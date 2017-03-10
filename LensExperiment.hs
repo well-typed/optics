@@ -11,6 +11,8 @@
 module LensExperiment where
 
 import Control.Applicative (Const(..))
+import Data.Coerce (coerce)
+import Data.Functor.Identity (Identity(..))
 import GHC.Exts (Constraint)
 
 
@@ -102,6 +104,24 @@ toFold :: Is k A_Fold => Optic' k s a -> Fold s a
 toFold = sub
 
 
+data A_Setter
+type instance Constraints A_Setter p f = (p ~ (->), f ~ Identity)
+type Setter s t a b = Optic A_Setter s t a b
+type Setter' s a = Optic' A_Setter s a
+
+toSetter :: Is k A_Setter => Optic k s t a b -> Setter s t a b
+toSetter = sub
+
+sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
+sets f = Optic (coerce f)
+
+mapped :: Functor f => Setter (f a) (f b) a b
+mapped = sets fmap
+
+over :: forall k s t a b . Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t
+over o = coerce (getOptic (sub o :: Setter s t a b))
+
+
 data A_Getter
 type instance Constraints A_Getter p f = (p ~ (->), Contravariant f, Functor f)
 type Getter s a = Optic' A_Getter s a
@@ -174,7 +194,14 @@ iso f g = Optic (\ x -> dimap f (fmap g) x)
 instance Is A_Getter A_Fold where
   implies _ = id
 
+instance Is A_Traversal A_Fold where
+  implies _ = id
+instance Is A_Traversal A_Setter where
+  implies _ = id
+
 instance Is A_Lens A_Fold where
+  implies _ = id
+instance Is A_Lens A_Setter where
   implies _ = id
 instance Is A_Lens A_Getter where
   implies _ = id
@@ -183,10 +210,14 @@ instance Is A_Lens A_Traversal where
 
 instance Is A_Prism A_Fold where
   implies _ = id
+instance Is A_Prism A_Setter where
+  implies _ = id
 instance Is A_Prism A_Traversal where
   implies _ = id
 
 instance Is An_Iso A_Fold where
+  implies _ = id
+instance Is An_Iso A_Setter where
   implies _ = id
 instance Is An_Iso A_Getter where
   implies _ = id
@@ -199,33 +230,51 @@ instance Is An_Iso A_Prism where
 
 
 
-instance Join A_Getter    A_Fold       A_Fold
 instance Join A_Fold      A_Getter     A_Fold
+instance Join A_Fold      A_Traversal  A_Fold
+instance Join A_Fold      A_Lens       A_Fold
+instance Join A_Fold      A_Prism      A_Fold
+instance Join A_Fold      An_Iso       A_Fold
+
+instance Join A_Setter    A_Traversal  A_Setter
+instance Join A_Setter    A_Lens       A_Setter
+instance Join A_Setter    A_Prism      A_Setter
+instance Join A_Setter    An_Iso       A_Setter
+
+instance Join A_Getter    A_Fold       A_Fold
+instance Join A_Getter    A_Traversal  A_Fold
+instance Join A_Getter    A_Lens       A_Getter
+instance Join A_Getter    A_Prism      A_Fold
+instance Join A_Getter    An_Iso       A_Getter
+
+instance Join A_Traversal A_Fold       A_Fold
+instance Join A_Traversal A_Setter     A_Setter
+instance Join A_Traversal A_Getter     A_Fold
+instance Join A_Traversal A_Lens       A_Traversal
+instance Join A_Traversal A_Prism      A_Traversal
+instance Join A_Traversal An_Iso       A_Traversal
 
 instance Join A_Lens      A_Fold       A_Fold
+instance Join A_Lens      A_Setter     A_Setter
 instance Join A_Lens      A_Getter     A_Getter
 instance Join A_Lens      A_Traversal  A_Traversal
 instance Join A_Lens      A_Prism      A_Traversal
-instance Join A_Fold      A_Lens       A_Fold
-instance Join A_Getter    A_Lens       A_Getter
-instance Join A_Traversal A_Lens       A_Traversal
-instance Join A_Prism     A_Lens       A_Traversal
+instance Join A_Lens      An_Iso       A_Lens
+
 
 instance Join A_Prism     A_Fold       A_Fold
+instance Join A_Prism     A_Setter     A_Setter
+instance Join A_Prism     A_Getter     A_Fold
 instance Join A_Prism     A_Traversal  A_Traversal
-instance Join A_Fold      A_Prism      A_Fold
-instance Join A_Traversal A_Prism      A_Traversal
+instance Join A_Prism     A_Lens       A_Traversal
+instance Join A_Prism     An_Iso       A_Prism
 
 instance Join An_Iso      A_Fold       A_Fold
+instance Join An_Iso      A_Setter     A_Setter
 instance Join An_Iso      A_Getter     A_Getter
 instance Join An_Iso      A_Traversal  A_Traversal
 instance Join An_Iso      A_Lens       A_Lens
 instance Join An_Iso      A_Prism      A_Prism
-instance Join A_Fold      An_Iso       A_Fold
-instance Join A_Getter    An_Iso       A_Getter
-instance Join A_Traversal An_Iso       A_Traversal
-instance Join A_Lens      An_Iso       A_Lens
-instance Join A_Prism     An_Iso       A_Prism
 
 
 -- | A constraint that can never be satisfied (accompanied by a
@@ -245,14 +294,16 @@ instance Is k Bogus where
 -- suitable unsolved constraint errors when attempting to compose
 -- flavours that do not have a (non-'Bogus') common supertype.
 --
--- For example, if you try to compose a getter with a traversal then
--- you will get an error
+-- For example, if you try to compose a fold with a setter then you
+-- will get an error
 --
--- > Could not deduce (CanCompose A_Getter A_Traversal)
+-- > Could not deduce (CanCompose A_Fold A_Setter)
 class Absurd => CanCompose k l
 
-instance CanCompose A_Getter A_Traversal => Join A_Getter A_Traversal Bogus
-instance CanCompose A_Traversal A_Getter => Join A_Traversal A_Getter Bogus
+instance CanCompose A_Fold   A_Setter => Join A_Fold   A_Setter Bogus
+instance CanCompose A_Setter A_Fold   => Join A_Setter A_Fold   Bogus
+instance CanCompose A_Setter A_Getter => Join A_Setter A_Getter Bogus
+instance CanCompose A_Getter A_Setter => Join A_Getter A_Setter Bogus
 
 
 -- | Composing a lens and a traversal yields a traversal
@@ -281,5 +332,5 @@ eg2 = view _1
 
 
 -- These don't typecheck, as one would expect:
---   to fst % mkTraversal traverse  -- Cannot compose a getter with a traversal
---   toLens (to fst)                 -- Cannot use a getter as a lens
+--   to fst % mapped  -- Cannot compose a getter with a setter
+--   toLens (to fst)  -- Cannot use a getter as a lens
