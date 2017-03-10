@@ -21,7 +21,7 @@ import GHC.TypeLits (TypeError, ErrorMessage(Text))
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
 -- The first type parameter @k@ identifies the particular flavour
--- (e.g. 'Lens' or 'Traversal').
+-- (e.g. 'A_Lens' or 'A_Traversal').
 newtype Optic k s t a b = Optic { getOptic :: Optic_ k s t a b }
 
 -- | By choosing different instantiations for @p@ and @f@, along with
@@ -39,7 +39,7 @@ type Optic' k s a = Optic k s s a a
 
 
 -- | Hooray, subtyping!  This gives the relationship between flavours,
--- e.g. we have @Is Lens Traversal@ but not @Is Traversal Lens@.
+-- e.g. we have @Is A_Lens A_Traversal@ but not @Is A_Traversal A_Lens@.
 -- Unfortunately we have to give O(n^2) instances of this class.
 class Is k l where
   implies :: (Constraints k p f => r) -> (Constraints l p f => r)
@@ -100,128 +100,128 @@ instance Choice (->) where
 
 
 
-data Fold
-type instance Constraints Fold p f = (p ~ (->), Contravariant f, Applicative f)
+data A_Fold
+type instance Constraints A_Fold p f = (p ~ (->), Contravariant f, Applicative f)
 
-toFold :: Is k Fold => Optic' k s a -> Optic' Fold s a
+toFold :: Is k A_Fold => Optic' k s a -> Optic' A_Fold s a
 toFold = sub
 
 
-data Getter
-type instance Constraints Getter p f = (p ~ (->), Contravariant f, Functor f)
+data A_Getter
+type instance Constraints A_Getter p f = (p ~ (->), Contravariant f, Functor f)
 
-view :: Is k Getter => Optic' k s a -> s -> a
+view :: Is k A_Getter => Optic' k s a -> s -> a
 view o s = getConst (getOptic (toGetter o) Const s)
 
-to :: (s -> a) -> Optic' Getter s a
+to :: (s -> a) -> Optic' A_Getter s a
 to f = Optic (\ q s -> contramap f (q (f s)))
 
-toGetter :: Is k Getter => Optic' k s a -> Optic' Getter s a
+toGetter :: Is k A_Getter => Optic' k s a -> Optic' A_Getter s a
 toGetter = sub
 
 
-data Traversal
-type instance Constraints Traversal p f = (p ~ (->), Applicative f)
+data A_Traversal
+type instance Constraints A_Traversal p f = (p ~ (->), Applicative f)
 
-toTraversal :: Is k Traversal => Optic k s t a b -> Optic Traversal s t a b
+toTraversal :: Is k A_Traversal => Optic k s t a b -> Optic A_Traversal s t a b
 toTraversal = sub
 
-traversalOf :: forall k s t a b . Is k Traversal => Optic k s t a b -> Optic_ Traversal s t a b
+traversalOf :: forall k s t a b . Is k A_Traversal => Optic k s t a b -> Optic_ A_Traversal s t a b
 traversalOf = getOptic . toTraversal
 
-mkTraversal :: Optic_ Traversal s t a b -> Optic Traversal s t a b
+mkTraversal :: Optic_ A_Traversal s t a b -> Optic A_Traversal s t a b
 mkTraversal = Optic
 
 
-data Lens
-type instance Constraints Lens p f = (p ~ (->), Functor f)
+data A_Lens
+type instance Constraints A_Lens p f = (p ~ (->), Functor f)
 
-toLens :: Is k Lens => Optic k s t a b -> Optic Lens s t a b
+toLens :: Is k A_Lens => Optic k s t a b -> Optic A_Lens s t a b
 toLens = sub
 
-mkLens :: Optic_ Lens s t a b -> Optic Lens s t a b
+mkLens :: Optic_ A_Lens s t a b -> Optic A_Lens s t a b
 mkLens = Optic
 
-lens :: (s -> a) -> (s -> b -> t) -> Optic Lens s t a b
+lens :: (s -> a) -> (s -> b -> t) -> Optic A_Lens s t a b
 lens get set = mkLens (\ f s -> set s <$> f (get s))
 
-_1 :: Optic Lens (a,y) (b,y) a b
+_1 :: Optic A_Lens (a,y) (b,y) a b
 _1 = lens fst (\ (_,y) x -> (x,y))
 
 
-data Prism
-type instance Constraints Prism p f = (Choice p, Applicative f)
+data A_Prism
+type instance Constraints A_Prism p f = (Choice p, Applicative f)
 
-prism :: (b -> t) -> (s -> Either t a) -> Optic Prism s t a b
+prism :: (b -> t) -> (s -> Either t a) -> Optic A_Prism s t a b
 prism f g = Optic $ \ p -> dimap g (either pure (fmap f)) (right' p)
 
-_Right :: Optic Prism (Either c a) (Either c b) a b
+_Right :: Optic A_Prism (Either c a) (Either c b) a b
 _Right = prism Right (either (Left . Left) Right)
 
 
-data Iso
-type instance Constraints Iso p f = (Profunctor p, Functor f)
+data An_Iso
+type instance Constraints An_Iso p f = (Profunctor p, Functor f)
 
-iso :: (s -> a) -> (b -> t) -> Optic Iso s t a b
+iso :: (s -> a) -> (b -> t) -> Optic An_Iso s t a b
 iso f g = Optic (\ x -> dimap f (fmap g) x)
 
 
 
-instance Is Getter Fold where
+instance Is A_Getter A_Fold where
   implies = id
 
-instance Is Lens Fold where
+instance Is A_Lens A_Fold where
   implies = id
-instance Is Lens Getter where
+instance Is A_Lens A_Getter where
   implies = id
-instance Is Lens Traversal where
-  implies = id
-
-instance Is Prism Fold where
-  implies = id
-instance Is Prism Traversal where
+instance Is A_Lens A_Traversal where
   implies = id
 
-instance Is Iso Fold where
+instance Is A_Prism A_Fold where
   implies = id
-instance Is Iso Getter where
-  implies = id
-instance Is Iso Traversal where
-  implies = id
-instance Is Iso Lens where
-  implies = id
-instance Is Iso Prism where
+instance Is A_Prism A_Traversal where
   implies = id
 
+instance Is An_Iso A_Fold where
+  implies = id
+instance Is An_Iso A_Getter where
+  implies = id
+instance Is An_Iso A_Traversal where
+  implies = id
+instance Is An_Iso A_Lens where
+  implies = id
+instance Is An_Iso A_Prism where
+  implies = id
 
 
-instance Join Getter Fold   Fold
-instance Join Fold   Getter Fold
 
-instance Join Lens      Fold      Fold
-instance Join Lens      Getter    Getter
-instance Join Lens      Traversal Traversal
-instance Join Lens      Prism     Traversal
-instance Join Fold      Lens      Fold
-instance Join Getter    Lens      Getter
-instance Join Traversal Lens      Traversal
-instance Join Prism     Lens      Traversal
+instance Join A_Getter    A_Fold       A_Fold
+instance Join A_Fold      A_Getter     A_Fold
 
-instance Join Prism     Fold      Fold
-instance Join Prism     Traversal Traversal
-instance Join Fold      Prism     Fold
-instance Join Traversal Prism     Traversal
+instance Join A_Lens      A_Fold       A_Fold
+instance Join A_Lens      A_Getter     A_Getter
+instance Join A_Lens      A_Traversal  A_Traversal
+instance Join A_Lens      A_Prism      A_Traversal
+instance Join A_Fold      A_Lens       A_Fold
+instance Join A_Getter    A_Lens       A_Getter
+instance Join A_Traversal A_Lens       A_Traversal
+instance Join A_Prism     A_Lens       A_Traversal
 
-instance Join Iso       Fold      Fold
-instance Join Iso       Getter    Getter
-instance Join Iso       Traversal Traversal
-instance Join Iso       Lens      Lens
-instance Join Iso       Prism     Prism
-instance Join Fold      Iso       Fold
-instance Join Getter    Iso       Getter
-instance Join Traversal Iso       Traversal
-instance Join Lens      Iso       Lens
-instance Join Prism     Iso       Prism
+instance Join A_Prism     A_Fold       A_Fold
+instance Join A_Prism     A_Traversal  A_Traversal
+instance Join A_Fold      A_Prism      A_Fold
+instance Join A_Traversal A_Prism      A_Traversal
+
+instance Join An_Iso      A_Fold       A_Fold
+instance Join An_Iso      A_Getter     A_Getter
+instance Join An_Iso      A_Traversal  A_Traversal
+instance Join An_Iso      A_Lens       A_Lens
+instance Join An_Iso      A_Prism      A_Prism
+instance Join A_Fold      An_Iso       A_Fold
+instance Join A_Getter    An_Iso       A_Getter
+instance Join A_Traversal An_Iso       A_Traversal
+instance Join A_Lens      An_Iso       A_Lens
+instance Join A_Prism     An_Iso       A_Prism
 
 
 -- | A constraint that can never be satisfied (accompanied by a
@@ -237,33 +237,33 @@ type instance Constraints Bogus p f = Absurd
 instance Is k Bogus where
   implies = absurd
 
-instance TypeError (Text "Cannot compose a getter with a traversal") => Join Getter Traversal Bogus
-instance TypeError (Text "Cannot compose a traversal with a getter") => Join Traversal Getter Bogus
+instance TypeError (Text "Cannot compose a getter with a traversal") => Join A_Getter A_Traversal Bogus
+instance TypeError (Text "Cannot compose a traversal with a getter") => Join A_Traversal A_Getter Bogus
 
-instance (Absurd, TypeError (Text "Cannot use a getter as a lens")) => Is Getter Lens where
+instance (Absurd, TypeError (Text "Cannot use a getter as a lens")) => Is A_Getter A_Lens where
   implies = absurd
-instance (Absurd, TypeError (Text "Cannot use a getter as a traversal")) => Is Getter Traversal where
+instance (Absurd, TypeError (Text "Cannot use a getter as a traversal")) => Is A_Getter A_Traversal where
   implies = absurd
-instance (Absurd, TypeError (Text "Cannot use a getter as a prism")) => Is Getter Prism where
+instance (Absurd, TypeError (Text "Cannot use a getter as a prism")) => Is A_Getter A_Prism where
   implies = absurd
-instance (Absurd, TypeError (Text "Cannot use a getter as an iso")) => Is Getter Iso where
+instance (Absurd, TypeError (Text "Cannot use a getter as an iso")) => Is A_Getter An_Iso where
   implies = absurd
 
 
 -- | Composing a lens and a traversal yields a traversal
-comp1 :: Traversable t => Optic Traversal (t a, y) (t b, y) a b
+comp1 :: Traversable t => Optic A_Traversal (t a, y) (t b, y) a b
 comp1 = _1 % mkTraversal traverse
 
 -- | Composing two lenses yields a lens
-comp2 :: Optic Lens ((a, y), y1) ((b, y), y1) a b
+comp2 :: Optic A_Lens ((a, y), y1) ((b, y), y1) a b
 comp2 = _1 % _1
 
 -- | Composing a getter and a lens yields a getter
-comp3 :: Optic Getter ((b, y), b1) ((b, y), b1) b b
+comp3 :: Optic A_Getter ((b, y), b1) ((b, y), b1) b b
 comp3 = to fst % _1
 
 -- | Composing a prism and a lens yields a traversal
-comp4 :: Optic Traversal (Either c (a, y)) (Either c (b, y)) a b
+comp4 :: Optic A_Traversal (Either c (a, y)) (Either c (b, y)) a b
 comp4 = _Right % _1
 
 -- | An iso can be used as a getter
