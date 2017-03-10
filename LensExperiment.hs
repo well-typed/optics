@@ -16,7 +16,6 @@ module LensExperiment where
 
 import Control.Applicative (Const(..))
 import GHC.Exts (Constraint)
-import GHC.TypeLits (TypeError, ErrorMessage(Text))
 
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
@@ -237,17 +236,18 @@ type instance Constraints Bogus p f = Absurd
 instance Is k Bogus where
   implies = absurd
 
-instance TypeError (Text "Cannot compose a getter with a traversal") => Join A_Getter A_Traversal Bogus
-instance TypeError (Text "Cannot compose a traversal with a getter") => Join A_Traversal A_Getter Bogus
+-- | This typeclass has no instances, and is used so that we get
+-- suitable unsolved constraint errors when attempting to compose
+-- flavours that do not have a (non-'Bogus') common supertype.
+--
+-- For example, if you try to compose a getter with a traversal then
+-- you will get an error
+--
+-- > Could not deduce (CanCompose A_Getter A_Traversal)
+class Absurd => CanCompose k l
 
-instance (Absurd, TypeError (Text "Cannot use a getter as a lens")) => Is A_Getter A_Lens where
-  implies = absurd
-instance (Absurd, TypeError (Text "Cannot use a getter as a traversal")) => Is A_Getter A_Traversal where
-  implies = absurd
-instance (Absurd, TypeError (Text "Cannot use a getter as a prism")) => Is A_Getter A_Prism where
-  implies = absurd
-instance (Absurd, TypeError (Text "Cannot use a getter as an iso")) => Is A_Getter An_Iso where
-  implies = absurd
+instance CanCompose A_Getter A_Traversal => Join A_Getter A_Traversal Bogus
+instance CanCompose A_Traversal A_Getter => Join A_Traversal A_Getter Bogus
 
 
 -- | Composing a lens and a traversal yields a traversal
