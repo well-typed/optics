@@ -68,13 +68,13 @@ instance Join k k k
 
 -- | Compose two optics, automatically casting them to the appropriate
 -- supertype.
-(^.) :: Join k l m => Optic k s t u v -> Optic l u v a b -> Optic m s t a b
-o ^. o' = sub o ^.^ sub o'
+(%) :: Join k l m => Optic k s t u v -> Optic l u v a b -> Optic m s t a b
+o % o' = sub o %% sub o'
 
 -- | Compose two optics that already have the same flavour.  It's not
--- obvious whether this is needed once one has defined '(^.)'.
-(^.^) :: Optic k s t u v -> Optic k u v a b -> Optic k s t a b
-Optic o ^.^ Optic o' = Optic (o . o')
+-- obvious whether this is needed once one has defined '(%)'.
+(%%) :: Optic k s t u v -> Optic k u v a b -> Optic k s t a b
+Optic o %% Optic o' = Optic (o . o')
 
 
 
@@ -252,19 +252,19 @@ instance (Absurd, TypeError (Text "Cannot use a getter as an iso")) => Is Getter
 
 -- | Composing a lens and a traversal yields a traversal
 comp1 :: Traversable t => Optic Traversal (t a, y) (t b, y) a b
-comp1 = _1 ^. mkTraversal traverse
+comp1 = _1 % mkTraversal traverse
 
 -- | Composing two lenses yields a lens
 comp2 :: Optic Lens ((a, y), y1) ((b, y), y1) a b
-comp2 = _1 ^. _1
+comp2 = _1 % _1
 
 -- | Composing a getter and a lens yields a getter
 comp3 :: Optic Getter ((b, y), b1) ((b, y), b1) b b
-comp3 = to fst ^. _1
+comp3 = to fst % _1
 
 -- | Composing a prism and a lens yields a traversal
 comp4 :: Optic Traversal (Either c (a, y)) (Either c (b, y)) a b
-comp4 = _Right ^. _1
+comp4 = _Right % _1
 
 -- | An iso can be used as a getter
 eg1 :: Int
@@ -276,5 +276,5 @@ eg2 = view _1
 
 
 -- These don't typecheck, as one would expect:
---   to fst ^. mkTraversal traverse  -- Cannot compose a getter with a traversal
+--   to fst % mkTraversal traverse  -- Cannot compose a getter with a traversal
 --   toLens (to fst)                 -- Cannot use a getter as a lens
