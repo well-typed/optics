@@ -96,67 +96,77 @@ instance Choice (->) where
 
 data A_Fold
 type instance Constraints A_Fold p f = (p ~ (->), Contravariant f, Applicative f)
+type Fold s a = Optic' A_Fold s a
 
-toFold :: Is k A_Fold => Optic' k s a -> Optic' A_Fold s a
+toFold :: Is k A_Fold => Optic' k s a -> Fold s a
 toFold = sub
 
 
 data A_Getter
 type instance Constraints A_Getter p f = (p ~ (->), Contravariant f, Functor f)
+type Getter s a = Optic' A_Getter s a
 
 view :: Is k A_Getter => Optic' k s a -> s -> a
 view o s = getConst (getOptic (toGetter o) Const s)
 
-to :: (s -> a) -> Optic' A_Getter s a
+to :: (s -> a) -> Getter s a
 to f = Optic (\ q s -> contramap f (q (f s)))
 
-toGetter :: Is k A_Getter => Optic' k s a -> Optic' A_Getter s a
+toGetter :: Is k A_Getter => Optic' k s a -> Getter s a
 toGetter = sub
 
 
 data A_Traversal
 type instance Constraints A_Traversal p f = (p ~ (->), Applicative f)
+type Traversal s t a b = Optic A_Traversal s t a b
+type Traversal' s a = Optic' A_Traversal s a
 
-toTraversal :: Is k A_Traversal => Optic k s t a b -> Optic A_Traversal s t a b
+toTraversal :: Is k A_Traversal => Optic k s t a b -> Traversal s t a b
 toTraversal = sub
 
 traversalOf :: forall k s t a b . Is k A_Traversal => Optic k s t a b -> Optic_ A_Traversal s t a b
 traversalOf = getOptic . toTraversal
 
-mkTraversal :: Optic_ A_Traversal s t a b -> Optic A_Traversal s t a b
+mkTraversal :: Optic_ A_Traversal s t a b -> Traversal s t a b
 mkTraversal = Optic
 
 
 data A_Lens
 type instance Constraints A_Lens p f = (p ~ (->), Functor f)
+type Lens s t a b = Optic A_Lens s t a b
+type Lens' s a = Optic' A_Lens s a
 
-toLens :: Is k A_Lens => Optic k s t a b -> Optic A_Lens s t a b
+toLens :: Is k A_Lens => Optic k s t a b -> Lens s t a b
 toLens = sub
 
-mkLens :: Optic_ A_Lens s t a b -> Optic A_Lens s t a b
+mkLens :: Optic_ A_Lens s t a b -> Lens s t a b
 mkLens = Optic
 
-lens :: (s -> a) -> (s -> b -> t) -> Optic A_Lens s t a b
+lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get set = mkLens (\ f s -> set s <$> f (get s))
 
-_1 :: Optic A_Lens (a,y) (b,y) a b
+_1 :: Lens (a,y) (b,y) a b
 _1 = lens fst (\ (_,y) x -> (x,y))
 
 
 data A_Prism
 type instance Constraints A_Prism p f = (Choice p, Applicative f)
+type Prism s t a b = Optic A_Prism s t a b
+type Prism' s a = Optic A_Prism s a
 
-prism :: (b -> t) -> (s -> Either t a) -> Optic A_Prism s t a b
+prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism f g = Optic $ \ p -> dimap g (either pure (fmap f)) (right' p)
 
-_Right :: Optic A_Prism (Either c a) (Either c b) a b
+_Right :: Prism (Either c a) (Either c b) a b
 _Right = prism Right (either (Left . Left) Right)
 
 
 data An_Iso
 type instance Constraints An_Iso p f = (Profunctor p, Functor f)
+type Iso s t a b = Optic An_Iso s t a b
+type Iso' s a = Optic' An_Iso s a
 
-iso :: (s -> a) -> (b -> t) -> Optic An_Iso s t a b
+iso :: (s -> a) -> (b -> t) -> Iso s t a b
 iso f g = Optic (\ x -> dimap f (fmap g) x)
 
 
