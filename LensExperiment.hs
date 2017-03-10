@@ -1,15 +1,11 @@
-{-# LANGUAGE AllowAmbiguousTypes
-           , DataKinds
+{-# LANGUAGE DataKinds
            , FlexibleContexts
            , FlexibleInstances
            , FunctionalDependencies
            , MultiParamTypeClasses
-           , NoMonomorphismRestriction
            , RankNTypes
            , ScopedTypeVariables
-           , TypeApplications
            , TypeFamilies
-           , UndecidableInstances
            #-}
 
 module LensExperiment where
@@ -25,7 +21,7 @@ newtype Optic k s t a b = Optic { getOptic :: Optic_ k s t a b }
 
 -- | By choosing different instantiations for @p@ and @f@, along with
 -- different constraints, we can make this represent any flavour of
--- lens-like thing.  I wish I understood this type better.
+-- optic.  I wish I understood this type better.
 type Optic_ k s t a b = forall p f . Constraints k p f => p a (f b) -> p s (f t)
 
 -- | Specific constraints on @p@ and @f@ that are needed for lens-like
@@ -41,21 +37,20 @@ type Optic' k s a = Optic k s s a a
 -- e.g. we have @Is A_Lens A_Traversal@ but not @Is A_Traversal A_Lens@.
 -- Unfortunately we have to give O(n^2) instances of this class.
 class Is k l where
-  implies :: (Constraints k p f => r) -> (Constraints l p f => r)
+  implies :: proxy k l p f -> (Constraints k p f => r) -> (Constraints l p f => r)
 
 -- | Of course, every flavour can be used as itself.
 instance Is k k where
-  implies = id
+  implies _ = id
 
 -- | Explicit cast from one optic flavour to another.  This is the
 -- identity function, modulo some constraint jiggery-pokery.
 sub :: forall k l s t a b . Is k l => Optic k s t a b -> Optic l s t a b
 sub (Optic o) = Optic (implies' o)
   where
-    implies' :: forall p f . Is k l
-              => (Constraints k p f => p a (f b) -> p s (f t))
-              -> (Constraints l p f => p a (f b) -> p s (f t))
-    implies' x = implies @k @l @p @f x
+    implies' :: forall p f . (Constraints k p f => p a (f b) -> p s (f t))
+                          -> (Constraints l p f => p a (f b) -> p s (f t))
+    implies' x = implies (undefined :: proxy k l p f) x
 
 
 -- | In order to define composition of optics, we need a way to talk
@@ -167,30 +162,30 @@ iso f g = Optic (\ x -> dimap f (fmap g) x)
 
 
 instance Is A_Getter A_Fold where
-  implies = id
+  implies _ = id
 
 instance Is A_Lens A_Fold where
-  implies = id
+  implies _ = id
 instance Is A_Lens A_Getter where
-  implies = id
+  implies _ = id
 instance Is A_Lens A_Traversal where
-  implies = id
+  implies _ = id
 
 instance Is A_Prism A_Fold where
-  implies = id
+  implies _ = id
 instance Is A_Prism A_Traversal where
-  implies = id
+  implies _ = id
 
 instance Is An_Iso A_Fold where
-  implies = id
+  implies _ = id
 instance Is An_Iso A_Getter where
-  implies = id
+  implies _ = id
 instance Is An_Iso A_Traversal where
-  implies = id
+  implies _ = id
 instance Is An_Iso A_Lens where
-  implies = id
+  implies _ = id
 instance Is An_Iso A_Prism where
-  implies = id
+  implies _ = id
 
 
 
