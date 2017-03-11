@@ -7,7 +7,7 @@
 --
 module Optics.Internal.Profunctor where
 
-import Data.Functor.Const (Const(..))
+import Control.Applicative (Const(..))
 
 class Contravariant f where
   contramap :: (a -> b) -> f b -> f a
