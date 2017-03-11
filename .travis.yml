@@ -54,15 +54,6 @@ install:
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
- - if [ -f configure.ac ]; then autoreconf -i; fi
- - rm -rf dist/
- - cabal sdist # test that a source-distribution can be generated
- - cd dist/
- - SRCTAR=(${PKGNAME}-*.tar.gz)
- - SRC_BASENAME="${SRCTAR/%.tar.gz}"
- - tar -xvf "./$SRC_BASENAME.tar.gz"
- - cd "$SRC_BASENAME/"
-## from here on, CWD is inside the extracted source-tarball
  - rm -fv cabal.project.local
  # this builds all libraries and executables (without tests/benchmarks)
  - rm -f cabal.project.freeze
