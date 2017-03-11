@@ -8,7 +8,7 @@
            , TypeFamilies
            #-}
 
-module LensExperiment where
+module Optics.Internal where
 
 import Control.Applicative (Const(..))
 import Data.Coerce (coerce)

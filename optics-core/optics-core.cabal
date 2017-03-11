@@ -13,3 +13,5 @@ library
     base >= 4.8 && < 5
   exposed-modules:
     Optics
+  other-modules:
+    Optics.Internal
