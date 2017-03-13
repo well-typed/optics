@@ -8,12 +8,14 @@
            , TypeFamilies
            #-}
 
-module LensExperiment where
+module Optics.Internal where
 
 import Control.Applicative (Const(..))
 import Data.Coerce (coerce)
 import Data.Functor.Identity (Identity(..))
 import GHC.Exts (Constraint)
+
+import Optics.Internal.Profunctor
 
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
@@ -72,27 +74,6 @@ o % o' = sub o %% sub o'
 (%%) :: Optic k s t u v -> Optic k u v a b -> Optic k s t a b
 Optic o %% Optic o' = Optic (o . o')
 
-
-
--- This lot is all copied from elsewhere, to keep this module
--- free-standing.
-
-class Contravariant f where
-  contramap :: (a -> b) -> f b -> f a
-instance Contravariant (Const r) where
-  contramap _ (Const x) = Const x
-
-class Profunctor (p :: * -> * -> *) where
-  dimap :: (a -> b) -> (c -> d) -> p b c -> p a d
-instance Profunctor (->) where
-  dimap f g k = g . k . f
-
-class Profunctor p => Choice (p :: * -> * -> *) where
-  left' :: p a b -> p (Either a c) (Either b c)
-  right' :: p a b -> p (Either c a) (Either c b)
-instance Choice (->) where
-  left'  f = either (Left . f) Right
-  right' f = either Left (Right . f)
 
 
 
