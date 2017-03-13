@@ -13,6 +13,27 @@ library
     base >= 4.8 && < 5
   exposed-modules:
     Optics
+    Optics.Equality
+    Optics.Fold
+    Optics.Getter
+    Optics.Iso
+    Optics.Lens
+    Optics.Optic
+    Optics.Prism
+    Optics.Review
+    Optics.Setter
+    Optics.Traversal
   other-modules:
     Optics.Internal
+    Optics.Internal.Equality
+    Optics.Internal.Fold
+    Optics.Internal.Getter
+    Optics.Internal.Iso
+    Optics.Internal.Lens
+    Optics.Internal.Optic
+    Optics.Internal.Prism
     Optics.Internal.Profunctor
+    Optics.Internal.Review
+    Optics.Internal.Setter
+    Optics.Internal.Subtyping
+    Optics.Internal.Traversal
