@@ -5,6 +5,8 @@ module Optics.Iso
   , toIso
   , mkIso
   , iso
+  , withIso
+  , from
   , module Optics.Optic
   )
   where

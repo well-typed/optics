@@ -3,6 +3,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Iso where
 
+import Data.Functor.Identity (Identity(..))
+
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -32,3 +34,26 @@ mkIso = Optic
 iso :: (s -> a) -> (b -> t) -> Iso s t a b
 iso f g = Optic (dimap f (fmap g))
 {-# INLINE iso #-}
+
+-- | Type to represent the components of an isomorphism.
+data Exchange a b s t =
+  Exchange (s -> a) (b -> t)
+
+instance Functor (Exchange a b s) where
+  fmap tt (Exchange sa bt) = Exchange sa (tt . bt)
+  {-# INLINE fmap #-}
+
+instance Profunctor (Exchange a b) where
+  dimap ss tt (Exchange sa bt) = Exchange (sa . ss) (tt . bt)
+  {-# INLINE dimap #-}
+
+-- | Extract the two components of an isomorphism.
+withIso :: Is k An_Iso => Optic k s t a b -> ((s -> a) -> (b -> t) -> r) -> r
+withIso o k = case getOptic (toIso o) (Exchange id Identity) of
+  Exchange sa bt -> k sa (runIdentity . bt)
+{-# INLINE withIso #-}
+
+-- | Invert an isomorphism.
+from :: Is k An_Iso => Optic k s t a b -> Iso b a t s
+from o = withIso o $ \ sa bt -> iso bt sa
+{-# INLINE from #-}
