@@ -19,6 +19,7 @@ import GHC.Exts (Constraint)
 
 import Optics.Internal.Fold
 import Optics.Internal.Getter
+import Optics.Internal.Getting
 import Optics.Internal.Iso
 import Optics.Internal.Lens
 import Optics.Internal.Optic

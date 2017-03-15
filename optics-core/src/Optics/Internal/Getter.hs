@@ -31,8 +31,3 @@ mkGetter = Optic
 to :: (s -> a) -> Getter s a
 to f = Optic (dimap f (contramap f))
 {-# INLINE to #-}
-
--- | Apply a getter.
-view :: Is k A_Getter => Optic' k s a -> s -> a
-view o = getConst . getOptic (toGetter o) Const
-{-# INLINE view #-}

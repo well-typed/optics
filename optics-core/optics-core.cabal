@@ -16,6 +16,7 @@ library
     Optics.Equality
     Optics.Fold
     Optics.Getter
+    Optics.Getting
     Optics.Iso
     Optics.Lens
     Optics.Optic
@@ -28,6 +29,7 @@ library
     Optics.Internal.Equality
     Optics.Internal.Fold
     Optics.Internal.Getter
+    Optics.Internal.Getting
     Optics.Internal.Iso
     Optics.Internal.Lens
     Optics.Internal.Optic

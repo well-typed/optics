@@ -4,7 +4,6 @@ module Optics.Getter
   , toGetter
   , mkGetter
   , to
-  , view
   , module Optics.Optic
   )
   where
