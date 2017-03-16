@@ -3,6 +3,10 @@ module Optics.Fold
   , Fold
   , toFold
   , mkFold
+  , foldMapOf
+  , foldrOf
+  , toListOf
+  , preview
   , module Optics.Optic
   )
   where

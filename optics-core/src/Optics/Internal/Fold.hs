@@ -3,6 +3,9 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Fold where
 
+import Control.Applicative (Const(..))
+import Data.Monoid
+
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -25,3 +28,25 @@ toFold = sub
 mkFold :: Optic_' A_Fold s a -> Fold s a
 mkFold = Optic
 {-# INLINE mkFold #-}
+
+-- | Fold via embedding into a monoid.
+foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k s a -> (a -> r) -> s -> r
+foldMapOf o ar =
+  getConst . getOptic (toFold o) (Const . ar)
+{-# INLINE foldMapOf #-}
+
+-- | Fold right-associatively.
+foldrOf :: Is k A_Fold => Optic' k s a -> (a -> r -> r) -> r -> s -> r
+foldrOf o arr r =
+  (\ e -> appEndo e r) . foldMapOf o (Endo . arr)
+{-# INLINE foldrOf #-}
+
+-- | Fold to a list.
+toListOf :: Is k A_Fold => Optic' k s a -> s -> [a]
+toListOf o = foldrOf o (:) []
+{-# INLINE toListOf #-}
+
+-- | Fold to the first element (if it exists).
+preview :: Is k A_Fold => Optic' k s a -> s -> Maybe a
+preview o = foldrOf o (const . Just) Nothing
+{-# INLINE preview #-}
