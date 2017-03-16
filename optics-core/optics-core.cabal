@@ -37,4 +37,5 @@ library
     Optics.Internal.Review
     Optics.Internal.Setter
     Optics.Internal.Subtyping
+    Optics.Internal.Tagged
     Optics.Internal.Traversal
