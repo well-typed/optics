@@ -11,6 +11,7 @@ library
   hs-source-dirs: src
   build-depends:
     base >= 4.8 && < 5
+  ghc-options: -Wall
   exposed-modules:
     Optics
     Optics.Equality
