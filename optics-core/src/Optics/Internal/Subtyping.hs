@@ -1,4 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Instances to implement the subtyping hierarchy between optics.
 --
@@ -12,7 +13,6 @@ import Optics.Internal.Lens
 import Optics.Internal.Optic
 import Optics.Internal.Traversal
 import Optics.Internal.Prism
-import Optics.Internal.Profunctor
 import Optics.Internal.Review
 import Optics.Internal.Setter
 

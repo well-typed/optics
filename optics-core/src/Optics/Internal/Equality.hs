@@ -5,7 +5,6 @@
 module Optics.Internal.Equality where
 
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Tag for an equality.
 data An_Equality

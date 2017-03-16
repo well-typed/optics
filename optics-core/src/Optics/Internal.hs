@@ -7,15 +7,11 @@
            , ScopedTypeVariables
            , TypeFamilies
            #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Remnants that have not yet been moved to other modules.
 --
 module Optics.Internal where
-
-import Control.Applicative (Const(..))
-import Data.Coerce (coerce)
-import Data.Functor.Identity (Identity(..))
-import GHC.Exts (Constraint)
 
 import Optics.Internal.Fold
 import Optics.Internal.Getter
@@ -24,9 +20,8 @@ import Optics.Internal.Lens
 import Optics.Internal.Optic
 import Optics.Internal.Traversal
 import Optics.Internal.Prism
-import Optics.Internal.Profunctor
 import Optics.Internal.Setter
-import Optics.Internal.Subtyping
+import Optics.Internal.Subtyping ()
 
 
 

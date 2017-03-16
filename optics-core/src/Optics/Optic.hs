@@ -13,4 +13,4 @@ module Optics.Optic
   where
 
 import Optics.Internal.Optic
-import Optics.Internal.Subtyping
+import Optics.Internal.Subtyping ()
