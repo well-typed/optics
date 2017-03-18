@@ -10,17 +10,23 @@ import Optics
 import Generics.SOP.Optics
 
 type family ToTuple (xs :: [*]) :: * where
-  ToTuple '[]                                        = ()
-  ToTuple '[x1]                                      = x1
-  ToTuple '[x1, x2]                                  = (x1, x2)
-  ToTuple '[x1, x2, x3]                              = (x1, x2, x3)
-  ToTuple '[x1, x2, x3, x4]                          = (x1, x2, x3, x4)
-  ToTuple '[x1, x2, x3, x4, x5]                      = (x1, x2, x3, x4, x5)
-  ToTuple '[x1, x2, x3, x4, x5, x6]                  = (x1, x2, x3, x4, x5, x6)
-  ToTuple '[x1, x2, x3, x4, x5, x6, x7]              = (x1, x2, x3, x4, x5, x6, x7)
-  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8]          = (x1, x2, x3, x4, x5, x6, x7, x8)
-  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9]      = (x1, x2, x3, x4, x5, x6, x7, x8, x9)
-  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10] = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10)
+  ToTuple '[]                                                                      = ()
+  ToTuple '[x1]                                                                    = x1
+  ToTuple '[x1, x2]                                                                = (x1, x2)
+  ToTuple '[x1, x2, x3]                                                            = (x1, x2, x3)
+  ToTuple '[x1, x2, x3, x4]                                                        = (x1, x2, x3, x4)
+  ToTuple '[x1, x2, x3, x4, x5]                                                    = (x1, x2, x3, x4, x5)
+  ToTuple '[x1, x2, x3, x4, x5, x6]                                                = (x1, x2, x3, x4, x5, x6)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7]                                            = (x1, x2, x3, x4, x5, x6, x7)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8]                                        = (x1, x2, x3, x4, x5, x6, x7, x8)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9]                                    = (x1, x2, x3, x4, x5, x6, x7, x8, x9)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10]                               = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11]                          = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12]                     = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13]                = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14]           = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15]      = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15)
+  ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16] = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16)
 
 class TupleLike xs where
   tuple :: Iso' (NP I xs) (ToTuple xs)
@@ -39,4 +45,10 @@ instance TupleLike '[x1, x2, x3, x4, x5, x6, x7]
 instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8]
 instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9]
 instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10]
+instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11]
+instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12]
+instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13]
+instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14]
+instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15]
+instance TupleLike '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16]
 
