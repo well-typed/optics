@@ -35,7 +35,12 @@ sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
 sets f = Optic (coerce f)
 {-# INLINE sets #-}
 
--- | Apply a setter.
+-- | Apply a setter as a modifier.
 over :: Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t
 over o = coerce (getOptic (toSetter o))
 {-# INLINE over #-}
+
+-- | Apply a setter.
+set :: Is k A_Setter => Optic k s t a b -> b -> s -> t
+set o = over o . const
+{-# INLINE set #-}

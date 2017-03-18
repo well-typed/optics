@@ -6,6 +6,7 @@ module Optics.Setter
   , mkSetter
   , sets
   , over
+  , set
   , module Optics.Optic
   )
   where
