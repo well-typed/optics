@@ -19,6 +19,7 @@ library
     Optics.Getter
     Optics.Iso
     Optics.Lens
+    Optics.Operators
     Optics.Optic
     Optics.Prism
     Optics.Review
