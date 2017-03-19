@@ -41,6 +41,12 @@ foldrOf o arr r =
   (\ e -> appEndo e r) . foldMapOf o (Endo . arr)
 {-# INLINE foldrOf #-}
 
+-- | Fold left-associatively, and strictly.
+foldlOf' :: Is k A_Fold => Optic' k s a -> (r -> a -> r) -> r -> s -> r
+foldlOf' o rar r0 s =
+  foldrOf o (\ a rr r -> rr $! rar r a) id s r0
+{-# INLINE foldlOf' #-}
+
 -- | Fold to a list.
 toListOf :: Is k A_Fold => Optic' k s a -> s -> [a]
 toListOf o = foldrOf o (:) []
