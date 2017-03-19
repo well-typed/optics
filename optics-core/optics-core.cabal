@@ -13,6 +13,9 @@ library
     base >= 4.8 && < 5
   ghc-options: -Wall
   exposed-modules:
+    Data.Either.Optics
+    Data.Maybe.Optics
+    Data.Tuple.Optics
     Optics
     Optics.Equality
     Optics.Fold
