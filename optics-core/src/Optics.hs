@@ -1,6 +1,10 @@
 module Optics
-  ( module O )
+  ( module O
+  , module P
+  )
   where
+
+-- Core optics functionality
 
 import Optics.Equality  as O
 import Optics.Fold      as O
@@ -12,3 +16,9 @@ import Optics.Prism     as O
 import Optics.Review    as O
 import Optics.Setter    as O
 import Optics.Traversal as O
+
+-- Optics for concrete base types
+
+import Data.Either.Optics as P
+import Data.Maybe.Optics  as P
+import Data.Tuple.Optics  as P

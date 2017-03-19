@@ -4,7 +4,7 @@ module Data.Maybe.Optics
   )
   where
 
-import Optics
+import Optics.Prism
 
 _Nothing :: Prism' (Maybe a) ()
 _Nothing =

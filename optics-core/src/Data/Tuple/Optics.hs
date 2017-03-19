@@ -9,7 +9,8 @@ module Data.Tuple.Optics
 
 import Data.Tuple
 
-import Optics
+import Optics.Iso
+import Optics.Lens
 
 -- | Lens for the first component of a pair.
 --

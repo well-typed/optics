@@ -4,7 +4,7 @@ module Data.Either.Optics
   )
   where
 
-import Optics
+import Optics.Prism
 
 _Left :: Prism (Either a b) (Either c b) a c
 _Left =
