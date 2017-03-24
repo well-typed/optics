@@ -3,9 +3,9 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Fold where
 
-import Control.Applicative (Const(..))
 import Data.Monoid
 
+import Optics.Internal.Forget
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -13,8 +13,7 @@ import Optics.Internal.Profunctor
 data A_Fold
 
 -- | Constraints corresponding to a fold.
-type instance Constraints A_Fold p f =
-  (p ~ (->), Contravariant f, Applicative f)
+type instance Constraints A_Fold p = (OutPhantom p, Wandering p)
 
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold s a
@@ -32,7 +31,7 @@ mkFold = Optic
 -- | Fold via embedding into a monoid.
 foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k s a -> (a -> r) -> s -> r
 foldMapOf o ar =
-  getConst . getOptic (toFold o) (Const . ar)
+  (runForget . getOptic (toFold o) . Forget) ar
 {-# INLINE foldMapOf #-}
 
 -- | Fold right-associatively.

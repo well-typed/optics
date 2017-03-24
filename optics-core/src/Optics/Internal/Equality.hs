@@ -10,7 +10,7 @@ import Optics.Internal.Optic
 data An_Equality
 
 -- | Constraints corresponding to an equality.
-type instance Constraints An_Equality p f = ()
+type instance Constraints An_Equality p = ()
 
 -- | Type synonym for a type-modifying equality.
 type Equality s t a b = Optic An_Equality s t a b

@@ -32,6 +32,7 @@ library
     Optics.Internal
     Optics.Internal.Equality
     Optics.Internal.Fold
+    Optics.Internal.Forget
     Optics.Internal.Getter
     Optics.Internal.Iso
     Optics.Internal.Lens

@@ -3,16 +3,13 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Setter where
 
-import Data.Coerce (coerce)
-import Data.Functor.Identity
-
 import Optics.Internal.Optic
 
 -- | Tag for a setter.
 data A_Setter
 
 -- | Constraints corresponding to a setter.
-type instance Constraints A_Setter p f = (p ~ (->), f ~ Identity)
+type instance Constraints A_Setter p = (p ~ (->))
 
 -- | Type synonym for a type-modifying setter.
 type Setter s t a b = Optic A_Setter s t a b
@@ -32,12 +29,12 @@ mkSetter = Optic
 
 -- | Build a setter.
 sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
-sets f = Optic (coerce f)
+sets f = Optic f
 {-# INLINE sets #-}
 
 -- | Apply a setter as a modifier.
 over :: Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t
-over o = coerce (getOptic (toSetter o))
+over o = getOptic (toSetter o)
 {-# INLINE over #-}
 
 -- | Apply a setter.

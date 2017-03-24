@@ -10,7 +10,7 @@ import Optics.Internal.Profunctor
 data A_Prism
 
 -- | Constraints corresponding to a prism.
-type instance Constraints A_Prism p f = (Choice p, Applicative f)
+type instance Constraints A_Prism p = (Choice p)
 
 -- | Type synonym for a type-modifying prism.
 type Prism s t a b = Optic A_Prism s t a b
@@ -31,7 +31,7 @@ mkPrism = Optic
 -- | Build a prism from a constructor and a matcher.
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism construct match =
-  mkPrism (\ p -> dimap match (either pure (fmap construct)) (right' p))
+  mkPrism (dimap match (either id construct) . right')
 {-# INLINE prism #-}
 
 -- withPrism

@@ -54,7 +54,7 @@ class Absurd where
 -- with a universal supertype, whose constraints can never be
 -- satisfied.
 data Bogus
-type instance Constraints Bogus p f = Absurd
+type instance Constraints Bogus p = Absurd
 instance Is k Bogus where
   implies = absurd
 
@@ -76,7 +76,7 @@ instance CanCompose A_Getter A_Setter => Join A_Getter A_Setter Bogus
 
 -- | Composing a lens and a traversal yields a traversal
 comp1 :: Traversable t => Optic A_Traversal (t a, y) (t b, y) a b
-comp1 = _1 % mkTraversal traverse
+comp1 = _1 % _traverse
 
 -- | Composing two lenses yields a lens
 comp2 :: Optic A_Lens ((a, y), y1) ((b, y), y1) a b

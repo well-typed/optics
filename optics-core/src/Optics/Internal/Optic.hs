@@ -34,15 +34,15 @@ newtype Optic k s t a b =
 -- @p@ and @f@ are represented by the tag type @k@.
 --
 type Optic_ k s t a b =
-  forall p f . Optic__ k p f s t a b
+  forall p . Optic__ k p s t a b
 
 -- | Type representing the various kinds of optics.
 --
 -- The tag parameter @k@ is translated into constraints on @p@ and @f@
 -- via the type family 'Constraints'.
 --
-type Optic__ k p f s t a b =
-  Constraints k p f => p a (f b) -> p s (f t)
+type Optic__ k p s t a b =
+  Constraints k p => p a b -> p s t
 
 -- | Common special case of 'Optic' where source and target types are equal.
 --
@@ -60,7 +60,7 @@ type Optic_' k s a = Optic_ k s s a a
 -- various flavours of optics have to fulfill.
 --
 type family Constraints
-  (k :: *) (p :: * -> * -> *) (f :: * -> *) :: Constraint
+  (k :: *) (p :: * -> * -> *) :: Constraint
 
 -- | Subtyping relationship between flavours of optics.
 --
@@ -73,7 +73,7 @@ type family Constraints
 class Is k l where
   -- | Witness of the subtyping relationship.
   implies ::
-    proxy k l p f -> (Constraints k p f => r) -> (Constraints l p f => r)
+    proxy k l p -> (Constraints k p => r) -> (Constraints l p => r)
 
 -- | Every flavour of optic can be used as itself.
 instance Is k k where
@@ -81,7 +81,7 @@ instance Is k k where
 
 -- | Proxy type for use as an argument to 'implies'.
 --
-data IsProxy (k :: *) (l :: *) (p :: * -> * -> *) (f :: * -> *) =
+data IsProxy (k :: *) (l :: *) (p :: * -> * -> *) =
   IsProxy
 
 -- | Explicit cast from one optic flavour to another.
@@ -91,8 +91,8 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> *) (f :: * -> *) =
 sub :: forall k l s t a b . Is k l => Optic k s t a b -> Optic l s t a b
 sub (Optic o) = Optic (implies' o)
   where
-    implies' :: forall p f . Optic__ k p f s t a b -> Optic__ l p f s t a b
-    implies' x = implies (IsProxy :: IsProxy k l p f) x
+    implies' :: forall p . Optic__ k p s t a b -> Optic__ l p s t a b
+    implies' x = implies (IsProxy :: IsProxy k l p) x
 
 -- | Computes the least upper bound of two optics flavours.
 --

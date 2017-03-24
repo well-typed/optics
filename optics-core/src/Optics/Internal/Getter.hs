@@ -3,8 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Getter where
 
-import Control.Applicative (Const(..))
-
+import Optics.Internal.Forget
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -12,7 +11,7 @@ import Optics.Internal.Profunctor
 data A_Getter
 
 -- | Constraints corresponding to a getter.
-type instance Constraints A_Getter p f = (p ~ (->), Contravariant f, Functor f)
+type instance Constraints A_Getter p = OutPhantom p
 
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter s a
@@ -29,10 +28,10 @@ mkGetter = Optic
 
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a
-to f = Optic (dimap f (contramap f))
+to f = Optic (ocoerce . dimap f id)
 {-# INLINE to #-}
 
 -- | Apply a getter.
 view :: Is k A_Getter => Optic' k s a -> s -> a
-view o = getConst . getOptic (toGetter o) Const
+view o = (runForget . getOptic (toGetter o) . Forget) id
 {-# INLINE view #-}

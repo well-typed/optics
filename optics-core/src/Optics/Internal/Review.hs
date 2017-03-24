@@ -3,9 +3,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Review where
 
-import Data.Bifunctor
-import Data.Functor.Identity (Identity(..))
-
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -13,8 +10,7 @@ import Optics.Internal.Profunctor
 data A_Review
 
 -- | Constraints corresponding to a review.
-type instance Constraints A_Review p f =
-  (Choice p, Bifunctor p, f ~ Identity)
+type instance Constraints A_Review p = InPhantom p
 
 -- | Type synonym for a type-modifying review.
 type Review s t a b = Optic A_Review s t a b
@@ -31,4 +27,3 @@ toReview = sub
 mkReview :: Optic_ A_Review s t a b -> Review s t a b
 mkReview = Optic
 {-# INLINE mkReview #-}
-

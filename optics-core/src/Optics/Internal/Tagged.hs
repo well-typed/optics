@@ -28,3 +28,7 @@ instance Choice Tagged where
   {-# INLINE left' #-}
   right' = Tagged . Right . unTagged
   {-# INLINE right' #-}
+
+instance InPhantom Tagged where
+  icoerce = Tagged . unTagged
+  {-# INLINE icoerce #-}
