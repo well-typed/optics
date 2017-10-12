@@ -1,4 +1,7 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Instances to implement the subtyping hierarchy between optics.
@@ -187,3 +190,32 @@ instance Join An_Equality A_Review     A_Review
 instance Join An_Equality A_Prism      A_Prism
 instance Join An_Equality An_Iso       An_Iso
 
+
+
+-- | A constraint that can never be satisfied (accompanied by a
+-- helpful witness to anything you like).
+class Absurd where
+  absurd :: a
+
+-- | In order to get nice error messages, we complete the type lattice
+-- with a universal supertype, whose constraints can never be
+-- satisfied.
+data Bogus
+type instance Constraints Bogus p f = Absurd
+instance Is k Bogus where
+  implies = absurd
+
+-- | This typeclass has no instances, and is used so that we get
+-- suitable unsolved constraint errors when attempting to compose
+-- flavours that do not have a (non-'Bogus') common supertype.
+--
+-- For example, if you try to compose a fold with a setter then you
+-- will get an error
+--
+-- > Could not deduce (CanCompose A_Fold A_Setter)
+class Absurd => CanCompose k l
+
+instance CanCompose A_Fold   A_Setter => Join A_Fold   A_Setter Bogus
+instance CanCompose A_Setter A_Fold   => Join A_Setter A_Fold   Bogus
+instance CanCompose A_Setter A_Getter => Join A_Setter A_Getter Bogus
+instance CanCompose A_Getter A_Setter => Join A_Getter A_Setter Bogus

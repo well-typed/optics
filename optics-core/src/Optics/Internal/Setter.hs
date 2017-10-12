@@ -35,6 +35,10 @@ sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
 sets f = Optic (coerce f)
 {-# INLINE sets #-}
 
+-- | Build a setter from a functor.
+mapped :: Functor f => Setter (f a) (f b) a b
+mapped = sets fmap
+
 -- | Apply a setter as a modifier.
 over :: Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t
 over o = coerce (getOptic (toSetter o))

@@ -5,6 +5,7 @@ module Optics.Traversal
   , toTraversal
   , vlTraversal
   , _traverse
+  , traversalOf
   , module Optics.Optic
   )
   where

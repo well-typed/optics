@@ -36,3 +36,8 @@ vlTraversal = Optic
 _traverse :: Traversable t => Traversal (t a) (t b) a b
 _traverse = vlTraversal traverse
 {-# INLINE _traverse #-}
+
+-- | Convert a traversal to the van Laarhoven representation.
+traversalOf :: forall k s t a b . Is k A_Traversal => Optic k s t a b
+            -> (forall f . Applicative f => (a -> f b) -> s -> f t)
+traversalOf = getOptic . toTraversal

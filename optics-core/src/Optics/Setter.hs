@@ -7,6 +7,7 @@ module Optics.Setter
   , sets
   , over
   , set
+  , mapped
   , module Optics.Optic
   )
   where
