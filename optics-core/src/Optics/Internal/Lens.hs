@@ -23,11 +23,11 @@ toLens = sub
 {-# INLINE toLens #-}
 
 -- | Build a lens from the van Laarhoven representation.
-mkLens :: (forall f . Functor f => (a -> f b) -> s -> f t) -> Lens s t a b
-mkLens = Optic
-{-# INLINE mkLens #-}
+vlLens :: (forall f . Functor f => (a -> f b) -> s -> f t) -> Lens s t a b
+vlLens = Optic
+{-# INLINE vlLens #-}
 
 -- | Build a lens from a getter and setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens get set = mkLens (\ f s -> set s <$> f (get s))
+lens get set = vlLens (\ f s -> set s <$> f (get s))
 {-# INLINE lens #-}

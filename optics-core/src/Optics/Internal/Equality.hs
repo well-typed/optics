@@ -24,9 +24,9 @@ toEquality = sub
 {-# INLINE toEquality #-}
 
 -- | Build an equality from the van Laarhoven representation.
-mkEquality :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
-mkEquality = Optic
-{-# INLINE mkEquality #-}
+vlEquality :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
+vlEquality = Optic
+{-# INLINE vlEquality #-}
 
 -- | Proof of reflexivity.
 simple :: Equality' a a

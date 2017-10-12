@@ -24,14 +24,14 @@ toPrism = sub
 {-# INLINE toPrism #-}
 
 -- | Build a prism from the van Laarhoven representation.
-mkPrism :: (forall p f . (Choice p, Applicative f) => p a (f b) -> p s (f t)) -> Prism s t a b
-mkPrism = Optic
-{-# INLINE mkPrism #-}
+vlPrism :: (forall p f . (Choice p, Applicative f) => p a (f b) -> p s (f t)) -> Prism s t a b
+vlPrism = Optic
+{-# INLINE vlPrism #-}
 
 -- | Build a prism from a constructor and a matcher.
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism construct match =
-  mkPrism (\ p -> dimap match (either pure (fmap construct)) (right' p))
+  vlPrism (\ p -> dimap match (either pure (fmap construct)) (right' p))
 {-# INLINE prism #-}
 
 -- withPrism

@@ -24,9 +24,9 @@ toTraversal = sub
 {-# INLINE toTraversal #-}
 
 -- | Build a traversal from the van Laarhoven representation.
-mkTraversal :: (forall f . Applicative f => (a -> f b) -> s -> f t) -> Traversal s t a b
-mkTraversal = Optic
-{-# INLINE mkTraversal #-}
+vlTraversal :: (forall f . Applicative f => (a -> f b) -> s -> f t) -> Traversal s t a b
+vlTraversal = Optic
+{-# INLINE vlTraversal #-}
 
 -- | Traversal via the 'Traversal' class.
 --
@@ -34,5 +34,5 @@ mkTraversal = Optic
 -- use 'traverse'. The name here is preliminary.
 --
 _traverse :: Traversable t => Traversal (t a) (t b) a b
-_traverse = mkTraversal traverse
+_traverse = vlTraversal traverse
 {-# INLINE _traverse #-}

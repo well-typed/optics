@@ -3,7 +3,7 @@ module Optics.Fold
   ( A_Fold
   , Fold
   , toFold
-  , mkFold
+  , vlFold
   , foldMapOf
   , foldrOf
   , foldlOf'

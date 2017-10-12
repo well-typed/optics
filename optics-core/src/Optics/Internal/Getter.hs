@@ -23,9 +23,9 @@ toGetter = sub
 {-# INLINE toGetter #-}
 
 -- | Build a getter from the van Laarhoven representation.
-mkGetter :: (forall f . (Contravariant f, Functor f) => (a -> f a) -> s -> f s) -> Getter s a
-mkGetter = Optic
-{-# INLINE mkGetter #-}
+vlGetter :: (forall f . (Contravariant f, Functor f) => (a -> f a) -> s -> f s) -> Getter s a
+vlGetter = Optic
+{-# INLINE vlGetter #-}
 
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a

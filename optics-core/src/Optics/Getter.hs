@@ -2,7 +2,7 @@ module Optics.Getter
   ( A_Getter
   , Getter
   , toGetter
-  , mkGetter
+  , vlGetter
   , to
   , view
   , module Optics.Optic

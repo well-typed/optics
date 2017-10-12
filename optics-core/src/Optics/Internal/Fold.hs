@@ -25,9 +25,9 @@ toFold = sub
 {-# INLINE toFold #-}
 
 -- | Build a fold from the van Laarhoven representation.
-mkFold :: (forall f . (Applicative f, Contravariant f) => (a -> f a) -> s -> f s) -> Fold s a
-mkFold = Optic
-{-# INLINE mkFold #-}
+vlFold :: (forall f . (Applicative f, Contravariant f) => (a -> f a) -> s -> f s) -> Fold s a
+vlFold = Optic
+{-# INLINE vlFold #-}
 
 -- | Fold via embedding into a monoid.
 foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k s a -> (a -> r) -> s -> r

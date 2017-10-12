@@ -26,9 +26,9 @@ toSetter = sub
 {-# INLINE toSetter #-}
 
 -- | Build a setter from the van Laarhoven representation.
-mkSetter :: ((a -> Identity b) -> s -> Identity t) -> Setter s t a b
-mkSetter x = Optic x
-{-# INLINE mkSetter #-}
+vlSetter :: ((a -> Identity b) -> s -> Identity t) -> Setter s t a b
+vlSetter x = Optic x
+{-# INLINE vlSetter #-}
 
 -- | Build a setter from a function to modify the element(s).
 sets :: ((a -> b) -> (s -> t)) -> Setter s t a b

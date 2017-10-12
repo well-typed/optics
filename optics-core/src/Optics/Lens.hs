@@ -3,7 +3,7 @@ module Optics.Lens
   , Lens
   , Lens'
   , toLens
-  , mkLens
+  , vlLens
   , lens
   , module Optics.Optic
   )

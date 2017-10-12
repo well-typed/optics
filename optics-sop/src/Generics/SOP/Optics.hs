@@ -46,15 +46,15 @@ record = rep % sop % z
 
 -- | Lens accessing the head of an 'NP'.
 npHead :: Lens (NP f (x ': xs)) (NP f (y ': xs)) (f x) (f y)
-npHead = mkLens (\ f (x :* xs) -> (:* xs) <$> f x)
+npHead = vlLens (\ f (x :* xs) -> (:* xs) <$> f x)
 
 -- | Lens accessing the tail of an 'NP'.
 npTail :: Lens (NP f (x ': xs)) (NP f (x ': ys)) (NP f xs) (NP f ys)
-npTail = mkLens (\ f (x :* xs) -> (x :*) <$> f xs)
+npTail = vlLens (\ f (x :* xs) -> (x :*) <$> f xs)
 
 -- | Iso between a single-element 'NP' and its contents.
 npSingleton :: Iso (NP f '[ x ]) (NP g '[ y ]) (f x) (g y)
-npSingleton = iso hd (:* Nil) 
+npSingleton = iso hd (:* Nil)
 
 -- | Prism for the first option in an 'NS'.
 _Z :: Prism (NS f (x ': xs)) (NS f (y ': xs)) (f x) (f y)

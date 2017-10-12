@@ -26,9 +26,9 @@ toIso = sub
 {-# INLINE toIso #-}
 
 -- | Build an iso from the van Laarhoven representation.
-mkIso :: (forall p f . (Profunctor p, Functor f) => p a (f b) -> p s (f t)) -> Iso s t a b
-mkIso = Optic
-{-# INLINE mkIso #-}
+vlIso :: (forall p f . (Profunctor p, Functor f) => p a (f b) -> p s (f t)) -> Iso s t a b
+vlIso = Optic
+{-# INLINE vlIso #-}
 
 -- | Build an iso from a pair of inverse functions.
 iso :: (s -> a) -> (b -> t) -> Iso s t a b
