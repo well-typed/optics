@@ -1,9 +1,6 @@
 module Optics.Optic
   ( Optic()
-  , Optic_
-  , Optic__
   , Optic'
-  , Optic_'
   , Is()
   , sub
   , Join()
