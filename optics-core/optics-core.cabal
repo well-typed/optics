@@ -29,7 +29,6 @@ library
     Optics.Setter
     Optics.Traversal
   other-modules:
-    Optics.Internal
     Optics.Internal.Equality
     Optics.Internal.Fold
     Optics.Internal.Getter
@@ -43,3 +42,10 @@ library
     Optics.Internal.Subtyping
     Optics.Internal.Tagged
     Optics.Internal.Traversal
+
+test-suite optics-tests
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  main-is: Optics/Tests.hs
+  hs-source-dirs: tests
+  build-depends: base, optics-core

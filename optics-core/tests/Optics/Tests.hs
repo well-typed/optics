@@ -9,19 +9,13 @@
            #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
--- | Remnants that have not yet been moved to other modules.
---
-module Optics.Internal where
+-- | At the moment, merely compiling this module is all the testing we do.
+module Main where
 
 import Data.Either.Optics
 import Data.Tuple.Optics
 
-import Optics.Internal.Getter
-import Optics.Internal.Iso
-import Optics.Internal.Lens
-import Optics.Internal.Optic
-import Optics.Internal.Traversal
-import Optics.Internal.Subtyping ()
+import Optics
 
 
 -- | Composing a lens and a traversal yields a traversal
@@ -52,3 +46,7 @@ eg2 = view _1
 -- These don't typecheck, as one would expect:
 --   to fst % mapped  -- Cannot compose a getter with a setter
 --   toLens (to fst)  -- Cannot use a getter as a lens
+
+
+main :: IO ()
+main = return ()
