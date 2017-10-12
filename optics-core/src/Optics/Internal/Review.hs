@@ -27,8 +27,8 @@ toReview :: Is k A_Review => Optic k s t a b -> Review s t a b
 toReview = sub
 {-# INLINE toReview #-}
 
--- | Create a review.
-mkReview :: Optic_ A_Review s t a b -> Review s t a b
+-- | Build a review from the van Laarhoven representation.
+mkReview :: (forall p . (Choice p, Bifunctor p) => p a (Identity b) -> p s (Identity t)) -> Review s t a b
 mkReview = Optic
 {-# INLINE mkReview #-}
 

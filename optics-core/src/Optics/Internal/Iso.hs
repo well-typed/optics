@@ -25,8 +25,8 @@ toIso :: Is k An_Iso => Optic k s t a b -> Iso s t a b
 toIso = sub
 {-# INLINE toIso #-}
 
--- | Create a lens.
-mkIso :: Optic_ An_Iso s t a b -> Iso s t a b
+-- | Build an iso from the van Laarhoven representation.
+mkIso :: (forall p f . (Profunctor p, Functor f) => p a (f b) -> p s (f t)) -> Iso s t a b
 mkIso = Optic
 {-# INLINE mkIso #-}
 

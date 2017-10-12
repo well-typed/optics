@@ -24,8 +24,8 @@ toFold :: Is k A_Fold => Optic' k s a -> Fold s a
 toFold = sub
 {-# INLINE toFold #-}
 
--- | Create a fold.
-mkFold :: Optic_' A_Fold s a -> Fold s a
+-- | Build a fold from the van Laarhoven representation.
+mkFold :: (forall f . (Applicative f, Contravariant f) => (a -> f a) -> s -> f s) -> Fold s a
 mkFold = Optic
 {-# INLINE mkFold #-}
 

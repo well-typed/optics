@@ -23,8 +23,8 @@ toTraversal :: Is k A_Traversal => Optic k s t a b -> Traversal s t a b
 toTraversal = sub
 {-# INLINE toTraversal #-}
 
--- | Create a traversal.
-mkTraversal :: Optic_ A_Traversal s t a b -> Traversal s t a b
+-- | Build a traversal from the van Laarhoven representation.
+mkTraversal :: (forall f . Applicative f => (a -> f b) -> s -> f t) -> Traversal s t a b
 mkTraversal = Optic
 {-# INLINE mkTraversal #-}
 

@@ -23,8 +23,8 @@ toPrism :: Is k A_Prism => Optic k s t a b -> Prism s t a b
 toPrism = sub
 {-# INLINE toPrism #-}
 
--- | Create a prism.
-mkPrism :: Optic_ A_Prism s t a b -> Prism s t a b
+-- | Build a prism from the van Laarhoven representation.
+mkPrism :: (forall p f . (Choice p, Applicative f) => p a (f b) -> p s (f t)) -> Prism s t a b
 mkPrism = Optic
 {-# INLINE mkPrism #-}
 

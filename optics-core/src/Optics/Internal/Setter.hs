@@ -25,12 +25,12 @@ toSetter :: Is k A_Setter => Optic k s t a b -> Setter s t a b
 toSetter = sub
 {-# INLINE toSetter #-}
 
--- | Create a setter.
-mkSetter :: Optic_ A_Setter s t a b -> Setter s t a b
-mkSetter = Optic
+-- | Build a setter from the van Laarhoven representation.
+mkSetter :: ((a -> Identity b) -> s -> Identity t) -> Setter s t a b
+mkSetter x = Optic x
 {-# INLINE mkSetter #-}
 
--- | Build a setter.
+-- | Build a setter from a function to modify the element(s).
 sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
 sets f = Optic (coerce f)
 {-# INLINE sets #-}

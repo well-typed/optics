@@ -22,8 +22,8 @@ toLens :: Is k A_Lens => Optic k s t a b -> Lens s t a b
 toLens = sub
 {-# INLINE toLens #-}
 
--- | Create a lens.
-mkLens :: Optic_ A_Lens s t a b -> Lens s t a b
+-- | Build a lens from the van Laarhoven representation.
+mkLens :: (forall f . Functor f => (a -> f b) -> s -> f t) -> Lens s t a b
 mkLens = Optic
 {-# INLINE mkLens #-}
 
