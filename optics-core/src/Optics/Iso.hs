@@ -3,7 +3,7 @@ module Optics.Iso
   , Iso
   , Iso'
   , toIso
-  , mkIso
+  , vlIso
   , iso
   , withIso
   , from

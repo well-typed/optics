@@ -3,7 +3,7 @@ module Optics.Equality
   , Equality
   , Equality'
   , toEquality
-  , mkEquality
+  , vlEquality
   , Identical(..)
   , runEq
   , module Optics.Optic

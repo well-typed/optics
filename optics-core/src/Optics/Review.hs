@@ -4,7 +4,7 @@ module Optics.Review
   , Review
   , Review'
   , toReview
-  , mkReview
+  , vlReview
   , re
   , review
   , module Optics.Optic

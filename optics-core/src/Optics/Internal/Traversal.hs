@@ -23,10 +23,10 @@ toTraversal :: Is k A_Traversal => Optic k s t a b -> Traversal s t a b
 toTraversal = sub
 {-# INLINE toTraversal #-}
 
--- | Create a traversal.
-mkTraversal :: Optic_ A_Traversal s t a b -> Traversal s t a b
-mkTraversal = Optic
-{-# INLINE mkTraversal #-}
+-- | Build a traversal from the van Laarhoven representation.
+vlTraversal :: (forall f . Applicative f => (a -> f b) -> s -> f t) -> Traversal s t a b
+vlTraversal = Optic
+{-# INLINE vlTraversal #-}
 
 -- | Traversal via the 'Traversal' class.
 --
@@ -34,5 +34,10 @@ mkTraversal = Optic
 -- use 'traverse'. The name here is preliminary.
 --
 _traverse :: Traversable t => Traversal (t a) (t b) a b
-_traverse = mkTraversal traverse
+_traverse = vlTraversal traverse
 {-# INLINE _traverse #-}
+
+-- | Convert a traversal to the van Laarhoven representation.
+traversalOf :: forall k s t a b . Is k A_Traversal => Optic k s t a b
+            -> (forall f . Applicative f => (a -> f b) -> s -> f t)
+traversalOf = getOptic . toTraversal

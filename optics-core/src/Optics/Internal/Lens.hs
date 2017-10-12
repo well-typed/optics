@@ -22,12 +22,12 @@ toLens :: Is k A_Lens => Optic k s t a b -> Lens s t a b
 toLens = sub
 {-# INLINE toLens #-}
 
--- | Create a lens.
-mkLens :: Optic_ A_Lens s t a b -> Lens s t a b
-mkLens = Optic
-{-# INLINE mkLens #-}
+-- | Build a lens from the van Laarhoven representation.
+vlLens :: (forall f . Functor f => (a -> f b) -> s -> f t) -> Lens s t a b
+vlLens = Optic
+{-# INLINE vlLens #-}
 
 -- | Build a lens from a getter and setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens get set = mkLens (\ f s -> set s <$> f (get s))
+lens get set = vlLens (\ f s -> set s <$> f (get s))
 {-# INLINE lens #-}

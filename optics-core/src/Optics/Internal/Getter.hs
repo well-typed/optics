@@ -22,10 +22,10 @@ toGetter :: Is k A_Getter => Optic' k s a -> Getter s a
 toGetter = sub
 {-# INLINE toGetter #-}
 
--- | Create a getter.
-mkGetter :: Optic_' A_Getter s a -> Getter s a
-mkGetter = Optic
-{-# INLINE mkGetter #-}
+-- | Build a getter from the van Laarhoven representation.
+vlGetter :: (forall f . (Contravariant f, Functor f) => (a -> f a) -> s -> f s) -> Getter s a
+vlGetter = Optic
+{-# INLINE vlGetter #-}
 
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a

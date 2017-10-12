@@ -23,10 +23,10 @@ toEquality :: Is k An_Equality => Optic k s t a b -> Equality s t a b
 toEquality = sub
 {-# INLINE toEquality #-}
 
--- | Create an equality.
-mkEquality :: Optic_ An_Equality s t a b -> Equality s t a b
-mkEquality = Optic
-{-# INLINE mkEquality #-}
+-- | Build an equality from the van Laarhoven representation.
+vlEquality :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
+vlEquality = Optic
+{-# INLINE vlEquality #-}
 
 -- | Proof of reflexivity.
 simple :: Equality' a a

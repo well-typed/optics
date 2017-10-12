@@ -3,8 +3,9 @@ module Optics.Traversal
   , Traversal
   , Traversal'
   , toTraversal
-  , mkTraversal
+  , vlTraversal
   , _traverse
+  , traversalOf
   , module Optics.Optic
   )
   where
