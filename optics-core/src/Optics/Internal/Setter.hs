@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Setter where
 
@@ -40,8 +41,8 @@ mapped :: Functor f => Setter (f a) (f b) a b
 mapped = sets fmap
 
 -- | Apply a setter as a modifier.
-over :: Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t
-over o = coerce (getOptic (toSetter o))
+over :: forall k s t a b . Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t
+over o = coerce (getOptic (toSetter o) :: (a -> Identity b) -> s -> Identity t)
 {-# INLINE over #-}
 
 -- | Apply a setter.
