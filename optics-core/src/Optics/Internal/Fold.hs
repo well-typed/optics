@@ -6,6 +6,7 @@ module Optics.Internal.Fold where
 import Control.Applicative (Const(..))
 import Data.Monoid
 
+import Optics.Internal.Contravariant
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 

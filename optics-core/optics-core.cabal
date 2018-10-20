@@ -9,39 +9,43 @@ tested-with: GHC == 7.10.3, GHC == 8.0.2
 library
   default-language: Haskell2010
   hs-source-dirs: src
+
   build-depends:
     base >= 4.8 && < 5
+
   ghc-options: -Wall
-  exposed-modules:
-    Data.Either.Optics
-    Data.Maybe.Optics
-    Data.Tuple.Optics
-    Optics
-    Optics.Equality
-    Optics.Fold
-    Optics.Getter
-    Optics.Iso
-    Optics.Lens
-    Optics.Operators
-    Optics.Optic
-    Optics.Prism
-    Optics.Review
-    Optics.Setter
-    Optics.Traversal
-  other-modules:
-    Optics.Internal.Equality
-    Optics.Internal.Fold
-    Optics.Internal.Getter
-    Optics.Internal.Iso
-    Optics.Internal.Lens
-    Optics.Internal.Optic
-    Optics.Internal.Prism
-    Optics.Internal.Profunctor
-    Optics.Internal.Review
-    Optics.Internal.Setter
-    Optics.Internal.Subtyping
-    Optics.Internal.Tagged
-    Optics.Internal.Traversal
+
+  exposed-modules: Data.Either.Optics
+                   Data.Maybe.Optics
+                   Data.Tuple.Optics
+                   Optics
+                   Optics.Equality
+                   Optics.Fold
+                   Optics.Getter
+                   Optics.Iso
+                   Optics.Lens
+                   Optics.Operators
+                   Optics.Optic
+                   Optics.Prism
+                   Optics.Review
+                   Optics.Setter
+                   Optics.Traversal
+
+  other-modules: Optics.Internal.Bicontravariant
+                 Optics.Internal.Contravariant
+                 Optics.Internal.Equality
+                 Optics.Internal.Fold
+                 Optics.Internal.Getter
+                 Optics.Internal.Iso
+                 Optics.Internal.Lens
+                 Optics.Internal.Optic
+                 Optics.Internal.Prism
+                 Optics.Internal.Profunctor
+                 Optics.Internal.Review
+                 Optics.Internal.Setter
+                 Optics.Internal.Subtyping
+                 Optics.Internal.Tagged
+                 Optics.Internal.Traversal
 
 test-suite optics-tests
   default-language: Haskell2010

@@ -5,6 +5,7 @@ module Optics.Internal.Getter where
 
 import Control.Applicative (Const(..))
 
+import Optics.Internal.Contravariant
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 

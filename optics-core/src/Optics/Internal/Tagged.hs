@@ -25,6 +25,12 @@ instance Profunctor Tagged where
 
 instance Choice Tagged where
   left'  = Tagged . Left  . unTagged
-  {-# INLINE left' #-}
   right' = Tagged . Right . unTagged
+  {-# INLINE left' #-}
   {-# INLINE right' #-}
+
+instance Costrong Tagged where
+  unfirst (Tagged bd) = Tagged (fst bd)
+  unsecond (Tagged db) = Tagged (snd db)
+  {-# INLINE unfirst #-}
+  {-# INLINE unsecond #-}
