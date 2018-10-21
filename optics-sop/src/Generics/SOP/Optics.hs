@@ -18,7 +18,7 @@ module Generics.SOP.Optics
   where
 
 import Generics.SOP
-import Optics hiding (from, to)
+import Optics hiding (to)
 
 -- | Iso between a generic type and its representation.
 rep :: (Generic a, Generic b) => Iso a b (Rep a) (Rep b)
