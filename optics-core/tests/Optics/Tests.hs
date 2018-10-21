@@ -31,7 +31,7 @@ comp3 :: Optic A_Getter ((b, y), b1) ((b, y), b1) b b
 comp3 = to fst % _1
 
 -- | Composing a prism and a lens yields a traversal
-comp4 :: Optic A_Traversal (Either c (a, y)) (Either c (b, y)) a b
+comp4 :: Optic An_AffineTraversal (Either c (a, y)) (Either c (b, y)) a b
 comp4 = _Right % _1
 
 -- | An iso can be used as a getter

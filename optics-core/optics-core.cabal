@@ -18,6 +18,7 @@ library
                    Data.Maybe.Optics
                    Data.Tuple.Optics
                    Optics
+                   Optics.AffineTraversal
                    Optics.Equality
                    Optics.Fold
                    Optics.Getter
@@ -30,7 +31,8 @@ library
                    Optics.Setter
                    Optics.Traversal
 
-  other-modules: Optics.Internal.Bicontravariant
+  other-modules: Optics.Internal.AffineTraversal
+                 Optics.Internal.Bicontravariant
                  Optics.Internal.Contravariant
                  Optics.Internal.Equality
                  Optics.Internal.Fold
