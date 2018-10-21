@@ -23,8 +23,9 @@ type Fold s a = Optic' A_Fold s a
 
 -- | View the result of folding over all the results of a 'Fold' or 'Traversal'
 -- that points at a monoidal value.
-viewN :: Monoid a => Fold s a -> s -> a
-viewN o = runForget (getOptic o (Forget id))
+viewN :: (Is k A_Fold, Monoid a) => Optic' k s a -> s -> a
+viewN o = runForget (getOptic (toFold o) (Forget id))
+{-# INLINE viewN #-}
 
 -- | Fold to the first element (if it exists).
 preview :: Is k A_Fold => Optic' k s a -> s -> Maybe a
