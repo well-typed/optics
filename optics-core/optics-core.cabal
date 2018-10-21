@@ -41,6 +41,7 @@ library
                  Optics.Internal.Prism
                  Optics.Internal.Profunctor
                  Optics.Internal.Review
+                 Optics.Internal.Re
                  Optics.Internal.Setter
                  Optics.Internal.Subtyping
                  Optics.Internal.Tagged

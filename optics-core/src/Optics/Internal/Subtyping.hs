@@ -135,7 +135,7 @@ instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
 
 -- Join instances
 
-type family JoinError k l
+type family JoinError k l :: *
 type instance JoinError k l = TypeError ('ShowType k
                                          ':<>: 'Text " cannot be composed with "
                                          ':<>: 'ShowType l)

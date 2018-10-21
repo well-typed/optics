@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Review where
 
@@ -7,8 +6,8 @@ import Data.Bifunctor
 import Data.Void
 
 import Optics.Internal.Optic
-import Optics.Internal.Tagged
 import Optics.Internal.Profunctor
+import Optics.Internal.Tagged
 
 -- | Tag for a review.
 data A_Review
@@ -29,9 +28,10 @@ toReview = sub
 {-# INLINE toReview #-}
 
 -- | Apply a review.
-review :: Is k A_Review => Optic' k s a -> a -> s
+review :: Is k A_Review => Optic' k t b -> b -> t
 review o = unTagged . getOptic (toReview o) . Tagged
 
 -- | An analogue of 'to' for review.
 unto :: (b -> t) -> Review' b t
 unto f = Optic (first absurd . dimap absurd f)
+{-# INLINE unto #-}
