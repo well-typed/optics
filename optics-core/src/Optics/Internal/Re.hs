@@ -14,9 +14,8 @@ import Optics.Internal.Review
 
 class ReversibleOptic k where
   type ReversedOptic k :: *
-  -- | Reverses optics, turning around 'Iso' into 'Iso', 'Prism' into
-  -- 'PrismaticGetter' (and back), 'Lens' into 'LensyReview' (and back) and
-  -- 'Getter' into 'Review' (and back).
+  -- | Reverses optics, turning around 'Iso' into 'Iso', 'Prism' into 'Getter',
+  -- 'Lens' into 'Review' and 'Getter' into 'Review' (and back).
   re :: Optic k s t a b -> Optic (ReversedOptic k) b a t s
 
 instance ReversibleOptic An_Iso where
