@@ -28,6 +28,14 @@ iso :: (s -> a) -> (b -> t) -> Iso s t a b
 iso f g = Optic (dimap f g)
 {-# INLINE iso #-}
 
+-- | Extract the two components of an isomorphism.
+withIso :: Is k An_Iso => Optic k s t a b -> ((s -> a) -> (b -> t) -> r) -> r
+withIso o k = case getOptic (toIso o) (Exchange id id) of
+  Exchange sa bt -> k sa bt
+{-# INLINE withIso #-}
+
+----------------------------------------
+
 -- | Type to represent the components of an isomorphism.
 data Exchange a b s t =
   Exchange (s -> a) (b -> t)
@@ -39,9 +47,3 @@ instance Functor (Exchange a b s) where
 instance Profunctor (Exchange a b) where
   dimap ss tt (Exchange sa bt) = Exchange (sa . ss) (tt . bt)
   {-# INLINE dimap #-}
-
--- | Extract the two components of an isomorphism.
-withIso :: Is k An_Iso => Optic k s t a b -> ((s -> a) -> (b -> t) -> r) -> r
-withIso o k = case getOptic (toIso o) (Exchange id id) of
-  Exchange sa bt -> k sa bt
-{-# INLINE withIso #-}
