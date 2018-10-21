@@ -11,7 +11,7 @@
 --
 module Optics.Internal.Subtyping where
 
-import GHC.TypeLits
+import GHC.TypeLits (TypeError, ErrorMessage(..))
 
 import Optics.Internal.Equality
 import Optics.Internal.Fold
@@ -126,13 +126,19 @@ instance Is An_Equality A_Prism where
 instance Is An_Equality An_Iso where
   implies _ = id
 
+-- | Overlappable instance for a custom type error.
+instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
+                                         ':<>: 'Text " cannot be used as "
+                                         ':<>: 'ShowType l
+                                        ) => Is k l where
+  implies = error "unreachable"
+
 -- Join instances
 
-type family JoinError k l :: *
+type family JoinError k l
 type instance JoinError k l = TypeError ('ShowType k
-                                         ':<>: 'Text " and "
-                                         ':<>: 'ShowType l
-                                         ':<>: 'Text " are not composable")
+                                         ':<>: 'Text " cannot be composed with "
+                                         ':<>: 'ShowType l)
 
 type instance Join A_Fold A_Setter    = JoinError A_Fold A_Setter
 type instance Join A_Fold A_Getter    = A_Fold
