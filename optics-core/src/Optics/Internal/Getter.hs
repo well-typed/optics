@@ -3,6 +3,8 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Getter where
 
+import Data.Void
+
 import Optics.Internal.Bicontravariant
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
@@ -28,5 +30,5 @@ toGetter = sub
 
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a
-to f = Optic (contrabimap f f)
+to f = Optic (dimap f absurd . contrasecond absurd)
 {-# INLINE to #-}
