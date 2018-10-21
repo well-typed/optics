@@ -3,11 +3,16 @@ module Optics.Fold
   ( A_Fold
   , Fold
   , toFold
+  , viewN
   , preview
   , foldMapOf
   , foldrOf
   , foldlOf'
   , toListOf
+  , sequenceOf_
+  , traverseOf_
+  , folded
+  , folding
     -- * Concrete folds
   , andOf
   , orOf
@@ -32,24 +37,25 @@ import Control.Monad
 import Data.Monoid
 
 import Optics.Internal.Fold
+import Optics.Internal.Utils
 import Optics.Optic
 
 -- Concrete folds
 
 andOf :: Is k A_Fold => Optic' k s Bool -> s -> Bool
-andOf o = getAll . foldMapOf o All
+andOf o = getAll #. foldMapOf o All
 {-# INLINE andOf #-}
 
 orOf :: Is k A_Fold => Optic' k s Bool -> s -> Bool
-orOf o = getAny . foldMapOf o Any
+orOf o = getAny #. foldMapOf o Any
 {-# INLINE orOf #-}
 
 allOf :: Is k A_Fold => Optic' k s a -> (a -> Bool) -> s -> Bool
-allOf o f = getAll . foldMapOf o (All . f)
+allOf o f = getAll #. foldMapOf o (All #. f)
 {-# INLINE allOf #-}
 
 anyOf :: Is k A_Fold => Optic' k s a -> (a -> Bool) -> s -> Bool
-anyOf o f = getAny . foldMapOf o (Any . f)
+anyOf o f = getAny #. foldMapOf o (Any #. f)
 {-# INLINE anyOf #-}
 
 noneOf :: Is k A_Fold => Optic' k s a -> (a -> Bool) -> s -> Bool
