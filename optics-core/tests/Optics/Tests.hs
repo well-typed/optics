@@ -20,7 +20,7 @@ import Optics
 
 -- | Composing a lens and a traversal yields a traversal
 comp1 :: Traversable t => Optic A_Traversal (t a, y) (t b, y) a b
-comp1 = _1 % vlTraversal traverse
+comp1 = _1 % traversed
 
 -- | Composing two lenses yields a lens
 comp2 :: Optic A_Lens ((a, y), y1) ((b, y), y1) a b
