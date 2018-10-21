@@ -13,6 +13,7 @@ module Optics.Internal.Subtyping where
 
 import GHC.TypeLits (TypeError, ErrorMessage(..))
 
+import Optics.Internal.AffineFold
 import Optics.Internal.AffineTraversal
 import Optics.Internal.Equality
 import Optics.Internal.Fold
@@ -29,6 +30,12 @@ import Optics.Internal.Setter
 --
 -- (none)
 
+-- Instances for An_AffineFold
+--
+
+instance Is An_AffineFold A_Fold where
+  implies _ = id
+
 -- Instances for A_Setter
 --
 -- (none)
@@ -36,6 +43,9 @@ import Optics.Internal.Setter
 -- Instances for A_Getter
 
 instance Is A_Getter A_Fold where
+  implies _ = id
+
+instance Is A_Getter An_AffineFold where
   implies _ = id
 
 -- Instances for A_Traversal
@@ -48,18 +58,24 @@ instance Is A_Traversal A_Setter where
 
 -- Instances for An_AffineTraversal
 
-instance Is An_AffineTraversal A_Traversal where
+instance Is An_AffineTraversal A_Fold where
   implies _ = id
 
-instance Is An_AffineTraversal A_Fold where
+instance Is An_AffineTraversal An_AffineFold where
   implies _ = id
 
 instance Is An_AffineTraversal A_Setter where
   implies _ = id
 
+instance Is An_AffineTraversal A_Traversal where
+  implies _ = id
+
 -- Instances for A_Lens
 
 instance Is A_Lens A_Fold where
+  implies _ = id
+
+instance Is A_Lens An_AffineFold where
   implies _ = id
 
 instance Is A_Lens A_Setter where
@@ -68,10 +84,10 @@ instance Is A_Lens A_Setter where
 instance Is A_Lens A_Getter where
   implies _ = id
 
-instance Is A_Lens An_AffineTraversal where
+instance Is A_Lens A_Traversal where
   implies _ = id
 
-instance Is A_Lens A_Traversal where
+instance Is A_Lens An_AffineTraversal where
   implies _ = id
 
 -- Instances for A_Review
@@ -83,21 +99,27 @@ instance Is A_Lens A_Traversal where
 instance Is A_Prism A_Fold where
   implies _ = id
 
+instance Is A_Prism An_AffineFold where
+  implies _ = id
+
 instance Is A_Prism A_Setter where
   implies _ = id
 
 instance Is A_Prism A_Review where
   implies _ = id
 
-instance Is A_Prism An_AffineTraversal where
+instance Is A_Prism A_Traversal where
   implies _ = id
 
-instance Is A_Prism A_Traversal where
+instance Is A_Prism An_AffineTraversal where
   implies _ = id
 
 -- Instances for An_Iso
 
 instance Is An_Iso A_Fold where
+  implies _ = id
+
+instance Is An_Iso An_AffineFold where
   implies _ = id
 
 instance Is An_Iso A_Setter where
@@ -124,6 +146,9 @@ instance Is An_Iso A_Prism where
 -- Instances for An_Equality
 
 instance Is An_Equality A_Fold where
+  implies _ = id
+
+instance Is An_Equality An_AffineFold where
   implies _ = id
 
 instance Is An_Equality A_Setter where
@@ -164,6 +189,7 @@ type instance JoinError k l = TypeError ('ShowType k
                                          ':<>: 'Text " cannot be composed with "
                                          ':<>: 'ShowType l)
 
+type instance Join A_Fold An_AffineFold      = A_Fold
 type instance Join A_Fold A_Setter           = JoinError A_Fold A_Setter
 type instance Join A_Fold A_Getter           = A_Fold
 type instance Join A_Fold A_Traversal        = A_Fold
@@ -174,7 +200,18 @@ type instance Join A_Fold A_Prism            = A_Fold
 type instance Join A_Fold An_Iso             = A_Fold
 type instance Join A_Fold An_Equality        = A_Fold
 
+type instance Join An_AffineFold A_Setter           = JoinError An_AffineFold A_Setter
+type instance Join An_AffineFold A_Getter           = An_AffineFold
+type instance Join An_AffineFold A_Traversal        = A_Fold
+type instance Join An_AffineFold An_AffineTraversal = An_AffineFold
+type instance Join An_AffineFold A_Lens             = An_AffineFold
+type instance Join An_AffineFold A_Review           = JoinError An_AffineFold A_Review
+type instance Join An_AffineFold A_Prism            = An_AffineFold
+type instance Join An_AffineFold An_Iso             = An_AffineFold
+type instance Join An_AffineFold An_Equality        = An_AffineFold
+
 type instance Join A_Setter A_Fold             = JoinError A_Setter A_Fold
+type instance Join A_Setter An_AffineFold      = JoinError A_Setter An_AffineFold
 type instance Join A_Setter A_Getter           = JoinError A_Setter A_Getter
 type instance Join A_Setter An_AffineTraversal = A_Traversal
 type instance Join A_Setter A_Traversal        = A_Setter
@@ -185,16 +222,18 @@ type instance Join A_Setter An_Iso             = A_Setter
 type instance Join A_Setter An_Equality        = A_Setter
 
 type instance Join A_Getter A_Fold             = A_Fold
+type instance Join A_Getter An_AffineFold      = An_AffineFold
 type instance Join A_Getter A_Setter           = JoinError A_Getter A_Setter
 type instance Join A_Getter A_Traversal        = A_Fold
-type instance Join A_Getter An_AffineTraversal = A_Fold
+type instance Join A_Getter An_AffineTraversal = An_AffineFold
 type instance Join A_Getter A_Lens             = A_Getter
 type instance Join A_Getter A_Review           = JoinError A_Getter A_Review
-type instance Join A_Getter A_Prism            = A_Fold
+type instance Join A_Getter A_Prism            = An_AffineFold
 type instance Join A_Getter An_Iso             = A_Getter
 type instance Join A_Getter An_Equality        = A_Getter
 
 type instance Join A_Traversal A_Fold             = A_Fold
+type instance Join A_Traversal An_AffineFold      = A_Fold
 type instance Join A_Traversal A_Setter           = A_Setter
 type instance Join A_Traversal A_Getter           = A_Fold
 type instance Join A_Traversal An_AffineTraversal = A_Traversal
@@ -204,16 +243,18 @@ type instance Join A_Traversal A_Prism            = A_Traversal
 type instance Join A_Traversal An_Iso             = A_Traversal
 type instance Join A_Traversal An_Equality        = A_Traversal
 
-type instance Join An_AffineTraversal A_Fold      = A_Fold
-type instance Join An_AffineTraversal A_Setter    = A_Setter
-type instance Join An_AffineTraversal A_Getter    = JoinError An_AffineTraversal A_Getter
-type instance Join An_AffineTraversal A_Lens      = An_AffineTraversal
-type instance Join An_AffineTraversal A_Review    = JoinError An_AffineTraversal A_Review
-type instance Join An_AffineTraversal A_Prism     = An_AffineTraversal
-type instance Join An_AffineTraversal An_Iso      = An_AffineTraversal
-type instance Join An_AffineTraversal An_Equality = An_AffineTraversal
+type instance Join An_AffineTraversal A_Fold        = A_Fold
+type instance Join An_AffineTraversal An_AffineFold = An_AffineFold
+type instance Join An_AffineTraversal A_Setter      = A_Setter
+type instance Join An_AffineTraversal A_Getter      = An_AffineFold
+type instance Join An_AffineTraversal A_Lens        = An_AffineTraversal
+type instance Join An_AffineTraversal A_Review      = JoinError An_AffineTraversal A_Review
+type instance Join An_AffineTraversal A_Prism       = An_AffineTraversal
+type instance Join An_AffineTraversal An_Iso        = An_AffineTraversal
+type instance Join An_AffineTraversal An_Equality   = An_AffineTraversal
 
 type instance Join A_Lens A_Fold             = A_Fold
+type instance Join A_Lens An_AffineFold      = An_AffineFold
 type instance Join A_Lens A_Setter           = A_Setter
 type instance Join A_Lens A_Getter           = A_Getter
 type instance Join A_Lens A_Traversal        = A_Traversal
@@ -224,6 +265,7 @@ type instance Join A_Lens An_Iso             = A_Lens
 type instance Join A_Lens An_Equality        = A_Lens
 
 type instance Join A_Review A_Fold             = JoinError A_Review A_Fold
+type instance Join A_Review An_AffineFold      = JoinError A_Review An_AffineFold
 type instance Join A_Review A_Setter           = JoinError A_Review A_Setter
 type instance Join A_Review A_Getter           = JoinError A_Review A_Getter
 type instance Join A_Review A_Traversal        = JoinError A_Review A_Traversal
@@ -234,8 +276,9 @@ type instance Join A_Review An_Iso             = A_Review
 type instance Join A_Review An_Equality        = A_Review
 
 type instance Join A_Prism A_Fold              = A_Fold
+type instance Join A_Prism An_AffineFold       = An_AffineFold
 type instance Join A_Prism A_Setter            = A_Setter
-type instance Join A_Prism A_Getter            = A_Fold
+type instance Join A_Prism A_Getter            = An_AffineFold
 type instance Join A_Prism A_Traversal         = A_Traversal
 type instance Join A_Prism An_AffineTraversal  = An_AffineTraversal
 type instance Join A_Prism A_Lens              = An_AffineTraversal
@@ -244,6 +287,7 @@ type instance Join A_Prism An_Iso              = A_Prism
 type instance Join A_Prism An_Equality         = A_Prism
 
 type instance Join An_Iso A_Fold               = A_Fold
+type instance Join An_Iso An_AffineFold        = An_AffineFold
 type instance Join An_Iso A_Setter             = A_Setter
 type instance Join An_Iso A_Getter             = A_Getter
 type instance Join An_Iso A_Traversal          = A_Traversal
@@ -254,6 +298,7 @@ type instance Join An_Iso A_Prism              = A_Prism
 type instance Join An_Iso An_Equality          = An_Iso
 
 type instance Join An_Equality A_Fold             = A_Fold
+type instance Join An_Equality An_AffineFold       = An_AffineFold
 type instance Join An_Equality A_Setter           = A_Setter
 type instance Join An_Equality A_Getter           = A_Getter
 type instance Join An_Equality A_Traversal        = A_Traversal

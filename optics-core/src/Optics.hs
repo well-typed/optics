@@ -6,6 +6,7 @@ module Optics
 
 -- Core optics functionality
 
+import Optics.AffineFold      as O
 import Optics.AffineTraversal as O
 import Optics.Equality        as O
 import Optics.Fold            as O

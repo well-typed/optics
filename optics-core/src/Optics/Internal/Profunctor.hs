@@ -100,7 +100,7 @@ instance Monoid r => Choice (Forget r) where
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
-instance Monoid r => Choice (ForgetM r) where
+instance Choice (ForgetM r) where
   left'  (ForgetM k) = ForgetM (either k (const Nothing))
   right' (ForgetM k) = ForgetM (either (const Nothing) k)
   {-# INLINE left' #-}
