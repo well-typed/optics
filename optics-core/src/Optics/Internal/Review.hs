@@ -8,6 +8,7 @@ import Data.Void
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Tagged
+import Optics.Internal.Utils
 
 -- | Tag for a review.
 data A_Review
@@ -29,7 +30,8 @@ toReview = sub
 
 -- | Apply a review.
 review :: Is k A_Review => Optic' k t b -> b -> t
-review o = unTagged . getOptic (toReview o) . Tagged
+review o = unTagged #. getOptic (toReview o) .# Tagged
+{-# INLINE review #-}
 
 -- | An analogue of 'to' for review.
 unto :: (b -> t) -> Review' b t

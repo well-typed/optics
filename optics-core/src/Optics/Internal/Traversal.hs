@@ -6,6 +6,7 @@ module Optics.Internal.Traversal where
 
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
+import Optics.Internal.Utils
 
 -- | Tag for a traversal.
 data A_Traversal
@@ -39,5 +40,5 @@ traversed = vlTraversal traverse
 -- actions from left to right, and collect the results.
 traverseOf :: (Is k A_Traversal) => Optic k s t a b
            -> (forall f. Applicative f => (a -> f b) -> s -> f t)
-traverseOf o = runStar . getOptic (toTraversal o) . Star
+traverseOf o = runStar #. getOptic (toTraversal o) .# Star
 {-# INLINE traverseOf #-}

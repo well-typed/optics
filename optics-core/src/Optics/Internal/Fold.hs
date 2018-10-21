@@ -38,7 +38,7 @@ toFold = sub
 
 -- | Fold via embedding into a monoid.
 foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k s a -> (a -> r) -> s -> r
-foldMapOf o = runForget #. (getOptic (toFold o) .# Forget)
+foldMapOf o = runForget #. getOptic (toFold o) .# Forget
 {-# INLINE foldMapOf #-}
 
 -- | Fold right-associatively.
