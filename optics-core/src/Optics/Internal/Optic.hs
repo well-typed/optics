@@ -85,21 +85,23 @@ sub (Optic o) = Optic (implies' o)
 
 -- | Computes the least upper bound of two optics flavours.
 --
--- An instance of @Join k l m@ represents that the least upper bound
--- of an @Optic k@ and an @Optic l@ is an @Optic m@. This means in
--- particular that composition of an @Optic k@ and an @Optic k@ will
--- yield an @Optic m@.
+-- An instance of @Join k l@ represents the least upper bound of an @Optic k@
+-- and an @Optic l@. This means in particular that composition of an @Optic k@
+-- and an @Optic k@ will yield an @Optic (Join k l)@.
 --
-class (Is k m, Is l m) => Join k l m | k l -> m
+type family Join k l :: *
 
 -- | Every optics flavour can be joined with itself.
-instance Join k k k
+type instance Join k k = k
 
 -- | Compose two optics of compatible flavours.
 --
 -- Returns an optic of the appropriate supertype.
 --
-(%) :: Join k l m => Optic k s t u v -> Optic l u v a b -> Optic m s t a b
+(%) :: (Is k m, Is l m, m ~ Join k l)
+    => Optic k s t u v
+    -> Optic l u v a b
+    -> Optic m s t a b
 o % o' = sub o %% sub o'
 
 -- | Compose two optics of the same flavour.

@@ -1,12 +1,17 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Instances to implement the subtyping hierarchy between optics.
 --
 module Optics.Internal.Subtyping where
+
+import GHC.TypeLits
 
 import Optics.Internal.Equality
 import Optics.Internal.Fold
@@ -123,99 +128,89 @@ instance Is An_Equality An_Iso where
 
 -- Join instances
 
-instance Join A_Fold      A_Getter     A_Fold
-instance Join A_Fold      A_Traversal  A_Fold
-instance Join A_Fold      A_Lens       A_Fold
-instance Join A_Fold      A_Prism      A_Fold
-instance Join A_Fold      An_Iso       A_Fold
-instance Join A_Fold      An_Equality  A_Fold
+type family JoinError k l :: *
+type instance JoinError k l = TypeError ('ShowType k
+                                         ':<>: 'Text " and "
+                                         ':<>: 'ShowType l
+                                         ':<>: 'Text " are not composable")
 
-instance Join A_Setter    A_Traversal  A_Setter
-instance Join A_Setter    A_Lens       A_Setter
-instance Join A_Setter    A_Prism      A_Setter
-instance Join A_Setter    An_Iso       A_Setter
-instance Join A_Setter    An_Equality  A_Setter
+type instance Join A_Fold A_Setter    = JoinError A_Fold A_Setter
+type instance Join A_Fold A_Getter    = A_Fold
+type instance Join A_Fold A_Traversal = A_Fold
+type instance Join A_Fold A_Lens      = A_Fold
+type instance Join A_Fold A_Review    = JoinError A_Fold A_Review
+type instance Join A_Fold A_Prism     = A_Fold
+type instance Join A_Fold An_Iso      = A_Fold
+type instance Join A_Fold An_Equality = A_Fold
 
-instance Join A_Getter    A_Fold       A_Fold
-instance Join A_Getter    A_Traversal  A_Fold
-instance Join A_Getter    A_Lens       A_Getter
-instance Join A_Getter    A_Prism      A_Fold
-instance Join A_Getter    An_Iso       A_Getter
-instance Join A_Getter    An_Equality  A_Getter
+type instance Join A_Setter A_Fold      = JoinError A_Setter A_Fold
+type instance Join A_Setter A_Getter    = JoinError A_Setter A_Getter
+type instance Join A_Setter A_Traversal = A_Setter
+type instance Join A_Setter A_Lens      = A_Setter
+type instance Join A_Setter A_Review    = JoinError A_Setter A_Review
+type instance Join A_Setter A_Prism     = A_Setter
+type instance Join A_Setter An_Iso      = A_Setter
+type instance Join A_Setter An_Equality = A_Setter
 
-instance Join A_Traversal A_Fold       A_Fold
-instance Join A_Traversal A_Setter     A_Setter
-instance Join A_Traversal A_Getter     A_Fold
-instance Join A_Traversal A_Lens       A_Traversal
-instance Join A_Traversal A_Prism      A_Traversal
-instance Join A_Traversal An_Iso       A_Traversal
-instance Join A_Traversal An_Equality  A_Traversal
+type instance Join A_Getter A_Fold      = A_Fold
+type instance Join A_Getter A_Setter    = JoinError A_Getter A_Setter
+type instance Join A_Getter A_Traversal = A_Fold
+type instance Join A_Getter A_Lens      = A_Getter
+type instance Join A_Getter A_Review    = JoinError A_Getter A_Review
+type instance Join A_Getter A_Prism     = A_Fold
+type instance Join A_Getter An_Iso      = A_Getter
+type instance Join A_Getter An_Equality = A_Getter
 
-instance Join A_Lens      A_Fold       A_Fold
-instance Join A_Lens      A_Setter     A_Setter
-instance Join A_Lens      A_Getter     A_Getter
-instance Join A_Lens      A_Traversal  A_Traversal
-instance Join A_Lens      A_Prism      A_Traversal
-instance Join A_Lens      An_Iso       A_Lens
-instance Join A_Lens      An_Equality  A_Lens
+type instance Join A_Traversal A_Fold      = A_Fold
+type instance Join A_Traversal A_Setter    = A_Setter
+type instance Join A_Traversal A_Getter    = A_Fold
+type instance Join A_Traversal A_Lens      = A_Traversal
+type instance Join A_Traversal A_Review    = JoinError A_Traversal A_Review
+type instance Join A_Traversal A_Prism     = A_Traversal
+type instance Join A_Traversal An_Iso      = A_Traversal
+type instance Join A_Traversal An_Equality = A_Traversal
 
-instance Join A_Review    A_Prism      A_Review
-instance Join A_Review    An_Iso       A_Review
-instance Join A_Review    An_Equality  A_Review
+type instance Join A_Lens A_Fold      = A_Fold
+type instance Join A_Lens A_Setter    = A_Setter
+type instance Join A_Lens A_Getter    = A_Getter
+type instance Join A_Lens A_Traversal = A_Traversal
+type instance Join A_Lens A_Review    = JoinError A_Lens A_Review
+type instance Join A_Lens A_Prism     = A_Traversal
+type instance Join A_Lens An_Iso      = A_Lens
+type instance Join A_Lens An_Equality = A_Lens
 
-instance Join A_Prism     A_Fold       A_Fold
-instance Join A_Prism     A_Setter     A_Setter
-instance Join A_Prism     A_Getter     A_Fold
-instance Join A_Prism     A_Traversal  A_Traversal
-instance Join A_Prism     A_Lens       A_Traversal
-instance Join A_Prism     A_Review     A_Review
-instance Join A_Prism     An_Iso       A_Prism
-instance Join A_Prism     An_Equality  A_Prism
+type instance Join A_Review A_Fold      = JoinError A_Review A_Fold
+type instance Join A_Review A_Setter    = JoinError A_Review A_Setter
+type instance Join A_Review A_Getter    = JoinError A_Review A_Getter
+type instance Join A_Review A_Traversal = JoinError A_Review A_Traversal
+type instance Join A_Review A_Lens      = JoinError A_Review A_Lens
+type instance Join A_Review A_Prism     = A_Review
+type instance Join A_Review An_Iso      = A_Review
+type instance Join A_Review An_Equality = A_Review
 
-instance Join An_Iso      A_Fold       A_Fold
-instance Join An_Iso      A_Setter     A_Setter
-instance Join An_Iso      A_Getter     A_Getter
-instance Join An_Iso      A_Traversal  A_Traversal
-instance Join An_Iso      A_Lens       A_Lens
-instance Join An_Iso      A_Review     A_Review
-instance Join An_Iso      A_Prism      A_Prism
-instance Join An_Iso      An_Equality  An_Iso
+type instance Join A_Prism A_Fold       = A_Fold
+type instance Join A_Prism A_Setter     = A_Setter
+type instance Join A_Prism A_Getter     = A_Fold
+type instance Join A_Prism A_Traversal  = A_Traversal
+type instance Join A_Prism A_Lens       = A_Traversal
+type instance Join A_Prism A_Review     = A_Review
+type instance Join A_Prism An_Iso       = A_Prism
+type instance Join A_Prism An_Equality  = A_Prism
 
-instance Join An_Equality A_Fold       A_Fold
-instance Join An_Equality A_Setter     A_Setter
-instance Join An_Equality A_Getter     A_Getter
-instance Join An_Equality A_Traversal  A_Traversal
-instance Join An_Equality A_Lens       A_Lens
-instance Join An_Equality A_Review     A_Review
-instance Join An_Equality A_Prism      A_Prism
-instance Join An_Equality An_Iso       An_Iso
+type instance Join An_Iso A_Fold        = A_Fold
+type instance Join An_Iso A_Setter      = A_Setter
+type instance Join An_Iso A_Getter      = A_Getter
+type instance Join An_Iso A_Traversal   = A_Traversal
+type instance Join An_Iso A_Lens        = A_Lens
+type instance Join An_Iso A_Review      = A_Review
+type instance Join An_Iso A_Prism       = A_Prism
+type instance Join An_Iso An_Equality   = An_Iso
 
-
-
--- | A constraint that can never be satisfied (accompanied by a
--- helpful witness to anything you like).
-class Absurd where
-  absurd :: a
-
--- | In order to get nice error messages, we complete the type lattice
--- with a universal supertype, whose constraints can never be
--- satisfied.
-data Bogus
-type instance Constraints Bogus p = Absurd
-instance Is k Bogus where
-  implies = absurd
-
--- | This typeclass has no instances, and is used so that we get
--- suitable unsolved constraint errors when attempting to compose
--- flavours that do not have a (non-'Bogus') common supertype.
---
--- For example, if you try to compose a fold with a setter then you
--- will get an error
---
--- > Could not deduce (CanCompose A_Fold A_Setter)
-class Absurd => CanCompose k l
-
-instance CanCompose A_Fold   A_Setter => Join A_Fold   A_Setter Bogus
-instance CanCompose A_Setter A_Fold   => Join A_Setter A_Fold   Bogus
-instance CanCompose A_Setter A_Getter => Join A_Setter A_Getter Bogus
-instance CanCompose A_Getter A_Setter => Join A_Getter A_Setter Bogus
+type instance Join An_Equality A_Fold      = A_Fold
+type instance Join An_Equality A_Setter    = A_Setter
+type instance Join An_Equality A_Getter    = A_Getter
+type instance Join An_Equality A_Traversal = A_Traversal
+type instance Join An_Equality A_Lens      = A_Lens
+type instance Join An_Equality A_Review    = A_Review
+type instance Join An_Equality A_Prism     = A_Prism
+type instance Join An_Equality An_Iso      = An_Iso
