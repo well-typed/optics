@@ -46,6 +46,7 @@ library
                  Optics.Internal.Subtyping
                  Optics.Internal.Tagged
                  Optics.Internal.Traversal
+                 Optics.Internal.Utils
 
 test-suite optics-tests
   default-language: Haskell2010

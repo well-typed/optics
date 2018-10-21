@@ -2,6 +2,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Optics.Internal.Equality where
 
 import Optics.Internal.Optic
@@ -10,7 +11,7 @@ import Optics.Internal.Optic
 data An_Equality
 
 -- | Constraints corresponding to an equality.
-type instance Constraints An_Equality p f = ()
+type instance Constraints An_Equality p = ()
 
 -- | Type synonym for a type-modifying equality.
 type Equality s t a b = Optic An_Equality s t a b
@@ -25,13 +26,26 @@ toEquality = sub
 
 -- | Build an equality from the van Laarhoven representation.
 vlEquality :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
-vlEquality = Optic
+vlEquality f = case f Identical of Identical -> Optic id
 {-# INLINE vlEquality #-}
+
+-- | Capture type constraints as an equality.
+equality :: (s ~ a, t ~ b) => Equality s t a b
+equality = Optic id
+{-# INLINE equality #-}
 
 -- | Proof of reflexivity.
 simple :: Equality' a a
 simple = Optic id
 {-# INLINE simple #-}
+
+-- | Substituting types with 'Equality'.
+substEq :: Equality s t a b -> ((s ~ a, t ~ b) => r) -> r
+substEq l = case runEq l of
+  Identical -> \r -> r
+{-# INLINE substEq #-}
+
+----------------------------------------
 
 -- | Provides a witness of equality.
 data Identical (s :: *) (t :: *) (a :: *) (b :: *) where

@@ -201,7 +201,7 @@ class Absurd where
 -- with a universal supertype, whose constraints can never be
 -- satisfied.
 data Bogus
-type instance Constraints Bogus p f = Absurd
+type instance Constraints Bogus p = Absurd
 instance Is k Bogus where
   implies = absurd
 

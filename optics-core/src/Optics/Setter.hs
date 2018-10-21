@@ -3,7 +3,6 @@ module Optics.Setter
   , Setter
   , Setter'
   , toSetter
-  , vlSetter
   , sets
   , over
   , set

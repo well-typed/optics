@@ -4,6 +4,9 @@ module Optics.Equality
   , Equality'
   , toEquality
   , vlEquality
+  , equality
+  , simple
+  , substEq
   , Identical(..)
   , runEq
   , module Optics.Optic

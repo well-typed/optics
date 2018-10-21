@@ -3,12 +3,11 @@ module Optics.Fold
   ( A_Fold
   , Fold
   , toFold
-  , vlFold
+  , preview
   , foldMapOf
   , foldrOf
   , foldlOf'
   , toListOf
-  , preview
     -- * Concrete folds
   , andOf
   , orOf

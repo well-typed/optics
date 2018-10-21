@@ -3,7 +3,6 @@ module Optics.Prism
   , Prism
   , Prism'
   , toPrism
-  , vlPrism
   , prism
   , module Optics.Optic
   )

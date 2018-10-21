@@ -7,6 +7,7 @@
 --
 module Optics.Internal.Profunctor where
 
+import Data.Functor.Const
 import Data.Functor.Identity
 
 -- | Needed for traversals.
@@ -135,4 +136,8 @@ instance Traversing (->) where
 
 instance Applicative f => Traversing (Star f) where
   wander t (Star f) = Star (t f)
+  {-# INLINE wander #-}
+
+instance Monoid r => Traversing (Forget r) where
+  wander f (Forget r) = Forget (getConst . f (Const . r))
   {-# INLINE wander #-}

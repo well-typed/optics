@@ -3,9 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Getter where
 
-import Control.Applicative (Const(..))
-
-import Optics.Internal.Contravariant
+import Optics.Internal.Bicontravariant
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -13,27 +11,22 @@ import Optics.Internal.Profunctor
 data A_Getter
 
 -- | Constraints corresponding to a getter.
-type instance Constraints A_Getter p f = (p ~ (->), Contravariant f, Functor f)
+type instance Constraints A_Getter p = (Bicontravariant p, Cochoice p, Strong p)
 
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter s a
+
+-- | Apply a getter.
+view :: Is k A_Getter => Optic' k s a -> s -> a
+view o = runForget (getOptic (toGetter o) (Forget id))
+{-# INLINE view #-}
 
 -- | Explicitly cast an optic to a getter.
 toGetter :: Is k A_Getter => Optic' k s a -> Getter s a
 toGetter = sub
 {-# INLINE toGetter #-}
 
--- | Build a getter from the van Laarhoven representation.
-vlGetter :: (forall f . (Contravariant f, Functor f) => (a -> f a) -> s -> f s) -> Getter s a
-vlGetter = Optic
-{-# INLINE vlGetter #-}
-
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a
-to f = Optic (dimap f (contramap f))
+to f = Optic (contrabimap f f)
 {-# INLINE to #-}
-
--- | Apply a getter.
-view :: Is k A_Getter => Optic' k s a -> s -> a
-view o = getConst . getOptic (toGetter o) Const
-{-# INLINE view #-}

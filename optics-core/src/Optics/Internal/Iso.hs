@@ -3,8 +3,6 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Iso where
 
-import Data.Functor.Identity (Identity(..))
-
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -12,7 +10,7 @@ import Optics.Internal.Profunctor
 data An_Iso
 
 -- | Constraints corresponding to an iso.
-type instance Constraints An_Iso p f = (Profunctor p, Functor f)
+type instance Constraints An_Iso p = Profunctor p
 
 -- | Type synonym for a type-modifying iso.
 type Iso s t a b = Optic An_Iso s t a b
@@ -25,14 +23,9 @@ toIso :: Is k An_Iso => Optic k s t a b -> Iso s t a b
 toIso = sub
 {-# INLINE toIso #-}
 
--- | Build an iso from the van Laarhoven representation.
-vlIso :: (forall p f . (Profunctor p, Functor f) => p a (f b) -> p s (f t)) -> Iso s t a b
-vlIso = Optic
-{-# INLINE vlIso #-}
-
 -- | Build an iso from a pair of inverse functions.
 iso :: (s -> a) -> (b -> t) -> Iso s t a b
-iso f g = Optic (dimap f (fmap g))
+iso f g = Optic (dimap f g)
 {-# INLINE iso #-}
 
 -- | Type to represent the components of an isomorphism.
@@ -49,11 +42,6 @@ instance Profunctor (Exchange a b) where
 
 -- | Extract the two components of an isomorphism.
 withIso :: Is k An_Iso => Optic k s t a b -> ((s -> a) -> (b -> t) -> r) -> r
-withIso o k = case getOptic (toIso o) (Exchange id Identity) of
-  Exchange sa bt -> k sa (runIdentity . bt)
+withIso o k = case getOptic (toIso o) (Exchange id id) of
+  Exchange sa bt -> k sa bt
 {-# INLINE withIso #-}
-
--- | Invert an isomorphism.
-from :: Is k An_Iso => Optic k s t a b -> Iso b a t s
-from o = withIso o $ \ sa bt -> iso bt sa
-{-# INLINE from #-}

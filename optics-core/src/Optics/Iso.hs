@@ -3,10 +3,8 @@ module Optics.Iso
   , Iso
   , Iso'
   , toIso
-  , vlIso
   , iso
   , withIso
-  , from
   , module Optics.Optic
   )
   where

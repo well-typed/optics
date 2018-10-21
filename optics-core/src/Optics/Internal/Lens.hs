@@ -3,13 +3,15 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Lens where
 
+import Optics.Internal.Profunctor
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- | Tag for a lens.
 data A_Lens
 
 -- | Constraints corresponding to a lens.
-type instance Constraints A_Lens p f = (p ~ (->), Functor f)
+type instance Constraints A_Lens p = (Strong p)
 
 -- | Type synonym for a type-modifying lens.
 type Lens s t a b = Optic A_Lens s t a b
@@ -23,11 +25,19 @@ toLens = sub
 {-# INLINE toLens #-}
 
 -- | Build a lens from the van Laarhoven representation.
-vlLens :: (forall f . Functor f => (a -> f b) -> s -> f t) -> Lens s t a b
-vlLens = Optic
+vlLens :: (forall f. Functor f => (a -> f b) -> s -> f t)
+       -> Lens s t a b
+vlLens l = Optic $
+  dimap ((\(Context f a) -> (f, a)) . l (Context id))
+        (\(f, b) -> f b)
+  . second' -- p (b -> t, a) (b -> t, b)
+
 {-# INLINE vlLens #-}
 
 -- | Build a lens from a getter and setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens get set = vlLens (\ f s -> set s <$> f (get s))
+lens get set = Optic $
+  dimap (\s -> (get s, s))
+        (\(b, s) -> set s b)
+  . first'
 {-# INLINE lens #-}
