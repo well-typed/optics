@@ -10,13 +10,6 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Tagged
 import Optics.Internal.Utils
 
--- | Tag for a review.
-data A_Review
-
--- | Constraints corresponding to a review.
-type instance Constraints A_Review p =
-  (Bifunctor p, Choice p, Costrong p)
-
 -- | Type synonym for a type-modifying review.
 type Review s t a b = Optic A_Review s t a b
 

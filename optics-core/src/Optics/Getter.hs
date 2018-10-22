@@ -9,4 +9,5 @@ module Optics.Getter
   where
 
 import Optics.Internal.Getter
+import Optics.Internal.Optic
 import Optics.Optic

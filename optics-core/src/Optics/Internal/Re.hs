@@ -4,13 +4,8 @@ module Optics.Internal.Re where
 import Data.Bifunctor
 
 import Optics.Internal.Bicontravariant
-import Optics.Internal.Getter
-import Optics.Internal.Iso
-import Optics.Internal.Lens
 import Optics.Internal.Optic
-import Optics.Internal.Prism
 import Optics.Internal.Profunctor
-import Optics.Internal.Review
 
 class ReversibleOptic k where
   type ReversedOptic k :: *

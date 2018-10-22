@@ -10,4 +10,5 @@ module Optics.Iso
   where
 
 import Optics.Internal.Iso
+import Optics.Internal.Optic
 import Optics.Optic

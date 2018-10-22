@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -12,9 +10,19 @@
 --
 -- The composition operator for optics is also defined here.
 --
-module Optics.Internal.Optic where
+module Optics.Internal.Optic
+  ( Optic(..)
+  , Optic'
+  , Optic_
+  , sub
+  , (%)
+  , (%%)
+  , module Optics.Internal.Optic.Subtyping
+  , module Optics.Internal.Optic.Types
+  ) where
 
-import GHC.Exts (Constraint)
+import Optics.Internal.Optic.Subtyping
+import Optics.Internal.Optic.Types
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
 --
@@ -25,15 +33,7 @@ import GHC.Exts (Constraint)
 -- whereas @a@ and @b@ represent the "small" structure.
 --
 newtype Optic k s t a b =
-  Optic { getOptic :: forall p. OpticImpl k p s t a b }
-
--- | Type representing the various kinds of optics.
---
--- The tag parameter @k@ is translated into constraints on @p@
--- via the type family 'Constraints'.
---
-type OpticImpl k p s t a b =
-  Constraints k p => p a b -> p s t
+  Optic { getOptic :: forall p. Optic_ k p s t a b }
 
 -- | Common special case of 'Optic' where source and target types are equal.
 --
@@ -42,30 +42,12 @@ type OpticImpl k p s t a b =
 --
 type Optic' k s a = Optic k s s a a
 
--- | Mapping tag types @k@ to constraints on @p@ and @f@.
+-- | Type representing the various kinds of optics.
 --
--- Using this open type family, we define the constraints that the
--- various flavours of optics have to fulfill.
+-- The tag parameter @k@ is translated into constraints on @p@
+-- via the type family 'Constraints'.
 --
-type family Constraints
-  (k :: *) (p :: * -> * -> *) :: Constraint
-
--- | Subtyping relationship between flavours of optics.
---
--- An instance of @Is k l@ represents that any @Optic k@ can be used as
--- an @Optic l@. For example, we have an @Is A_Lens A_Traversal@ instance,
--- but not @Is A_Traversal A_Lens@.
---
--- This class needs instances for all possible combinations of tags.
---
-class Is k l where
-  -- | Witness of the subtyping relationship.
-  implies ::
-    proxy k l p -> (Constraints k p => r) -> (Constraints l p => r)
-
--- | Every flavour of optic can be used as itself.
-instance Is k k where
-  implies _ = id
+type Optic_ k p s t a b = Constraints k p => p a b -> p s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
@@ -79,19 +61,8 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> *) =
 sub :: forall k l s t a b . Is k l => Optic k s t a b -> Optic l s t a b
 sub (Optic o) = Optic (implies' o)
   where
-    implies' :: forall p . OpticImpl k p s t a b -> OpticImpl l p s t a b
+    implies' :: forall p . Optic_ k p s t a b -> Optic_ l p s t a b
     implies' x = implies (IsProxy :: IsProxy k l p) x
-
--- | Computes the least upper bound of two optics flavours.
---
--- An instance of @Join k l@ represents the least upper bound of an @Optic k@
--- and an @Optic l@. This means in particular that composition of an @Optic k@
--- and an @Optic k@ will yield an @Optic (Join k l)@.
---
-type family Join k l :: *
-
--- | Every optics flavour can be joined with itself.
-type instance Join k k = k
 
 -- | Compose two optics of compatible flavours.
 --

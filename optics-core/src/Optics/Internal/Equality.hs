@@ -7,12 +7,6 @@ module Optics.Internal.Equality where
 
 import Optics.Internal.Optic
 
--- | Tag for an equality.
-data An_Equality
-
--- | Constraints corresponding to an equality.
-type instance Constraints An_Equality p = ()
-
 -- | Type synonym for a type-modifying equality.
 type Equality s t a b = Optic An_Equality s t a b
 
@@ -20,7 +14,8 @@ type Equality s t a b = Optic An_Equality s t a b
 type Equality' s a = Optic' An_Equality s a
 
 -- | Explicitly cast an optic to an iso.
-toEquality :: Is k An_Equality => Optic k s t a b -> Equality s t a b
+toEquality ::
+  Is k An_Equality => Optic k s t a b -> Equality s t a b
 toEquality = sub
 {-# INLINE toEquality #-}
 

@@ -1,14 +1,3 @@
-{-# LANGUAGE DataKinds
-           , FlexibleContexts
-           , FlexibleInstances
-           , FunctionalDependencies
-           , MultiParamTypeClasses
-           , RankNTypes
-           , ScopedTypeVariables
-           , TypeFamilies
-           #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-
 -- | At the moment, merely compiling this module is all the testing we do.
 module Main where
 
@@ -16,7 +5,6 @@ import Data.Either.Optics
 import Data.Tuple.Optics
 
 import Optics
-
 
 -- | Composing a lens and a traversal yields a traversal
 comp1 :: Traversable t => Optic A_Traversal (t a, y) (t b, y) a b
@@ -42,11 +30,9 @@ eg1 = view (iso (+ 1) (\ x -> x - 1)) 5
 eg2 :: (a, b) -> a
 eg2 = view _1
 
-
 -- These don't typecheck, as one would expect:
 --   to fst % mapped  -- Cannot compose a getter with a setter
 --   toLens (to fst)  -- Cannot use a getter as a lens
-
 
 main :: IO ()
 main = return ()

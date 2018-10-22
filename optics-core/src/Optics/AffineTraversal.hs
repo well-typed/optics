@@ -9,4 +9,5 @@ module Optics.AffineTraversal
   where
 
 import Optics.Internal.AffineTraversal
+import Optics.Internal.Optic
 import Optics.Optic

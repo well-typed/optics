@@ -12,4 +12,5 @@ module Optics.Setter
   where
 
 import Optics.Internal.Setter
+import Optics.Internal.Optic
 import Optics.Optic

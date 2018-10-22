@@ -6,12 +6,6 @@ module Optics.Internal.Setter where
 
 import Optics.Internal.Optic
 
--- | Tag for a setter.
-data A_Setter
-
--- | Constraints corresponding to a setter.
-type instance Constraints A_Setter p = (p ~ (->))
-
 -- | Type synonym for a type-modifying setter.
 type Setter s t a b = Optic A_Setter s t a b
 

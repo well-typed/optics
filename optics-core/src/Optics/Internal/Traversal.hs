@@ -8,12 +8,6 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
--- | Tag for a traversal.
-data A_Traversal
-
--- | Constraints corresponding to a traversal.
-type instance Constraints A_Traversal p = (Traversing p)
-
 -- | Type synonym for a type-modifying traversal.
 type Traversal s t a b = Optic A_Traversal s t a b
 

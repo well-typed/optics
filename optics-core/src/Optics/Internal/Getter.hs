@@ -9,12 +9,6 @@ import Optics.Internal.Bicontravariant
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
--- | Tag for a getter.
-data A_Getter
-
--- | Constraints corresponding to a getter.
-type instance Constraints A_Getter p = (Bicontravariant p, Cochoice p, Strong p)
-
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter s a
 

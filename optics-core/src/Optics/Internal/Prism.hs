@@ -5,12 +5,6 @@ module Optics.Internal.Prism where
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
--- | Tag for a prism.
-data A_Prism
-
--- | Constraints corresponding to a prism.
-type instance Constraints A_Prism p = Choice p
-
 -- | Type synonym for a type-modifying prism.
 type Prism s t a b = Optic A_Prism s t a b
 

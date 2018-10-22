@@ -37,6 +37,7 @@ import Control.Monad
 import Data.Monoid
 
 import Optics.Internal.Fold
+import Optics.Internal.Optic
 import Optics.Internal.Utils
 import Optics.Optic
 

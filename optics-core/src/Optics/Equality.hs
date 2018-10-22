@@ -14,4 +14,5 @@ module Optics.Equality
   where
 
 import Optics.Internal.Equality
+import Optics.Internal.Optic
 import Optics.Optic

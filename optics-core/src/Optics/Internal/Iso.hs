@@ -6,12 +6,6 @@ module Optics.Internal.Iso where
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
--- | Tag for an iso.
-data An_Iso
-
--- | Constraints corresponding to an iso.
-type instance Constraints An_Iso p = Profunctor p
-
 -- | Type synonym for a type-modifying iso.
 type Iso s t a b = Optic An_Iso s t a b
 

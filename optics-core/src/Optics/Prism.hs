@@ -18,6 +18,7 @@ module Optics.Prism
 import Data.Bifunctor
 
 import Optics.Internal.Prism
+import Optics.Internal.Optic
 import Optics.Optic
 
 -- | Use a 'Prism' to work over part of a structure.

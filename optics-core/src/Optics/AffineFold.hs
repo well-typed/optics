@@ -7,4 +7,5 @@ module Optics.AffineFold
   ) where
 
 import Optics.Internal.AffineFold
+import Optics.Internal.Optic
 import Optics.Optic

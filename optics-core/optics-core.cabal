@@ -42,12 +42,13 @@ library
                  Optics.Internal.Iso
                  Optics.Internal.Lens
                  Optics.Internal.Optic
+                 Optics.Internal.Optic.Subtyping
+                 Optics.Internal.Optic.Types
                  Optics.Internal.Prism
                  Optics.Internal.Profunctor
                  Optics.Internal.Review
                  Optics.Internal.Re
                  Optics.Internal.Setter
-                 Optics.Internal.Subtyping
                  Optics.Internal.Tagged
                  Optics.Internal.Traversal
                  Optics.Internal.Utils

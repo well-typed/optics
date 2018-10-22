@@ -3,15 +3,9 @@
 {-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Lens where
 
-import Optics.Internal.Profunctor
 import Optics.Internal.Optic
+import Optics.Internal.Profunctor
 import Optics.Internal.Utils
-
--- | Tag for a lens.
-data A_Lens
-
--- | Constraints corresponding to a lens.
-type instance Constraints A_Lens p = (Strong p)
 
 -- | Type synonym for a type-modifying lens.
 type Lens s t a b = Optic A_Lens s t a b

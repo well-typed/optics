@@ -11,13 +11,6 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
--- | Tag for a fold.
-data A_Fold
-
--- | Constraints corresponding to a fold.
-type instance Constraints A_Fold p =
-  (Bicontravariant p, Cochoice p, Traversing p)
-
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold s a
 
