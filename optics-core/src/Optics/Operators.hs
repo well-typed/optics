@@ -10,6 +10,7 @@ module Optics.Operators
   , (^.)
   , (^..)
   , (^?)
+  , (#)
   , (%~)
   , (.~)
   )
@@ -39,6 +40,12 @@ infixl 8 ^..
 {-# INLINE (^?) #-}
 
 infixl 8 ^?
+
+-- | Flipped infix version of 'review'.
+(#) :: Is k A_Review => b -> Optic' k t b -> t
+(#) = flip review
+{-# INLINE (#) #-}
+infixr 8 #
 
 -- | Infix version of 'over'.
 (%~) :: Is k A_Setter => Optic k s t a b -> (a -> b) -> s -> t

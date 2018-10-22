@@ -25,7 +25,6 @@ vlLens l = Optic $
   dimap ((\(Context f a) -> (f, a)) . l (Context id))
         (\(f, b) -> f b)
   . second' -- p (b -> t, a) (b -> t, b)
-
 {-# INLINE vlLens #-}
 
 -- | Build a lens from a getter and setter.
