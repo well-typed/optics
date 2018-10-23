@@ -1,7 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies #-}
-
 -- | Core optic types and subtyping machinery.
 --
 -- This module contains the core 'Optic' types, and the underlying

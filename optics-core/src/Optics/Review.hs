@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Optics.Review
   ( A_Review
   , Review

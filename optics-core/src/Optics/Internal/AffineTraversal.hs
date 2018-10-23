@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.AffineTraversal where
 
 import Optics.Internal.Optic
@@ -24,3 +22,4 @@ atraversal match update = Optic $
         (\(etb, f) -> either id f etb)
   . first'
   . right'
+{-# INLINE atraversal #-}

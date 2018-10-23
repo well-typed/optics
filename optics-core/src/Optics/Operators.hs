@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 -- | Defines some infix operators for optics operations.
 --
 -- These are not exported by default from 'Optics'.

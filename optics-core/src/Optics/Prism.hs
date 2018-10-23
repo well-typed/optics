@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Optics.Prism
   ( A_Prism
   , Prism

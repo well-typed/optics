@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Optics.Fold
   ( A_Fold
   , Fold

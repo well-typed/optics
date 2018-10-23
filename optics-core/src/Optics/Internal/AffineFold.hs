@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.AffineFold where
 
 import Optics.Internal.Bicontravariant

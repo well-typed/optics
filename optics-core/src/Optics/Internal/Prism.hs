@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Prism where
 
 import Optics.Internal.Optic

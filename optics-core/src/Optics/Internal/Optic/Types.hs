@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Optic.Types where
 
 import Data.Bifunctor

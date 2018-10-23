@@ -1,5 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
-
 -- | Copied from the profunctors package.
 --
 -- We include this here, at least for now, with the goal
