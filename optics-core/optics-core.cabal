@@ -35,7 +35,6 @@ library
   other-modules: Optics.Internal.AffineFold
                  Optics.Internal.AffineTraversal
                  Optics.Internal.Bicontravariant
-                 Optics.Internal.Contravariant
                  Optics.Internal.Equality
                  Optics.Internal.Fold
                  Optics.Internal.Getter
