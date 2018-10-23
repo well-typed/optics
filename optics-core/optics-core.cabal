@@ -52,6 +52,7 @@ library
                  Optics.Internal.Tagged
                  Optics.Internal.Traversal
                  Optics.Internal.Utils
+                 Optics.Internal.View
 
   default-extensions: FlexibleContexts
                       GADTs

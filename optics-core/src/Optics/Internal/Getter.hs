@@ -10,9 +10,9 @@ import Optics.Internal.Profunctor
 type Getter s a = Optic' A_Getter s a
 
 -- | Apply a getter.
-view :: Is k A_Getter => Optic' k s a -> s -> a
-view o = runForget (getOptic (toGetter o) (Forget id))
-{-# INLINE view #-}
+view1 :: Is k A_Getter => Optic' k s a -> s -> a
+view1 o = runForget (getOptic (toGetter o) (Forget id))
+{-# INLINE view1 #-}
 
 -- | Explicitly cast an optic to a getter.
 toGetter :: Is k A_Getter => Optic' k s a -> Getter s a

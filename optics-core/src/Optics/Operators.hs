@@ -19,7 +19,7 @@ import Data.Function
 import Optics
 
 -- | Flipped infix version of 'view'.
-(^.) :: Is k A_Getter => s -> Optic' k s a -> a
+(^.) :: ViewableOptic k a => s -> Optic' k s a -> ViewResult k a
 (^.) = flip view
 {-# INLINE (^.) #-}
 

@@ -3,7 +3,7 @@ module Optics.Getter
   , Getter
   , toGetter
   , to
-  , view
+  , view1
   , module Optics.Optic
   )
   where
