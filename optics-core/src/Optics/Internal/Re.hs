@@ -14,28 +14,33 @@ class ReversibleOptic k where
 
 instance ReversibleOptic An_Iso where
   type ReversedOptic An_Iso = An_Iso
-  re o = Optic (unRe (getOptic o (Re id)))
+  re o = Optic (re__ (getOptic o))
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Prism where
   type ReversedOptic A_Prism = A_Getter
-  re o = Optic (unRe (getOptic o (Re id)))
+  re o = Optic (re__ (getOptic o))
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Lens where
   type ReversedOptic A_Lens = A_Review
-  re o = Optic (unRe (getOptic o (Re id)))
+  re o = Optic (re__ (getOptic o))
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Getter where
   type ReversedOptic A_Getter = A_Review
-  re o = Optic (unRe (getOptic o (Re id)))
+  re o = Optic (re__ (getOptic o))
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Review where
   type ReversedOptic A_Review = A_Getter
-  re o = Optic (unRe (getOptic o (Re id)))
+  re o = Optic (re__ (getOptic o))
   {-# INLINE re #-}
+
+-- | Internal implementation of re.
+re__ :: Optic__ (Re p a b) s t a b -> Optic__ p b a t s
+re__ o = unRe (o (Re id))
+{-# INLINE re__ #-}
 
 ----------------------------------------
 

@@ -10,6 +10,7 @@ module Optics.Internal.Optic
   ( Optic(..)
   , Optic'
   , Optic_
+  , Optic__
   , sub
   , (%)
   , (%%)
@@ -43,7 +44,10 @@ type Optic' k s a = Optic k s s a a
 -- The tag parameter @k@ is translated into constraints on @p@
 -- via the type family 'Constraints'.
 --
-type Optic_ k p s t a b = Constraints k p => p a b -> p s t
+type Optic_ k p s t a b = Constraints k p => Optic__ p s t a b
+
+-- | Optic internally as a profunctor transformation.
+type Optic__ p s t a b = p a b -> p s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
