@@ -15,7 +15,9 @@ toSetter = sub
 
 -- | Build a setter from a function to modify the element(s).
 sets :: ((a -> b) -> (s -> t)) -> Setter s t a b
-sets = Optic
+sets =
+  -- Optic alone doesn't compile with GHC 8.2.2 for some weird reason
+  \f -> Optic f
 {-# INLINE sets #-}
 
 -- | Build a setter from a functor.
