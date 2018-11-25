@@ -10,6 +10,6 @@ module Optics.Traversal
   )
   where
 
-import Optics.Internal.Traversal
 import Optics.Internal.Optic
+import Optics.Internal.Traversal
 import Optics.Optic

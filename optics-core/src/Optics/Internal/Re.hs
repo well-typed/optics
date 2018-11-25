@@ -1,8 +1,6 @@
 module Optics.Internal.Re where
 
-import Data.Bifunctor
-
-import Optics.Internal.Bicontravariant
+import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -10,7 +8,7 @@ class ReversibleOptic k where
   type ReversedOptic k :: *
   -- | Reverses optics, turning around 'Iso' into 'Iso', 'Prism' into 'Getter',
   -- 'Lens' into 'Review' and 'Getter' into 'Review' (and back).
-  re :: Optic k s t a b -> Optic (ReversedOptic k) b a t s
+  re :: Optic k i i s t a b -> Optic (ReversedOptic k) i i b a t s
 
 instance ReversibleOptic An_Iso where
   type ReversedOptic An_Iso = An_Iso
@@ -38,22 +36,26 @@ instance ReversibleOptic A_Review where
   {-# INLINE re #-}
 
 -- | Internal implementation of re.
-re__ :: Optic__ (Re p a b) s t a b -> Optic__ p b a t s
+re__ :: Optic__ (Re p a b) i i s t a b -> Optic__ p i i b a t s
 re__ o = unRe (o (Re id))
 {-# INLINE re__ #-}
 
 ----------------------------------------
 
 -- | Helper for reversing optics.
-newtype Re p s t a b = Re { unRe :: p b a -> p t s }
+newtype Re p s t i a b = Re { unRe :: p i b a -> p i t s }
 
 instance Profunctor p => Profunctor (Re p s t) where
   dimap f g (Re p) = Re (p . dimap g f)
   {-# INLINE dimap #-}
 
 instance Bicontravariant p => Bifunctor (Re p s t) where
-  bimap f g (Re p) = Re (p . contrabimap g f)
+  bimap  f g (Re p) = Re (p . contrabimap g f)
+  first  f   (Re p) = Re (p . contrasecond f)
+  second   g (Re p) = Re (p . contrafirst g)
   {-# INLINE bimap #-}
+  {-# INLINE first #-}
+  {-# INLINE second #-}
 
 instance Bifunctor p => Bicontravariant (Re p s t) where
   contrabimap  f g (Re p) = Re (p . bimap g f)

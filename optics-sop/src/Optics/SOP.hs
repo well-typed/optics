@@ -29,19 +29,19 @@ import Generics.SOP.Optics
 import Optics.SOP.ToTuple
 
 -- | Wrapped form of a simple lens, to enable partial application.
-newtype WrappedLens    s a  = WrappedLens    { unWrapLens :: Lens' s a }
+newtype WrappedLens    i s a  = WrappedLens    { unWrapLens :: Lens' i s a }
 -- | Wrapped form of a prism to an 'NP', to enable partial application.
-newtype WrappedNPPrism s xs = WrappedNPPrism { unWrapNPPrism :: Prism' s (NP I xs) }
+newtype WrappedNPPrism i s xs = WrappedNPPrism { unWrapNPPrism :: Prism' i s (NP I xs) }
 -- | Wrapped form of a prism to a tuple, to enable partial application.
-newtype WrappedPrism   s xs = WrappedPrism   { unWrapPrism :: Prism' s (ToTuple xs) }
+newtype WrappedPrism   i s xs = WrappedPrism   { unWrapPrism :: Prism' i s (ToTuple xs) }
 
 -- | Produce an 'NP' of wrapped lenses for a generic record type.
 lenses ::
-  forall a xs .
-  (Generic a, Code a ~ '[ xs ]) => NP (WrappedLens a) xs
+  forall i a xs .
+  (Generic a, Code a ~ '[ xs ]) => NP (WrappedLens i a) xs
 lenses = hmap (coerce (record %)) (go sList)
   where
-    go :: forall ys . SList ys -> NP (WrappedLens (NP I ys)) ys
+    go :: forall ys . SList ys -> NP (WrappedLens i (NP I ys)) ys
     go SNil  = Nil
     go SCons = coerce (npHead % i) :* hmap (coerce (npTail %)) (go sList)
 
@@ -51,11 +51,11 @@ lenses = hmap (coerce (record %)) (go sList)
 -- In this variant, 'NP' is used to represent these products.
 --
 npPrisms ::
-  forall a xss .
-  (Generic a, Code a ~ xss) => NP (WrappedNPPrism a) xss
+  forall i a xss .
+  (Generic a, Code a ~ xss) => NP (WrappedNPPrism i a) xss
 npPrisms = hmap (coerce (rep % sop %)) (go sList)
   where
-    go :: forall yss . SList yss -> NP (WrappedNPPrism (NS (NP I) yss)) yss
+    go :: forall yss . SList yss -> NP (WrappedNPPrism i (NS (NP I) yss)) yss
     go SNil  = Nil
     go SCons = coerce _Z :* hmap (coerce (_S %)) (go sList)
 
@@ -65,8 +65,8 @@ npPrisms = hmap (coerce (rep % sop %)) (go sList)
 -- In this variant, tuples are used to represent these products.
 --
 prisms ::
-  forall a xss .
-  (Generic a, Code a ~ xss, All TupleLike xss) => NP (WrappedPrism a) xss
+  forall i a xss .
+  (Generic a, Code a ~ xss, All TupleLike xss) => NP (WrappedPrism i a) xss
 prisms =
   hcmap (Proxy :: Proxy TupleLike)
     (\ (WrappedNPPrism p) -> WrappedPrism (p % tuple)) npPrisms
@@ -81,9 +81,9 @@ type family Unpack f xs where
 
 -- | Type-level function that unwraps a wrapped optic.
 type family ApplyWrapped (f :: k -> *) (x :: k) :: *
-type instance ApplyWrapped (WrappedLens s)    a  = Lens' s a
-type instance ApplyWrapped (WrappedNPPrism s) xs = Prism' s (NP I xs)
-type instance ApplyWrapped (WrappedPrism s)   xs = Prism' s (ToTuple xs)
+type instance ApplyWrapped (WrappedLens i s)    a  = Lens' i s a
+type instance ApplyWrapped (WrappedNPPrism i s) xs = Prism' i s (NP I xs)
+type instance ApplyWrapped (WrappedPrism i s)   xs = Prism' i s (ToTuple xs)
 
 -- | Convenience type synonym combining unpacking a type-level
 -- list with turning it into a tuple.
@@ -103,32 +103,32 @@ tupleUnpack un = view tuple . go
     go (x :* xs) = I (un x) :* go xs
 
 -- | Wrapper type holding the lenses for a generic datatype as a tuple.
-newtype LensesFor a =
-  Lenses ((Generic a) => TupleUnpack (WrappedLens a) (Extract (Code a)))
+newtype LensesFor i a =
+  Lenses ((Generic a) => TupleUnpack (WrappedLens i a) (Extract (Code a)))
 
 -- | Helper function needed by 'LensesFor'.
 type family Extract xss where
   Extract '[ xs ] = xs
 
 -- | Wrapper type holding the ('NP'-)prisms for a generic datatype as a tuple.
-data NPPrismsFor a =
-  NPPrisms ((Generic a) => TupleUnpack (WrappedNPPrism a) (Code a))
+data NPPrismsFor i a =
+  NPPrisms ((Generic a) => TupleUnpack (WrappedNPPrism i a) (Code a))
 
 -- | Wrapper type holding the (tuple-)prisms for a generic datatype as a tuple.
-data PrismsFor a =
-  Prisms ((Generic a) => TupleUnpack (WrappedPrism a) (Code a))
+data PrismsFor i a =
+  Prisms ((Generic a) => TupleUnpack (WrappedPrism i a) (Code a))
 
 -- | Produce all lenses for a generic record datatype.
-mkLenses :: forall a xs . (Generic a, Code a ~ '[ xs ]) => LensesFor a
+mkLenses :: forall i a xs . (Generic a, Code a ~ '[ xs ]) => LensesFor i a
 mkLenses =
-  Lenses (tupleUnpack unWrapLens (lenses :: NP (WrappedLens a) xs))
+  Lenses (tupleUnpack unWrapLens (lenses :: NP (WrappedLens i a) xs))
 
 -- | Produce all ('NP'-)prisms for a generic datatype.
-mkNPPrisms :: forall a xss . (Generic a, Code a ~ xss) => NPPrismsFor a
+mkNPPrisms :: forall i a xss . (Generic a, Code a ~ xss) => NPPrismsFor i a
 mkNPPrisms =
-  NPPrisms (tupleUnpack unWrapNPPrism (npPrisms :: NP (WrappedNPPrism a) xss))
+  NPPrisms (tupleUnpack unWrapNPPrism (npPrisms :: NP (WrappedNPPrism i a) xss))
 
 -- | Produce all (tuple-)prisms for a generic datatype.
-mkPrisms :: forall a xss . (Generic a, Code a ~ xss, All TupleLike xss) => PrismsFor a
+mkPrisms :: forall i a xss . (Generic a, Code a ~ xss, All TupleLike xss) => PrismsFor i a
 mkPrisms =
- Prisms (tupleUnpack unWrapPrism (prisms :: NP (WrappedPrism a) xss))
+ Prisms (tupleUnpack unWrapPrism (prisms :: NP (WrappedPrism i a) xss))

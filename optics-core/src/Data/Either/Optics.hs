@@ -6,7 +6,7 @@ module Data.Either.Optics
 
 import Optics.Prism
 
-_Left :: Prism (Either a b) (Either c b) a c
+_Left :: Prism i (Either a b) (Either c b) a c
 _Left =
   prism
     Left
@@ -17,7 +17,7 @@ _Left =
     )
 {-# INLINE _Left #-}
 
-_Right :: Prism (Either a b) (Either a c) b c
+_Right :: Prism i (Either a b) (Either a c) b c
 _Right =
   prism
     Right

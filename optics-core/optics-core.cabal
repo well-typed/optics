@@ -24,6 +24,9 @@ library
                    Optics.Fold
                    Optics.Getter
                    Optics.Iso
+                   Optics.IxFold
+                   Optics.IxSetter
+                   Optics.IxTraversal
                    Optics.Lens
                    Optics.Operators
                    Optics.Optic
@@ -34,11 +37,15 @@ library
 
   other-modules: Optics.Internal.AffineFold
                  Optics.Internal.AffineTraversal
-                 Optics.Internal.Bicontravariant
+                 Optics.Internal.Bi
                  Optics.Internal.Equality
                  Optics.Internal.Fold
                  Optics.Internal.Getter
                  Optics.Internal.Iso
+                 Optics.Internal.Indexed
+                 Optics.Internal.IxFold
+                 Optics.Internal.IxTraversal
+                 Optics.Internal.IxSetter
                  Optics.Internal.Lens
                  Optics.Internal.Optic
                  Optics.Internal.Optic.Subtyping
@@ -57,6 +64,7 @@ library
                       GADTs
                       RankNTypes
                       ScopedTypeVariables
+                      TupleSections
                       TypeFamilies
 
 

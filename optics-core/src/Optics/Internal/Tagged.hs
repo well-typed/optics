@@ -5,20 +5,25 @@
 --
 module Optics.Internal.Tagged where
 
-import Data.Bifunctor
+import Data.Coerce
 
+import Optics.Internal.Bi
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
-newtype Tagged a b = Tagged { unTagged :: b }
+newtype Tagged i a b = Tagged { unTagged :: b }
 
-instance Functor (Tagged a) where
+instance Functor (Tagged i a) where
   fmap f = Tagged #. f .# unTagged
   {-# INLINE fmap #-}
 
 instance Bifunctor Tagged where
-  bimap _f g = Tagged #. g .# unTagged
+  bimap  _f g = Tagged #. g .# unTagged
+  first  _f   = coerce
+  second    g = Tagged #. g .# unTagged
   {-# INLINE bimap #-}
+  {-# INLINE first #-}
+  {-# INLINE second #-}
 
 instance Profunctor Tagged where
   dimap _f g = Tagged #. g .# unTagged

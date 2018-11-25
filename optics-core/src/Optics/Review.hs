@@ -10,7 +10,7 @@ module Optics.Review
   )
   where
 
+import Optics.Internal.Optic
 import Optics.Internal.Re
 import Optics.Internal.Review
-import Optics.Internal.Optic
 import Optics.Optic

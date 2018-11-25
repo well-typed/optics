@@ -2,11 +2,10 @@ module Optics.Equality
   ( An_Equality
   , Equality
   , Equality'
-  , toEquality
   , vlEquality
   , equality
   , simple
-  , substEq
+  , withEq
   , Identical(..)
   , runEq
   , module Optics.Optic

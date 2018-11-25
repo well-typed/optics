@@ -12,6 +12,9 @@ import Optics.Equality        as O
 import Optics.Fold            as O
 import Optics.Getter          as O
 import Optics.Iso             as O
+import Optics.IxFold          as O
+import Optics.IxSetter        as O
+import Optics.IxTraversal     as O
 import Optics.Lens            as O
 import Optics.Optic           as O ()
 import Optics.Prism           as O

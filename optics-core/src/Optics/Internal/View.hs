@@ -2,10 +2,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Optics.Internal.View where
 
-import Optics.Internal.Optic
-import Optics.Internal.Getter
 import Optics.Internal.AffineFold
 import Optics.Internal.Fold
+import Optics.Internal.Getter
+import Optics.Internal.Optic
 
 class ViewableOptic k r where
   type ViewResult k r :: *
@@ -13,7 +13,7 @@ class ViewableOptic k r where
   -- exactly one, Prisms, AffineTraversals and AffineFolds return at most one,
   -- whereas Folds and Traversals return a sum (with respect to a Monoid
   -- instance) of all their results.
-  view :: Optic' k s r -> s -> ViewResult k r
+  view :: Optic' k i i s r -> s -> ViewResult k r
 
 instance ViewableOptic An_Iso r where
   type ViewResult An_Iso r = r

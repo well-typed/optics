@@ -29,8 +29,8 @@ type family ToTuple (xs :: [*]) :: * where
   ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16] = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16)
 
 class TupleLike xs where
-  tuple :: Iso' (NP I xs) (ToTuple xs)
-  default tuple :: (Generic a, Code a ~ '[ xs ], ToTuple xs ~ a) => Iso' (NP I xs) (ToTuple xs)
+  tuple :: Iso' i (NP I xs) (ToTuple xs)
+  default tuple :: (Generic a, Code a ~ '[ xs ], ToTuple xs ~ a) => Iso' i (NP I xs) (ToTuple xs)
   tuple = re record
 
 instance TupleLike '[]

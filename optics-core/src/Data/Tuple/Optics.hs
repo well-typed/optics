@@ -16,7 +16,7 @@ import Optics.Lens
 --
 -- TODO: Introduce a 'Field1' class?
 --
-_1 :: Lens (a, b) (c, b) a c
+_1 :: Lens i (a, b) (c, b) a c
 _1 = vlLens (\ wrap (a, b) -> (\ c -> (c, b)) <$> wrap a)
 {-# INLINE _1 #-}
 
@@ -24,17 +24,17 @@ _1 = vlLens (\ wrap (a, b) -> (\ c -> (c, b)) <$> wrap a)
 --
 -- TODO: Introduce a 'Field2' class?
 --
-_2 :: Lens (a, b) (a, c) b c
+_2 :: Lens i (a, b) (a, c) b c
 _2 = vlLens (\ wrap (a, b) -> (\ c -> (a, c)) <$> wrap b)
 {-# INLINE _2 #-}
 
 -- | Iso between the curried and uncurried versions of a function.
-curried :: Iso ((a, b) -> c) ((d, e) -> f) (a -> b -> c) (d -> e -> f)
+curried :: Iso i ((a, b) -> c) ((d, e) -> f) (a -> b -> c) (d -> e -> f)
 curried = iso curry uncurry
 {-# INLINE curried #-}
 
 -- | Flipped version of 'curried'.
-uncurried :: Iso (a -> b -> c) (d -> e -> f) ((a, b) -> c) ((d, e) -> f)
+uncurried :: Iso i (a -> b -> c) (d -> e -> f) ((a, b) -> c) ((d, e) -> f)
 uncurried = iso uncurry curry
 {-# INLINE uncurried #-}
 
@@ -42,6 +42,6 @@ uncurried = iso uncurry curry
 --
 -- TODO: Introduce a 'Swapped' class?
 --
-swapped :: Iso (a, b) (c, d) (b, a) (d, c)
+swapped :: Iso i (a, b) (c, d) (b, a) (d, c)
 swapped = iso swap swap
 {-# INLINE swapped #-}
