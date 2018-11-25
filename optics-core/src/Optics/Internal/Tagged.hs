@@ -8,24 +8,25 @@ module Optics.Internal.Tagged where
 import Data.Bifunctor
 
 import Optics.Internal.Profunctor
+import Optics.Internal.Utils
 
 newtype Tagged a b = Tagged { unTagged :: b }
 
 instance Functor (Tagged a) where
-  fmap f = Tagged . f . unTagged
+  fmap f = Tagged #. f .# unTagged
   {-# INLINE fmap #-}
 
 instance Bifunctor Tagged where
-  bimap _f g = Tagged . g . unTagged
+  bimap _f g = Tagged #. g .# unTagged
   {-# INLINE bimap #-}
 
 instance Profunctor Tagged where
-  dimap _f g = Tagged . g . unTagged
+  dimap _f g = Tagged #. g .# unTagged
   {-# INLINE dimap #-}
 
 instance Choice Tagged where
-  left'  = Tagged . Left  . unTagged
-  right' = Tagged . Right . unTagged
+  left'  = Tagged #. Left  .# unTagged
+  right' = Tagged #. Right .# unTagged
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
