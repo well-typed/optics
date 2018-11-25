@@ -31,3 +31,12 @@ lens get set = Optic $
         (\(b, s) -> set s b)
   . first'
 {-# INLINE lens #-}
+
+-- | Work with a lens in van Laarhoven representation.
+withLens
+  :: Is k A_Lens
+  => Optic k s t a b
+  -> ((forall f. Functor f => (a -> f b) -> s -> f t) -> r)
+  -> r
+withLens o k = k (runStar #. getOptic (toLens o) .# Star)
+{-# INLINE withLens #-}

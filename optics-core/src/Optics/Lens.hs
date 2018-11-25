@@ -5,6 +5,7 @@ module Optics.Lens
   , toLens
   , vlLens
   , lens
+  , withLens
   , module Optics.Optic
   )
   where
