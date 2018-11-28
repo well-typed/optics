@@ -33,8 +33,8 @@ itraversed = vlIxTraversal itraverse
 {-# INLINE itraversed #-}
 
 itraverseOf
-  :: Is k An_IxTraversal
-  => Optic k i (i -> i) s t a b
+  :: (CheckIndices i o, Is k An_IxTraversal)
+  => Optic k i o s t a b
   -> (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
 itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
 {-# INLINE itraverseOf #-}

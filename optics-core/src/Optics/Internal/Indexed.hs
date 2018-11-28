@@ -1,13 +1,56 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Optics.Internal.Indexed where
 
 import Data.Foldable
 import Data.Functor.Identity
 import Data.Monoid
+import GHC.TypeLits (ErrorMessage(..), TypeError)
 
 import Optics.Internal.Utils
+
+-- | Generate sensible error messages in case a user tries to use regular optic
+-- as an indexed one or doesn't call appropriate icompose function to flatten
+-- the indices before trying to use an indexed optic.
+class o ~ (i -> i) => CheckIndices i o
+
+instance CheckIndices i (i -> i)
+
+instance {-# OVERLAPPING #-}
+  ( TypeError ('Text "Regular optic cannot be used as an indexed one")
+  , i ~ (i -> i)
+  ) => CheckIndices i i
+
+instance {-# OVERLAPPING #-}
+  ( TypeError ('Text "Use icompose to flatten indices")
+  , (a -> b -> i) ~ (i -> i)
+  ) => CheckIndices i (a -> b -> i)
+
+instance {-# OVERLAPPING #-}
+  ( TypeError ('Text "Use icompose3 to flatten indices")
+  , (a -> b -> c -> i) ~ (i -> i)
+  ) => CheckIndices i (a -> b -> c -> i)
+
+instance {-# OVERLAPPING #-}
+  ( TypeError ('Text "Use icompose4 to flatten indices")
+  , (a -> b -> c -> d -> i) ~ (i -> i)
+  ) => CheckIndices i (a -> b -> c -> d -> i)
+
+instance {-# OVERLAPPING #-}
+  ( TypeError ('Text "Use icompose5 to flatten indices")
+  , (a -> b -> c -> d -> e -> i) ~ (i -> i)
+  ) => CheckIndices i (a -> b -> c -> d -> e -> i)
+
+instance {-# OVERLAPPING #-}
+  ( TypeError ('Text "Use icompose* variants to flatten indices")
+  , o ~ (i -> i)
+  ) => CheckIndices i o
+
+----------------------------------------
 
 newtype Indexing f a = Indexing { runIndexing :: Int -> (Int, f a) }
 

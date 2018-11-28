@@ -18,32 +18,32 @@ toIxFold = sub
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
-  :: (Monoid r, Is k An_IxFold)
-  => Optic' k i (i -> i) s a
+  :: (CheckIndices i o, Monoid r, Is k An_IxFold)
+  => Optic' k i o s a
   -> (i -> a -> r) -> s -> r
 ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
 {-# INLINE ifoldMapOf #-}
 
 -- | Fold with index right-associatively.
 ifoldrOf
-  :: Is k An_IxFold
-  => Optic' k i (i -> i) s a
+  :: (CheckIndices i o, Is k An_IxFold)
+  => Optic' k i o s a
   -> (i -> a -> r -> r) -> r -> s -> r
 ifoldrOf o iarr r0 = (\e -> appEndo e r0) . ifoldMapOf o (\i -> Endo #. iarr i)
 {-# INLINE ifoldrOf #-}
 
 -- | Fold with index left-associatively, and strictly.
 ifoldlOf'
-  :: Is k An_IxFold
-  => Optic' k i (i -> i) s a
+  :: (CheckIndices i o, Is k An_IxFold)
+  => Optic' k i o s a
   -> (i -> r -> a -> r) -> r -> s -> r
 ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
 {-# INLINE ifoldlOf' #-}
 
 -- | Fold with index to a list.
 itoListOf
-  :: Is k An_IxFold
-  => Optic' k i (i -> i) s a
+  :: (CheckIndices i o, Is k An_IxFold)
+  => Optic' k i o s a
   -> s -> [(i, a)]
 itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
 {-# INLINE itoListOf #-}
@@ -51,8 +51,8 @@ itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
 ----------------------------------------
 
 itraverseOf_
-  :: (Is k An_IxFold, Applicative f)
-  => Optic' k i (i -> i) s a
+  :: ( CheckIndices i o, Is k An_IxFold, Applicative f)
+  => Optic' k i o s a
   -> (i -> a -> f r) -> s -> f ()
 itraverseOf_ o f = ifoldrOf o (\i -> (*>) . f i) (pure ())
 {-# INLINE itraverseOf_ #-}

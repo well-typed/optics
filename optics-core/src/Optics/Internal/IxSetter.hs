@@ -17,16 +17,16 @@ toIxSetter = sub
 
 -- | Apply an indexed setter as a modifier.
 iover
-  :: Is k An_IxSetter
-  => Optic k i (i -> i) s t a b
+  :: (CheckIndices i o, Is k An_IxSetter)
+  => Optic k i o s t a b
   -> (i -> a -> b) -> s -> t
 iover o f = runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
 {-# INLINE iover #-}
 
 -- | Apply an indexed setter.
 iset
-  :: Is k An_IxSetter
-  => Optic k i (i -> i) s t a b
+  :: (CheckIndices i o, Is k An_IxSetter)
+  => Optic k i o s t a b
   -> (i -> b) -> s -> t
 iset o f = iover o (\i _ -> f i)
 {-# INLINE iset #-}
