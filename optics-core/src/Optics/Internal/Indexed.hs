@@ -20,32 +20,32 @@ class o ~ (i -> i) => CheckIndices i o
 
 instance CheckIndices i (i -> i)
 
-instance {-# OVERLAPPING #-}
+instance
   ( TypeError ('Text "Regular optic cannot be used as an indexed one")
   , i ~ (i -> i)
   ) => CheckIndices i i
 
-instance {-# OVERLAPPING #-}
-  ( TypeError ('Text "Use icompose to flatten indices")
+instance
+  ( TypeError ('Text "Precompose with icompose to flatten indices")
   , (a -> b -> i) ~ (i -> i)
   ) => CheckIndices i (a -> b -> i)
 
-instance {-# OVERLAPPING #-}
-  ( TypeError ('Text "Use icompose3 to flatten indices")
+instance
+  ( TypeError ('Text "Precompose with icompose3 to flatten indices")
   , (a -> b -> c -> i) ~ (i -> i)
   ) => CheckIndices i (a -> b -> c -> i)
 
-instance {-# OVERLAPPING #-}
-  ( TypeError ('Text "Use icompose4 to flatten indices")
+instance
+  ( TypeError ('Text "Precompose with icompose4 to flatten indices")
   , (a -> b -> c -> d -> i) ~ (i -> i)
   ) => CheckIndices i (a -> b -> c -> d -> i)
 
-instance {-# OVERLAPPING #-}
-  ( TypeError ('Text "Use icompose5 to flatten indices")
+instance
+  ( TypeError ('Text "Precompose with icompose5 to flatten indices")
   , (a -> b -> c -> d -> e -> i) ~ (i -> i)
   ) => CheckIndices i (a -> b -> c -> d -> e -> i)
 
-instance {-# OVERLAPPING #-}
+instance {-# OVERLAPPABLE #-}
   ( TypeError ('Text "Use icompose* variants to flatten indices")
   , o ~ (i -> i)
   ) => CheckIndices i o
