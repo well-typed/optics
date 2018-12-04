@@ -38,14 +38,16 @@ instance Is k k where
 
 ----------------------------------------
 
--- Instances for A_Fold
+-- Instances for An_IxFold
 --
+-- (none)
+
+-- Instances for A_Fold
 
 instance Is A_Fold An_IxFold where
   implies _ = id
 
 -- Instances for An_AffineFold
---
 
 instance Is An_AffineFold An_IxFold where
   implies _ = id
@@ -58,7 +60,7 @@ instance Is An_AffineFold A_Fold where
 -- (none)
 
 -- Instances for A_Setter
---
+
 instance Is A_Setter An_IxSetter where
   implies _ = id
 
@@ -74,7 +76,6 @@ instance Is A_Getter An_AffineFold where
   implies _ = id
 
 -- Instances for An_IxTraversal
---
 
 instance Is An_IxTraversal An_IxFold where
   implies _ = id
@@ -155,6 +156,25 @@ instance Is A_Lens An_AffineTraversal where
 --
 -- (none)
 
+-- Instances for A_LensyReview
+
+instance Is A_LensyReview A_Review where
+  implies _ = id
+
+-- Instances for A_PrismaticGetter
+
+instance Is A_PrismaticGetter An_IxFold where
+  implies _ = id
+
+instance Is A_PrismaticGetter A_Fold where
+  implies _ = id
+
+instance Is A_PrismaticGetter An_AffineFold where
+  implies _ = id
+
+instance Is A_PrismaticGetter A_Getter where
+  implies _ = id
+
 -- Instances for A_Prism
 
 instance Is A_Prism An_IxFold where
@@ -216,7 +236,13 @@ instance Is An_Iso An_IxTraversal where
 instance Is An_Iso A_Lens where
   implies _ = id
 
+instance Is An_Iso A_LensyReview where
+  implies _ = id
+
 instance Is An_Iso A_Review where
+  implies _ = id
+
+instance Is An_Iso A_PrismaticGetter where
   implies _ = id
 
 instance Is An_Iso A_Prism where
@@ -254,7 +280,13 @@ instance Is An_Equality An_IxTraversal where
 instance Is An_Equality A_Lens where
   implies _ = id
 
+instance Is An_Equality A_LensyReview where
+  implies _ = id
+
 instance Is An_Equality A_Review where
+  implies _ = id
+
+instance Is An_Equality A_PrismaticGetter where
   implies _ = id
 
 instance Is An_Equality A_Prism where
@@ -275,6 +307,7 @@ type family Join k l :: * where
   Join An_IxFold          A_Fold               = An_IxFold
   Join An_IxFold          An_AffineFold        = An_IxFold
   Join An_IxFold          A_Getter             = An_IxFold
+  Join An_IxFold          A_PrismaticGetter    = An_IxFold
   Join An_IxFold          An_IxTraversal       = An_IxFold
   Join An_IxFold          A_Traversal          = An_IxFold
   Join An_IxFold          An_AffineTraversal   = An_IxFold
@@ -285,11 +318,13 @@ type family Join k l :: * where
   -- Doesn't join with:
   -- - IxSetter
   -- - Setter
+  -- - LensyReview
   -- - Review
 
   Join A_Fold             An_IxFold            = An_IxFold
   Join A_Fold             An_AffineFold        = A_Fold
   Join A_Fold             A_Getter             = A_Fold
+  Join A_Fold             A_PrismaticGetter    = A_Fold
   Join A_Fold             An_IxTraversal       = An_IxFold
   Join A_Fold             A_Traversal          = A_Fold
   Join A_Fold             An_AffineTraversal   = A_Fold
@@ -300,11 +335,13 @@ type family Join k l :: * where
   -- Doesn't join with:
   -- - IxSetter
   -- - Setter
+  -- - LensyReview
   -- - Review
 
   Join An_AffineFold      An_IxFold            = An_IxFold
   Join An_AffineFold      A_Fold               = A_Fold
   Join An_AffineFold      A_Getter             = An_AffineFold
+  Join An_AffineFold      A_PrismaticGetter    = An_AffineFold
   Join An_AffineFold      An_IxTraversal       = An_IxFold
   Join An_AffineFold      A_Traversal          = A_Fold
   Join An_AffineFold      An_AffineTraversal   = An_AffineFold
@@ -315,6 +352,7 @@ type family Join k l :: * where
   -- Doesn't join with:
   -- - IxSetter
   -- - Setter
+  -- - LensyReview
   -- - Review
 
   Join An_IxSetter        A_Setter             = An_IxSetter
@@ -329,7 +367,9 @@ type family Join k l :: * where
   -- - IxFold
   -- - Fold
   -- - AffineFold
+  -- - PrismaticGetter
   -- - Getter
+  -- - LensyReview
   -- - Review
 
   Join A_Setter           An_IxSetter          = An_IxSetter
@@ -344,7 +384,9 @@ type family Join k l :: * where
   -- - IxFold
   -- - Fold
   -- - AffineFold
+  -- - PrismaticGetter
   -- - Getter
+  -- - LensyReview
   -- - Review
 
   Join A_Getter           An_IxFold            = An_IxFold
@@ -354,12 +396,31 @@ type family Join k l :: * where
   Join A_Getter           A_Traversal          = A_Fold
   Join A_Getter           An_AffineTraversal   = An_AffineFold
   Join A_Getter           A_Lens               = A_Getter
+  Join A_Getter           A_PrismaticGetter    = A_Getter
   Join A_Getter           A_Prism              = An_AffineFold
   Join A_Getter           An_Iso               = A_Getter
   Join A_Getter           An_Equality          = A_Getter
   -- Doesn't join with:
   -- - IxSetter
   -- - Setter
+  -- - LensyReview
+  -- - Review
+
+  Join A_PrismaticGetter  An_IxFold            = An_IxFold
+  Join A_PrismaticGetter  A_Fold               = A_Fold
+  Join A_PrismaticGetter  An_AffineFold        = An_AffineFold
+  Join A_PrismaticGetter  An_IxTraversal       = An_IxFold
+  Join A_PrismaticGetter  A_Traversal          = A_Fold
+  Join A_PrismaticGetter  An_AffineTraversal   = An_AffineFold
+  Join A_PrismaticGetter  A_Lens               = A_Getter
+  Join A_PrismaticGetter  A_Getter             = A_Getter
+  Join A_PrismaticGetter  A_Prism              = An_AffineFold
+  Join A_PrismaticGetter  An_Iso               = A_PrismaticGetter
+  Join A_PrismaticGetter  An_Equality          = A_PrismaticGetter
+  -- Doesn't join with:
+  -- - IxSetter
+  -- - Setter
+  -- - LensyReview
   -- - Review
 
   Join An_IxTraversal     An_IxFold            = An_IxFold
@@ -368,6 +429,7 @@ type family Join k l :: * where
   Join An_IxTraversal     An_IxSetter          = An_IxSetter
   Join An_IxTraversal     A_Setter             = An_IxSetter
   Join An_IxTraversal     A_Getter             = An_IxFold
+  Join An_IxTraversal     A_PrismaticGetter    = An_IxFold
   Join An_IxTraversal     A_Traversal          = An_IxTraversal
   Join An_IxTraversal     An_AffineTraversal   = An_IxTraversal
   Join An_IxTraversal     A_Lens               = An_IxTraversal
@@ -375,6 +437,7 @@ type family Join k l :: * where
   Join An_IxTraversal     An_Iso               = An_IxTraversal
   Join An_IxTraversal     An_Equality          = An_IxTraversal
   -- Doesn't join with:
+  -- - LensyReview
   -- - Review
 
   Join A_Traversal        An_IxFold            = An_IxFold
@@ -383,6 +446,7 @@ type family Join k l :: * where
   Join A_Traversal        An_IxSetter          = An_IxSetter
   Join A_Traversal        A_Setter             = A_Setter
   Join A_Traversal        A_Getter             = A_Fold
+  Join A_Traversal        A_PrismaticGetter    = A_Fold
   Join A_Traversal        An_IxTraversal       = An_IxTraversal
   Join A_Traversal        An_AffineTraversal   = A_Traversal
   Join A_Traversal        A_Lens               = A_Traversal
@@ -390,6 +454,7 @@ type family Join k l :: * where
   Join A_Traversal        An_Iso               = A_Traversal
   Join A_Traversal        An_Equality          = A_Traversal
   -- Doesn't join with:
+  -- - LensyReview
   -- - Review
 
   Join An_AffineTraversal An_IxFold            = An_IxFold
@@ -398,6 +463,7 @@ type family Join k l :: * where
   Join An_AffineTraversal An_IxSetter          = An_IxSetter
   Join An_AffineTraversal A_Setter             = A_Setter
   Join An_AffineTraversal A_Getter             = An_AffineFold
+  Join An_AffineTraversal A_PrismaticGetter    = An_AffineFold
   Join An_AffineTraversal An_IxTraversal       = An_IxTraversal
   Join An_AffineTraversal A_Traversal          = A_Traversal
   Join An_AffineTraversal A_Lens               = An_AffineTraversal
@@ -405,6 +471,7 @@ type family Join k l :: * where
   Join An_AffineTraversal An_Iso               = An_AffineTraversal
   Join An_AffineTraversal An_Equality          = An_AffineTraversal
   -- Doesn't join with:
+  -- - LensyReview
   -- - Review
 
   Join A_Lens             An_IxFold            = An_IxFold
@@ -413,6 +480,7 @@ type family Join k l :: * where
   Join A_Lens             An_IxSetter          = An_IxSetter
   Join A_Lens             A_Setter             = A_Setter
   Join A_Lens             A_Getter             = A_Getter
+  Join A_Lens             A_PrismaticGetter    = A_Getter
   Join A_Lens             An_IxTraversal       = An_IxTraversal
   Join A_Lens             A_Traversal          = A_Traversal
   Join A_Lens             An_AffineTraversal   = An_AffineTraversal
@@ -420,8 +488,27 @@ type family Join k l :: * where
   Join A_Lens             An_Iso               = A_Lens
   Join A_Lens             An_Equality          = A_Lens
   -- Doesn't join with:
+  -- - LensyReview
   -- - Review
 
+  Join A_LensyReview      A_Review             = A_Review
+  Join A_LensyReview      A_Prism              = A_Review
+  Join A_LensyReview      An_Iso               = A_LensyReview
+  Join A_LensyReview      An_Equality          = A_LensyReview
+  -- Doesn't join with:
+  -- - IxFold
+  -- - Fold
+  -- - AffineFold
+  -- - IxSetter
+  -- - Setter
+  -- - PrismaticGetter
+  -- - Getter
+  -- - IxTraversal
+  -- - Traversal
+  -- - AffineTraversal
+  -- - Lens
+
+  Join A_Review           A_LensyReview        = A_Review
   Join A_Review           A_Prism              = A_Review
   Join A_Review           An_Iso               = A_Review
   Join A_Review           An_Equality          = A_Review
@@ -431,6 +518,7 @@ type family Join k l :: * where
   -- - AffineFold
   -- - IxSetter
   -- - Setter
+  -- - PrismaticGetter
   -- - Getter
   -- - IxTraversal
   -- - Traversal
@@ -443,10 +531,12 @@ type family Join k l :: * where
   Join A_Prism            An_IxSetter          = An_IxSetter
   Join A_Prism            A_Setter             = A_Setter
   Join A_Prism            A_Getter             = An_AffineFold
+  Join A_Prism            A_PrismaticGetter    = An_AffineFold
   Join A_Prism            An_IxTraversal       = An_IxTraversal
   Join A_Prism            A_Traversal          = A_Traversal
   Join A_Prism            An_AffineTraversal   = An_AffineTraversal
   Join A_Prism            A_Lens               = An_AffineTraversal
+  Join A_Prism            A_LensyReview        = A_Review
   Join A_Prism            A_Review             = A_Review
   Join A_Prism            An_Iso               = A_Prism
   Join A_Prism            An_Equality          = A_Prism
@@ -457,10 +547,12 @@ type family Join k l :: * where
   Join An_Iso             An_IxSetter          = An_IxSetter
   Join An_Iso             A_Setter             = A_Setter
   Join An_Iso             A_Getter             = A_Getter
+  Join An_Iso             A_PrismaticGetter    = A_PrismaticGetter
   Join An_Iso             An_IxTraversal       = An_IxTraversal
   Join An_Iso             A_Traversal          = A_Traversal
   Join An_Iso             An_AffineTraversal   = An_AffineTraversal
   Join An_Iso             A_Lens               = A_Lens
+  Join An_Iso             A_LensyReview        = A_LensyReview
   Join An_Iso             A_Review             = A_Review
   Join An_Iso             A_Prism              = A_Prism
   Join An_Iso             An_Equality          = An_Iso
@@ -471,10 +563,12 @@ type family Join k l :: * where
   Join An_Equality        An_IxSetter          = An_IxSetter
   Join An_Equality        A_Setter             = A_Setter
   Join An_Equality        A_Getter             = A_Getter
+  Join An_Equality        A_PrismaticGetter    = A_PrismaticGetter
   Join An_Equality        An_IxTraversal       = An_IxTraversal
   Join An_Equality        A_Traversal          = A_Traversal
   Join An_Equality        An_AffineTraversal   = An_AffineTraversal
   Join An_Equality        A_Lens               = A_Lens
+  Join An_Equality        A_LensyReview        = A_LensyReview
   Join An_Equality        A_Review             = A_Review
   Join An_Equality        A_Prism              = A_Prism
   Join An_Equality        An_Iso               = An_Iso

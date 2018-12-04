@@ -28,9 +28,11 @@ library
                    Optics.IxSetter
                    Optics.IxTraversal
                    Optics.Lens
+                   Optics.LensyReview
                    Optics.Operators
                    Optics.Optic
                    Optics.Prism
+                   Optics.PrismaticGetter
                    Optics.Review
                    Optics.Setter
                    Optics.Traversal

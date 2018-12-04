@@ -9,10 +9,10 @@ import Optics.Internal.Optic
 
 class ViewableOptic k r where
   type ViewResult k r :: *
-  -- | Apply an optic to view its result. Isos, Lenses and Getters return
-  -- exactly one, Prisms, AffineTraversals and AffineFolds return at most one,
-  -- whereas Folds and Traversals return a sum (with respect to a Monoid
-  -- instance) of all their results.
+  -- | Apply an optic to view its result. Isos, Lenses, PrismaticGetters and
+  -- Getters return exactly one, Prisms, AffineTraversals and AffineFolds return
+  -- at most one, whereas Folds and Traversals return a sum (with respect to a
+  -- Monoid instance) of all their results.
   view :: Optic' k i i s r -> s -> ViewResult k r
 
 instance ViewableOptic An_Iso r where
@@ -22,6 +22,11 @@ instance ViewableOptic An_Iso r where
 
 instance ViewableOptic A_Lens r where
   type ViewResult A_Lens r = r
+  view = view1
+  {-# INLINE view #-}
+
+instance ViewableOptic A_PrismaticGetter r where
+  type ViewResult A_PrismaticGetter r = r
   view = view1
   {-# INLINE view #-}
 

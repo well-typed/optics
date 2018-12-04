@@ -6,38 +6,57 @@ import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
   type ReversedOptic k :: *
-  -- | Reverses optics, turning around 'Iso' into 'Iso', 'Prism' into 'Getter',
-  -- 'Lens' into 'Review' and 'Getter' into 'Review' (and back).
+  -- | Reverses optics, turning around 'Equality' into 'Equality', 'Iso' into
+  -- 'Iso', 'Prism' into 'PrismaticGetter' (and back), 'Lens' into 'LensyReview'
+  -- (and back) and 'Getter' into 'Review' (and back).
   re :: Optic k i i s t a b -> Optic (ReversedOptic k) i i b a t s
+
+instance ReversibleOptic An_Equality where
+  type ReversedOptic An_Equality = An_Equality
+  re o = Optic (re__ o)
+  {-# INLINE re #-}
 
 instance ReversibleOptic An_Iso where
   type ReversedOptic An_Iso = An_Iso
-  re o = Optic (re__ (getOptic o))
+  re o = Optic (re__ o)
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Prism where
-  type ReversedOptic A_Prism = A_Getter
-  re o = Optic (re__ (getOptic o))
+  type ReversedOptic A_Prism = A_PrismaticGetter
+  re o = Optic (re__ o)
+  {-# INLINE re #-}
+
+instance ReversibleOptic A_PrismaticGetter where
+  type ReversedOptic A_PrismaticGetter = A_Prism
+  re o = Optic (re__ o)
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Lens where
-  type ReversedOptic A_Lens = A_Review
-  re o = Optic (re__ (getOptic o))
+  type ReversedOptic A_Lens = A_LensyReview
+  re o = Optic (re__ o)
+  {-# INLINE re #-}
+
+instance ReversibleOptic A_LensyReview where
+  type ReversedOptic A_LensyReview = A_Lens
+  re o = Optic (re__ o)
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Getter where
   type ReversedOptic A_Getter = A_Review
-  re o = Optic (re__ (getOptic o))
+  re o = Optic (re__ o)
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Review where
   type ReversedOptic A_Review = A_Getter
-  re o = Optic (re__ (getOptic o))
+  re o = Optic (re__ o)
   {-# INLINE re #-}
 
 -- | Internal implementation of re.
-re__ :: Optic__ (Re p a b) i i s t a b -> Optic__ p i i b a t s
-re__ o = unRe (o (Re id))
+re__
+  :: Constraints k (Re p a b)
+  => Optic k   i i s t a b
+  -> Optic__ p i i b a t s
+re__ o = unRe (getOptic o (Re id))
 {-# INLINE re__ #-}
 
 ----------------------------------------

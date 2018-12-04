@@ -23,6 +23,8 @@ data An_IxTraversal
 data A_Setter
 -- | Tag for an indexed setter.
 data An_IxSetter
+-- | Tag for a prismatic getter.
+data A_PrismaticGetter
 -- | Tag for a getter.
 data A_Getter
 -- | Tag for an affine fold.
@@ -31,6 +33,8 @@ data An_AffineFold
 data A_Fold
 -- | Tag for an indexed fold.
 data An_IxFold
+-- | Tag for a lensy review.
+data A_LensyReview
 -- | Tag for a review.
 data A_Review
 
@@ -43,7 +47,9 @@ type family Constraints (k :: *) (p :: * -> * -> * -> *) :: Constraint where
   Constraints An_Equality        p = ()
   Constraints An_Iso             p = Profunctor p
   Constraints A_Lens             p = Strong p
+  Constraints A_LensyReview      p = Costrong p
   Constraints A_Prism            p = Choice p
+  Constraints A_PrismaticGetter  p = Cochoice p
   Constraints An_AffineTraversal p = (Strong p, Choice p)
   Constraints A_Traversal        p = Traversing p
   Constraints An_IxTraversal     p = TraversingWithIndex p
