@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
 module Optics.Internal.Utils where
 
 import Data.Coerce

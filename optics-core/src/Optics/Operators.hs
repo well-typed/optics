@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -- | Defines some infix operators for optics operations.
 --
 -- These are not exported by default from 'Optics'.
@@ -5,6 +6,7 @@
 --
 module Optics.Operators
   ( (&)
+  , (<&>)
   , (^.)
   , (^..)
   , (^?)
@@ -16,7 +18,23 @@ module Optics.Operators
 
 import Data.Function
 
-import Optics
+import Optics.Fold
+import Optics.Review
+import Optics.Setter
+
+#if MIN_VERSION_base(4,11,0)
+import Data.Functor ((<&>))
+#else
+-- | Infix flipped 'fmap'.
+--
+-- @
+-- ('<&>') = 'flip' 'fmap'
+-- @
+(<&>) :: Functor f => f a -> (a -> b) -> f b
+as <&> f = f <$> as
+{-# INLINE (<&>) #-}
+infixl 1 <&>
+#endif
 
 -- | Flipped infix version of 'view'.
 (^.) :: ViewableOptic k a => s -> Optic' k i i s a -> ViewResult k a

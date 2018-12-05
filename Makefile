@@ -4,7 +4,7 @@ all :
 	cabal new-build all
 
 doctest :
-	cd optics-core && doctest  -XFlexibleContexts -XGADTs -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies src
+	cd optics-core && doctest -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XUndecidableInstances src
 
 ghcid-optics-core :
 	ghcid -c 'cabal new-repl optics-core'

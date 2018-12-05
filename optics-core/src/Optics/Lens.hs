@@ -2,10 +2,13 @@ module Optics.Lens
   ( A_Lens
   , Lens
   , Lens'
+  , LensVL
+  , LensVL'
   , toLens
-  , vlLens
   , lens
-  , withLens
+  , lensVL
+  , toLensVL
+  , withLensVL
   , module Optics.Optic
   )
   where
