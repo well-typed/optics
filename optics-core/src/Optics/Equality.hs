@@ -2,8 +2,10 @@ module Optics.Equality
   ( An_Equality
   , Equality
   , Equality'
-  , toEquality
   , vlEquality
+  , equality
+  , simple
+  , withEq
   , Identical(..)
   , runEq
   , module Optics.Optic
@@ -11,4 +13,5 @@ module Optics.Equality
   where
 
 import Optics.Internal.Equality
+import Optics.Internal.Optic
 import Optics.Optic

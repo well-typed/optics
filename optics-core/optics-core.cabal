@@ -4,48 +4,80 @@ license: BSD3
 license-file: LICENSE
 build-type: Simple
 cabal-version: >= 1.10
-tested-with: GHC == 7.10.3, GHC == 8.0.2
+tested-with: GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3
 
 library
   default-language: Haskell2010
   hs-source-dirs: src
-  build-depends:
-    base >= 4.8 && < 5
+
+  build-depends: base >= 4.9 && < 5
+
   ghc-options: -Wall
-  exposed-modules:
-    Data.Either.Optics
-    Data.Maybe.Optics
-    Data.Tuple.Optics
-    Optics
-    Optics.Equality
-    Optics.Fold
-    Optics.Getter
-    Optics.Iso
-    Optics.Lens
-    Optics.Operators
-    Optics.Optic
-    Optics.Prism
-    Optics.Review
-    Optics.Setter
-    Optics.Traversal
-  other-modules:
-    Optics.Internal.Equality
-    Optics.Internal.Fold
-    Optics.Internal.Getter
-    Optics.Internal.Iso
-    Optics.Internal.Lens
-    Optics.Internal.Optic
-    Optics.Internal.Prism
-    Optics.Internal.Profunctor
-    Optics.Internal.Review
-    Optics.Internal.Setter
-    Optics.Internal.Subtyping
-    Optics.Internal.Tagged
-    Optics.Internal.Traversal
+
+  exposed-modules: Data.Either.Optics
+                   Data.Maybe.Optics
+                   Data.Tuple.Optics
+                   Optics
+                   Optics.AffineFold
+                   Optics.AffineTraversal
+                   Optics.Equality
+                   Optics.Fold
+                   Optics.Getter
+                   Optics.Iso
+                   Optics.IxFold
+                   Optics.IxSetter
+                   Optics.IxTraversal
+                   Optics.Lens
+                   Optics.LensyReview
+                   Optics.Operators
+                   Optics.Optic
+                   Optics.Prism
+                   Optics.PrismaticGetter
+                   Optics.Review
+                   Optics.Setter
+                   Optics.Traversal
+
+  other-modules: Optics.Internal.AffineFold
+                 Optics.Internal.AffineTraversal
+                 Optics.Internal.Bi
+                 Optics.Internal.Equality
+                 Optics.Internal.Fold
+                 Optics.Internal.Getter
+                 Optics.Internal.Iso
+                 Optics.Internal.Indexed
+                 Optics.Internal.IxFold
+                 Optics.Internal.IxTraversal
+                 Optics.Internal.IxSetter
+                 Optics.Internal.Lens
+                 Optics.Internal.Optic
+                 Optics.Internal.Optic.Subtyping
+                 Optics.Internal.Optic.Types
+                 Optics.Internal.Prism
+                 Optics.Internal.Profunctor
+                 Optics.Internal.Review
+                 Optics.Internal.Re
+                 Optics.Internal.Setter
+                 Optics.Internal.Tagged
+                 Optics.Internal.Traversal
+                 Optics.Internal.Utils
+                 Optics.Internal.View
+
+  default-extensions: FlexibleContexts
+                      GADTs
+                      RankNTypes
+                      ScopedTypeVariables
+                      TupleSections
+                      TypeFamilies
+
 
 test-suite optics-tests
   default-language: Haskell2010
+  hs-source-dirs: tests
+
+  ghc-options: -Wall
+
+  build-depends: base
+               , optics-core
+
   type: exitcode-stdio-1.0
   main-is: Optics/Tests.hs
-  hs-source-dirs: tests
-  build-depends: base, optics-core

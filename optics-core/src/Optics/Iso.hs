@@ -3,13 +3,12 @@ module Optics.Iso
   , Iso
   , Iso'
   , toIso
-  , vlIso
   , iso
   , withIso
-  , from
   , module Optics.Optic
   )
   where
 
 import Optics.Internal.Iso
+import Optics.Internal.Optic
 import Optics.Optic

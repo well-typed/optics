@@ -2,12 +2,12 @@ module Optics.Getter
   ( A_Getter
   , Getter
   , toGetter
-  , vlGetter
   , to
-  , view
+  , view1
   , module Optics.Optic
   )
   where
 
 import Optics.Internal.Getter
+import Optics.Internal.Optic
 import Optics.Optic

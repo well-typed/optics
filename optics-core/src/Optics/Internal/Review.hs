@@ -1,34 +1,30 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeFamilies #-}
 module Optics.Internal.Review where
 
-import Data.Bifunctor
-import Data.Functor.Identity (Identity(..))
+import Data.Void
 
+import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-
--- | Tag for a review.
-data A_Review
-
--- | Constraints corresponding to a review.
-type instance Constraints A_Review p f =
-  (Choice p, Bifunctor p, f ~ Identity)
+import Optics.Internal.Tagged
+import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying review.
-type Review s t a b = Optic A_Review s t a b
+type Review i s t a b = Optic A_Review i i s t a b
 
 -- | Type synonym for a type-preserving review.
-type Review' s a = Optic' A_Review s a
+type Review' i b t = Optic' A_Review i i t b
 
 -- | Explicitly cast an optic to a review.
-toReview :: Is k A_Review => Optic k s t a b -> Review s t a b
+toReview :: Is k A_Review => Optic k i i s t a b -> Review i s t a b
 toReview = sub
 {-# INLINE toReview #-}
 
--- | Build a review from the van Laarhoven representation.
-vlReview :: (forall p . (Choice p, Bifunctor p) => p a (Identity b) -> p s (Identity t)) -> Review s t a b
-vlReview = Optic
-{-# INLINE vlReview #-}
+-- | Apply a review.
+review :: Is k A_Review => Optic' k i i t b -> b -> t
+review o = unTagged #. getOptic (toReview o) .# Tagged
+{-# INLINE review #-}
 
+-- | An analogue of 'to' for review.
+unto :: (b -> t) -> Review' i b t
+unto f = Optic (first absurd . dimap absurd f)
+{-# INLINE unto #-}

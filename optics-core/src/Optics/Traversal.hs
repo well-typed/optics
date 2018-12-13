@@ -4,11 +4,12 @@ module Optics.Traversal
   , Traversal'
   , toTraversal
   , vlTraversal
-  , _traverse
-  , traversalOf
+  , traversed
+  , traverseOf
   , module Optics.Optic
   )
   where
 
+import Optics.Internal.Optic
 import Optics.Internal.Traversal
 import Optics.Optic

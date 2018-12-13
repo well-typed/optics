@@ -1,14 +1,12 @@
 module Optics.Optic
-  ( Optic()
+  ( Optic
   , Optic'
-  , Is()
+  , Is
   , sub
-  , Join()
-  , CanCompose()
+  , Join
   , (%)
   , (%%)
   )
   where
 
 import Optics.Internal.Optic
-import Optics.Internal.Subtyping (CanCompose)
