@@ -24,6 +24,10 @@ over o = runFunArrow #. getOptic (toSetter o) .# FunArrow
 {-# INLINE over #-}
 
 -- | Apply a setter.
+--
+-- >>> set _1 'x' ('y', 'z')
+-- ('x','z')
+--
 set
   :: Is k A_Setter
   => Optic k i i s t a b
@@ -42,3 +46,6 @@ sets f = Optic (dimap (Context id) (\(Context g s) -> f g s) . map')
 mapped :: Functor f => Setter i (f a) (f b) a b
 mapped = Optic map'
 {-# INLINE mapped #-}
+
+-- $setup
+-- >>> import Optics
