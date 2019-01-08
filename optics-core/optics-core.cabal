@@ -84,7 +84,6 @@ library
                       TupleSections
                       TypeFamilies
                       TypeOperators
-                      UndecidableInstances
 
 
 test-suite optics-tests

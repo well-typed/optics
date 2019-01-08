@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Tuple.Optics
