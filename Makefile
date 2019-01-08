@@ -20,3 +20,10 @@ doctest :
 
 ghcid-optics-core :
 	ghcid -c 'cabal new-repl optics-core'
+
+codegen-subtypes :
+	cabal new-run --builddir=dist-codegen --project-file=cabal.codegen.project optics-codegen-subtypes -- subtypes
+
+codegen-join :
+	cabal new-run --builddir=dist-codegen --project-file=cabal.codegen.project optics-codegen-subtypes -- join
+
