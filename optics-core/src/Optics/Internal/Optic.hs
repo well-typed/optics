@@ -29,6 +29,8 @@ import Optics.Internal.Optic.Types
 -- The type parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
+-- TODO: explain indices
+--
 newtype Optic (k :: OpticKind) i o s t a b =
   Optic { getOptic :: forall p. Optic_ k p i o s t a b }
 
@@ -57,6 +59,8 @@ data IsProxy (k :: OpticKind) (l :: OpticKind) (p :: * -> * -> * -> *) =
 -- | Explicit cast from one optic flavour to another.
 --
 -- This is the identity function, modulo some constraint jiggery-pokery.
+--
+-- TODO: add a graph
 --
 sub :: forall k l i o s t a b . Is k l => Optic k i o s t a b -> Optic l i o s t a b
 sub (Optic o) = Optic (implies' o)
