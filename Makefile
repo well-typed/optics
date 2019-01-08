@@ -3,6 +3,9 @@
 all :
 	cabal new-build all
 
+haddock :
+	cabal new-haddock optics-core
+
 # Build with all supported GHCs, run tests.
 validate : all doctest
 	cabal new-build all --builddir=dist-validate-8.0.2 -w ghc-8.0.2 --write-ghc-environment-files=never

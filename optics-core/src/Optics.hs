@@ -19,7 +19,29 @@ module Optics
 
   -- * Core definitions
 
-  -- | TODO: Add a graph
+  -- | "Optics.Optic" module provides core definitions:
+  --
+  -- * Opaque 'Optic' type,
+  --
+  -- * which is parameterised over 'OpticKind';
+  --
+  -- * 'Is' and 'Join' relations, illustrated in the graph below;
+  --
+  -- * and optic composition operators '%' and '%%'.
+  --
+  -- <<optics.png Optics hierarchy>>
+  --
+  -- Red arrows connect optics which can be converted to each other with 're'.
+  -- All other arrows represent 'Is' relation (partial order). The hierachy is a 'Join' semilattice, for example the
+  -- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
+  --
+  -- >>> :kind! Join A_Lens A_Prism
+  -- Join A_Lens A_Prism :: OpticKind
+  -- = 'An_AffineTraversal
+  --
+  -- There are also indexed variants of 'Traversal', 'Fold' and 'Setter'.
+  -- Indexed optics are explained in more detail in /Differences from lens/ section.
+  --
     module Optics.Optic
 
   -- * Optic variants
