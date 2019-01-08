@@ -19,12 +19,7 @@ library
 
   ghc-options: -Wall
 
-  exposed-modules: Data.Either.Optics
-                   Data.Maybe.Optics
-                   Data.Set.Optics
-                   Data.Tuple.Optics
-                   Language.Haskell.TH.Optics
-                   Optics
+  exposed-modules: Optics
                    Optics.AffineFold
                    Optics.AffineTraversal
                    Optics.Each
@@ -45,6 +40,13 @@ library
                    Optics.Setter
                    Optics.Traversal
 
+  exposed-modules: Data.Either.Optics
+                   Data.Maybe.Optics
+                   Data.Tuple.Optics
+                   GHC.Generics.Optics
+                   Data.Set.Optics
+                   Language.Haskell.TH.Optics
+ 
   other-modules: Optics.Internal.AffineFold
                  Optics.Internal.AffineTraversal
                  Optics.Internal.Bi
