@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 module Optics.Internal.Indexed where
 
@@ -226,14 +227,22 @@ instance FunctorWithIndex Int Seq.Seq where
   imap = Seq.mapWithIndex
 
 instance FoldableWithIndex Int Seq.Seq where
+#if MIN_VERSION_containers(0,5,8)
   ifoldMap = Seq.foldMapWithIndex
+#else
+  ifoldMap f = Data.Foldable.fold . Seq.mapWithIndex f
+#endif
   {-# INLINE ifoldMap #-}
 
   ifoldr = Seq.foldrWithIndex
   {-# INLINE ifoldr #-}
 
 instance TraversableWithIndex Int Seq.Seq where
+#if MIN_VERSION_containers(0,5,8)
   itraverse = Seq.traverseWithIndex
+#else
+  itraverse f = sequenceA . Seq.mapWithIndex f
+#endif
   {-# INLINE itraverse #-}
 
 -- IntMap
