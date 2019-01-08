@@ -41,3 +41,7 @@ setmapped = sets Set.map
 setOf :: (Is k A_Fold, Ord a) => Optic' k i i s a -> s -> Set a
 setOf l = foldMapOf l Set.singleton
 {-# INLINE setOf #-}
+
+-- $setup
+-- >>> import Optics
+-- >>> import Optics.Operators

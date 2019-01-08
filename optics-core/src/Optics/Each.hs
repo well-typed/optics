@@ -119,3 +119,7 @@ instance (Ix i, IArray UArray a, IArray UArray b, i ~ j) => Each (UArray i a) (U
   each = traversalVL $ \f arr ->
     array (bounds arr) <$> traverse (\(i,a) -> (,) i <$> f a) (IArray.assocs arr)
   {-# INLINE each #-}
+
+-- $setup
+-- >>> import Optics
+-- >>> import Optics.Operators

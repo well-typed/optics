@@ -1278,3 +1278,7 @@ proxyN17 = Proxy
 proxyN18 :: Proxy N18
 proxyN18 = Proxy
 {-# INLINE proxyN18 #-}
+
+-- $setup
+-- >>> import Optics
+-- >>> import Optics.Operators
