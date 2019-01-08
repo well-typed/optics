@@ -110,7 +110,7 @@ script:
   - if [ "x$TEST" = "x--enable-tests" ]; then cabal new-test -w ${HC} ${TEST} ${BENCH} all; fi
 
   # doctest
-  - if [ $HCNUMVER -ge 80000 ]; then (cd optics-core-* && doctest  -XFlexibleContexts -XGADTs -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies src); fi
+  - if [ $HCNUMVER -ge 80000 ]; then (cd optics-core-* && doctest  -XFlexibleContexts -XGADTs -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XDataKinds src); fi
   - if [ $HCNUMVER -ge 80000 ]; then (cd optics-sop-* && doctest  src); fi
 
   # haddock

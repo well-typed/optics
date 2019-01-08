@@ -69,6 +69,8 @@ library
                       TupleSections
                       TypeFamilies
 
+  default-extensions: DataKinds
+
 
 test-suite optics-tests
   default-language: Haskell2010
