@@ -29,7 +29,7 @@ import Optics.Internal.Optic.Types
 -- The type parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
-newtype Optic k i o s t a b =
+newtype Optic (k :: OpticKind) i o s t a b =
   Optic { getOptic :: forall p. Optic_ k p i o s t a b }
 
 -- | Common special case of 'Optic' where source and target types are equal.
@@ -51,7 +51,7 @@ type Optic__ p i o s t a b = p i a b -> p o s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
-data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
+data IsProxy (k :: OpticKind) (l :: OpticKind) (p :: * -> * -> * -> *) =
   IsProxy
 
 -- | Explicit cast from one optic flavour to another.

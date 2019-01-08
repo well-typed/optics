@@ -87,6 +87,8 @@ library
                       TypeFamilies
                       TypeOperators
 
+  default-extensions: DataKinds
+
 
 test-suite optics-tests
   default-language: Haskell2010
