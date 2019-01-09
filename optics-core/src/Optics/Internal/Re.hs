@@ -5,49 +5,49 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
-  type ReversedOptic k :: *
+  type ReversedOptic k :: OpticKind
   -- | Reverses optics, turning around 'Equality' into 'Equality', 'Iso' into
   -- 'Iso', 'Prism' into 'PrismaticGetter' (and back), 'Lens' into 'LensyReview'
   -- (and back) and 'Getter' into 'Review' (and back).
   re :: Optic k i i s t a b -> Optic (ReversedOptic k) i i b a t s
 
-instance ReversibleOptic An_Equality where
-  type ReversedOptic An_Equality = An_Equality
+instance ReversibleOptic 'An_Equality where
+  type ReversedOptic 'An_Equality = 'An_Equality
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic An_Iso where
-  type ReversedOptic An_Iso = An_Iso
+instance ReversibleOptic 'An_Iso where
+  type ReversedOptic 'An_Iso = 'An_Iso
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_Prism where
-  type ReversedOptic A_Prism = A_PrismaticGetter
+instance ReversibleOptic 'A_Prism where
+  type ReversedOptic 'A_Prism = 'A_PrismaticGetter
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_PrismaticGetter where
-  type ReversedOptic A_PrismaticGetter = A_Prism
+instance ReversibleOptic 'A_PrismaticGetter where
+  type ReversedOptic 'A_PrismaticGetter = 'A_Prism
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_Lens where
-  type ReversedOptic A_Lens = A_LensyReview
+instance ReversibleOptic 'A_Lens where
+  type ReversedOptic 'A_Lens = 'A_LensyReview
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_LensyReview where
-  type ReversedOptic A_LensyReview = A_Lens
+instance ReversibleOptic 'A_LensyReview where
+  type ReversedOptic 'A_LensyReview = 'A_Lens
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_Getter where
-  type ReversedOptic A_Getter = A_Review
+instance ReversibleOptic 'A_Getter where
+  type ReversedOptic 'A_Getter = 'A_Review
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_Review where
-  type ReversedOptic A_Review = A_Getter
+instance ReversibleOptic 'A_Review where
+  type ReversedOptic 'A_Review = 'A_Getter
   re o = Optic (re__ o)
   {-# INLINE re #-}
 

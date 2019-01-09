@@ -1,6 +1,6 @@
 *~
 *.swp
-dist-newstyle
+dist-*
 dist
 .ghc.environment.*
 cabal.project.local

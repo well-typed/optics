@@ -1,3 +1,4 @@
+-- | TODO: what's affine fold.
 module Optics.AffineFold
   ( An_AffineFold
   , AffineFold
