@@ -45,9 +45,11 @@ module Optics
     module Optics.Optic
 
   -- * Optic variants
-  
-  ,  module O
-  
+  , module O
+
+  -- * Optics-powered utilities
+  , module U
+
   -- * Optics for concrete base types
   , module P
   )
@@ -73,6 +75,9 @@ import Optics.Fold            as O
 import Optics.Equality        as O
 import Optics.AffineTraversal as O
 import Optics.AffineFold      as O
+
+-- Optics utilities
+import Optics.Each as U
 
 -- Optics for concrete base types
 
