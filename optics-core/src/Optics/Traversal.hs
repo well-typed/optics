@@ -2,10 +2,13 @@ module Optics.Traversal
   ( A_Traversal
   , Traversal
   , Traversal'
+  , TraversalVL
+  , TraversalVL'
   , toTraversal
-  , vlTraversal
+  , traversalVL
   , traversed
   , traverseOf
+  , elementsOf
   , module Optics.Optic
   )
   where

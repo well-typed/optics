@@ -3,6 +3,7 @@ module Optics.Fold
   , Fold
   , toFold
   , ViewableOptic(..)
+  , viewM
   , viewN
   , preview
   , foldMapOf

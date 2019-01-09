@@ -1,6 +1,6 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 module Optics.Internal.View where
+
+import Control.Monad.Reader.Class
 
 import Optics.Internal.AffineFold
 import Optics.Internal.Fold
@@ -59,3 +59,10 @@ instance Monoid r => ViewableOptic A_Fold r where
   type ViewResult A_Fold r = r
   view = viewN
   {-# INLINE view #-}
+
+-- | Generalization of 'view' from @(->) s@ to arbitrary @MonadReader s m@.
+viewM
+  :: (ViewableOptic k r, MonadReader s m)
+  => Optic' k i i s r
+  -> m (ViewResult k r)
+viewM = asks . view

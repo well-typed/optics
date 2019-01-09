@@ -4,6 +4,7 @@ module Optics.Prism
   , Prism'
   , toPrism
   , prism
+  , prism'
   , withPrism
   , aside
   , without

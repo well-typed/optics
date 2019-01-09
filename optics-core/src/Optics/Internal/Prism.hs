@@ -19,6 +19,12 @@ prism :: (b -> t) -> (s -> Either t a) -> Prism i s t a b
 prism construct match = Optic $ dimap match (either id construct) . right'
 {-# INLINE prism #-}
 
+-- | This is usually used to build a 'Prism'', when you have to use an operation
+-- like 'Data.Typeable.cast' which already returns a 'Maybe'.
+prism' :: (b -> s) -> (s -> Maybe a) -> Prism i s s a b
+prism' bs sma = prism bs (\s -> maybe (Left s) Right (sma s))
+{-# INLINE prism' #-}
+
 withPrism
   :: Is k A_Prism
   => Optic k i i s t a b

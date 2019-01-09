@@ -46,11 +46,11 @@ record = rep % sop % z
 
 -- | Lens accessing the head of an 'NP'.
 npHead :: Lens i (NP f (x ': xs)) (NP f (y ': xs)) (f x) (f y)
-npHead = vlLens (\ f (x :* xs) -> (:* xs) <$> f x)
+npHead = lensVL (\ f (x :* xs) -> (:* xs) <$> f x)
 
 -- | Lens accessing the tail of an 'NP'.
 npTail :: Lens i (NP f (x ': xs)) (NP f (x ': ys)) (NP f xs) (NP f ys)
-npTail = vlLens (\ f (x :* xs) -> (x :*) <$> f xs)
+npTail = lensVL (\ f (x :* xs) -> (x :*) <$> f xs)
 
 -- | Iso between a single-element 'NP' and its contents.
 npSingleton :: Iso i (NP f '[ x ]) (NP g '[ y ]) (f x) (g y)
