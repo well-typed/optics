@@ -67,7 +67,7 @@ module Optics
   --   the particular optic. Continuing with a 'Lens' example:
   --
   --     @
-  --     -- Build a lens from a getter and setter.
+  --     -- Build a lens from a getter and a setter.
   --     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' i s t a b
   --     @
   --
@@ -82,9 +82,9 @@ module Optics
   --     'over'  :: 'Lens' i s t a b -> (a -> b) -> s -> t
   --     @
   --
-  -- * We however omit the __computation__ rules.
-  --
-  --     TODO: why or why not, should we incude them anyway - I think in all cases they are quite clear)
+  -- * There are also __computation__ rules, which tie introduction and
+  --   elimination combinators together. These rules are automatically
+  --   fulfilled.
   --
   --     @
   --     'view1' ('lens' f g)   s = f s

@@ -21,7 +21,7 @@ toLens :: Is k A_Lens => Optic k i i s t a b -> Lens i s t a b
 toLens = sub
 {-# INLINE toLens #-}
 
--- | Build a lens from a getter and setter.
+-- | Build a lens from a getter and a setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens i s t a b
 lens get set = Optic $
   dimap (\s -> (get s, s))

@@ -42,6 +42,14 @@ module Optics.Lens
   -- @
   --
 
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'view1' ('lens' f g)   s = f s
+  -- 'set'   ('lens' f g) a s = g s a
+  -- @
+
   -- * van Laarhoven encoding
   , LensVL
   , LensVL'
