@@ -1,5 +1,7 @@
 # We use make for small scripts
 
+.PHONY : all build test haddock validate doctest diagrams
+
 all : build
 
 build :
@@ -35,3 +37,22 @@ codegen-subtypes :
 codegen-join :
 	cabal new-run --builddir=dist-codegen --project-file=cabal.codegen.project optics-codegen-subtypes -- join
 
+diagrams : optics-core/optics.png optics-core/reoptics.png optics-core/indexedoptics.png
+
+metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp : build metametapost/src/MetaMetaPost.hs
+	cabal new-build metametapost-optics
+	$$(cabal new-exec which metametapost-optics) hierarchy > metametapost/optics.mp
+	$$(cabal new-exec which metametapost-optics) reoptics > metametapost/reoptics.mp
+	$$(cabal new-exec which metametapost-optics) indexedoptics > metametapost/indexedoptics.mp
+
+metametapost/optics.png metametapost/reoptics.png metametapost/indexedoptics.png : metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp
+	make -C metametapost
+
+optics-core/optics.png : metametapost/optics.mp
+	cp metametapost/optics.png optics-core/optics.png
+
+optics-core/reoptics.png : metametapost/reoptics.mp
+	cp metametapost/reoptics.png optics-core/reoptics.png
+
+optics-core/indexedoptics.png : metametapost/indexedoptics.mp
+	cp metametapost/indexedoptics.png optics-core/indexedoptics.png

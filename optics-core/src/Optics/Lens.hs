@@ -79,6 +79,8 @@ module Optics.Lens
   , lensVL
   , toLensVL
   , withLensVL
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where

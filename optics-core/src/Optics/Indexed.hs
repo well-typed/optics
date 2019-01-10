@@ -1,7 +1,12 @@
 module Optics.Indexed
   (
+  -- * Indexed optics
+    module Optics.IxTraversal
+  , module Optics.IxFold
+  , module Optics.IxSetter
+
   -- * Functors with index
-    FunctorWithIndex (..)
+  , FunctorWithIndex (..)
   -- ** Foldable with index
   , FoldableWithIndex (..)
   , itraverse_
@@ -12,3 +17,7 @@ module Optics.Indexed
   ) where
 
 import Optics.Internal.Indexed
+
+import Optics.IxTraversal
+import Optics.IxFold
+import Optics.IxSetter

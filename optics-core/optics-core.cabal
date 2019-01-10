@@ -11,7 +11,7 @@ description:
   
   See the main module "Optics" for the documentation.
 
-extra-doc-files: optics.png
+extra-doc-files: optics.png reoptics.png indexedoptics.png
 
 library
   default-language: Haskell2010
@@ -46,6 +46,7 @@ library
                    Optics.Optic
                    Optics.Prism
                    Optics.PrismaticGetter
+                   Optics.Re
                    Optics.Review
                    Optics.Setter
                    Optics.Traversal

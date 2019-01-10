@@ -31,8 +31,7 @@ module Optics
   --
   -- <<optics.png Optics hierarchy>>
   --
-  -- Red arrows connect optics which can be converted to each other with 're'.
-  -- All other arrows represent 'Is' relation (partial order). The hierachy is a 'Join' semilattice, for example the
+  -- The arrows represent 'Is' relation (partial order). The hierachy is a 'Join' semilattice, for example the
   -- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
   --
   -- >>> :kind! Join A_Lens A_Prism
@@ -48,7 +47,7 @@ module Optics
 
   -- |
   --
-  -- There are 16 (TODO: add modules for LensyReview and PrismaticGetter)
+  -- There are 16 (/TODO/: add modules for LensyReview and PrismaticGetter)
   -- different kinds of optics, each documented in a separate module.
   -- Each optic module documentation has /formation/, /introduction/,
   -- /elimination/, and /well-formedness/ sections.
@@ -109,15 +108,98 @@ module Optics
 
   -- * Optics utilities
 
-  -- ** Indexed optics
-
-  -- | TODO
-  , module Optics.Indexed
-
   -- ** Re
 
-  -- | TODO
---  , module Optics.Re
+  -- | Some optics can be reversed with 're':
+  -- @'Iso' i s t a b@ into @'Iso' i b a t s@,
+  -- @'Getter' s t a b@ into @'Review' i b a t s@ etc.
+  -- Red arrows illustrate how 're' transforms optics:
+  --
+  -- <<reoptics.png Reversed Optics>>
+  --
+  -- 're' is mainly useful to invert 'Iso's:
+  --
+  -- >>> let _Identity = iso runIdentity Identity
+  -- >>> view1 (_1 % re _Identity) ('x', "yz")
+  -- Identity 'x'
+  --
+  -- Yet we can use a 'Lens' as a 'Review' too:
+  --
+  -- >>> review (re _1) ('x', "yz")
+  -- 'x'
+  --
+  -- /Note:/ there are no @from@ combinator.
+
+  , module Optics.Re
+
+  -- ** Indexed optics
+
+  -- |
+  --
+  -- @optics@ library also provides indexed optics, which provide
+  -- an additional /index/ value in mappings:
+  --
+  -- @
+  -- 'over'  :: 'Setter'     s t a b -> (a -> b)      -> s -> t
+  -- 'iover' :: 'IxSetter' i s t a b -> (i -> a -> b) -> s -> t
+  -- @
+  --
+  -- Note that there aren't any laws about indices.
+  -- Especially in compositions same index may occur multiple times.
+  --
+  -- The machinery builds on indexed variants of 'Functor', 'Foldable', and 'Traversable' classes:
+  -- 'FunctorWithIndex', 'FoldableWithIndex' and 'TraversableWithIndex' respectively.
+  -- There are instances for types in the boot libraries.
+  --
+  -- @
+  -- class ('FoldableWithIndex' i t, 'Traversable' t)
+  --   => 'TraversableWithIndex' i t | t -> i where
+  --     'itraverse' :: 'Applicative' f => (i -> a -> f b) -> t a -> f (t b)
+  -- @
+  --
+  -- Indexed optics /can/ be used as regular ones, i.e. indexed optics
+  -- gracefully downgrade to regular ones.
+  --
+  -- >>> toListOf ifolded "foo"
+  -- "foo"
+  --
+  -- But there is also a combinator to explicitly erase indices:
+  --
+  -- >>> :t ifolded
+  -- ifolded :: FoldableWithIndex i f => IxFold i (f a) a
+  --
+  -- >>> :t unIx ifolded
+  -- unIx ifolded
+  --   :: FoldableWithIndex i f => Optic A_Fold '[] (f b) (f b) b b
+  --
+  --
+  -- As the example above illustrates (/TODO:/ will do),
+  -- regular and indexed optics have the same kind, in this case @'Optic' 'A_Fold'@.
+  -- Regular optics simply don't have any indices.
+  -- The provided type aliases `IxFold`, `IxSetter` and `IxTraversal`
+  -- are variants with a single index.
+  --
+  -- In the diagram below, the optics hierachy is amended with these (singly) indexed variants (in blue).
+  -- Orange arrows mean
+  -- "can be used as one, assuming it's composed with any optic below the
+  -- orange arrow first". For example. '_1' is not an indexed fold, but
+  -- @'itraversed' % '_1'@ is, because it's an indexed traversal, so it's
+  -- also an indexed fold.
+  --
+  -- >>> let fst' = _1 :: Lens (a, c) (b, c) a b
+  -- >>> :t fst' % itraversed
+  -- fst' % itraversed
+  --   :: TraversableWithIndex i t =>
+  --      Optic A_Traversal '[i] (t a, c) (t b, c) a b
+  --
+  -- <<indexedoptics.png Indexed Optics>>
+  --
+  -- /TODO:/ write about 'icompose' and multiple indices.
+  --
+  -- There are yet no @IxAffineFold@, @IxAffineTraversal@ etc, but they can be added.
+  --
+  , module Optics.Indexed
+  , module Optics.Unindexed
 
   -- ** Each
 
@@ -158,8 +240,9 @@ import Optics.AffineFold      as O
 
 -- Optics utilities
 import Optics.Each
+import Optics.Unindexed
 import Optics.Indexed
--- import Optics.Re
+import Optics.Re
 
 -- Optics for concrete base types
 
@@ -241,3 +324,6 @@ import Data.Either.Optics as P
 --   'view1', 'view01' and 'viewN' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'view' at all, and what '^.' should be)
 -- * There are no 'from', only 're' (Should there be a 'from' restricted to 'Iso' or an alias to 're'? <https://github.com/well-typed/optics/pull/43#discussion_r247121380>)
 --
+
+-- $setup
+-- >>> import Data.Functor.Identity
