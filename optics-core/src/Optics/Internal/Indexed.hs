@@ -114,10 +114,21 @@ class (FunctorWithIndex i f, Foldable f
   ifoldl' ibab b0 s = ifoldr (\i a bb b -> bb $! ibab i b a) id s b0
   {-# INLINE ifoldl' #-}
 
+-- | Traverse 'FoldableWithIndex' ignoring the results.
+itraverse_ :: (FoldableWithIndex i t, Applicative f) => (i -> a -> f b) -> t a -> f ()
+itraverse_ f = ifoldr (\i -> (*>) . f i) (pure ())
+
+-- | Flipped 'itraverse_'.
+ifor_ :: (FoldableWithIndex i t, Applicative f) => t a -> (i -> a -> f b) -> f ()
+ifor_ = flip itraverse_
 
 class (FoldableWithIndex i t, Traversable t
       ) => TraversableWithIndex i t | t -> i where
   itraverse :: Applicative f => (i -> a -> f b) -> t a -> f (t b)
+
+-- | Flipped 'itraverse'
+ifor :: (TraversableWithIndex i t, Applicative f) => t a -> (i -> a -> f b) -> f (t b)
+ifor = flip itraverse
 
 ----------------------------------------
 -- Instances
