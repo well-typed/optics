@@ -29,7 +29,7 @@ import Optics.Traversal
 
 -- | Extract 'each' element of a (potentially monomorphic) container.
 --
--- >>> (1,2,3) & each %~ (*10)
+-- >>> over each (*10) (1,2,3)
 -- (10,20,30)
 --
 class Each s t a b | s -> a, t -> b, s b -> t, t a -> s where

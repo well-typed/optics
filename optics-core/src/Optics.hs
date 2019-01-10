@@ -45,6 +45,59 @@ module Optics
     module Optics.Optic
 
   -- * Optic variants
+
+  -- |
+  --
+  -- There are 16 (TODO: add modules for LensyReview and PrismaticGetter)
+  -- different kinds of optics, each documented in a separate module.
+  -- Each optic module documentation has /formation/, /introduction/ and
+  -- /elimination/ sections.
+  --
+  -- * The __formation__ sections contain type definitions. For example
+  --
+  -- @
+  -- -- Tag for a lens.
+  -- type 'A_Lens' = 'A_Lens
+  --
+  -- -- Type synonym for a type-modifying lens.
+  -- type 'Lens' s t a b = 'Optic' 'A_Lens' i i s t a b
+  -- @
+  --
+  -- * In the __introduction__ sections are described the ways to construct
+  --   the particular optic. Continuing with a 'Lens' example:
+  --
+  --     @
+  --     -- Build a lens from a getter and setter.
+  --     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' i s t a b
+  --     @
+  --
+  -- * In the __elimination__ sections are shown how you can destruct the
+  --   optic into a pieces it was constructed from.
+  --
+  --     @
+  --     -- 'Lens' is a 'Setter' and a 'Getter', therefore you can
+  --
+  --     'view1' :: 'Lens' i s t a b -> s -> a
+  --     'set'   :: 'Lens' i s t a b -> b -> s -> t
+  --     'over'  :: 'Lens' i s t a b -> (a -> b) -> s -> t
+  --     @
+  --
+  -- * We however omit the __computation__ rules.
+  --
+  --     TODO: why or why not, should we incude them anyway - I think in all cases they are quite clear)
+  --
+  --     @
+  --     'view1' ('lens' f g)   s = f s
+  --     'set'   ('lens' f g) a s = g s a
+  --     @
+  --
+  -- /Note:/ you should consult the optics hierarchy diagram.
+  -- Neither introduction or elimination sections list all ways to construct or use
+  -- particular optic kind.
+  -- For example you can construct 'Lens' from 'Iso' using 'sub'.
+  -- Also, as a 'Lens' is also a 'Traversal', a 'Fold' etc, so you can use 'traverseOf', 'preview'
+  -- and many other combinators.
+  --
   , module O
 
   -- * Optics utilities
@@ -63,7 +116,7 @@ module Optics
 
   -- | A 'Traversal' for a (potentially monomorphic) container.
   --
-  -- >>> (1,2,3) & each %~ (*10)
+  -- >>> over each (*10) (1,2,3)
   -- (10,20,30)
   --
   , module Optics.Each
