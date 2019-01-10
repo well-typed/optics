@@ -47,8 +47,26 @@ module Optics
   -- * Optic variants
   , module O
 
-  -- * Optics-powered utilities
-  , module U
+  -- * Optics utilities
+
+  -- ** Indexed optics
+
+  -- | TODO
+  , module Optics.Indexed
+
+  -- ** Re
+
+  -- | TODO
+--  , module Optics.Re
+
+  -- ** Each
+
+  -- | A 'Traversal' for a (potentially monomorphic) container.
+  --
+  -- >>> (1,2,3) & each %~ (*10)
+  -- (10,20,30)
+  --
+  , module Optics.Each
 
   -- * Optics for concrete base types
   , module P
@@ -77,7 +95,9 @@ import Optics.AffineTraversal as O
 import Optics.AffineFold      as O
 
 -- Optics utilities
-import Optics.Each as U
+import Optics.Each
+import Optics.Indexed
+-- import Optics.Re
 
 -- Optics for concrete base types
 

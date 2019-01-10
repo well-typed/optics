@@ -62,7 +62,4 @@ itraverseOf_ o f = ifoldrOf o (\i -> (*>) . f i) (pure ())
 -- | Indexed fold via 'FoldableWithIndex' class.
 ifolded :: FoldableWithIndex i f => IxFold j (i -> j) (f a) a
 ifolded = Optic (contrasecond (\_ -> ()) . iwander itraverse_)
-  where
-    itraverse_ f = ifoldr (\i -> (*>) . f i) (pure ())
-
 {-# INLINE ifolded #-}

@@ -33,6 +33,7 @@ library
                    Optics.Equality
                    Optics.Fold
                    Optics.Getter
+                   Optics.Indexed
                    Optics.Iso
                    Optics.IxFold
                    Optics.IxSetter
