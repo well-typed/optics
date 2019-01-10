@@ -50,18 +50,18 @@ module Optics
   --
   -- There are 16 (TODO: add modules for LensyReview and PrismaticGetter)
   -- different kinds of optics, each documented in a separate module.
-  -- Each optic module documentation has /formation/, /introduction/ and
-  -- /elimination/ sections.
+  -- Each optic module documentation has /formation/, /introduction/,
+  -- /elimination/, and /well-formedness/ sections.
   --
   -- * The __formation__ sections contain type definitions. For example
   --
-  -- @
-  -- -- Tag for a lens.
-  -- type 'A_Lens' = 'A_Lens
+  --     @
+  --     -- Tag for a lens.
+  --     type 'A_Lens' = 'A_Lens
   --
-  -- -- Type synonym for a type-modifying lens.
-  -- type 'Lens' s t a b = 'Optic' 'A_Lens' i i s t a b
-  -- @
+  --     -- Type synonym for a type-modifying lens.
+  --     type 'Lens' s t a b = 'Optic' 'A_Lens' i i s t a b
+  --     @
   --
   -- * In the __introduction__ sections are described the ways to construct
   --   the particular optic. Continuing with a 'Lens' example:
@@ -82,7 +82,7 @@ module Optics
   --     'over'  :: 'Lens' i s t a b -> (a -> b) -> s -> t
   --     @
   --
-  -- * There are also __computation__ rules, which tie introduction and
+  -- * __Computation__ rules tie introduction and
   --   elimination combinators together. These rules are automatically
   --   fulfilled.
   --
@@ -91,7 +91,14 @@ module Optics
   --     'set'   ('lens' f g) a s = g s a
   --     @
   --
-  -- /Note:/ you should consult the optics hierarchy diagram.
+  -- * All optics provided by the library are __well-formed__.
+  --     Constructing of ill-formed optics is possible, but should be avoided.
+  --     Ill-formed optic /might/ behave differently from what computation rules specify.
+  --
+  --     A 'Lens' should obey three laws, known as /GetPut/, /PutGet/ and /PutPut/.
+  --     See "Optics.Lens" module for their definitions.
+  --
+  -- /Note:/ you should also consult the optics hierarchy diagram.
   -- Neither introduction or elimination sections list all ways to construct or use
   -- particular optic kind.
   -- For example you can construct 'Lens' from 'Iso' using 'sub'.

@@ -50,6 +50,28 @@ module Optics.Lens
   -- 'set'   ('lens' f g) a s = g s a
   -- @
 
+  -- * Well-formedness
+  -- |
+  --
+  -- * __GetPut__: You get back what you put in:
+  --
+  --     @
+  --     view l (set l v s) = v
+  --     @
+  --
+  -- * __PutGet__: Putting back what you got doesn’t change anything:
+  --
+  --     @
+  --     set l (view l s) s = s
+  --     @
+  --
+  -- * __PutPut__: Setting twice is the same as setting once:
+  --
+  --     @
+  --     set l v' (set l v s) = set l v' s
+  --     @
+  --
+
   -- * van Laarhoven encoding
   , LensVL
   , LensVL'
