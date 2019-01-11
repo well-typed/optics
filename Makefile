@@ -1,13 +1,18 @@
 # We use make for small scripts
 
-all :
+all : build
+
+build :
 	cabal new-build all
+
+test : build
+	cabal new-run optics-tests
 
 haddock :
 	cabal new-haddock optics-core
 
 # Build with all supported GHCs, run tests.
-validate : all doctest
+validate : build doctest
 	cabal new-build all --builddir=dist-validate-8.0.2 -w ghc-8.0.2 --write-ghc-environment-files=never
 	cabal new-build all --builddir=dist-validate-8.2.2 -w ghc-8.2.2 --write-ghc-environment-files=never
 	cabal new-build all --builddir=dist-validate-8.4.4 -w ghc-8.4.4 --write-ghc-environment-files=never

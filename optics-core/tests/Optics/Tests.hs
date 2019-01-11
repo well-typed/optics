@@ -57,10 +57,32 @@ inspectionTests = testGroup "inspection"
         assertResult $(inspectTest $ 'lhs01 === 'rhs01)
     , testCase "traverseOf (traversed % traversed) = traverse . traverse" $
         assertResult $(inspectTest $ 'lhs02 === 'rhs02)
+
     ]
-  where
-    assertResult (Success _)   = return ()
-    assertResult (Failure err) = assertFailure err
+
+assertResult :: Result -> IO ()
+assertResult (Success _)   = return ()
+assertResult (Failure err) = assertFailure err
+
+-------------------------------------------------------------------------------
+-- Computation tests
+-------------------------------------------------------------------------------
+
+compL01, compR01 :: (s -> a) -> (s -> a -> s) -> (s -> a)
+compL01 f g s = view (lens f g) s
+compR01 f _ s = f s
+
+compL02, compR02 :: (s -> a) -> (s -> b -> t) -> (s -> b -> t)
+compL02 f g s b = set (lens f g) b s
+compR02 _ g s b = g s b
+
+computationTests :: TestTree
+computationTests = testGroup "computation"
+    [ testCase "view (lens f g) = f" $
+        assertResult $(inspectTest $ 'compL01 === 'compR01)
+    , testCase "set (lens f g) = g" $
+        assertResult $(inspectTest $ 'compL01 === 'compR01)
+    ]
 
 -------------------------------------------------------------------------------
 -- Main
@@ -69,4 +91,5 @@ inspectionTests = testGroup "inspection"
 main :: IO ()
 main = defaultMain $ testGroup "tests"
     [ inspectionTests
+    , computationTests
     ]
