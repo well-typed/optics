@@ -1,5 +1,10 @@
--- | At the moment, merely compiling this module is all the testing we do.
+{-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
 module Main where
+
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Inspection
 
 import Data.Either.Optics
 import Data.Tuple.Optics
@@ -33,5 +38,35 @@ eg2 = view _1
 --   to fst % mapped  -- Cannot compose a getter with a setter
 --   toLens (to fst)  -- Cannot use a getter as a lens
 
+-------------------------------------------------------------------------------
+-- Inspection tests
+-------------------------------------------------------------------------------
+ 
+-- eta-expansion is required
+lhs01, rhs01 :: (Applicative f, Traversable t) => (a -> f b) -> t a -> f (t b)
+lhs01 f = traverseOf traversed f
+rhs01 f = traverse f
+
+lhs02, rhs02 :: (Applicative f, Traversable t, Traversable s) => (a -> f b) -> t (s a) -> f (t (s b))
+lhs02 f = traverseOf (traversed % traversed) f
+rhs02 f = traverse . traverse $ f
+
+inspectionTests :: TestTree
+inspectionTests = testGroup "inspection"
+    [ testCase "traverseOf traversed = traverse" $
+        assertResult $(inspectTest $ 'lhs01 === 'rhs01)
+    , testCase "traverseOf (traversed % traversed) = traverse . traverse" $
+        assertResult $(inspectTest $ 'lhs02 === 'rhs02)
+    ]
+  where
+    assertResult (Success _)   = return ()
+    assertResult (Failure err) = assertFailure err
+
+-------------------------------------------------------------------------------
+-- Main
+-------------------------------------------------------------------------------
+
 main :: IO ()
-main = return ()
+main = defaultMain $ testGroup "tests"
+    [ inspectionTests
+    ]
