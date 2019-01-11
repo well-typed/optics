@@ -86,12 +86,12 @@ type family Constraints (k :: OpticKind) (p :: * -> * -> * -> *) :: Constraint w
   Constraints 'A_Prism            p = Choice p
   Constraints 'A_PrismaticGetter  p = Cochoice p
   Constraints 'An_AffineTraversal p = (Strong p, Choice p)
-  Constraints 'A_Traversal        p = Traversing p
+  Constraints 'A_Traversal        p = TraversingWithIndex p
   Constraints 'An_IxTraversal     p = TraversingWithIndex p
-  Constraints 'A_Setter           p = Mapping p
-  Constraints 'An_IxSetter        p = p ~ IxFunArrow
+  Constraints 'A_Setter           p = MappingWithIndex p
+  Constraints 'An_IxSetter        p = MappingWithIndex p
   Constraints 'A_Getter           p = (Bicontravariant p, Cochoice p, Strong p)
   Constraints 'An_AffineFold      p = (Bicontravariant p, Cochoice p, Strong p, Choice p)
-  Constraints 'A_Fold             p = (Bicontravariant p, Cochoice p, Traversing p)
+  Constraints 'A_Fold             p = (Bicontravariant p, Cochoice p, TraversingWithIndex p)
   Constraints 'An_IxFold          p = (Bicontravariant p, Cochoice p, TraversingWithIndex p)
   Constraints 'A_Review           p = (Bifunctor p, Choice p, Costrong p)

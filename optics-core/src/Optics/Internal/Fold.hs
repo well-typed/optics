@@ -13,37 +13,40 @@ type Fold i s a = Optic' A_Fold i i s a
 
 -- | View the result of folding over all the results of a 'Fold' or 'Traversal'
 -- that points at a monoidal value.
-viewN :: (Is k A_Fold, Monoid a) => Optic' k i i s a -> s -> a
+viewN :: (Is k A_Fold, Monoid a) => Optic' k i o s a -> s -> a
 viewN o = runForget (getOptic (toFold o) (Forget id))
 {-# INLINE viewN #-}
 
 -- | Fold to the first element (if it exists).
-preview :: Is k A_Fold => Optic' k i i s a -> s -> Maybe a
+preview :: Is k A_Fold => Optic' k i o s a -> s -> Maybe a
 preview o = getFirst #. foldMapOf o (First #. Just)
 {-# INLINE preview #-}
 
 -- | Explicitly cast an optic to a fold.
-toFold :: Is k A_Fold => Optic' k i i s a -> Fold i s a
+toFold
+  :: Is k A_Fold
+  => Optic' k i o s a
+  -> Optic' A_Fold i o s a
 toFold = sub
 {-# INLINE toFold #-}
 
 -- | Fold via embedding into a monoid.
-foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k i i s a -> (a -> r) -> s -> r
+foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k i o s a -> (a -> r) -> s -> r
 foldMapOf o = runForget #. getOptic (toFold o) .# Forget
 {-# INLINE foldMapOf #-}
 
 -- | Fold right-associatively.
-foldrOf :: Is k A_Fold => Optic' k i i s a -> (a -> r -> r) -> r -> s -> r
+foldrOf :: Is k A_Fold => Optic' k i o s a -> (a -> r -> r) -> r -> s -> r
 foldrOf o arr r = (\e -> appEndo e r) . foldMapOf o (Endo #. arr)
 {-# INLINE foldrOf #-}
 
 -- | Fold left-associatively, and strictly.
-foldlOf' :: Is k A_Fold => Optic' k i i s a -> (r -> a -> r) -> r -> s -> r
+foldlOf' :: Is k A_Fold => Optic' k i o s a -> (r -> a -> r) -> r -> s -> r
 foldlOf' o rar r0 s = foldrOf o (\a rr r -> rr $! rar r a) id s r0
 {-# INLINE foldlOf' #-}
 
 -- | Fold to a list.
-toListOf :: Is k A_Fold => Optic' k i i s a -> s -> [a]
+toListOf :: Is k A_Fold => Optic' k i o s a -> s -> [a]
 toListOf o = foldrOf o (:) []
 {-# INLINE toListOf #-}
 
@@ -51,14 +54,14 @@ toListOf o = foldrOf o (:) []
 
 sequenceOf_
   :: (Is k A_Fold, Applicative f)
-  => Optic' k i i s (f a)
+  => Optic' k i o s (f a)
   -> s -> f ()
 sequenceOf_ o = foldrOf o (*>) (pure ())
 {-# INLINE sequenceOf_ #-}
 
 traverseOf_
   :: (Is k A_Fold, Applicative f)
-  => Optic' k i i s a
+  => Optic' k i o s a
   -> (a -> f r) -> s -> f ()
 traverseOf_ o f = foldrOf o ((*>) . f) (pure ())
 {-# INLINE traverseOf_ #-}

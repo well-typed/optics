@@ -98,6 +98,10 @@ class Functor f => FunctorWithIndex i f | f -> i where
   imap f = runIdentity #. itraverse (\i -> Identity #. f i)
   {-# INLINE imap #-}
 
+instance FunctorWithIndex i (IxContext i a b) where
+  imap f (IxContext ibt a) = IxContext (\i -> f i . ibt i) a
+  {-# INLINE imap #-}
+
 class (FunctorWithIndex i f, Foldable f
       ) => FoldableWithIndex i f | f -> i where
   ifoldMap :: Monoid m => (i -> a -> m) -> f a -> m

@@ -47,6 +47,7 @@ library
                    Optics.Review
                    Optics.Setter
                    Optics.Traversal
+                   Optics.Unindexed
 
   exposed-modules: Data.Either.Optics
                    Data.Maybe.Optics

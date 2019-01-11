@@ -18,7 +18,10 @@ type TraversalVL s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
 type TraversalVL' s a = TraversalVL s s a a
 
 -- | Explicitly cast an optic to a traversal.
-toTraversal :: Is k A_Traversal => Optic k i i s t a b -> Traversal i s t a b
+toTraversal
+  :: Is k A_Traversal
+  => Optic k i o s t a b
+  -> Optic A_Traversal i o s t a b
 toTraversal = sub
 {-# INLINE toTraversal #-}
 
@@ -35,7 +38,7 @@ traversed = traversalVL traverse
 -- | Map each element of a structure targeted by a 'Traversal', evaluate these
 -- actions from left to right, and collect the results.
 traverseOf
-  :: (Is k A_Traversal, Applicative f) => Optic k i i s t a b
+  :: (Is k A_Traversal, Applicative f) => Optic k i o s t a b
   -> (a -> f b) -> s -> f t
 traverseOf o = runStar #. getOptic (toTraversal o) .# Star
 {-# INLINE traverseOf #-}

@@ -8,6 +8,7 @@ module Optics.Internal.Profunctor where
 import Data.Functor.Const
 import Data.Functor.Identity
 
+import Optics.Internal.Indexed
 import Optics.Internal.Utils
 
 -- | Needed for traversals.
@@ -239,6 +240,18 @@ instance Mapping IxFunArrow where
 class IxProfunctor p where
   ixcontramap :: (i -> j) -> p j a b -> p i a b
 
+instance IxProfunctor (Star f) where
+  ixcontramap _ij (Star k) = Star k
+  {-# INLINE ixcontramap #-}
+
+instance IxProfunctor (Forget r) where
+  ixcontramap _ij (Forget k) = Forget k
+  {-# INLINE ixcontramap #-}
+
+instance IxProfunctor FunArrow where
+  ixcontramap _ij (FunArrow k) = FunArrow k
+  {-# INLINE ixcontramap #-}
+
 instance IxProfunctor (IxStar f) where
   ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
   {-# INLINE ixcontramap #-}
@@ -258,6 +271,19 @@ class (IxProfunctor p, Traversing p) => TraversingWithIndex p where
     :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
     -> p j a b -> p (i -> j) s t
 
+instance Applicative f => TraversingWithIndex (Star f) where
+  iwander f (Star k) = Star $ f (\_ -> k)
+  {-# INLINE iwander #-}
+
+instance Monoid r => TraversingWithIndex (Forget r) where
+  iwander f (Forget k) = Forget $ getConst #. f (\_ -> Const #. k)
+  {-# INLINE iwander #-}
+
+instance TraversingWithIndex FunArrow where
+  iwander f (FunArrow k) =
+    FunArrow $ runIdentity #. f (\_ -> Identity #. k)
+  {-# INLINE iwander #-}
+
 instance Applicative f => TraversingWithIndex (IxStar f) where
   iwander f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
   {-# INLINE iwander #-}
@@ -271,3 +297,16 @@ instance TraversingWithIndex IxFunArrow where
   iwander f (IxFunArrow k) =
     IxFunArrow $ \ij -> runIdentity #. f (\i -> Identity #. k (ij i))
   {-# INLINE iwander #-}
+
+----------------------------------------
+
+class (TraversingWithIndex p, Mapping p) => MappingWithIndex p where
+  imap' :: FunctorWithIndex i f => p j a b -> p (i -> j) (f a) (f b)
+
+instance MappingWithIndex FunArrow where
+  imap' (FunArrow k) = FunArrow $ fmap k
+  {-# INLINE imap' #-}
+
+instance MappingWithIndex IxFunArrow where
+  imap' (IxFunArrow k) = IxFunArrow $ \ij -> imap $ \i -> k (ij i)
+  {-# INLINE imap' #-}
