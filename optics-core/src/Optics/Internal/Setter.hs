@@ -11,14 +11,17 @@ type Setter i s t a b = Optic A_Setter i i s t a b
 type Setter' i s a = Optic' A_Setter i i s a
 
 -- | Explicitly cast an optic to a setter.
-toSetter :: Is k A_Setter => Optic k i i s t a b -> Setter i s t a b
+toSetter
+  :: Is k A_Setter
+  => Optic k i o s t a b
+  -> Optic A_Setter i o s t a b
 toSetter = sub
 {-# INLINE toSetter #-}
 
 -- | Apply a setter as a modifier.
 over
   :: Is k A_Setter
-  => Optic k i i s t a b
+  => Optic k i o s t a b
   -> (a -> b) -> s -> t
 over o = runFunArrow #. getOptic (toSetter o) .# FunArrow
 {-# INLINE over #-}
@@ -30,7 +33,7 @@ over o = runFunArrow #. getOptic (toSetter o) .# FunArrow
 --
 set
   :: Is k A_Setter
-  => Optic k i i s t a b
+  => Optic k i o s t a b
   -> b -> s -> t
 set o = over o . const
 {-# INLINE set #-}
