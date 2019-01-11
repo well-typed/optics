@@ -183,53 +183,55 @@ import Data.Either.Optics as P
 
 -- $differences
 --
--- From Adam's talk:
+-- /This section is work-in-progress/
+--
+-- === From Adam's talk:
+--
+-- See @Talk.pdf@, or watch <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction>
 --
 -- * @optics@ has an abstract interface: 'Optic' is an opaque type
---
 -- * Cannot write @optics@ without depending on the package,
 --   therefore @optics-core@ doesnt' have non GHC-boot library dependencies.
 --   (one cannot write /prisms/ with @lens@ without depending on @profunctors@, indexed optics require depending on @lens@ ...)
---
 -- * abstract interface: @optics@ has better error messages (note: @silica@ is a hybrid approach)
 --
--- >>> set (to fst)
--- ...
--- ...'A_Getter cannot be used as 'A_Setter
--- ...
+--     >>> set (to fst)
+--     ...
+--     ...'A_Getter cannot be used as 'A_Setter
+--     ...
 --
 -- * abstract interface: better type-inference (optics kind is preserved)
 --
--- >>> :t traversed % to not
--- traversed % to not
---   :: Traversable t => Optic 'A_Fold o o (t Bool) (t Bool) Bool Bool
+--     >>> :t traversed % to not
+--     traversed % to not
+--       :: Traversable t => Optic 'A_Fold o o (t Bool) (t Bool) Bool Bool
 --
 -- * abstract interface: not all optics have 'Join'
 --
--- >>> sets map % to not
--- ...
--- ...'A_Setter cannot be composed with 'A_Getter
--- ...
+--     >>> sets map % to not
+--     ...
+--     ...'A_Setter cannot be composed with 'A_Getter
+--     ...
 --
 -- * 'Optic' is a @Rank1Type@ (not really before #41), so there are no
---   need for @ALens@ etc.
---
+--     need for @ALens@ etc.
 -- * Types that say what they mean
 -- * More comprehensible type errors
 -- * Less vulnerable to the monomorphism restriction
 -- * Free choice of lens implementation
---
 -- * Indexed optics have different interface.
 --
--- Drawbacks
+-- === Drawbacks
 --
 -- * Can’t insert points into the subtyping order post hoc
 --
 -- === Technical differences
 --
 -- * Composition operator is '%'
---
 -- * 'view' is /smart/
---
 -- * None of operators is exported from main module
+-- * All ordinary optics are index-preserving by default
+-- * Indexed optics interface is different (let's expand in own section, when the implementation is stabilised)
+-- * There are no @Traversal1@
+-- * There is 'AffineTraversal'
 --
