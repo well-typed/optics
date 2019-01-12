@@ -4,6 +4,7 @@ module Optics.AffineTraversal
   , AffineTraversal'
   , toAffineTraversal
   , atraversal
+  , withAffineTraversal
   , module Optics.Optic
   )
   where

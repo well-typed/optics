@@ -41,7 +41,7 @@ eg2 = view _1
 -------------------------------------------------------------------------------
 -- Inspection tests
 -------------------------------------------------------------------------------
- 
+
 -- eta-expansion is required
 lhs01, rhs01 :: (Applicative f, Traversable t) => (a -> f b) -> t a -> f (t b)
 lhs01 f = traverseOf traversed f
@@ -54,15 +54,19 @@ rhs02 f = traverse . traverse $ f
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
     [ testCase "traverseOf traversed = traverse" $
-        assertResult $(inspectTest $ 'lhs01 === 'rhs01)
+        assertSuccess $(inspectTest $ 'lhs01 === 'rhs01)
     , testCase "traverseOf (traversed % traversed) = traverse . traverse" $
-        assertResult $(inspectTest $ 'lhs02 === 'rhs02)
+        assertSuccess $(inspectTest $ 'lhs02 === 'rhs02)
 
     ]
 
-assertResult :: Result -> IO ()
-assertResult (Success _)   = return ()
-assertResult (Failure err) = assertFailure err
+assertSuccess :: Result -> IO ()
+assertSuccess (Success _)   = return ()
+assertSuccess (Failure err) = assertFailure err
+
+assertFailure' :: Result -> IO ()
+assertFailure' (Success err) = assertFailure err
+assertFailure' (Failure _)   = return ()
 
 -------------------------------------------------------------------------------
 -- Computation tests
@@ -76,12 +80,34 @@ compL02, compR02 :: (s -> a) -> (s -> b -> t) -> (s -> b -> t)
 compL02 f g s b = set (lens f g) b s
 compR02 _ g s b = g s b
 
+compL03, compR03, compR03_ :: (s -> Either t a) -> (s -> b -> t) -> (s -> b -> t)
+compL03 f g s b = withAffineTraversal (atraversal f g) (\h _ -> h) s b
+compR03 _ g s b = g s b
+compR03_ f g s b = case f s of
+    Left t  -> t
+    Right _ -> g s b
+
+compL04, compR04 :: (s -> Either t a) -> (s -> b -> t) -> (s -> Either t a)
+compL04 f g s = withAffineTraversal (atraversal f g) (\_ h -> h) s
+compR04 f _ s = f s
+
 computationTests :: TestTree
 computationTests = testGroup "computation"
-    [ testCase "view (lens f g) = f" $
-        assertResult $(inspectTest $ 'compL01 === 'compR01)
-    , testCase "set (lens f g) = g" $
-        assertResult $(inspectTest $ 'compL01 === 'compR01)
+    [ testGroup "Lens"
+        [ testCase "view (lens f g) = f" $
+            assertSuccess $(inspectTest $ 'compL01 === 'compR01)
+        , testCase "set (lens f g) = g" $
+            assertSuccess $(inspectTest $ 'compL01 === 'compR01)
+        ]
+    , testGroup "AffineTraversal"
+        -- this doesn't hold definitionally: we need law here
+        [ testCase "withAffineTraversal (atraversal f g) (\\ h _ -> h) /= g" $
+             assertFailure' $(inspectTest $ 'compL03 === 'compR03)
+        , testCase "withAffineTraversal (atraversal f g) (\\ h _ -> h) = ..." $
+             assertSuccess $(inspectTest $ 'compL03 === 'compR03_)
+        , testCase "withAffineTraversal (atraversal f g) (\\ _ h -> h) = f" $
+            assertSuccess $(inspectTest $ 'compL04 === 'compR04)
+        ]
     ]
 
 -------------------------------------------------------------------------------
