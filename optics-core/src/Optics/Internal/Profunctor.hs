@@ -266,47 +266,47 @@ instance IxProfunctor IxFunArrow where
 
 ----------------------------------------
 
-class (IxProfunctor p, Traversing p) => TraversingWithIndex p where
+class (IxProfunctor p, Traversing p) => IxTraversing p where
   iwander
     :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
     -> p j a b -> p (i -> j) s t
 
-instance Applicative f => TraversingWithIndex (Star f) where
+instance Applicative f => IxTraversing (Star f) where
   iwander f (Star k) = Star $ f (\_ -> k)
   {-# INLINE iwander #-}
 
-instance Monoid r => TraversingWithIndex (Forget r) where
+instance Monoid r => IxTraversing (Forget r) where
   iwander f (Forget k) = Forget $ getConst #. f (\_ -> Const #. k)
   {-# INLINE iwander #-}
 
-instance TraversingWithIndex FunArrow where
+instance IxTraversing FunArrow where
   iwander f (FunArrow k) =
     FunArrow $ runIdentity #. f (\_ -> Identity #. k)
   {-# INLINE iwander #-}
 
-instance Applicative f => TraversingWithIndex (IxStar f) where
+instance Applicative f => IxTraversing (IxStar f) where
   iwander f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
   {-# INLINE iwander #-}
 
-instance Monoid r => TraversingWithIndex (IxForget r) where
+instance Monoid r => IxTraversing (IxForget r) where
   iwander f (IxForget k) =
     IxForget $ \ij -> getConst #. f (\i -> Const #. k (ij i))
   {-# INLINE iwander #-}
 
-instance TraversingWithIndex IxFunArrow where
+instance IxTraversing IxFunArrow where
   iwander f (IxFunArrow k) =
     IxFunArrow $ \ij -> runIdentity #. f (\i -> Identity #. k (ij i))
   {-# INLINE iwander #-}
 
 ----------------------------------------
 
-class (TraversingWithIndex p, Mapping p) => MappingWithIndex p where
+class (IxTraversing p, Mapping p) => IxMapping p where
   imap' :: FunctorWithIndex i f => p j a b -> p (i -> j) (f a) (f b)
 
-instance MappingWithIndex FunArrow where
+instance IxMapping FunArrow where
   imap' (FunArrow k) = FunArrow $ fmap k
   {-# INLINE imap' #-}
 
-instance MappingWithIndex IxFunArrow where
+instance IxMapping IxFunArrow where
   imap' (IxFunArrow k) = IxFunArrow $ \ij -> imap $ \i -> k (ij i)
   {-# INLINE imap' #-}
