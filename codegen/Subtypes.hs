@@ -137,10 +137,10 @@ genJoin = either (fail . show) id $ runG opticsKind $ \g -> do
                 Nothing -> putStrLn $ "  -- no Join with " ++ show l
                 Just kl -> putStrLn $ unwords
                     [ "  Join"
-                    , '\'' : leftpad (show k)
-                    , '\'' : leftpad (show l)
+                    , leftpad (show k)
+                    , leftpad (show l)
                     , "="
-                    , '\'' : show kl
+                    , show kl
                     ]
 -------------------------------------------------------------------------------
 -- subtypes
@@ -161,8 +161,8 @@ genSubtypes = either (fail . show) id $ runG opticsKind $ \g -> do
 
                 putStrLn $ unwords
                     [ "instance Is"
-                    , '\'' : leftpad (show k)
-                    , '\'' : leftpad (show k')
+                    , leftpad (show k)
+                    , leftpad (show k')
                     , "where implies _ = id"
                     ]
 
