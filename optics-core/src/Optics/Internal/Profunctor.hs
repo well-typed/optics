@@ -8,7 +8,6 @@ module Optics.Internal.Profunctor where
 import Data.Functor.Const
 import Data.Functor.Identity
 
-import Optics.Internal.Indexed
 import Optics.Internal.Utils
 
 -- | Needed for traversals.
@@ -225,15 +224,15 @@ instance Traversing IxFunArrow where
 ----------------------------------------
 
 class Traversing p => Mapping p where
-  map' :: Functor f => p i a b -> p i (f a) (f b)
+  roam :: ((a -> b) -> s -> t) -> p i a b -> p i s t
 
 instance Mapping FunArrow where
-  map' (FunArrow k) = FunArrow $ fmap k
-  {-# INLINE map' #-}
+  roam f (FunArrow k) = FunArrow (f k)
+  {-# INLINE roam #-}
 
 instance Mapping IxFunArrow where
-  map' (IxFunArrow k) = IxFunArrow $ \i -> fmap (k i)
-  {-# INLINE map' #-}
+  roam f (IxFunArrow k) = IxFunArrow $ \i -> f (k i)
+  {-# INLINE roam #-}
 
 ----------------------------------------
 
@@ -301,12 +300,11 @@ instance IxTraversing IxFunArrow where
 ----------------------------------------
 
 class (IxTraversing p, Mapping p) => IxMapping p where
-  imap' :: FunctorWithIndex i f => p j a b -> p (i -> j) (f a) (f b)
+  iroam :: ((i -> a -> b) -> s -> t) -> p j a b -> p (i -> j) s t
 
 instance IxMapping FunArrow where
-  imap' (FunArrow k) = FunArrow $ fmap k
-  {-# INLINE imap' #-}
+  iroam f (FunArrow k) = FunArrow (f (const k))
 
 instance IxMapping IxFunArrow where
-  imap' (IxFunArrow k) = IxFunArrow $ \ij -> imap $ \i -> k (ij i)
-  {-# INLINE imap' #-}
+  iroam f (IxFunArrow k) =
+    IxFunArrow $ \ij -> f $ \i -> k (ij i)

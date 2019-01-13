@@ -91,6 +91,10 @@ compL04, compR04 :: (s -> Either t a) -> (s -> b -> t) -> (s -> Either t a)
 compL04 f g s = withAffineTraversal (atraversal f g) (\_ h -> h) s
 compR04 f _ s = f s
 
+compL05, compR05 :: ((a -> b) -> s -> t) -> ((a -> b) -> s -> t)
+compL05 f ab s = over (sets f) ab s
+compR05 f ab s = f ab s
+
 computationTests :: TestTree
 computationTests = testGroup "computation"
     [ testGroup "Lens"
@@ -107,6 +111,11 @@ computationTests = testGroup "computation"
              assertSuccess $(inspectTest $ 'compL03 === 'compR03_)
         , testCase "withAffineTraversal (atraversal f g) (\\ _ h -> h) = f" $
             assertSuccess $(inspectTest $ 'compL04 === 'compR04)
+        ]
+
+    , testGroup "Setter"
+        [ testCase "over (sets f) = f" $
+            assertSuccess $(inspectTest $ 'compL05 === 'compR05)
         ]
     ]
 
