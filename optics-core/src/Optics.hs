@@ -37,7 +37,7 @@ module Optics
   --
   -- >>> :kind! Join A_Lens A_Prism
   -- Join A_Lens A_Prism :: OpticKind
-  -- = 'An_AffineTraversal
+  -- = An_AffineTraversal
   --
   -- There are also indexed variants of 'Traversal', 'Fold' and 'Setter'.
   -- Indexed optics are explained in more detail in /Differences from lens/ section.
