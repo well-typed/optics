@@ -41,10 +41,7 @@ withLens o k = case getOptic (toLens o) $ Store id (\_ -> id) of
 
 -- | Build a lens from the van Laarhoven representation.
 lensVL :: LensVL s t a b -> Lens i s t a b
-lensVL l = Optic $
-  dimap ((\(Context f a) -> (f, a)) . l (Context id))
-        (\(f, b) -> f b)
-  . second' -- p (b -> t, a) (b -> t, b)
+lensVL l = Optic (linear l)
 {-# INLINE lensVL #-}
 
 -- | Convert a lens to the van Laarhoven representation.
@@ -75,3 +72,9 @@ instance Strong (Store a b) where
   second' (Store get set) = Store (get . snd) (\(c, s) b -> (c, set s b))
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+  linear f = dimap
+    ((\(Context bt a) -> (a, bt)) . f (Context id))
+    (\(b, bt) -> bt b)
+    . first'
+  {-# INLINE linear #-}

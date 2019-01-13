@@ -41,6 +41,12 @@ instance Arrow p => Strong (WrappedArrow p) where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
+  linear f = dimap
+    ((\(Context bt a) -> (a, bt)) . f (Context id))
+    (\(b, bt) -> bt b)
+    . first'
+  {-# INLINE linear #-}
+
 instance ArrowChoice p => Choice (WrappedArrow p) where
   left'  (WrapArrow k) = WrapArrow (left k)
   right' (WrapArrow k) = WrapArrow (right k)

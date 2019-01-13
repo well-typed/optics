@@ -42,12 +42,12 @@ set o = over o . const
 sets
   :: ((a -> b) -> s -> t)
   -> Setter i s t a b
-sets f = Optic (dimap (Context id) (\(Context g s) -> f g s) . map')
+sets f = Optic (roam f)
 {-# INLINE sets #-}
 
 -- | Setter via the 'Functor' class.
 mapped :: Functor f => Setter i (f a) (f b) a b
-mapped = Optic map'
+mapped = Optic (roam fmap)
 {-# INLINE mapped #-}
 
 -- $setup

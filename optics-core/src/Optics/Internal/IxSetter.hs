@@ -3,7 +3,6 @@ module Optics.Internal.IxSetter where
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed setter.
 type IxSetter i o s t a b = Optic An_IxSetter i o s t a b
@@ -36,10 +35,10 @@ iset o f = iover o (\i _ -> f i)
 isets
   :: ((i -> a -> b) -> s -> t)
   -> IxSetter j (i -> j) s t a b
-isets f = Optic (dimap (IxContext (\_ -> id)) (\(IxContext g s) -> f g s) . imap')
+isets f = Optic (iroam f)
 {-# INLINE isets #-}
 
 -- | Indexed setter via the 'FunctorWithIndex' class.
 imapped :: FunctorWithIndex i f => IxSetter j (i -> j) (f a) (f b) a b
-imapped = Optic imap'
+imapped = Optic (iroam imap)
 {-# INLINE imapped #-}
