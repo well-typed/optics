@@ -30,6 +30,7 @@ module Optics.Lens
 
   -- * Introduction
   , lens
+  , withLens
   , toLens
 
   -- * Elimination
