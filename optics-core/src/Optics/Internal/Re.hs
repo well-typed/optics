@@ -3,7 +3,6 @@ module Optics.Internal.Re where
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Internal.Utils
 
 class ReversibleOptic k where
   type ReversedOptic k :: OpticKind
@@ -96,12 +95,6 @@ instance Costrong p => Strong (Re p s t) where
   second' (Re p) = Re (p . unsecond)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
-
-  linear f = dimap
-    ((\(Context bt a) -> (a, bt)) . f (Context id))
-    (\(b, bt) -> bt b)
-    . first'
-  {-# INLINE linear #-}
 
 instance Choice p => Cochoice (Re p s t) where
   unleft  (Re p) = Re (p . left')

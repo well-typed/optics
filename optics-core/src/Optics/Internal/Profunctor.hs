@@ -69,7 +69,14 @@ instance Profunctor IxFunArrow where
 class Profunctor p => Strong p where
   first'  :: p i a b -> p i (a, c) (b, c)
   second' :: p i a b -> p i (c, a) (c, b)
+
+  -- There are few places where default implementation is good enough.
   linear  :: (forall f. Functor f => (a -> f b) -> s -> f t) -> p i a b -> p i s t
+  linear f = dimap
+    ((\(Context bt a) -> (a, bt)) . f (Context id))
+    (\(b, bt) -> bt b)
+    . first'
+  {-# INLINE linear #-}
 
 instance Functor f => Strong (Star f) where
   first'  (Star k) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a

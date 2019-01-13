@@ -72,9 +72,3 @@ instance Strong (Store a b) where
   second' (Store get set) = Store (get . snd) (\(c, s) b -> (c, set s b))
   {-# INLINE first' #-}
   {-# INLINE second' #-}
-
-  linear f = dimap
-    ((\(Context bt a) -> (a, bt)) . f (Context id))
-    (\(b, bt) -> bt b)
-    . first'
-  {-# INLINE linear #-}
