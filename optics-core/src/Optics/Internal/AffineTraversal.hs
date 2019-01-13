@@ -2,6 +2,7 @@ module Optics.Internal.AffineTraversal where
 
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
+import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying affine traversal.
 type AffineTraversal i s t a b = Optic An_AffineTraversal i i s t a b
@@ -70,6 +71,12 @@ instance Strong (AffineMarket a b) where
 
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+  linear f = dimap
+    ((\(Context bt a) -> (a, bt)) . f (Context id))
+    (\(b, bt) -> bt b)
+    . first'
+  {-# INLINE linear #-}
 
 bimapE :: (a -> b) -> (c -> d) -> Either a c -> Either  b d
 bimapE f _ (Left a)  = Left (f a)

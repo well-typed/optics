@@ -69,6 +69,7 @@ instance Profunctor IxFunArrow where
 class Profunctor p => Strong p where
   first'  :: p i a b -> p i (a, c) (b, c)
   second' :: p i a b -> p i (c, a) (c, b)
+  linear  :: (forall f. Functor f => (a -> f b) -> s -> f t) -> p i a b -> p i s t
 
 instance Functor f => Strong (Star f) where
   first'  (Star k) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
@@ -76,11 +77,17 @@ instance Functor f => Strong (Star f) where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
+  linear f (Star k) = Star (f k)
+  {-# INLINE linear #-}
+
 instance Strong (Forget r) where
   first'  (Forget k) = Forget (k . fst)
   second' (Forget k) = Forget (k . snd)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+  linear f (Forget k) = Forget (getConst #. f (Const #. k))
+  {-# INLINE linear #-}
 
 instance Strong (ForgetM r) where
   first'  (ForgetM k) = ForgetM (k . fst)
@@ -88,11 +95,17 @@ instance Strong (ForgetM r) where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
+  linear f (ForgetM k) = ForgetM (getConst #. f (Const #. k))
+  {-# INLINE linear #-}
+
 instance Strong FunArrow where
   first'  (FunArrow k) = FunArrow $ \ ~(a, c) -> (k a, c)
   second' (FunArrow k) = FunArrow $ \ ~(c, a) -> (c, k a)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+  linear f (FunArrow k) = FunArrow $ runIdentity #. f (Identity #. k)
+  {-# INLINE linear #-}
 
 instance Functor f => Strong (IxStar f) where
   first'  (IxStar k) = IxStar $ \i ~(a, c) -> (\b' -> (b', c)) <$> k i a
@@ -100,17 +113,26 @@ instance Functor f => Strong (IxStar f) where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
+  linear f (IxStar k) = IxStar $ \i -> f (k i)
+  {-# INLINE linear #-}
+
 instance Strong (IxForget r) where
   first'  (IxForget k) = IxForget $ \i -> k i . fst
   second' (IxForget k) = IxForget $ \i -> k i . snd
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
+  linear f (IxForget k) = IxForget $ \i -> getConst #. f (Const #. k i)
+  {-# INLINE linear #-}
+
 instance Strong IxFunArrow where
   first'  (IxFunArrow k) = IxFunArrow $ \i ~(a, c) -> (k i a, c)
   second' (IxFunArrow k) = IxFunArrow $ \i ~(c, a) -> (c, k i a)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+  linear f (IxFunArrow k) = IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
+  {-# INLINE linear #-}
 
 ----------------------------------------
 
