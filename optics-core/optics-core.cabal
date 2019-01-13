@@ -29,6 +29,7 @@ library
   exposed-modules: Optics
                    Optics.AffineFold
                    Optics.AffineTraversal
+                   Optics.Arrow
                    Optics.Each
                    Optics.Equality
                    Optics.Fold
@@ -51,9 +52,9 @@ library
 
   exposed-modules: Data.Either.Optics
                    Data.Maybe.Optics
+                   Data.Set.Optics
                    Data.Tuple.Optics
                    GHC.Generics.Optics
-                   Data.Set.Optics
                    Language.Haskell.TH.Optics
  
   other-modules: Optics.Internal.AffineFold
