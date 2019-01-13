@@ -1,4 +1,23 @@
-module Optics.Internal.Optic.Types where
+module Optics.Internal.Optic.Types
+  ( OpticKind
+  , An_Equality
+  , An_Iso
+  , A_Lens
+  , A_Prism
+  , An_AffineTraversal
+  , A_Traversal
+  , An_IxTraversal
+  , A_Setter
+  , An_IxSetter
+  , A_PrismaticGetter
+  , A_Getter
+  , An_AffineFold
+  , A_Fold
+  , An_IxFold
+  , A_LensyReview
+  , A_Review
+  , Constraints
+  ) where
 
 import GHC.Exts (Constraint)
 
@@ -79,19 +98,19 @@ type A_Review = 'A_Review
 -- optics have to fulfill.
 --
 type family Constraints (k :: OpticKind) (p :: * -> * -> * -> *) :: Constraint where
-  Constraints 'An_Equality        p = ()
-  Constraints 'An_Iso             p = Profunctor p
-  Constraints 'A_Lens             p = Strong p
-  Constraints 'A_LensyReview      p = Costrong p
-  Constraints 'A_Prism            p = Choice p
-  Constraints 'A_PrismaticGetter  p = Cochoice p
-  Constraints 'An_AffineTraversal p = (Strong p, Choice p)
-  Constraints 'A_Traversal        p = IxTraversing p
-  Constraints 'An_IxTraversal     p = IxTraversing p
-  Constraints 'A_Setter           p = IxMapping p
-  Constraints 'An_IxSetter        p = IxMapping p
-  Constraints 'A_Getter           p = (Bicontravariant p, Cochoice p, Strong p)
-  Constraints 'An_AffineFold      p = (Bicontravariant p, Cochoice p, Strong p, Choice p)
-  Constraints 'A_Fold             p = (Bicontravariant p, Cochoice p, IxTraversing p)
-  Constraints 'An_IxFold          p = (Bicontravariant p, Cochoice p, IxTraversing p)
-  Constraints 'A_Review           p = (Bifunctor p, Choice p, Costrong p)
+  Constraints An_Equality        p = ()
+  Constraints An_Iso             p = Profunctor p
+  Constraints A_Lens             p = Strong p
+  Constraints A_LensyReview      p = Costrong p
+  Constraints A_Prism            p = Choice p
+  Constraints A_PrismaticGetter  p = Cochoice p
+  Constraints An_AffineTraversal p = (Strong p, Choice p)
+  Constraints A_Traversal        p = IxTraversing p
+  Constraints An_IxTraversal     p = IxTraversing p
+  Constraints A_Setter           p = IxMapping p
+  Constraints An_IxSetter        p = IxMapping p
+  Constraints A_Getter           p = (Bicontravariant p, Cochoice p, Strong p)
+  Constraints An_AffineFold      p = (Bicontravariant p, Cochoice p, Strong p, Choice p)
+  Constraints A_Fold             p = (Bicontravariant p, Cochoice p, IxTraversing p)
+  Constraints An_IxFold          p = (Bicontravariant p, Cochoice p, IxTraversing p)
+  Constraints A_Review           p = (Bifunctor p, Choice p, Costrong p)
