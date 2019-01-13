@@ -326,7 +326,9 @@ class (IxTraversing p, Mapping p) => IxMapping p where
 
 instance IxMapping FunArrow where
   iroam f (FunArrow k) = FunArrow (f (const k))
+  {-# INLINE iroam #-}
 
 instance IxMapping IxFunArrow where
   iroam f (IxFunArrow k) =
     IxFunArrow $ \ij -> f $ \i -> k (ij i)
+  {-# INLINE iroam #-}
