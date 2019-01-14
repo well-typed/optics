@@ -5,14 +5,14 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying indexed traversal.
-type IxTraversal i o s t a b = Optic An_IxTraversal i o s t a b
+type IxTraversal i o s t a b = Optic A_Traversal i o s t a b
 
 -- | Type synonym for a type-preserving indexed traversal.
-type IxTraversal' i o s a = Optic' An_IxTraversal i o s a
+type IxTraversal' i o s a = Optic' A_Traversal i o s a
 
 -- | Explicitly cast an optic to an indexed traversal.
 toIxTraversal
-  :: Is k An_IxTraversal
+  :: Is k A_Traversal
   => Optic k i o s t a b
   -> IxTraversal i o s t a b
 toIxTraversal = sub
@@ -33,7 +33,7 @@ itraversed = vlIxTraversal itraverse
 {-# INLINE itraversed #-}
 
 itraverseOf
-  :: (CheckIndices i o, Is k An_IxTraversal)
+  :: (CheckIndices i o, Is k A_Traversal)
   => Optic k i o s t a b
   -> (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
 itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id

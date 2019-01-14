@@ -1,23 +1,21 @@
 module Optics.Unindexed where
 
 import Optics.Internal.Optic
+import Optics.Internal.Profunctor
+import Optics.Internal.Indexed
 
 class UnindexableOptic k where
-  type UnindexedOptic k :: *
   -- | Downcast an indexed optic to its unindexed equivalent.
-  unIx :: Optic k i o s t a b -> Optic (UnindexedOptic k) i o s t a b
+  unIx :: CheckIndices i o => Optic k i o s t a b -> Optic k i i s t a b
 
-instance UnindexableOptic An_IxTraversal where
-  type UnindexedOptic An_IxTraversal = A_Traversal
-  unIx (Optic o) = Optic o
+instance UnindexableOptic A_Traversal where
+  unIx (Optic o) = Optic (ixcontramap const . o)
   {-# INLINE unIx #-}
 
-instance UnindexableOptic An_IxFold where
-  type UnindexedOptic An_IxFold = A_Fold
-  unIx (Optic o) = Optic o
+instance UnindexableOptic A_Fold where
+  unIx (Optic o) = Optic (ixcontramap const . o)
   {-# INLINE unIx #-}
 
-instance UnindexableOptic An_IxSetter where
-  type UnindexedOptic An_IxSetter = A_Setter
-  unIx (Optic o) = Optic o
+instance UnindexableOptic A_Setter where
+  unIx (Optic o) = Optic (ixcontramap const . o)
   {-# INLINE unIx #-}

@@ -5,19 +5,19 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying indexed setter.
-type IxSetter i o s t a b = Optic An_IxSetter i o s t a b
+type IxSetter i o s t a b = Optic A_Setter i o s t a b
 
 -- | Type synonym for a type-preserving indexed setter.
-type IxSetter' i o s a = Optic' An_IxSetter i o s a
+type IxSetter' i o s a = Optic' A_Setter i o s a
 
 -- | Explicitly cast an optic to an indexeed setter.
-toIxSetter :: Is k An_IxSetter => Optic k i o s t a b -> IxSetter i o s t a b
+toIxSetter :: Is k A_Setter => Optic k i o s t a b -> IxSetter i o s t a b
 toIxSetter = sub
 {-# INLINE toIxSetter #-}
 
 -- | Apply an indexed setter as a modifier.
 iover
-  :: (CheckIndices i o, Is k An_IxSetter)
+  :: (CheckIndices i o, Is k A_Setter)
   => Optic k i o s t a b
   -> (i -> a -> b) -> s -> t
 iover o f = runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
@@ -25,7 +25,7 @@ iover o f = runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
 
 -- | Apply an indexed setter.
 iset
-  :: (CheckIndices i o, Is k An_IxSetter)
+  :: (CheckIndices i o, Is k A_Setter)
   => Optic k i o s t a b
   -> (i -> b) -> s -> t
 iset o f = iover o (\i _ -> f i)

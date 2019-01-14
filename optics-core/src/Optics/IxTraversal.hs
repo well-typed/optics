@@ -1,5 +1,5 @@
 module Optics.IxTraversal
-  ( An_IxTraversal
+  ( A_Traversal
   , IxTraversal
   , IxTraversal'
   , TraversableWithIndex(..)

@@ -34,12 +34,8 @@ data OpticKind
   |  An_AffineTraversal
   -- | Tag for a traversal.
   |  A_Traversal
-  -- | Tag for an indexed traversal.
-  |  An_IxTraversal
   -- | Tag for a setter.
   |  A_Setter
-  -- | Tag for an indexed setter.
-  |  An_IxSetter
   -- | Tag for a prismatic getter.
   |  A_PrismaticGetter
   -- | Tag for a getter.
@@ -48,8 +44,6 @@ data OpticKind
   |  An_AffineFold
   -- | Tag for a fold.
   |  A_Fold
-  -- | Tag for an indexed fold.
-  |  An_IxFold
   -- | Tag for a lensy review.
   |  A_LensyReview
   -- | Tag for a review.
@@ -79,14 +73,6 @@ opticsKind = mkProper $ Map.fromListWith (<>)
 
     , A_Getter           ~> An_AffineFold
     , An_AffineFold      ~> A_Fold
-
-    -- indexed
-    , A_Traversal        ~> An_IxTraversal
-    , A_Setter           ~> An_IxSetter
-    , A_Fold             ~> An_IxFold
-
-    , An_IxTraversal     ~> An_IxSetter
-    , An_IxTraversal     ~> An_IxFold
     ]
   where
     k ~> k' = (k, Set.singleton k')

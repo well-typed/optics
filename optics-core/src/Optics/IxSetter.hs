@@ -1,5 +1,5 @@
 module Optics.IxSetter
-  ( An_IxSetter
+  ( A_Setter
   , IxSetter
   , IxSetter'
   , FunctorWithIndex(..)

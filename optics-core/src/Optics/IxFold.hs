@@ -1,5 +1,5 @@
 module Optics.IxFold
-  ( An_IxFold
+  ( A_Fold
   , IxFold
   , toIxFold
   , ifoldMapOf
