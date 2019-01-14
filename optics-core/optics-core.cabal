@@ -57,6 +57,9 @@ library
                    Data.Tuple.Optics
                    GHC.Generics.Optics
                    Language.Haskell.TH.Optics
+
+  -- internal but exposed modules:
+  other-modules: Optics.Internal.OpticKind
  
   other-modules: Optics.Internal.AffineFold
                  Optics.Internal.AffineTraversal
