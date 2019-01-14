@@ -5,7 +5,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
-  type ReversedOptic k :: OpticKind
+  type ReversedOptic k :: *
   -- | Reverses optics, turning around 'Equality' into 'Equality', 'Iso' into
   -- 'Iso', 'Prism' into 'PrismaticGetter' (and back), 'Lens' into 'LensyReview'
   -- (and back) and 'Getter' into 'Review' (and back).

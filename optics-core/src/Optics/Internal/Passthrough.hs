@@ -7,7 +7,7 @@ import Optics.Internal.Prism
 import Optics.Internal.Traversal
 import Optics.Internal.View
 
-class (Is k 'A_Traversal, ViewableOptic k r) => PermeableOptic k r where
+class (Is k A_Traversal, ViewableOptic k r) => PermeableOptic k r where
   -- | Modify the target of an 'Optic' returning some extra information of type 'r'.
   passthrough :: Optic k i i s t a b -> (a -> (r, b)) -> s -> (ViewResult k r, t)
 

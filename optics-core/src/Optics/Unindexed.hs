@@ -3,7 +3,7 @@ module Optics.Unindexed where
 import Optics.Internal.Optic
 
 class UnindexableOptic k where
-  type UnindexedOptic k :: OpticKind
+  type UnindexedOptic k :: *
   -- | Downcast an indexed optic to its unindexed equivalent.
   unIx :: Optic k i o s t a b -> Optic (UnindexedOptic k) i o s t a b
 

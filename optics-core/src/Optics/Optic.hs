@@ -1,7 +1,6 @@
 module Optics.Optic
   ( Optic
   , Optic'
-  , OpticKind
   , Is
   , sub
   , Join

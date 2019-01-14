@@ -23,7 +23,7 @@ module Optics
   --
   -- * Opaque 'Optic' type,
   --
-  -- * which is parameterised over 'OpticKind';
+  -- * which is parameterised over a type representing an optic flavour;
   --
   -- * 'Is' and 'Join' relations, illustrated in the graph below;
   --
@@ -36,7 +36,7 @@ module Optics
   -- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
   --
   -- >>> :kind! Join A_Lens A_Prism
-  -- Join A_Lens A_Prism :: OpticKind
+  -- Join A_Lens A_Prism :: *
   -- = An_AffineTraversal
   --
   -- There are also indexed variants of 'Traversal', 'Fold' and 'Setter'.
