@@ -5,10 +5,10 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for an affine fold.
-type AffineFold i s a = Optic' An_AffineFold i i s a
+type AffineFold s a = Optic' An_AffineFold '[] s a
 
 -- | Explicitly cast an optic to an affine fold.
-toAffineFold :: Is k An_AffineFold => Optic' k i i s a -> AffineFold i s a
+toAffineFold :: Is k An_AffineFold => Optic' k is s a -> Optic' An_AffineFold is s a
 toAffineFold = sub
 {-# INLINE toAffineFold #-}
 
@@ -20,7 +20,7 @@ toAffineFold = sub
 -- >>> view01 _Right (Left 'y')
 -- Nothing
 --
-view01 :: Is k An_AffineFold => Optic' k i i s a -> s -> Maybe a
+view01 :: Is k An_AffineFold => Optic' k is s a -> s -> Maybe a
 view01 o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
 {-# INLINE view01 #-}
 
@@ -29,7 +29,7 @@ view01 o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
 -- >>> view01 (afolding listToMaybe) "foo"
 -- Just 'f'
 --
-afolding :: (s -> Maybe a) -> AffineFold i s a
+afolding :: (s -> Maybe a) -> AffineFold s a
 afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
 {-# INLINE afolding #-}
 

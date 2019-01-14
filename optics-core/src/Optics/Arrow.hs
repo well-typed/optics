@@ -49,7 +49,7 @@ instance ArrowChoice p => Choice (WrappedArrow p) where
 
 class Arrow arr => ArrowOptic k arr where
   -- | Turn an optic into an arrow transformer.
-  overA :: Optic k i o s t a b -> arr a b -> arr s t
+  overA :: Optic k '[] s t a b -> arr a b -> arr s t
 
 instance Arrow arr => ArrowOptic An_Iso arr where
   overA = overA__
@@ -86,7 +86,7 @@ instance ArrowChoice arr => ArrowOptic An_AffineTraversal arr where
 -- has the type @'Either' 'String' ('Int', 'Bool', 'Char')@
 assignA
   :: (Is k A_Setter, Arrow arr)
-  => Optic k i o s t a b
+  => Optic k '[] s t a b
   -> arr s b -> arr s t
 assignA o p = arr (flip $ set o) &&& p >>> arr (uncurry id)
 {-# INLINE assignA #-}
@@ -96,7 +96,7 @@ assignA o p = arr (flip $ set o) &&& p >>> arr (uncurry id)
 -- | Internal implementation of overA.
 overA__
   :: Constraints k (WrappedArrow arr)
-  => Optic k i o s t a b
+  => Optic k '[] s t a b
   -> arr a b -> arr s t
 overA__ o = unwrapArrow #. getOptic o .# WrapArrow
 {-# INLINE overA__ #-}

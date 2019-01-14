@@ -31,39 +31,39 @@ import Optics.Internal.Utils
 -- | Generate sensible error messages in case a user tries to use regular optic
 -- as an indexed one or doesn't call appropriate icompose function to flatten
 -- the indices before trying to use an indexed optic.
-class o ~ (i -> i) => CheckIndices i o
+class is ~ '[i] => CheckIndices i is
 
-instance CheckIndices i (i -> i)
+instance CheckIndices i '[i]
 
 instance
   ( TypeError ('Text "Regular optic cannot be used as an indexed one")
-  , i ~ (i -> i)
-  ) => CheckIndices i i
+  , '[] ~ '[i]
+  ) => CheckIndices i '[]
 
 instance
-  ( TypeError ('Text "Precompose with icompose to flatten indices")
-  , (a -> b -> i) ~ (i -> i)
-  ) => CheckIndices i (a -> b -> i)
+  ( TypeError ('Text "Use icompose to flatten indices")
+  , '[i1, i2] ~ '[i]
+  ) => CheckIndices i '[i1, i2]
 
 instance
-  ( TypeError ('Text "Precompose with icompose3 to flatten indices")
-  , (a -> b -> c -> i) ~ (i -> i)
-  ) => CheckIndices i (a -> b -> c -> i)
+  ( TypeError ('Text "Use icompose3 to flatten indices")
+  , '[i1, i2, i3] ~ '[i]
+  ) => CheckIndices i [i1, i2, i3]
 
 instance
-  ( TypeError ('Text "Precompose with icompose4 to flatten indices")
-  , (a -> b -> c -> d -> i) ~ (i -> i)
-  ) => CheckIndices i (a -> b -> c -> d -> i)
+  ( TypeError ('Text "Use icompose4 to flatten indices")
+  , '[i1, i2, i3, i4] ~ '[i]
+  ) => CheckIndices i '[i1, i2, i3, i4]
 
 instance
-  ( TypeError ('Text "Precompose with icompose5 to flatten indices")
-  , (a -> b -> c -> d -> e -> i) ~ (i -> i)
-  ) => CheckIndices i (a -> b -> c -> d -> e -> i)
+  ( TypeError ('Text "Use icompose5 to flatten indices")
+  , '[i1, i2, i3, i4, i5] ~ '[i]
+  ) => CheckIndices i '[i1, i2, i3, i4, i5]
 
-instance {-# OVERLAPPABLE #-}
+instance
   ( TypeError ('Text "Use icompose* variants to flatten indices")
-  , o ~ (i -> i)
-  ) => CheckIndices i o
+  , (i1 ': i2 ': i3 ': i4 ': i5 ': is) ~ '[i]
+  ) => CheckIndices i (i1 ': i2 ': i3 ': i4 ': i5 ': is)
 
 ----------------------------------------
 

@@ -9,7 +9,7 @@ class ReversibleOptic k where
   -- | Reverses optics, turning around 'Equality' into 'Equality', 'Iso' into
   -- 'Iso', 'Prism' into 'PrismaticGetter' (and back), 'Lens' into 'LensyReview'
   -- (and back) and 'Getter' into 'Review' (and back).
-  re :: Optic k i i s t a b -> Optic (ReversedOptic k) i i b a t s
+  re :: Optic k '[] s t a b -> Optic (ReversedOptic k) '[] b a t s
 
 instance ReversibleOptic An_Equality where
   type ReversedOptic An_Equality = An_Equality
@@ -54,7 +54,7 @@ instance ReversibleOptic A_Review where
 -- | Internal implementation of re.
 re__
   :: Constraints k (Re p a b)
-  => Optic k   i i s t a b
+  => Optic k   '[] s t a b
   -> Optic__ p i i b a t s
 re__ o = unRe (getOptic o (Re id))
 {-# INLINE re__ #-}

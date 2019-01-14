@@ -4,30 +4,30 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying prism.
-type Prism i s t a b = Optic A_Prism i i s t a b
+type Prism s t a b = Optic A_Prism '[] s t a b
 
 -- | Type synonym for a type-preserving prism.
-type Prism' i s a = Optic' A_Prism i i s a
+type Prism' s a = Optic' A_Prism '[] s a
 
 -- | Explicitly cast an optic to a prism.
-toPrism :: Is k A_Prism => Optic k i i s t a b -> Prism i s t a b
+toPrism :: Is k A_Prism => Optic k is s t a b -> Optic A_Prism is s t a b
 toPrism = sub
 {-# INLINE toPrism #-}
 
 -- | Build a prism from a constructor and a matcher.
-prism :: (b -> t) -> (s -> Either t a) -> Prism i s t a b
+prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism construct match = Optic $ dimap match (either id construct) . right'
 {-# INLINE prism #-}
 
 -- | This is usually used to build a 'Prism'', when you have to use an operation
 -- like 'Data.Typeable.cast' which already returns a 'Maybe'.
-prism' :: (b -> s) -> (s -> Maybe a) -> Prism i s s a b
+prism' :: (b -> s) -> (s -> Maybe a) -> Prism s s a b
 prism' bs sma = prism bs (\s -> maybe (Left s) Right (sma s))
 {-# INLINE prism' #-}
 
 withPrism
   :: Is k A_Prism
-  => Optic k i i s t a b
+  => Optic k is s t a b
   -> ((b -> t) -> (s -> Either t a) -> r)
   -> r
 withPrism o k = case getOptic (toPrism o) (Market id Right) of

@@ -206,7 +206,7 @@ import Data.Either.Optics as P
 --
 --     >>> :t traversed % to not
 --     traversed % to not
---       :: Traversable t => Optic A_Fold o o (t Bool) (t Bool) Bool Bool
+--       :: Traversable t => Optic A_Fold '[] (t Bool) (t Bool) Bool Bool
 --
 -- * abstract interface: not all optics have 'Join'
 --

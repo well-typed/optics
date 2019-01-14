@@ -47,7 +47,6 @@ instance AppendProof xs ys zs => AppendProof (x ': xs) ys (x ': zs) where
   appendProof i = case appendProof @xs @ys @zs i of
     Refl -> Refl
 
-{-
 
 class CurryCompose xs where
   composeN :: (i -> j) -> Curry xs i -> Curry xs j
@@ -60,6 +59,7 @@ instance CurryCompose xs => CurryCompose (x ': xs) where
   composeN ij f x = composeN @xs ij (f x)
   {-# INLINE composeN #-}
 
+{-
 
 class ConstN xs where
   constN :: y -> Curry xs y

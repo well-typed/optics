@@ -4,19 +4,19 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying affine traversal.
-type AffineTraversal i s t a b = Optic An_AffineTraversal i i s t a b
+type AffineTraversal is s t a b = Optic An_AffineTraversal is s t a b
 
 -- | Type synonym for a type-preserving affine traversal.
-type AffineTraversal' i s a = Optic' An_AffineTraversal i i s a
+type AffineTraversal' is s a = Optic' An_AffineTraversal is s a
 
 -- | Explicitly cast an optic to an affine traversal.
 toAffineTraversal
-  :: Is k An_AffineTraversal => Optic k i i s t a b -> AffineTraversal i s t a b
+  :: Is k An_AffineTraversal => Optic k is s t a b -> AffineTraversal is s t a b
 toAffineTraversal = sub
 {-# INLINE toAffineTraversal #-}
 
 -- | Build an affine traversal from a matcher and an updater.
-atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal i s t a b
+atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal '[] s t a b
 atraversal match update = Optic $
   dimap (\s -> (match s, update s))
         (\(etb, f) -> either id f etb)
@@ -26,7 +26,7 @@ atraversal match update = Optic $
 
 withAffineTraversal
   :: Is k An_AffineTraversal
-  => Optic k i i s t a b
+  => Optic k is s t a b
   -> ((s -> b -> t) -> (s -> Either t a) -> r)
   -> r
 withAffineTraversal o k = case getOptic (toAffineTraversal o) (AffineMarket (\_ b -> b) Right) of
@@ -36,7 +36,7 @@ withAffineTraversal o k = case getOptic (toAffineTraversal o) (AffineMarket (\_ 
 ----------------------------------------
 
 -- | Type to represent the components of a affine traversal
-data AffineMarket a b i s t = AffineMarket (s -> b -> t) (s -> Either t a)
+data AffineMarket a b is s t = AffineMarket (s -> b -> t) (s -> Either t a)
 
 instance Profunctor (AffineMarket a b) where
   dimap f g (AffineMarket sbt seta) = AffineMarket

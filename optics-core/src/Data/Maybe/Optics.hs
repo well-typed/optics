@@ -6,7 +6,7 @@ module Data.Maybe.Optics
 
 import Optics.Prism
 
-_Nothing :: Prism' i (Maybe a) ()
+_Nothing :: Prism' (Maybe a) ()
 _Nothing =
   prism
     (\ () -> Nothing)
@@ -17,7 +17,7 @@ _Nothing =
     )
 {-# INLINE _Nothing #-}
 
-_Just :: Prism i (Maybe a) (Maybe b) a b
+_Just :: Prism (Maybe a) (Maybe b) a b
 _Just =
   prism
     Just

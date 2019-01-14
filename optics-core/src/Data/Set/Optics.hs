@@ -27,7 +27,7 @@ import Optics.Setter
 --
 -- >>> over setmapped (+1) (fromList [1,2,3,4])
 -- fromList [2,3,4,5]
-setmapped :: Ord b => Setter i (Set a) (Set b) a b
+setmapped :: Ord b => Setter (Set a) (Set b) a b
 setmapped = sets Set.map
 {-# INLINE setmapped #-}
 
@@ -38,7 +38,7 @@ setmapped = sets Set.map
 --
 -- >>> setOf (folded % _2) [("hello",1),("world",2),("!!!",3)]
 -- fromList [1,2,3]
-setOf :: (Is k A_Fold, Ord a) => Optic' k i i s a -> s -> Set a
+setOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Set a
 setOf l = foldMapOf l Set.singleton
 {-# INLINE setOf #-}
 
