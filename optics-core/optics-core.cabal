@@ -73,6 +73,7 @@ library
                  Optics.Internal.Lens
                  Optics.Internal.Optic
                  Optics.Internal.Optic.Subtyping
+                 Optics.Internal.Optic.TypeLevel
                  Optics.Internal.Optic.Types
                  Optics.Internal.Prism
                  Optics.Internal.Profunctor

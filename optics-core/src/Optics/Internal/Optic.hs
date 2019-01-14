@@ -16,10 +16,12 @@ module Optics.Internal.Optic
   , (%%)
   , module Optics.Internal.Optic.Subtyping
   , module Optics.Internal.Optic.Types
+  , module Optics.Internal.Optic.TypeLevel
   ) where
 
 import Optics.Internal.Optic.Subtyping
 import Optics.Internal.Optic.Types
+import Optics.Internal.Optic.TypeLevel (Curry, Append)
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
 --

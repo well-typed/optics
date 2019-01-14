@@ -6,6 +6,7 @@ module Optics.Optic
   , Join
   , (%)
   , (%%)
+  , Append,
   )
   where
 
