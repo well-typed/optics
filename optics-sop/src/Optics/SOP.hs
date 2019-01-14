@@ -35,17 +35,17 @@ newtype WrappedNPPrism i s xs = WrappedNPPrism { unWrapNPPrism :: Prism' i s (NP
 -- | Wrapped form of a prism to a tuple, to enable partial application.
 newtype WrappedPrism   i s xs = WrappedPrism   { unWrapPrism :: Prism' i s (ToTuple xs) }
 
--- | Produce an 'NP' of wrapped lenses for a generic record type.
+-- | Produce an 'NP' of wrapped lenses for a generic product type.
 lenses ::
   forall i a xs .
-  (Generic a, Code a ~ '[ xs ]) => NP (WrappedLens i a) xs
-lenses = hmap (coerce (record %)) (go sList)
+  (IsProductType a xs) => NP (WrappedLens i a) xs
+lenses = hmap (coerce (productRep %)) (go sList)
   where
     go :: forall ys . SList ys -> NP (WrappedLens i (NP I ys)) ys
     go SNil  = Nil
     go SCons = coerce (npHead % i) :* hmap (coerce (npTail %)) (go sList)
 
--- | Produce an 'NP' of wrapped prisms for a generic record type.
+-- | Produce an 'NP' of wrapped prisms for a generic product type.
 --
 -- Prisms match the big type to a product of the constructor arguments.
 -- In this variant, 'NP' is used to represent these products.
@@ -59,7 +59,7 @@ npPrisms = hmap (coerce (rep % sop %)) (go sList)
     go SNil  = Nil
     go SCons = coerce _Z :* hmap (coerce (_S %)) (go sList)
 
--- | Produce an 'NP' of wrapped prisms for a generic record type.
+-- | Produce an 'NP' of wrapped prisms for a generic product type.
 --
 -- Prisms match the big type to a product of the constructor arguments.
 -- In this variant, tuples are used to represent these products.
@@ -119,7 +119,7 @@ data PrismsFor i a =
   Prisms ((Generic a) => TupleUnpack (WrappedPrism i a) (Code a))
 
 -- | Produce all lenses for a generic record datatype.
-mkLenses :: forall i a xs . (Generic a, Code a ~ '[ xs ]) => LensesFor i a
+mkLenses :: forall i a xs . (IsProductType a xs) => LensesFor i a
 mkLenses =
   Lenses (tupleUnpack unWrapLens (lenses :: NP (WrappedLens i a) xs))
 
