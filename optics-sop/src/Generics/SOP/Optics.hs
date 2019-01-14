@@ -8,7 +8,7 @@ module Generics.SOP.Optics
   , z
   , i
   , k
-  , record
+  , productRep
   , npHead
   , npTail
   , npSingleton
@@ -17,6 +17,7 @@ module Generics.SOP.Optics
   )
   where
 
+import Prelude hiding (product)
 import Generics.SOP
 import Optics hiding (to)
 
@@ -40,9 +41,9 @@ i = iso unI I
 k :: Iso i (K a b) (K c d) a c
 k = iso unK K
 
--- | Iso between a generic record type and its product representation.
-record :: (Generic a, Generic b, Code a ~ '[ xs ], Code b ~ '[ ys ]) => Iso i a b (NP I xs) (NP I ys)
-record = rep % sop % z
+-- | Iso between a generic product type and its product representation.
+productRep :: (IsProductType a xs, IsProductType b ys) => Iso i a b (NP I xs) (NP I ys)
+productRep = rep % sop % z
 
 -- | Lens accessing the head of an 'NP'.
 npHead :: Lens i (NP f (x ': xs)) (NP f (y ': xs)) (f x) (f y)

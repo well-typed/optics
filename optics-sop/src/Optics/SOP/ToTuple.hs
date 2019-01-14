@@ -30,8 +30,8 @@ type family ToTuple (xs :: [*]) :: * where
 
 class TupleLike xs where
   tuple :: Iso' i (NP I xs) (ToTuple xs)
-  default tuple :: (Generic a, Code a ~ '[ xs ], ToTuple xs ~ a) => Iso' i (NP I xs) (ToTuple xs)
-  tuple = re record
+  default tuple :: (IsProductType a xs, ToTuple xs ~ a) => Iso' i (NP I xs) (ToTuple xs)
+  tuple = re productRep
 
 instance TupleLike '[]
 instance TupleLike '[x1] where
