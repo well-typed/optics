@@ -40,5 +40,5 @@ isets f = Optic (iroam f)
 
 -- | Indexed setter via the 'FunctorWithIndex' class.
 imapped :: FunctorWithIndex i f => IxSetter i (f a) (f b) a b
-imapped = Optic (iroam imap)
+imapped = isets imap
 {-# INLINE imapped #-}

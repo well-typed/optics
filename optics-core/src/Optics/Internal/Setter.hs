@@ -47,7 +47,7 @@ sets f = Optic (roam f)
 
 -- | Setter via the 'Functor' class.
 mapped :: Functor f => Setter (f a) (f b) a b
-mapped = Optic (roam fmap)
+mapped = sets fmap
 {-# INLINE mapped #-}
 
 -- $setup
