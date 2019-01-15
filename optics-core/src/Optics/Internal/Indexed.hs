@@ -60,10 +60,10 @@ instance
   , '[i1, i2, i3, i4, i5] ~ '[i]
   ) => CheckIndices i '[i1, i2, i3, i4, i5]
 
-instance
+instance {-# OVERLAPPABLE #-}
   ( TypeError ('Text "Use icompose* variants to flatten indices")
-  , (i1 ': i2 ': i3 ': i4 ': i5 ': is) ~ '[i]
-  ) => CheckIndices i (i1 ': i2 ': i3 ': i4 ': i5 ': is)
+  , is ~ '[i]
+  ) => CheckIndices i is
 
 ----------------------------------------
 
