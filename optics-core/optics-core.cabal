@@ -3,11 +3,19 @@ version: 0.1
 license: BSD3
 license-file: LICENSE
 build-type: Simple
-cabal-version: >= 1.10
+cabal-version: 1.24
+maintainer: oleg@well-typed.com
+author: Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
 tested-with: GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.3
 
+synopsis: Optics as an abstract interface: core definitions
+category: Data, Optics, Lenses, Generics
 description:
   TODO: briefly mention motivation and differences from @lens@
+
+  This package provides core definitions with small dependency footprint.
+  See @optics@ package (and its dependencies) for "batteries-included"
+  variant.
   
   See the main module "Optics" for the documentation.
 
