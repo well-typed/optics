@@ -70,10 +70,10 @@ install:
   - grep -Ev -- '^\s*--' ${HOME}/.cabal/config | grep -Ev '^\s*$'
   - (cd /tmp && echo '' | cabal new-repl -w ${HC} --build-dep fail)
   - if [ $HCNUMVER -ge 80000 ]; then cabal new-install -w ${HC} -j2 --symlink-bindir=$HOME/.local/bin doctest --constraint='doctest ==0.16.*'; fi
-  - "printf 'packages: \"optics-core\" \"optics-sop\"\\n' > cabal.project"
+  - "printf 'packages: \"optics-core\" \"optics-sop\" \"generic-optics\"\\n' > cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics-core | grep -vw -- optics-sop | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
+  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics-core | grep -vw -- optics-sop | grep -vw -- generic-optics | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "optics-core/configure.ac" ]; then
@@ -82,10 +82,13 @@ install:
   - if [ -f "optics-sop/configure.ac" ]; then
       (cd "optics-sop" && autoreconf -i);
     fi
+  - if [ -f "generic-optics/configure.ac" ]; then
+      (cd "generic-optics" && autoreconf -i);
+    fi
   - rm -f cabal.project.freeze
   - cabal new-build -w ${HC} ${TEST} ${BENCH} --project-file="cabal.project" --dep -j2 all
   - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --project-file="cabal.project" --dep -j2 all
-  - rm -rf .ghc.environment.* "optics-core"/dist "optics-sop"/dist
+  - rm -rf .ghc.environment.* "optics-core"/dist "optics-sop"/dist "generic-optics"/dist
   - DISTDIR=$(mktemp -d /tmp/dist-test.XXXX)
 
 # Here starts the actual work to be performed for the package under test;
@@ -96,10 +99,10 @@ script:
   - mv dist-newstyle/sdist/*.tar.gz ${DISTDIR}/
   - cd ${DISTDIR} || false
   - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
-  - "printf 'packages: optics-core-*/*.cabal optics-sop-*/*.cabal\\n' > cabal.project"
+  - "printf 'packages: optics-core-*/*.cabal optics-sop-*/*.cabal generic-optics-*/*.cabal\\n' > cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics-core | grep -vw -- optics-sop | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
+  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics-core | grep -vw -- optics-sop | grep -vw -- generic-optics | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # this builds all libraries and executables (without tests/benchmarks)
@@ -112,6 +115,7 @@ script:
   # doctest
   - if [ $HCNUMVER -ge 80000 ]; then (cd optics-core-* && doctest  -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds src); fi
   - if [ $HCNUMVER -ge 80000 ]; then (cd optics-sop-* && doctest  src); fi
+  - if [ $HCNUMVER -ge 80000 ]; then (cd generic-optics-* && doctest  src); fi
 
   # haddock
   - if $HADDOCK; then cabal new-haddock -w ${HC} ${TEST} ${BENCH} all; else echo "Skipping haddock generation";fi
