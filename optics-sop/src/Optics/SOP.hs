@@ -23,7 +23,7 @@ module Optics.SOP
 
 import Data.Coerce
 import Generics.SOP
-import Optics
+import Optics.Core
 
 import Generics.SOP.Optics
 import Optics.SOP.ToTuple

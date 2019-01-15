@@ -14,6 +14,8 @@ toAffineFold = sub
 
 -- | View through 'AffineFold'.
 --
+-- >>> let _Right = prism Right $ either (Left . Left) Right
+--
 -- >>> view01 _Right (Right 'x')
 -- Just 'x'
 --
@@ -34,5 +36,5 @@ afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right'
 {-# INLINE afolding #-}
 
 -- $setup
--- >>> import Optics
+-- >>> import Optics.Core
 -- >>> import Data.Maybe (listToMaybe)

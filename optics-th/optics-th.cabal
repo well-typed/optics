@@ -1,0 +1,29 @@
+name:          optics-th
+version:       0.1
+license:       BSD3
+license-file:  LICENSE
+build-type:    Simple
+maintainer:    oleg@well-typed.com
+author:        Andrzej Rybczak
+cabal-version: >=1.10
+tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
+synopsis:      Optics for generics-sop, and using generics-sop
+category:      Data, Optics, Lenses, Generics
+description:
+  This package provides:
+  .
+  * optics to work with @template-haskell@ types,
+  .
+  * machinery to construct optics using @TemplateHaskell@ (/TODO/)
+
+library
+  default-language: Haskell2010
+  hs-source-dirs:   src
+  ghc-options:      -Wall
+  build-depends:
+      base              >=4.9  && <5
+    , optics-core       >=0.1  && <1
+    , containers >= 0.5.7.1 && < 0.7
+    , template-haskell  >=2.11 && <2.15
+
+  exposed-modules:  Language.Haskell.TH.Optics

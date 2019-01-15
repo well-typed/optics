@@ -22,5 +22,4 @@ executable metametapost-optics
     , generic-optics
     , generics-sop
     , mtl
-    , optics-core
-    , optics-sop
+    , optics

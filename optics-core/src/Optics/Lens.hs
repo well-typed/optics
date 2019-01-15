@@ -13,7 +13,7 @@
 --
 -- Which we can use as a 'Getter'
 --
--- >>> view name human
+-- >>> view1 name human
 -- "Bob"
 --
 -- or a 'Setter'
@@ -90,4 +90,4 @@ import Optics.Internal.Optic
 import Optics.Optic
 
 -- $setup
--- >>> import Optics
+-- >>> import Optics.Core

@@ -6,9 +6,9 @@ module Optics.Arrow
 import Control.Arrow
 import qualified Control.Category as C
 
+import Optics.Core
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Internal.Setter
 import Optics.Internal.Utils
 
 newtype WrappedArrow p i a b = WrapArrow { unwrapArrow :: p a b }
@@ -50,6 +50,10 @@ instance ArrowChoice p => Choice (WrappedArrow p) where
 class Arrow arr => ArrowOptic k arr where
   -- | Turn an optic into an arrow transformer.
   overA :: Optic k '[] s t a b -> arr a b -> arr s t
+
+instance Arrow arr => ArrowOptic An_Equality arr where
+  overA = overA__
+  {-# INLINE overA #-}
 
 instance Arrow arr => ArrowOptic An_Iso arr where
   overA = overA__

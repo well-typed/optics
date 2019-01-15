@@ -40,7 +40,7 @@ import Data.Monoid
 import Optics.Internal.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Utils
-import Optics.Internal.View
+import Optics.View
 import Optics.Optic
 
 -- Concrete folds

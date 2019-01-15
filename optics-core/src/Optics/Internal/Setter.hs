@@ -28,6 +28,7 @@ over o = runFunArrow #. getOptic (toSetter o) .# FunArrow
 
 -- | Apply a setter.
 --
+-- >>> let _1  = lens fst $ \(_,y) x -> (x, y)
 -- >>> set _1 'x' ('y', 'z')
 -- ('x','z')
 --
@@ -51,4 +52,4 @@ mapped = Optic (roam fmap)
 {-# INLINE mapped #-}
 
 -- $setup
--- >>> import Optics
+-- >>> import Optics.Core

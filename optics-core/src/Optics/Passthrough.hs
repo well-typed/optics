@@ -1,11 +1,11 @@
-module Optics.Internal.Passthrough where
+module Optics.Passthrough where
 
 import Optics.Internal.AffineTraversal
 import Optics.Internal.Lens
 import Optics.Internal.Optic
 import Optics.Internal.Prism
 import Optics.Internal.Traversal
-import Optics.Internal.View
+import Optics.View
 
 class (Is k A_Traversal, ViewableOptic k r) => PermeableOptic k r where
   -- | Modify the target of an 'Optic' returning some extra information of type 'r'.

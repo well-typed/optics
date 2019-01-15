@@ -1,4 +1,4 @@
-module Optics.Internal.View where
+module Optics.View where
 
 import Control.Monad.Reader.Class
 

@@ -1,6 +1,8 @@
 packages:
+  optics/*.cabal
   optics-core/*.cabal
   optics-sop/*.cabal
+  optics-th/*.cabal
   generic-optics/*.cabal
 
 -- An example, using optics to generate optics diagrams

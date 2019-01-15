@@ -11,7 +11,7 @@ test : build
 	cabal new-run optics-tests
 
 haddock :
-	cabal new-haddock optics-core
+	cabal new-haddock all
 
 # Build with all supported GHCs, run tests.
 validate : build doctest
@@ -25,8 +25,11 @@ validate : build doctest
 	cabal new-run optics-tests --builddir=dist-validate-8.4.4 -w ghc-8.4.4 --write-ghc-environment-files=never
 	cabal new-run optics-tests --builddir=dist-validate-8.6.3 -w ghc-8.6.3 --write-ghc-environment-files=never
 
-doctest :
-	cd optics-core &&  doctest  -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds src
+# You need patched doctest which knows --no-interpret
+doctest : build
+	doctest --no-interpret --fast $$(find optics/src -name '*.hs')
+	doctest --no-interpret --fast $$(find generic-optics/src -name '*.hs')
+	doctest --no-interpret --fast $$(find optics-core/src -name '*.hs') -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds
 
 ghcid-optics-core :
 	ghcid -c 'cabal new-repl optics-core'
@@ -37,7 +40,7 @@ codegen-subtypes :
 codegen-join :
 	cabal new-run --builddir=dist-codegen --project-file=cabal.codegen.project optics-codegen-subtypes -- join
 
-diagrams : optics-core/optics.png optics-core/reoptics.png optics-core/indexedoptics.png
+diagrams : optics/optics.png optics/reoptics.png optics/indexedoptics.png
 
 metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp : build metametapost/src/MetaMetaPost.hs
 	cabal new-build metametapost-optics
@@ -48,11 +51,11 @@ metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp : 
 metametapost/optics.png metametapost/reoptics.png metametapost/indexedoptics.png : metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp
 	make -C metametapost
 
-optics-core/optics.png : metametapost/optics.mp
-	cp metametapost/optics.png optics-core/optics.png
+optics/optics.png : metametapost/optics.mp
+	cp metametapost/optics.png optics/optics.png
 
-optics-core/reoptics.png : metametapost/reoptics.mp
-	cp metametapost/reoptics.png optics-core/reoptics.png
+optics/reoptics.png : metametapost/reoptics.mp
+	cp metametapost/reoptics.png optics/reoptics.png
 
-optics-core/indexedoptics.png : metametapost/indexedoptics.mp
-	cp metametapost/indexedoptics.png optics-core/indexedoptics.png
+optics/indexedoptics.png : metametapost/indexedoptics.mp
+	cp metametapost/indexedoptics.png optics/indexedoptics.png

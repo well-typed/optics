@@ -1,4 +1,8 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DefaultSignatures      #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs                  #-}
+{-# LANGUAGE UndecidableInstances   #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Optics.Each
