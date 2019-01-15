@@ -56,7 +56,7 @@ module Optics
   --
   --     @
   --     -- Tag for a lens.
-  --     type 'A_Lens' = 'A_Lens
+  --     data A_Lens
   --
   --     -- Type synonym for a type-modifying lens.
   --     type 'Lens' s t a b = 'Optic' 'A_Lens' i i s t a b
