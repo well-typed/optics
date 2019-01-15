@@ -3,4 +3,8 @@ packages:
   optics-sop/*.cabal
   generic-optics/*.cabal
 
+-- An example, using optics to generate optics diagrams
+packages:
+  metametapost/*.cabal
+
 tests: true

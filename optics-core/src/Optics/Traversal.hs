@@ -1,14 +1,20 @@
 module Optics.Traversal
-  ( A_Traversal
+  (
+  -- * Formation
+    A_Traversal
   , Traversal
   , Traversal'
-  , TraversalVL
-  , TraversalVL'
-  , toTraversal
-  , traversalVL
+  -- * Introduction
   , traversed
+  , toTraversal
+  -- * Elimination
   , traverseOf
   , elementsOf
+  -- * van Laarhoven encoding
+  , TraversalVL
+  , TraversalVL'
+  , traversalVL
+  -- * Re-exports
   , module Optics.Optic
   )
   where

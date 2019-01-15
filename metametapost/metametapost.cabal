@@ -1,0 +1,26 @@
+cabal-version: 1.24
+name:          metametapost
+version:       0.1
+license:       BSD3
+license-file:  LICENSE
+build-type:    Simple
+tested-with:   ghc ==8.0.2 ghc ==8.2.2 ghc ==8.4.4 ghc ==8.6.3
+maintainer:    oleg@well-typed.com
+synopsis:      Generate optics documentation diagrams
+category:      Optics, Examples
+description:
+  This is a an example using @optics@, with a practical
+  benefit of generating diagrams used in the documentation.
+
+executable metametapost-optics
+  default-language: Haskell2010
+  ghc-options:      -Wall
+  main-is:          MetaMetaPost.hs
+  hs-source-dirs:   src
+  build-depends:
+      base            >=4.9 && <5
+    , generic-optics
+    , generics-sop
+    , mtl
+    , optics-core
+    , optics-sop
