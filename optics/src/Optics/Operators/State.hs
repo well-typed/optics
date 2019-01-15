@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Optics.Operators.State (
     -- * State modifying optics
     (.=), (?=), (%=),
@@ -14,9 +15,8 @@ module Optics.Operators.State (
 import Control.Monad.State (MonadState)
 import qualified Control.Monad.State as State
 
-import Optics
+import Optics.Core
 import Optics.Operators
-import Optics.Internal.Passthrough
 
 infix 4 .=, ?=, %=
 

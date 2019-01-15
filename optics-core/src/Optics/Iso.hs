@@ -36,7 +36,7 @@ mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 -- 'curried' = 'iso' 'curry' 'uncurry'
 -- @
 --
--- >>> view curried fst 3 4
+-- >>> view1 curried fst 3 4
 -- 3
 --
 curried :: Iso ((a, b) -> c) ((d, e) -> f) (a -> b -> c) (d -> e -> f)
@@ -53,7 +53,7 @@ curried = iso curry uncurry
 -- 'uncurried' = 'from' 'curried'
 -- @
 --
--- >>> (view uncurried (+)) (1,2)
+-- >>> (view1 uncurried (+)) (1,2)
 -- 3
 --
 uncurried :: Iso (a -> b -> c) (d -> e -> f) ((a, b) -> c) ((d, e) -> f)
@@ -62,7 +62,7 @@ uncurried = iso uncurry curry
 
 -- | The isomorphism for flipping a function.
 --
--- >>> (view flipped (,)) 1 2
+-- >>> (view1 flipped (,)) 1 2
 -- (2,1)
 --
 flipped :: Iso (a -> b -> c) (a' -> b' -> c') (b -> a -> c) (b' -> a' -> c')
@@ -79,7 +79,7 @@ class Bifunctor p => Swapped p where
   -- 'bimap' f g '.' 'swapped' = 'swapped' '.' 'bimap' g f
   -- @
   --
-  -- >>> view swapped (1,2)
+  -- >>> view1 swapped (1,2)
   -- (2,1)
   --
   swapped :: Iso (p a b) (p c d) (p b a) (p d c)
@@ -93,4 +93,4 @@ instance Swapped Either where
   {-# INLINE swapped #-}
 
 -- $setup
--- >>> import Optics
+-- >>> import Optics.Core

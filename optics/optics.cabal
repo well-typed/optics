@@ -1,0 +1,108 @@
+name:            optics
+version:         0.1
+license:         BSD3
+license-file:    LICENSE
+build-type:      Simple
+maintainer:      oleg@well-typed.com
+author:          Adam Gundry, Andres Löh, Andrzej Rybczak
+cabal-version:   1.24
+tested-with:     ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
+synopsis:        Optics for generics-sop, and using generics-sop
+category:        Data, Optics, Lenses, Generics
+description:
+  TODO: briefly mention motivation and differences from @lens@
+  This package provides core definitions with small dependency footprint.
+  See @optics@ package (and its dependencies) for "batteries-included"
+  variant.
+  See the main module "Optics" for the documentation.
+
+extra-doc-files:
+  optics.png
+  reoptics.png
+  indexedoptics.png
+
+library
+  default-language:   Haskell2010
+  hs-source-dirs:     src
+  ghc-options:        -Wall
+  build-depends:
+      array           >=0.5.1.1 && <0.6
+    , base            >=4.9     && <5
+    , containers      >=0.5.7.1 && <0.7
+    , generic-optics  >=0.1     && <1
+    , mtl             >=2.2.2   && <2.3
+    , optics-core     >=0.1     && <1
+    , optics-sop      >=0.1     && <1
+    , optics-th       >=0.1     && <1
+    , transformers    >=0.5     && <0.6
+
+  -- main module to land with repl
+  exposed-modules:    Optics
+
+  -- type classes
+  exposed-modules:
+    Optics.Each
+
+  -- operators
+  exposed-modules:    Optics.Operators.State
+
+  -- data
+  exposed-modules:
+    Data.Either.Optics
+    Data.Maybe.Optics
+    Data.Set.Optics
+    Data.Tuple.Optics
+    GHC.Generics.Optics
+
+  -- optics-core optics
+  reexported-modules:
+    Optics.AffineFold
+    , Optics.AffineTraversal
+    , Optics.Equality
+    , Optics.Fold
+    , Optics.Getter
+    , Optics.Iso
+    , Optics.IxFold
+    , Optics.IxSetter
+    , Optics.IxTraversal
+    , Optics.Lens
+    , Optics.LensyReview
+    , Optics.Optic
+    , Optics.Prism
+    , Optics.PrismaticGetter
+    , Optics.Re
+    , Optics.Review
+    , Optics.Setter
+    , Optics.Traversal
+
+  -- optics-core goodies
+  reexported-modules:
+    Optics.Indexed
+    , Optics.Arrow
+    , Optics.Operators
+    , Optics.Passthrough
+    , Optics.Unindexed
+    , Optics.View
+
+  -- optics-sop
+  reexported-modules:
+    Generics.SOP.Optics
+    , Optics.SOP.ToTuple
+    , Optics.SOP
+
+  -- optics-th
+  reexported-modules: Language.Haskell.TH.Optics
+
+test-suite optics-tests
+  default-language: Haskell2010
+  hs-source-dirs:   tests
+  ghc-options:      -Wall
+  build-depends:
+      base
+    , inspection-testing  >=0.4.1.1 && <0.5
+    , optics
+    , tasty
+    , tasty-hunit
+
+  type:             exitcode-stdio-1.0
+  main-is:          Optics/Tests.hs

@@ -95,4 +95,4 @@ icomposeN f o = Optic (implies' (ixcontramap (\ij -> composeN @is ij f)) . getOp
 {-# INLINE icomposeN #-}
 
 -- $setup
--- >>> import Optics
+-- >>> import Optics.Core

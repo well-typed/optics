@@ -1,4 +1,14 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE BangPatterns           #-}
+{-# LANGUAGE DefaultSignatures      #-}
+{-# LANGUAGE FlexibleContexts       #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE KindSignatures         #-}
+{-# LANGUAGE RankNTypes             #-}
+{-# LANGUAGE ScopedTypeVariables    #-}
+{-# LANGUAGE TypeFamilies           #-}
+{-# LANGUAGE TypeOperators          #-}
+{-# LANGUAGE UndecidableInstances   #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Tuple.Optics
@@ -1119,6 +1129,7 @@ ix :: (Generic s, Generic t, GIxed n (Rep s) (Rep t) a b) => f n -> Lens s t a b
 ix n = lensVL $ \f -> fmap to . gix n f . from
 {-# INLINE ix #-}
 
+-- TODO: this can be replaced by generic-optics position
 type family GSize (f :: * -> *)
 type instance GSize U1 = Z
 type instance GSize (K1 i c) = S Z

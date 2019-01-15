@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Set.Optics
@@ -43,5 +44,6 @@ setOf l = foldMapOf l Set.singleton
 {-# INLINE setOf #-}
 
 -- $setup
+-- >>> import Data.Set
 -- >>> import Optics
 -- >>> import Optics.Operators

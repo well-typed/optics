@@ -61,7 +61,7 @@ module Optics.Labels where
 
 import GHC.OverloadedLabels (IsLabel (..))
 import GHC.TypeLits (Symbol)
-import Optics
+import Optics.Core
 import Optics.Generic.Product.Fields
 
 class Field (name :: Symbol) s t a b | s name -> a, t name -> b, s name b -> t, t name a -> s where
@@ -81,3 +81,6 @@ instance (Field name s t a b, is ~ '[], k ~ A_Lens) => IsLabel name (Optic k is 
 #else
   fromLabel _ = fieldLens @name @s @t @a @b
 #endif
+
+-- $setup
+-- >>> import Optics

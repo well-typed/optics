@@ -14,7 +14,7 @@ module Optics.Generic.Product.Fields
   ) where
 
 import qualified Data.Generics.Product.Fields as GL
-import           Optics
+import           Optics.Core
 
 -- $setup
 --
@@ -45,7 +45,7 @@ import           Optics
 
 -- | A 'Lens' that focuses on a field with a given name.
 --
--- >>> view (field @"age") human
+-- >>> view1 (field @"age") human
 -- 50
 --
 -- === /Type changing/

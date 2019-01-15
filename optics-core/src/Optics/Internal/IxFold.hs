@@ -42,12 +42,12 @@ ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
 
 -- | Fold with index to a list.
 --
--- >>> itoListOf (each % ifolded) ("abc", "def")
+-- >>> itoListOf (folded % ifolded) ["abc", "def"]
 -- [(0,'a'),(1,'b'),(2,'c'),(0,'d'),(1,'e'),(2,'f')]
 --
 -- /Note:/ currently indexed optics can be used as non-indexed
 --
--- >>> toListOf (each % ifolded) ("abc", "def")
+-- >>> toListOf (folded % ifolded) ["abc", "def"]
 -- "abcdef"
 --
 itoListOf
@@ -74,4 +74,4 @@ ifolded = Optic (contrasecond (\_ -> ()) . iwander itraverse_)
 {-# INLINE ifolded #-}
 
 -- $setup
--- >>> import Optics
+-- >>> import Optics.Core

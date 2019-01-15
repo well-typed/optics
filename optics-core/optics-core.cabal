@@ -1,128 +1,101 @@
-name: optics-core
-version: 0.1
-license: BSD3
-license-file: LICENSE
-build-type: Simple
+name:          optics-core
+version:       0.1
+license:       BSD3
+license-file:  LICENSE
+build-type:    Simple
 cabal-version: 1.24
-maintainer: oleg@well-typed.com
-author: Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
-tested-with: GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.3
-
-synopsis: Optics as an abstract interface: core definitions
-category: Data, Optics, Lenses, Generics
+maintainer:    oleg@well-typed.com
+author:        Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
+tested-with:   ghc ==8.0.2 ghc ==8.2.2 ghc ==8.4.4 ghc ==8.6.3
+synopsis:      Optics as an abstract interface: core definitions
+category:      Data, Optics, Lenses, Generics
 description:
-  TODO: briefly mention motivation and differences from @lens@
-
-  This package provides core definitions with small dependency footprint.
-  See @optics@ package (and its dependencies) for "batteries-included"
-  variant.
-  
-  See the main module "Optics" for the documentation.
-
-extra-doc-files: optics.png reoptics.png indexedoptics.png
+  This package provides core definitions with a minimal dependency footprint.
+  See @optics@ package (and its dependencies) for documentation and
+  "batteries-included" variant.
 
 library
-  default-language: Haskell2010
-  hs-source-dirs: src
+  default-language:   Haskell2010
+  hs-source-dirs:     src
+  build-depends:      base >=4.9 && <5
 
-  build-depends: base >= 4.9 && < 5
-               , array >= 0.5.1.1 && < 0.6
-               , containers >= 0.5.7.1 && < 0.7
-               , mtl >= 2.2.2 && < 2.3
-               , template-haskell >= 2.11 && < 2.15
-               , transformers >= 0.5 && < 0.6
+  -- this is for 'viewM'
+  build-depends:      mtl >=2.2.2 && <2.3
 
-  ghc-options: -Wall
+  -- these dependencies are to provide FunctorWithIndex instances
+  build-depends:
+      array         >=0.5.1.1 && <0.6
+    , containers    >=0.5.7.1 && <0.7
+    , transformers  >=0.5     && <0.6
 
-  exposed-modules: Optics
-                   Optics.AffineFold
-                   Optics.AffineTraversal
-                   Optics.Arrow
-                   Optics.Each
-                   Optics.Equality
-                   Optics.Fold
-                   Optics.Getter
-                   Optics.Indexed
-                   Optics.Iso
-                   Optics.IxFold
-                   Optics.IxSetter
-                   Optics.IxTraversal
-                   Optics.Lens
-                   Optics.LensyReview
-                   Optics.Operators
-                   Optics.Operators.State
-                   Optics.Optic
-                   Optics.Prism
-                   Optics.PrismaticGetter
-                   Optics.Re
-                   Optics.Review
-                   Optics.Setter
-                   Optics.Traversal
-                   Optics.Unindexed
+  ghc-options:        -Wall
+  exposed-modules:
+    Optics.AffineFold
+    Optics.AffineTraversal
+    Optics.Arrow
+    Optics.Core
+    Optics.Equality
+    Optics.Fold
+    Optics.Getter
+    Optics.Indexed
+    Optics.Iso
+    Optics.IxFold
+    Optics.IxSetter
+    Optics.IxTraversal
+    Optics.Lens
+    Optics.LensyReview
+    Optics.Operators
+    Optics.Optic
+    Optics.Passthrough
+    Optics.Prism
+    Optics.PrismaticGetter
+    Optics.Re
+    Optics.Review
+    Optics.Setter
+    Optics.Traversal
+    Optics.Unindexed
+    Optics.View
 
-  exposed-modules: Data.Either.Optics
-                   Data.Maybe.Optics
-                   Data.Set.Optics
-                   Data.Tuple.Optics
-                   GHC.Generics.Optics
-                   Language.Haskell.TH.Optics
- 
-  other-modules: Optics.Internal.AffineFold
-                 Optics.Internal.AffineTraversal
-                 Optics.Internal.Bi
-                 Optics.Internal.Equality
-                 Optics.Internal.Fold
-                 Optics.Internal.Getter
-                 Optics.Internal.Iso
-                 Optics.Internal.Indexed
-                 Optics.Internal.IxFold
-                 Optics.Internal.Passthrough
-                 Optics.Internal.IxTraversal
-                 Optics.Internal.IxSetter
-                 Optics.Internal.Lens
-                 Optics.Internal.Optic
-                 Optics.Internal.Optic.Subtyping
-                 Optics.Internal.Optic.TypeLevel
-                 Optics.Internal.Optic.Types
-                 Optics.Internal.Prism
-                 Optics.Internal.Profunctor
-                 Optics.Internal.Review
-                 Optics.Internal.Re
-                 Optics.Internal.Setter
-                 Optics.Internal.Tagged
-                 Optics.Internal.Traversal
-                 Optics.Internal.Utils
-                 Optics.Internal.View
+  other-modules:
+    Optics.Internal.AffineFold
+    Optics.Internal.AffineTraversal
+    Optics.Internal.Bi
+    Optics.Internal.Equality
+    Optics.Internal.Fold
+    Optics.Internal.Getter
+    Optics.Internal.Indexed
+    Optics.Internal.Iso
+    Optics.Internal.IxFold
+    Optics.Internal.IxSetter
+    Optics.Internal.IxTraversal
+    Optics.Internal.Lens
+    Optics.Internal.Optic
+    Optics.Internal.Optic.Subtyping
+    Optics.Internal.Optic.TypeLevel
+    Optics.Internal.Optic.Types
+    Optics.Internal.Prism
+    Optics.Internal.Profunctor
+    Optics.Internal.Re
+    Optics.Internal.Review
+    Optics.Internal.Setter
+    Optics.Internal.Tagged
+    Optics.Internal.Traversal
+    Optics.Internal.Utils
 
-  default-extensions: BangPatterns
-                      DefaultSignatures
-                      FlexibleContexts
-                      FlexibleInstances
-                      FunctionalDependencies
-                      DeriveFunctor
-                      GADTs
-                      LambdaCase
-                      MultiParamTypeClasses
-                      RankNTypes
-                      ScopedTypeVariables
-                      TupleSections
-                      TypeFamilies
-                      TypeOperators
+  default-extensions:
+    BangPatterns
+    DefaultSignatures
+    DeriveFunctor
+    FlexibleContexts
+    FlexibleInstances
+    FunctionalDependencies
+    GADTs
+    LambdaCase
+    MultiParamTypeClasses
+    RankNTypes
+    ScopedTypeVariables
+    TupleSections
+    TypeFamilies
+    TypeOperators
 
   default-extensions: DataKinds
-
-
-test-suite optics-tests
-  default-language: Haskell2010
-  hs-source-dirs: tests
-
-  ghc-options: -Wall
-
-  build-depends: base
-               , optics-core
-               , tasty
-               , tasty-hunit
-               , inspection-testing >= 0.4.1.1 && < 0.5
-
-  type: exitcode-stdio-1.0
-  main-is: Optics/Tests.hs

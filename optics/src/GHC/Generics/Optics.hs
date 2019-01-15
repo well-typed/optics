@@ -1,12 +1,9 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
-#if __GLASGOW_HASKELL__ >= 706
 {-# LANGUAGE PolyKinds #-}
-#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  GHC.Generics.Lens
@@ -36,19 +33,16 @@ module GHC.Generics.Optics
   , _M1
   , _L1
   , _R1
-  , _1
-  , _2
   ) where
 
 import qualified GHC.Generics as GHC (to, from, to1, from1)
-import GHC.Generics (Generic, Rep, Generic1, Rep1, (:+:) (..), (:*:) (..), V1, U1 (..), K1 (..), M1 (..), Par1 (..), Rec1 (..))
+import GHC.Generics (Generic, Rep, Generic1, Rep1, (:+:) (..), V1, U1 (..), K1 (..), M1 (..), Par1 (..), Rec1 (..))
 
-import Optics hiding (_1, _2) -- TODO: :*: fields
-import qualified Data.Tuple.Optics as Tuple
+import Optics
 
 -- | Convert from the data type to its representation (or back)
 --
--- >>> view (generic % re generic) "hello" :: String
+-- >>> view1 (generic % re generic) "hello" :: String
 -- "hello"
 --
 generic :: Generic a => Iso' a (Rep a b)
@@ -84,18 +78,6 @@ _K1 = iso unK1 K1
 _M1 :: Iso (M1 i c f p) (M1 j d g q) (f p) (g q)
 _M1 = iso unM1 M1
 {-# INLINE _M1 #-}
-
--- TODO: Add Field1 Field2 instances for (f :*: g)
-
--- not exported
-_Pair :: Iso' ((f :*: g) a) (f a, g a)
-_Pair = iso (\(x :*: y) -> (x, y)) (\(x, y) -> x :*: y)
-
-_1 :: Lens' ((f :*: g) a) (f a)
-_1 = _Pair % Tuple._1
-
-_2 :: Lens' ((f :*: g) a) (g a)
-_2 = _Pair % Tuple._2
 
 _L1 :: Prism' ((f :+: g) a) (f a)
 _L1 = prism L1 reviewer

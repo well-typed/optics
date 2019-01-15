@@ -210,6 +210,9 @@ module Optics
   --
   , module Optics.Each
 
+  -- ** OverloadedLabels 
+
+
   -- * Optics for concrete base types
   , module P
   )
@@ -243,6 +246,7 @@ import Optics.Each
 import Optics.Unindexed
 import Optics.Indexed
 import Optics.Re
+import Optics.Labels ()
 
 -- Optics for concrete base types
 
