@@ -165,13 +165,20 @@ module Optics
   --
   -- But there is also a combinator to explicitly erase indices:
   --
-  -- >>> :t ifolded
-  -- ifolded :: FoldableWithIndex i f => IxFold i (f a) a
+  -- >>> :t (ifolded % simple)
+  -- (ifolded % simple)
+  --   :: FoldableWithIndex i f => Optic A_Fold '[i] (f b) (f b) b b
   --
-  -- >>> :t unIx ifolded
-  -- unIx ifolded
+  -- >>> :t unIx (ifolded % simple)
+  -- unIx (ifolded % simple)
   --   :: FoldableWithIndex i f => Optic A_Fold '[] (f b) (f b) b b
   --
+  -- 'unIx' can erase all indices
+  --
+  -- >>> :t unIx (ifolded % ifolded)
+  -- unIx (ifolded % ifolded)
+  --   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
+  --      Optic A_Fold '[] (f1 (f2 b)) (f1 (f2 b)) b b
   --
   -- As the example above illustrates (/TODO:/ will do),
   -- regular and indexed optics have the same kind, in this case @'Optic' 'A_Fold'@.
