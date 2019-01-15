@@ -59,15 +59,14 @@ instance CurryCompose xs => CurryCompose (x ': xs) where
   composeN ij f x = composeN @xs ij (f x)
   {-# INLINE composeN #-}
 
-{-
 
 class ConstN xs where
   constN :: y -> Curry xs y
 
 instance ConstN '[] where
   constN = id
+  {-# INLINE constN #-}
 
 instance ConstN xs => ConstN (x ': xs) where
   constN y _ = constN @xs y
-
--}
+  {-# INLINE constN #-}
