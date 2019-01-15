@@ -199,20 +199,20 @@ import Data.Either.Optics as P
 --
 --     >>> set (to fst)
 --     ...
---     ...'A_Getter cannot be used as 'A_Setter
+--     ...A_Getter cannot be used as A_Setter
 --     ...
 --
 -- * abstract interface: better type-inference (optics kind is preserved)
 --
 --     >>> :t traversed % to not
 --     traversed % to not
---       :: Traversable t => Optic 'A_Fold o o (t Bool) (t Bool) Bool Bool
+--       :: Traversable t => Optic A_Fold o o (t Bool) (t Bool) Bool Bool
 --
 -- * abstract interface: not all optics have 'Join'
 --
 --     >>> sets map % to not
 --     ...
---     ...'A_Setter cannot be composed with 'A_Getter
+--     ...A_Setter cannot be composed with A_Getter
 --     ...
 --
 -- * 'Optic' is a @Rank1Type@ (not really before #41), so there are no
