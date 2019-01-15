@@ -33,8 +33,8 @@ import Optics.Traversal
 -- (10,20,30)
 --
 class Each s t a b | s -> a, t -> b, s b -> t, t a -> s where
-  each :: Traversal i s t a b
-  default each :: (Traversable g, s ~ g a, t ~ g b) => Traversal i s t a b
+  each :: Traversal s t a b
+  default each :: (Traversable g, s ~ g a, t ~ g b) => Traversal s t a b
   each = traversed
   {-# INLINE each #-}
 

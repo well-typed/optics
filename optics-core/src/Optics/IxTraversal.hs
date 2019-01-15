@@ -1,5 +1,5 @@
 module Optics.IxTraversal
-  ( An_IxTraversal
+  ( A_Traversal
   , IxTraversal
   , IxTraversal'
   , TraversableWithIndex(..)
@@ -7,10 +7,12 @@ module Optics.IxTraversal
   , vlIxTraversal
   , itraversed
   , itraverseOf
+{-
   , icompose
   , icompose3
   , icompose4
   , icompose5
+-}
   , module Optics.Optic
   ) where
 

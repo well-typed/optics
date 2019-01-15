@@ -5,10 +5,10 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying lens.
-type Lens i s t a b = Optic A_Lens i i s t a b
+type Lens s t a b = Optic A_Lens '[] s t a b
 
 -- | Type synonym for a type-preserving lens.
-type Lens' i s a = Optic' A_Lens i i s a
+type Lens' s a = Optic' A_Lens '[] s a
 
 -- | Type synonym for a type-modifying van Laarhoven lens.
 type LensVL s t a b = forall f. Functor f => (a -> f b) -> s -> f t
@@ -17,12 +17,12 @@ type LensVL s t a b = forall f. Functor f => (a -> f b) -> s -> f t
 type LensVL' s a = LensVL s s a a
 
 -- | Explicitly cast an optic to a lens.
-toLens :: Is k A_Lens => Optic k i i s t a b -> Lens i s t a b
+toLens :: Is k A_Lens => Optic k is s t a b -> Optic A_Lens is s t a b
 toLens = sub
 {-# INLINE toLens #-}
 
 -- | Build a lens from a getter and a setter.
-lens :: (s -> a) -> (s -> b -> t) -> Lens i s t a b
+lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get set = Optic $
   dimap (\s -> (get s, s))
         (\(b, s) -> set s b)
@@ -32,7 +32,7 @@ lens get set = Optic $
 -- | Work with a lens as a getter and a setter.
 withLens
   :: Is k A_Lens
-  => Optic k i i s t a b
+  => Optic k is s t a b
   -> ((s -> a) -> (s -> b -> t) -> r)
   -> r
 withLens o k = case getOptic (toLens o) $ Store id (\_ -> id) of
@@ -40,19 +40,19 @@ withLens o k = case getOptic (toLens o) $ Store id (\_ -> id) of
 {-# INLINE withLens #-}
 
 -- | Build a lens from the van Laarhoven representation.
-lensVL :: LensVL s t a b -> Lens i s t a b
+lensVL :: LensVL s t a b -> Lens s t a b
 lensVL l = Optic (linear l)
 {-# INLINE lensVL #-}
 
 -- | Convert a lens to the van Laarhoven representation.
-toLensVL :: Is k A_Lens => Optic k i i s t a b -> LensVL s t a b
+toLensVL :: Is k A_Lens => Optic k is s t a b -> LensVL s t a b
 toLensVL o = runStar #. getOptic (toLens o) .# Star
 {-# INLINE toLensVL #-}
 
 -- | Work with a lens in the van Laarhoven representation.
 withLensVL
   :: Is k A_Lens
-  => Optic k i i s t a b
+  => Optic k is s t a b
   -> (LensVL s t a b -> r)
   -> r
 withLensVL o k = k (toLensVL o)

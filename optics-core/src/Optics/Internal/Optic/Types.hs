@@ -17,8 +17,6 @@ data A_Prism
 data An_AffineTraversal
 -- | Tag for a traversal.
 data A_Traversal
--- | Tag for an indexed traversal.
-data An_IxTraversal
 -- | Tag for a setter.
 data A_Setter
 -- | Tag for an indexed setter.
@@ -31,8 +29,6 @@ data A_Getter
 data An_AffineFold
 -- | Tag for a fold.
 data A_Fold
--- | Tag for an indexed fold.
-data An_IxFold
 -- | Tag for a lensy review.
 data A_LensyReview
 -- | Tag for a review.
@@ -51,12 +47,9 @@ type family Constraints (k :: *) (p :: * -> * -> * -> *) :: Constraint where
   Constraints A_Prism            p = Choice p
   Constraints A_PrismaticGetter  p = Cochoice p
   Constraints An_AffineTraversal p = (Strong p, Choice p)
-  Constraints A_Traversal        p = IxTraversing p
-  Constraints An_IxTraversal     p = IxTraversing p
-  Constraints A_Setter           p = IxMapping p
-  Constraints An_IxSetter        p = IxMapping p
+  Constraints A_Traversal        p = Traversing p
+  Constraints A_Setter           p = Mapping p
   Constraints A_Getter           p = (Bicontravariant p, Cochoice p, Strong p)
   Constraints An_AffineFold      p = (Bicontravariant p, Cochoice p, Strong p, Choice p)
-  Constraints A_Fold             p = (Bicontravariant p, Cochoice p, IxTraversing p)
-  Constraints An_IxFold          p = (Bicontravariant p, Cochoice p, IxTraversing p)
+  Constraints A_Fold             p = (Bicontravariant p, Cochoice p, Traversing p)
   Constraints A_Review           p = (Bifunctor p, Choice p, Costrong p)

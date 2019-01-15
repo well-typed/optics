@@ -25,8 +25,8 @@ import Optics.Optic
 -- | This can be used to lift any 'Iso' into an arbitrary 'Functor'.
 mapping
   :: (Is k An_Iso, Functor f, Functor g)
-  => Optic k i i s t a b
-  -> Iso i (f s) (g t) (f a) (g b)
+  => Optic k '[] s t a b
+  -> Iso (f s) (g t) (f a) (g b)
 mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 {-# INLINE mapping #-}
 
@@ -39,7 +39,7 @@ mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 -- >>> view curried fst 3 4
 -- 3
 --
-curried :: Iso i ((a, b) -> c) ((d, e) -> f) (a -> b -> c) (d -> e -> f)
+curried :: Iso ((a, b) -> c) ((d, e) -> f) (a -> b -> c) (d -> e -> f)
 curried = iso curry uncurry
 {-# INLINE curried #-}
 
@@ -56,7 +56,7 @@ curried = iso curry uncurry
 -- >>> (view uncurried (+)) (1,2)
 -- 3
 --
-uncurried :: Iso i (a -> b -> c) (d -> e -> f) ((a, b) -> c) ((d, e) -> f)
+uncurried :: Iso (a -> b -> c) (d -> e -> f) ((a, b) -> c) ((d, e) -> f)
 uncurried = iso uncurry curry
 {-# INLINE uncurried #-}
 
@@ -65,7 +65,7 @@ uncurried = iso uncurry curry
 -- >>> (view flipped (,)) 1 2
 -- (2,1)
 --
-flipped :: Iso i (a -> b -> c) (a' -> b' -> c') (b -> a -> c) (b' -> a' -> c')
+flipped :: Iso (a -> b -> c) (a' -> b' -> c') (b -> a -> c) (b' -> a' -> c')
 flipped = iso flip flip
 {-# INLINE flipped #-}
 
@@ -82,7 +82,7 @@ class Bifunctor p => Swapped p where
   -- >>> view swapped (1,2)
   -- (2,1)
   --
-  swapped :: Iso i (p a b) (p c d) (p b a) (p d c)
+  swapped :: Iso (p a b) (p c d) (p b a) (p d c)
 
 instance Swapped (,) where
   swapped = iso swap swap

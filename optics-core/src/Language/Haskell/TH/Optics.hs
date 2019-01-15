@@ -17,7 +17,7 @@ module Language.Haskell.TH.Optics
   , HasTypes(..)
   , HasTypeVars(..)
   , SubstType(..)
-  , typeVars      -- :: HasTypeVars t => Traversal' i t Name
+  , typeVars      -- :: HasTypeVars t => Traversal' t Name
   , substTypeVars -- :: HasTypeVars t => Map Name Name -> t -> t
   , conFields
   , conNamedFields
@@ -340,7 +340,7 @@ import Optics.Traversal
 -- | Has a 'Name'
 class HasName t where
   -- | Extract (or modify) the 'Name' of something
-  name :: Lens' i t Name
+  name :: Lens' t Name
 
 instance HasName TyVarBndr where
   name = lensVL $ \f -> \case
@@ -383,7 +383,7 @@ instance HasName InjectivityAnn where
 -- | Contains some amount of `Type`s inside
 class HasTypes t where
   -- | Traverse all the types
-  types :: Traversal' i t Type
+  types :: Traversal' t Type
 
 instance HasTypes Type where
   types = traversalVL id
@@ -421,7 +421,7 @@ class HasTypeVars t where
   -- | When performing substitution into this traversal you're not allowed to
   -- substitute in a name that is bound internally or you'll violate the
   -- 'Traversal' laws, when in doubt generate your names with 'newName'.
-  typeVarsEx :: Set Name -> Traversal' i t Name
+  typeVarsEx :: Set Name -> Traversal' t Name
 
 instance HasTypeVars TyVarBndr where
   typeVarsEx s = traversalVL $ \f b ->
@@ -476,7 +476,7 @@ instance HasTypeVars t => HasTypeVars (Maybe t) where
   typeVarsEx s = traversed % typeVarsEx s
 
 -- | Traverse /free/ type variables
-typeVars :: HasTypeVars t => Traversal' i t Name
+typeVars :: HasTypeVars t => Traversal' t Name
 typeVars = typeVarsEx mempty
 
 -- | Substitute using a map of names in for /free/ type variables
@@ -503,7 +503,7 @@ instance SubstType t => SubstType [t] where
   substType = map . substType
 
 -- | Provides a 'Traversal' of the types of each field of a constructor.
-conFields :: Traversal' i Con BangType
+conFields :: Traversal' Con BangType
 conFields = traversalVL $ \f -> \case
   NormalC n fs             -> NormalC n <$> traverse f fs
   RecC n fs                -> RecC n <$> traverse (sansVar f) fs
@@ -517,7 +517,7 @@ conFields = traversalVL $ \f -> \case
     sansVar f (fn,s,t) = (\(s', t') -> (fn,s',t')) <$> f (s, t)
 
 -- | 'Traversal' of the types of the /named/ fields of a constructor.
-conNamedFields :: Traversal' i Con VarBangType
+conNamedFields :: Traversal' Con VarBangType
 conNamedFields = traversalVL $ \f -> \case
   RecC n fs                -> RecC n <$> traverse f fs
   ForallC a b fs           -> ForallC a b <$> traverseOf conNamedFields f fs
@@ -525,141 +525,141 @@ conNamedFields = traversalVL $ \f -> \case
   c                        -> pure c
 
 -- Lenses and Prisms
-locFileName :: Lens' i Loc String
+locFileName :: Lens' Loc String
 locFileName = lens loc_filename
             $ \loc fn -> loc { loc_filename = fn }
 
-locPackage :: Lens' i Loc String
+locPackage :: Lens' Loc String
 locPackage = lens loc_package
            $ \loc fn -> loc { loc_package = fn }
 
-locModule :: Lens' i Loc String
+locModule :: Lens' Loc String
 locModule = lens loc_module
           $ \loc fn -> loc { loc_module = fn }
 
-locStart :: Lens' i Loc CharPos
+locStart :: Lens' Loc CharPos
 locStart = lens loc_start
          $ \loc fn -> loc { loc_start = fn }
 
-locEnd :: Lens' i Loc CharPos
+locEnd :: Lens' Loc CharPos
 locEnd = lens loc_end
        $ \loc fn -> loc { loc_end = fn }
 
-funDepInputs :: Lens' i FunDep [Name]
+funDepInputs :: Lens' FunDep [Name]
 funDepInputs = lens g s where
    g (FunDep xs _)    = xs
    s (FunDep _ ys) xs = FunDep xs ys
 
-funDepOutputs :: Lens' i FunDep [Name]
+funDepOutputs :: Lens' FunDep [Name]
 funDepOutputs = lens g s where
    g (FunDep _ xs) = xs
    s (FunDep ys _) = FunDep ys
 
-fieldExpName :: Lens' i FieldExp Name
+fieldExpName :: Lens' FieldExp Name
 fieldExpName = _1
 
-fieldExpExpression :: Lens' i FieldExp Exp
+fieldExpExpression :: Lens' FieldExp Exp
 fieldExpExpression = _2
 
-fieldPatName :: Lens' i FieldPat Name
+fieldPatName :: Lens' FieldPat Name
 fieldPatName = _1
 
-fieldPatPattern :: Lens' i FieldPat Pat
+fieldPatPattern :: Lens' FieldPat Pat
 fieldPatPattern = _2
 
-matchPattern :: Lens' i Match Pat
+matchPattern :: Lens' Match Pat
 matchPattern = lens g s where
    g (Match p _ _)   = p
    s (Match _ x y) p = Match p x y
 
-matchBody :: Lens' i Match Body
+matchBody :: Lens' Match Body
 matchBody = lens g s where
    g (Match _ b _)   = b
    s (Match x _ y) b = Match x b y
 
-matchDeclarations :: Lens' i Match [Dec]
+matchDeclarations :: Lens' Match [Dec]
 matchDeclarations = lens g s where
    g (Match _ _ ds) = ds
    s (Match x y _ ) = Match x y
 
-fixityPrecedence :: Lens' i Fixity Int
+fixityPrecedence :: Lens' Fixity Int
 fixityPrecedence = lens g s where
    g (Fixity i _)   = i
    s (Fixity _ x) i = Fixity i x
 
-fixityDirection :: Lens' i Fixity FixityDirection
+fixityDirection :: Lens' Fixity FixityDirection
 fixityDirection = lens g s where
    g (Fixity _ d) = d
    s (Fixity i _) = Fixity i
 
-clausePattern :: Lens' i Clause [Pat]
+clausePattern :: Lens' Clause [Pat]
 clausePattern = lens g s where
    g (Clause ps _ _)    = ps
    s (Clause _  x y) ps = Clause ps x y
 
-clauseBody :: Lens' i Clause Body
+clauseBody :: Lens' Clause Body
 clauseBody = lens g s where
    g (Clause _ b _)   = b
    s (Clause x _ y) b = Clause x b y
 
-clauseDecs :: Lens' i Clause [Dec]
+clauseDecs :: Lens' Clause [Dec]
 clauseDecs = lens g s where
    g (Clause _ _ ds) = ds
    s (Clause x y _ ) = Clause x y
 
-injectivityAnnOutput :: Lens' i InjectivityAnn Name
+injectivityAnnOutput :: Lens' InjectivityAnn Name
 injectivityAnnOutput = lens g s where
    g (InjectivityAnn o _)   = o
    s (InjectivityAnn _ i) o = InjectivityAnn o i
 
-injectivityAnnInputs :: Lens' i InjectivityAnn [Name]
+injectivityAnnInputs :: Lens' InjectivityAnn [Name]
 injectivityAnnInputs = lens g s where
    g (InjectivityAnn _ i) = i
    s (InjectivityAnn o _) = InjectivityAnn o
 
-typeFamilyHeadName :: Lens' i TypeFamilyHead Name
+typeFamilyHeadName :: Lens' TypeFamilyHead Name
 typeFamilyHeadName = lens g s where
   g (TypeFamilyHead n _    _  _ )   = n
   s (TypeFamilyHead _ tvbs rs ia) n = TypeFamilyHead n tvbs rs ia
 
-typeFamilyHeadTyVarBndrs :: Lens' i TypeFamilyHead [TyVarBndr]
+typeFamilyHeadTyVarBndrs :: Lens' TypeFamilyHead [TyVarBndr]
 typeFamilyHeadTyVarBndrs = lens g s where
   g (TypeFamilyHead _ tvbs _  _ )      = tvbs
   s (TypeFamilyHead n _    rs ia) tvbs = TypeFamilyHead n tvbs rs ia
 
-typeFamilyHeadResultSig :: Lens' i TypeFamilyHead FamilyResultSig
+typeFamilyHeadResultSig :: Lens' TypeFamilyHead FamilyResultSig
 typeFamilyHeadResultSig = lens g s where
   g (TypeFamilyHead _ _    rs _ )    = rs
   s (TypeFamilyHead n tvbs _  ia) rs = TypeFamilyHead n tvbs rs ia
 
-typeFamilyHeadInjectivityAnn :: Lens' i TypeFamilyHead (Maybe InjectivityAnn)
+typeFamilyHeadInjectivityAnn :: Lens' TypeFamilyHead (Maybe InjectivityAnn)
 typeFamilyHeadInjectivityAnn = lens g s where
   g (TypeFamilyHead _ _    _  ia) = ia
   s (TypeFamilyHead n tvbs rs _ ) = TypeFamilyHead n tvbs rs
 
-bangSourceUnpackedness :: Lens' i Bang SourceUnpackedness
+bangSourceUnpackedness :: Lens' Bang SourceUnpackedness
 bangSourceUnpackedness = lens g s where
   g (Bang su _ )    = su
   s (Bang _  ss) su = Bang su ss
 
-bangSourceStrictness :: Lens' i Bang SourceStrictness
+bangSourceStrictness :: Lens' Bang SourceStrictness
 bangSourceStrictness = lens g s where
   g (Bang _  su) = su
   s (Bang ss _ ) = Bang ss
 
 #if MIN_VERSION_template_haskell(2,12,0)
-derivClauseStrategy :: Lens' i DerivClause (Maybe DerivStrategy)
+derivClauseStrategy :: Lens' DerivClause (Maybe DerivStrategy)
 derivClauseStrategy = lens g s where
   g (DerivClause mds _)     = mds
   s (DerivClause _   c) mds = DerivClause mds c
 
-derivClauseCxt :: Lens' i DerivClause Cxt
+derivClauseCxt :: Lens' DerivClause Cxt
 derivClauseCxt = lens g s where
   g (DerivClause _   c) = c
   s (DerivClause mds _) = DerivClause mds
 #endif
 
-_ClassI :: Prism' i Info (Dec, [InstanceDec])
+_ClassI :: Prism' Info (Dec, [InstanceDec])
 _ClassI
   = prism' reviewer remitter
   where
@@ -667,7 +667,7 @@ _ClassI
       remitter (ClassI x y) = Just (x, y)
       remitter _ = Nothing
 
-_ClassOpI :: Prism' i Info (Name, Type, ParentName)
+_ClassOpI :: Prism' Info (Name, Type, ParentName)
 _ClassOpI
   = prism' reviewer remitter
   where
@@ -675,7 +675,7 @@ _ClassOpI
       remitter (ClassOpI x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_TyConI :: Prism' i Info Dec
+_TyConI :: Prism' Info Dec
 _TyConI
   = prism' reviewer remitter
   where
@@ -683,7 +683,7 @@ _TyConI
       remitter (TyConI x) = Just x
       remitter _ = Nothing
 
-_FamilyI :: Prism' i Info (Dec, [InstanceDec])
+_FamilyI :: Prism' Info (Dec, [InstanceDec])
 _FamilyI
   = prism' reviewer remitter
   where
@@ -691,7 +691,7 @@ _FamilyI
       remitter (FamilyI x y) = Just (x, y)
       remitter _ = Nothing
 
-_PrimTyConI :: Prism' i Info (Name, Arity, Unlifted)
+_PrimTyConI :: Prism' Info (Name, Arity, Unlifted)
 _PrimTyConI
   = prism' reviewer remitter
   where
@@ -699,7 +699,7 @@ _PrimTyConI
       remitter (PrimTyConI x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_DataConI :: Prism' i Info (Name, Type, ParentName)
+_DataConI :: Prism' Info (Name, Type, ParentName)
 _DataConI
   = prism' reviewer remitter
   where
@@ -707,7 +707,7 @@ _DataConI
       remitter (DataConI x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_VarI :: Prism' i Info (Name, Type, Maybe Dec)
+_VarI :: Prism' Info (Name, Type, Maybe Dec)
 _VarI
   = prism' reviewer remitter
   where
@@ -715,7 +715,7 @@ _VarI
       remitter (VarI x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_TyVarI :: Prism' i Info (Name, Type)
+_TyVarI :: Prism' Info (Name, Type)
 _TyVarI
   = prism' reviewer remitter
   where
@@ -724,7 +724,7 @@ _TyVarI
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_PatSynI :: Prism' i Info (Name, PatSynType)
+_PatSynI :: Prism' Info (Name, PatSynType)
 _PatSynI
   = prism' reviewer remitter
   where
@@ -733,7 +733,7 @@ _PatSynI
       remitter _ = Nothing
 #endif
 
-_FunD :: Prism' i Dec (Name, [Clause])
+_FunD :: Prism' Dec (Name, [Clause])
 _FunD
   = prism' reviewer remitter
   where
@@ -741,7 +741,7 @@ _FunD
       remitter (FunD x y) = Just (x,y)
       remitter _ = Nothing
 
-_ValD :: Prism' i Dec (Pat, Body, [Dec])
+_ValD :: Prism' Dec (Pat, Body, [Dec])
 _ValD
   = prism' reviewer remitter
   where
@@ -749,7 +749,7 @@ _ValD
       remitter (ValD x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_TySynD :: Prism' i Dec (Name, [TyVarBndr], Type)
+_TySynD :: Prism' Dec (Name, [TyVarBndr], Type)
 _TySynD
   = prism' reviewer remitter
   where
@@ -757,7 +757,7 @@ _TySynD
       remitter (TySynD x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_ClassD :: Prism' i Dec (Cxt, Name, [TyVarBndr], [FunDep], [Dec])
+_ClassD :: Prism' Dec (Cxt, Name, [TyVarBndr], [FunDep], [Dec])
 _ClassD
   = prism' reviewer remitter
   where
@@ -765,7 +765,7 @@ _ClassD
       remitter (ClassD x y z w u) = Just (x, y, z, w, u)
       remitter _ = Nothing
 
-_InstanceD :: Prism' i Dec (Maybe Overlap, Cxt, Type, [Dec])
+_InstanceD :: Prism' Dec (Maybe Overlap, Cxt, Type, [Dec])
 _InstanceD
   = prism' reviewer remitter
   where
@@ -773,35 +773,35 @@ _InstanceD
       remitter (InstanceD x y z w) = Just (x, y, z, w)
       remitter _ = Nothing
 
-_Overlappable  :: Prism' i Overlap  ()
+_Overlappable  :: Prism' Overlap  ()
 _Overlappable  = prism' reviewer remitter
   where
       reviewer () = Overlappable
       remitter Overlappable = Just  ()
       remitter _ = Nothing
 
-_Overlapping :: Prism' i Overlap ()
+_Overlapping :: Prism' Overlap ()
 _Overlapping = prism' reviewer remitter
   where
       reviewer () = Overlapping
       remitter Overlapping = Just ()
       remitter _ = Nothing
 
-_Overlaps ::  Prism' i Overlap  ()
+_Overlaps ::  Prism' Overlap  ()
 _Overlaps =  prism' reviewer remitter
   where
       reviewer () =  Overlaps
       remitter Overlaps = Just ()
       remitter _ = Nothing
 
-_Incoherent  :: Prism' i Overlap ()
+_Incoherent  :: Prism' Overlap ()
 _Incoherent  = prism' reviewer remitter
   where
       reviewer () = Incoherent
       remitter Incoherent = Just ()
       remitter _ = Nothing
 
-_SigD :: Prism' i Dec (Name, Type)
+_SigD :: Prism' Dec (Name, Type)
 _SigD
   = prism' reviewer remitter
   where
@@ -809,7 +809,7 @@ _SigD
       remitter (SigD x y) = Just (x, y)
       remitter _ = Nothing
 
-_ForeignD :: Prism' i Dec Foreign
+_ForeignD :: Prism' Dec Foreign
 _ForeignD
   = prism' reviewer remitter
   where
@@ -817,7 +817,7 @@ _ForeignD
       remitter (ForeignD x) = Just x
       remitter _ = Nothing
 
-_InfixD :: Prism' i Dec (Fixity, Name)
+_InfixD :: Prism' Dec (Fixity, Name)
 _InfixD
   = prism' reviewer remitter
   where
@@ -825,7 +825,7 @@ _InfixD
       remitter (InfixD x y) = Just (x, y)
       remitter _ = Nothing
 
-_PragmaD :: Prism' i Dec Pragma
+_PragmaD :: Prism' Dec Pragma
 _PragmaD
   = prism' reviewer remitter
   where
@@ -833,7 +833,7 @@ _PragmaD
       remitter (PragmaD x) = Just x
       remitter _ = Nothing
 
-_TySynInstD :: Prism' i Dec (Name, TySynEqn)
+_TySynInstD :: Prism' Dec (Name, TySynEqn)
 _TySynInstD
   = prism' reviewer remitter
   where
@@ -841,7 +841,7 @@ _TySynInstD
       remitter (TySynInstD x y) = Just (x, y)
       remitter _ = Nothing
 
-_RoleAnnotD :: Prism' i Dec (Name, [Role])
+_RoleAnnotD :: Prism' Dec (Name, [Role])
 _RoleAnnotD
   = prism' reviewer remitter
   where
@@ -850,7 +850,7 @@ _RoleAnnotD
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_StandaloneDerivD :: Prism' i Dec (Maybe DerivStrategy, Cxt, Type)
+_StandaloneDerivD :: Prism' Dec (Maybe DerivStrategy, Cxt, Type)
 _StandaloneDerivD
   = prism' reviewer remitter
   where
@@ -858,7 +858,7 @@ _StandaloneDerivD
       remitter (StandaloneDerivD x y z) = Just (x, y, z)
       remitter _ = Nothing
 #else
-_StandaloneDerivD :: Prism' i Dec (Cxt, Type)
+_StandaloneDerivD :: Prism' Dec (Cxt, Type)
 _StandaloneDerivD
   = prism' reviewer remitter
   where
@@ -867,7 +867,7 @@ _StandaloneDerivD
       remitter _ = Nothing
 #endif
 
-_DefaultSigD :: Prism' i Dec (Name, Type)
+_DefaultSigD :: Prism' Dec (Name, Type)
 _DefaultSigD
   = prism' reviewer remitter
   where
@@ -875,7 +875,7 @@ _DefaultSigD
       remitter (DefaultSigD x y) = Just (x, y)
       remitter _ = Nothing
 
-_ClosedTypeFamilyD :: Prism' i Dec (TypeFamilyHead, [TySynEqn])
+_ClosedTypeFamilyD :: Prism' Dec (TypeFamilyHead, [TySynEqn])
 _ClosedTypeFamilyD
   = prism' reviewer remitter
   where
@@ -884,12 +884,12 @@ _ClosedTypeFamilyD
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-type DataPrism' i tys cons = Prism' i Dec (Cxt, Name, tys, Maybe Kind, cons, [DerivClause])
+type DataPrism' tys cons = Prism' Dec (Cxt, Name, tys, Maybe Kind, cons, [DerivClause])
 #else
-type DataPrism' i tys cons = Prism' i Dec (Cxt, Name, tys, Maybe Kind, cons, Cxt)
+type DataPrism' tys cons = Prism' Dec (Cxt, Name, tys, Maybe Kind, cons, Cxt)
 #endif
 
-_DataD :: DataPrism' i [TyVarBndr] [Con]
+_DataD :: DataPrism' [TyVarBndr] [Con]
 _DataD
   = prism' reviewer remitter
   where
@@ -897,7 +897,7 @@ _DataD
       remitter (DataD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
-_NewtypeD :: DataPrism' i [TyVarBndr] Con
+_NewtypeD :: DataPrism' [TyVarBndr] Con
 _NewtypeD
   = prism' reviewer remitter
   where
@@ -905,7 +905,7 @@ _NewtypeD
       remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
-_DataInstD :: DataPrism' i [Type] [Con]
+_DataInstD :: DataPrism' [Type] [Con]
 _DataInstD
   = prism' reviewer remitter
   where
@@ -913,7 +913,7 @@ _DataInstD
       remitter (DataInstD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
-_NewtypeInstD :: DataPrism' i [Type] Con
+_NewtypeInstD :: DataPrism' [Type] Con
 _NewtypeInstD
   = prism' reviewer remitter
   where
@@ -921,7 +921,7 @@ _NewtypeInstD
       remitter (NewtypeInstD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
-_DataFamilyD :: Prism' i Dec (Name, [TyVarBndr], Maybe Kind)
+_DataFamilyD :: Prism' Dec (Name, [TyVarBndr], Maybe Kind)
 _DataFamilyD
   = prism' reviewer remitter
   where
@@ -929,7 +929,7 @@ _DataFamilyD
       remitter (DataFamilyD x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_OpenTypeFamilyD :: Prism' i Dec TypeFamilyHead
+_OpenTypeFamilyD :: Prism' Dec TypeFamilyHead
 _OpenTypeFamilyD
   = prism' reviewer remitter
   where
@@ -938,7 +938,7 @@ _OpenTypeFamilyD
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_PatSynD :: Prism' i Dec (Name, PatSynArgs, PatSynDir, Pat)
+_PatSynD :: Prism' Dec (Name, PatSynArgs, PatSynDir, Pat)
 _PatSynD
   = prism' reviewer remitter
   where
@@ -946,7 +946,7 @@ _PatSynD
       remitter (PatSynD x y z w) = Just (x, y, z, w)
       remitter _ = Nothing
 
-_PatSynSigD :: Prism' i Dec (Name, PatSynType)
+_PatSynSigD :: Prism' Dec (Name, PatSynType)
 _PatSynSigD
   = prism' reviewer remitter
   where
@@ -956,7 +956,7 @@ _PatSynSigD
 #endif
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_Unidir :: Prism' i PatSynDir ()
+_Unidir :: Prism' PatSynDir ()
 _Unidir
   = prism' reviewer remitter
   where
@@ -964,7 +964,7 @@ _Unidir
       remitter Unidir = Just ()
       remitter _ = Nothing
 
-_ImplBidir :: Prism' i PatSynDir ()
+_ImplBidir :: Prism' PatSynDir ()
 _ImplBidir
   = prism' reviewer remitter
   where
@@ -972,7 +972,7 @@ _ImplBidir
       remitter ImplBidir = Just ()
       remitter _ = Nothing
 
-_ExplBidir :: Prism' i PatSynDir [Clause]
+_ExplBidir :: Prism' PatSynDir [Clause]
 _ExplBidir
   = prism' reviewer remitter
   where
@@ -980,7 +980,7 @@ _ExplBidir
       remitter (ExplBidir x) = Just x
       remitter _ = Nothing
 
-_PrefixPatSyn :: Prism' i PatSynArgs [Name]
+_PrefixPatSyn :: Prism' PatSynArgs [Name]
 _PrefixPatSyn
   = prism' reviewer remitter
   where
@@ -988,7 +988,7 @@ _PrefixPatSyn
       remitter (PrefixPatSyn x) = Just x
       remitter _ = Nothing
 
-_InfixPatSyn :: Prism' i PatSynArgs (Name, Name)
+_InfixPatSyn :: Prism' PatSynArgs (Name, Name)
 _InfixPatSyn
   = prism' reviewer remitter
   where
@@ -996,7 +996,7 @@ _InfixPatSyn
       remitter (InfixPatSyn x y) = Just (x, y)
       remitter _ = Nothing
 
-_RecordPatSyn :: Prism' i PatSynArgs [Name]
+_RecordPatSyn :: Prism' PatSynArgs [Name]
 _RecordPatSyn
   = prism' reviewer remitter
   where
@@ -1006,7 +1006,7 @@ _RecordPatSyn
 #endif
 
 _NormalC ::
-  Prism' i Con (Name, [BangType])
+  Prism' Con (Name, [BangType])
 _NormalC
   = prism' reviewer remitter
   where
@@ -1015,7 +1015,7 @@ _NormalC
       remitter _ = Nothing
 
 _RecC ::
-  Prism' i Con (Name, [VarBangType])
+  Prism' Con (Name, [VarBangType])
 _RecC
   = prism' reviewer remitter
   where
@@ -1023,7 +1023,7 @@ _RecC
       remitter (RecC x y) = Just (x, y)
       remitter _ = Nothing
 
-_InfixC :: Prism' i Con (BangType, Name, BangType)
+_InfixC :: Prism' Con (BangType, Name, BangType)
 _InfixC
   = prism' reviewer remitter
   where
@@ -1031,7 +1031,7 @@ _InfixC
       remitter (InfixC x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_ForallC :: Prism' i Con ([TyVarBndr], Cxt, Con)
+_ForallC :: Prism' Con ([TyVarBndr], Cxt, Con)
 _ForallC
   = prism' reviewer remitter
   where
@@ -1039,7 +1039,7 @@ _ForallC
       remitter (ForallC x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_GadtC :: Prism' i Con ([Name], [BangType], Type)
+_GadtC :: Prism' Con ([Name], [BangType], Type)
 _GadtC
   = prism' reviewer remitter
   where
@@ -1047,7 +1047,7 @@ _GadtC
       remitter (GadtC x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_RecGadtC :: Prism' i Con ([Name], [VarBangType], Type)
+_RecGadtC :: Prism' Con ([Name], [VarBangType], Type)
 _RecGadtC
   = prism' reviewer remitter
   where
@@ -1055,7 +1055,7 @@ _RecGadtC
       remitter (RecGadtC x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_NoSourceUnpackedness :: Prism' i SourceUnpackedness ()
+_NoSourceUnpackedness :: Prism' SourceUnpackedness ()
 _NoSourceUnpackedness
   = prism' reviewer remitter
   where
@@ -1063,7 +1063,7 @@ _NoSourceUnpackedness
       remitter NoSourceUnpackedness = Just ()
       remitter _ = Nothing
 
-_SourceNoUnpack :: Prism' i SourceUnpackedness ()
+_SourceNoUnpack :: Prism' SourceUnpackedness ()
 _SourceNoUnpack
   = prism' reviewer remitter
   where
@@ -1071,7 +1071,7 @@ _SourceNoUnpack
       remitter SourceNoUnpack = Just ()
       remitter _ = Nothing
 
-_SourceUnpack :: Prism' i SourceUnpackedness ()
+_SourceUnpack :: Prism' SourceUnpackedness ()
 _SourceUnpack
   = prism' reviewer remitter
   where
@@ -1079,7 +1079,7 @@ _SourceUnpack
       remitter SourceUnpack = Just ()
       remitter _ = Nothing
 
-_NoSourceStrictness :: Prism' i SourceStrictness ()
+_NoSourceStrictness :: Prism' SourceStrictness ()
 _NoSourceStrictness
   = prism' reviewer remitter
   where
@@ -1087,7 +1087,7 @@ _NoSourceStrictness
       remitter NoSourceStrictness = Just ()
       remitter _ = Nothing
 
-_SourceLazy :: Prism' i SourceStrictness ()
+_SourceLazy :: Prism' SourceStrictness ()
 _SourceLazy
   = prism' reviewer remitter
   where
@@ -1095,7 +1095,7 @@ _SourceLazy
       remitter SourceLazy = Just ()
       remitter _ = Nothing
 
-_SourceStrict :: Prism' i SourceStrictness ()
+_SourceStrict :: Prism' SourceStrictness ()
 _SourceStrict
   = prism' reviewer remitter
   where
@@ -1103,7 +1103,7 @@ _SourceStrict
       remitter SourceStrict = Just ()
       remitter _ = Nothing
 
-_DecidedLazy :: Prism' i DecidedStrictness ()
+_DecidedLazy :: Prism' DecidedStrictness ()
 _DecidedLazy
   = prism' reviewer remitter
   where
@@ -1111,7 +1111,7 @@ _DecidedLazy
       remitter DecidedLazy = Just ()
       remitter _ = Nothing
 
-_DecidedStrict :: Prism' i DecidedStrictness ()
+_DecidedStrict :: Prism' DecidedStrictness ()
 _DecidedStrict
   = prism' reviewer remitter
   where
@@ -1119,7 +1119,7 @@ _DecidedStrict
       remitter DecidedStrict = Just ()
       remitter _ = Nothing
 
-_DecidedUnpack :: Prism' i DecidedStrictness ()
+_DecidedUnpack :: Prism' DecidedStrictness ()
 _DecidedUnpack
   = prism' reviewer remitter
   where
@@ -1127,7 +1127,7 @@ _DecidedUnpack
       remitter DecidedUnpack = Just ()
       remitter _ = Nothing
 
-_ImportF :: Prism' i Foreign (Callconv, Safety, String, Name, Type)
+_ImportF :: Prism' Foreign (Callconv, Safety, String, Name, Type)
 _ImportF
   = prism' reviewer remitter
   where
@@ -1135,7 +1135,7 @@ _ImportF
       remitter (ImportF x y z w u) = Just (x,y,z,w,u)
       remitter _ = Nothing
 
-_ExportF :: Prism' i Foreign (Callconv, String, Name, Type)
+_ExportF :: Prism' Foreign (Callconv, String, Name, Type)
 _ExportF
   = prism' reviewer remitter
   where
@@ -1143,7 +1143,7 @@ _ExportF
       remitter (ExportF x y z w) = Just (x, y, z, w)
       remitter _ = Nothing
 
-_CCall :: Prism' i Callconv ()
+_CCall :: Prism' Callconv ()
 _CCall
   = prism' reviewer remitter
   where
@@ -1151,7 +1151,7 @@ _CCall
       remitter CCall = Just ()
       remitter _ = Nothing
 
-_StdCall :: Prism' i Callconv ()
+_StdCall :: Prism' Callconv ()
 _StdCall
   = prism' reviewer remitter
   where
@@ -1159,7 +1159,7 @@ _StdCall
       remitter StdCall = Just ()
       remitter _ = Nothing
 
-_CApi :: Prism' i Callconv ()
+_CApi :: Prism' Callconv ()
 _CApi
   = prism' reviewer remitter
   where
@@ -1167,7 +1167,7 @@ _CApi
       remitter CApi = Just ()
       remitter _ = Nothing
 
-_Prim :: Prism' i Callconv ()
+_Prim :: Prism' Callconv ()
 _Prim
   = prism' reviewer remitter
   where
@@ -1175,7 +1175,7 @@ _Prim
       remitter Prim = Just ()
       remitter _ = Nothing
 
-_JavaScript :: Prism' i Callconv ()
+_JavaScript :: Prism' Callconv ()
 _JavaScript
   = prism' reviewer remitter
   where
@@ -1183,7 +1183,7 @@ _JavaScript
       remitter JavaScript = Just ()
       remitter _ = Nothing
 
-_Unsafe :: Prism' i Safety ()
+_Unsafe :: Prism' Safety ()
 _Unsafe
   = prism' reviewer remitter
   where
@@ -1191,7 +1191,7 @@ _Unsafe
       remitter Unsafe = Just ()
       remitter _ = Nothing
 
-_Safe :: Prism' i Safety ()
+_Safe :: Prism' Safety ()
 _Safe
   = prism' reviewer remitter
   where
@@ -1199,7 +1199,7 @@ _Safe
       remitter Safe = Just ()
       remitter _ = Nothing
 
-_Interruptible :: Prism' i Safety ()
+_Interruptible :: Prism' Safety ()
 _Interruptible
   = prism' reviewer remitter
   where
@@ -1207,7 +1207,7 @@ _Interruptible
       remitter Interruptible = Just ()
       remitter _ = Nothing
 
-_InlineP :: Prism' i Pragma (Name, Inline, RuleMatch, Phases)
+_InlineP :: Prism' Pragma (Name, Inline, RuleMatch, Phases)
 _InlineP
   = prism' reviewer remitter
   where
@@ -1215,7 +1215,7 @@ _InlineP
       remitter (InlineP x y z w) = Just (x, y, z, w)
       remitter _ = Nothing
 
-_SpecialiseP :: Prism' i Pragma (Name, Type, Maybe Inline, Phases)
+_SpecialiseP :: Prism' Pragma (Name, Type, Maybe Inline, Phases)
 _SpecialiseP
   = prism' reviewer remitter
   where
@@ -1223,7 +1223,7 @@ _SpecialiseP
       remitter (SpecialiseP x y z w) = Just (x, y, z, w)
       remitter _ = Nothing
 
-_SpecialiseInstP :: Prism' i Pragma Type
+_SpecialiseInstP :: Prism' Pragma Type
 _SpecialiseInstP
   = prism' reviewer remitter
   where
@@ -1231,7 +1231,7 @@ _SpecialiseInstP
       remitter (SpecialiseInstP x) = Just x
       remitter _ = Nothing
 
-_RuleP :: Prism' i Pragma (String, [RuleBndr], Exp, Exp, Phases)
+_RuleP :: Prism' Pragma (String, [RuleBndr], Exp, Exp, Phases)
 _RuleP
   = prism' reviewer remitter
   where
@@ -1239,7 +1239,7 @@ _RuleP
       remitter (RuleP x y z w u) = Just (x, y, z, w, u)
       remitter _ = Nothing
 
-_AnnP :: Prism' i Pragma (AnnTarget, Exp)
+_AnnP :: Prism' Pragma (AnnTarget, Exp)
 _AnnP
   = prism' reviewer remitter
   where
@@ -1247,7 +1247,7 @@ _AnnP
       remitter (AnnP x y) = Just (x, y)
       remitter _ = Nothing
 
-_LineP :: Prism' i Pragma (Int, String)
+_LineP :: Prism' Pragma (Int, String)
 _LineP
   = prism' reviewer remitter
   where
@@ -1256,7 +1256,7 @@ _LineP
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_CompleteP :: Prism' i Pragma ([Name], Maybe Name)
+_CompleteP :: Prism' Pragma ([Name], Maybe Name)
 _CompleteP
   = prism' reviewer remitter
   where
@@ -1265,7 +1265,7 @@ _CompleteP
       remitter _ = Nothing
 #endif
 
-_NoInline :: Prism' i Inline ()
+_NoInline :: Prism' Inline ()
 _NoInline
   = prism' reviewer remitter
   where
@@ -1273,7 +1273,7 @@ _NoInline
       remitter NoInline = Just ()
       remitter _ = Nothing
 
-_Inline :: Prism' i Inline ()
+_Inline :: Prism' Inline ()
 _Inline
   = prism' reviewer remitter
   where
@@ -1281,7 +1281,7 @@ _Inline
       remitter Inline = Just ()
       remitter _ = Nothing
 
-_Inlinable :: Prism' i Inline ()
+_Inlinable :: Prism' Inline ()
 _Inlinable
   = prism' reviewer remitter
   where
@@ -1289,7 +1289,7 @@ _Inlinable
       remitter Inlinable = Just ()
       remitter _ = Nothing
 
-_ConLike :: Prism' i RuleMatch ()
+_ConLike :: Prism' RuleMatch ()
 _ConLike
   = prism' reviewer remitter
   where
@@ -1297,7 +1297,7 @@ _ConLike
       remitter ConLike = Just ()
       remitter _ = Nothing
 
-_FunLike :: Prism' i RuleMatch ()
+_FunLike :: Prism' RuleMatch ()
 _FunLike
   = prism' reviewer remitter
   where
@@ -1305,7 +1305,7 @@ _FunLike
       remitter FunLike = Just ()
       remitter _ = Nothing
 
-_AllPhases :: Prism' i Phases ()
+_AllPhases :: Prism' Phases ()
 _AllPhases
   = prism' reviewer remitter
   where
@@ -1313,7 +1313,7 @@ _AllPhases
       remitter AllPhases = Just ()
       remitter _ = Nothing
 
-_FromPhase :: Prism' i Phases Int
+_FromPhase :: Prism' Phases Int
 _FromPhase
   = prism' reviewer remitter
   where
@@ -1321,7 +1321,7 @@ _FromPhase
       remitter (FromPhase x) = Just x
       remitter _ = Nothing
 
-_BeforePhase :: Prism' i Phases Int
+_BeforePhase :: Prism' Phases Int
 _BeforePhase
   = prism' reviewer remitter
   where
@@ -1329,7 +1329,7 @@ _BeforePhase
       remitter (BeforePhase x) = Just x
       remitter _ = Nothing
 
-_RuleVar :: Prism' i RuleBndr Name
+_RuleVar :: Prism' RuleBndr Name
 _RuleVar
   = prism' reviewer remitter
   where
@@ -1337,7 +1337,7 @@ _RuleVar
       remitter (RuleVar x) = Just x
       remitter _ = Nothing
 
-_TypedRuleVar :: Prism' i RuleBndr (Name, Type)
+_TypedRuleVar :: Prism' RuleBndr (Name, Type)
 _TypedRuleVar
   = prism' reviewer remitter
   where
@@ -1345,7 +1345,7 @@ _TypedRuleVar
       remitter (TypedRuleVar x y) = Just (x, y)
       remitter _ = Nothing
 
-_ModuleAnnotation :: Prism' i AnnTarget ()
+_ModuleAnnotation :: Prism' AnnTarget ()
 _ModuleAnnotation
   = prism' reviewer remitter
   where
@@ -1353,7 +1353,7 @@ _ModuleAnnotation
       remitter ModuleAnnotation = Just ()
       remitter _ = Nothing
 
-_TypeAnnotation :: Prism' i AnnTarget Name
+_TypeAnnotation :: Prism' AnnTarget Name
 _TypeAnnotation
   = prism' reviewer remitter
   where
@@ -1361,7 +1361,7 @@ _TypeAnnotation
       remitter (TypeAnnotation x) = Just x
       remitter _ = Nothing
 
-_ValueAnnotation :: Prism' i AnnTarget Name
+_ValueAnnotation :: Prism' AnnTarget Name
 _ValueAnnotation
   = prism' reviewer remitter
   where
@@ -1369,7 +1369,7 @@ _ValueAnnotation
       remitter (ValueAnnotation x) = Just x
       remitter _ = Nothing
 
-_FunDep :: Iso' i FunDep ([Name], [Name])
+_FunDep :: Iso' FunDep ([Name], [Name])
 _FunDep
   = iso remitter reviewer
   where
@@ -1377,7 +1377,7 @@ _FunDep
       remitter (FunDep x y) = (x, y)
 
 #if !(MIN_VERSION_template_haskell(2,13,0))
-_TypeFam :: Prism' i FamFlavour ()
+_TypeFam :: Prism' FamFlavour ()
 _TypeFam
   = prism' reviewer remitter
   where
@@ -1385,7 +1385,7 @@ _TypeFam
       remitter TypeFam = Just ()
       remitter _ = Nothing
 
-_DataFam :: Prism' i FamFlavour ()
+_DataFam :: Prism' FamFlavour ()
 _DataFam
   = prism' reviewer remitter
   where
@@ -1394,17 +1394,17 @@ _DataFam
       remitter _ = Nothing
 #endif
 
-tySynEqnPatterns :: Lens' i TySynEqn [Type]
+tySynEqnPatterns :: Lens' TySynEqn [Type]
 tySynEqnPatterns = lens g s where
    g (TySynEqn xs _)    = xs
    s (TySynEqn _  y) xs = TySynEqn xs y
 
-tySynEqnResult :: Lens' i TySynEqn Type
+tySynEqnResult :: Lens' TySynEqn Type
 tySynEqnResult = lens g s where
    g (TySynEqn _  x) = x
    s (TySynEqn xs _) = TySynEqn xs
 
-_InfixL :: Prism' i FixityDirection ()
+_InfixL :: Prism' FixityDirection ()
 _InfixL
   = prism' reviewer remitter
   where
@@ -1412,7 +1412,7 @@ _InfixL
       remitter InfixL = Just ()
       remitter _ = Nothing
 
-_InfixR :: Prism' i FixityDirection ()
+_InfixR :: Prism' FixityDirection ()
 _InfixR
   = prism' reviewer remitter
   where
@@ -1420,7 +1420,7 @@ _InfixR
       remitter InfixR = Just ()
       remitter _ = Nothing
 
-_InfixN :: Prism' i FixityDirection ()
+_InfixN :: Prism' FixityDirection ()
 _InfixN
   = prism' reviewer remitter
   where
@@ -1428,7 +1428,7 @@ _InfixN
       remitter InfixN = Just ()
       remitter _ = Nothing
 
-_VarE :: Prism' i Exp Name
+_VarE :: Prism' Exp Name
 _VarE
   = prism' reviewer remitter
   where
@@ -1436,7 +1436,7 @@ _VarE
       remitter (VarE x) = Just x
       remitter _ = Nothing
 
-_ConE :: Prism' i Exp Name
+_ConE :: Prism' Exp Name
 _ConE
   = prism' reviewer remitter
   where
@@ -1444,7 +1444,7 @@ _ConE
       remitter (ConE x) = Just x
       remitter _ = Nothing
 
-_LitE :: Prism' i Exp Lit
+_LitE :: Prism' Exp Lit
 _LitE
   = prism' reviewer remitter
   where
@@ -1452,7 +1452,7 @@ _LitE
       remitter (LitE x) = Just x
       remitter _ = Nothing
 
-_AppE :: Prism' i Exp (Exp, Exp)
+_AppE :: Prism' Exp (Exp, Exp)
 _AppE
   = prism' reviewer remitter
   where
@@ -1461,7 +1461,7 @@ _AppE
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_AppTypeE :: Prism' i Exp (Exp, Type)
+_AppTypeE :: Prism' Exp (Exp, Type)
 _AppTypeE
   = prism' reviewer remitter
   where
@@ -1470,7 +1470,7 @@ _AppTypeE
       remitter _ = Nothing
 #endif
 
-_InfixE :: Prism' i Exp (Maybe Exp, Exp, Maybe Exp)
+_InfixE :: Prism' Exp (Maybe Exp, Exp, Maybe Exp)
 _InfixE
   = prism' reviewer remitter
   where
@@ -1478,7 +1478,7 @@ _InfixE
       remitter (InfixE x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_UInfixE :: Prism' i Exp (Exp, Exp, Exp)
+_UInfixE :: Prism' Exp (Exp, Exp, Exp)
 _UInfixE
   = prism' reviewer remitter
   where
@@ -1486,7 +1486,7 @@ _UInfixE
       remitter (UInfixE x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_ParensE :: Prism' i Exp Exp
+_ParensE :: Prism' Exp Exp
 _ParensE
   = prism' reviewer remitter
   where
@@ -1494,7 +1494,7 @@ _ParensE
       remitter (ParensE x) = Just x
       remitter _ = Nothing
 
-_LamE :: Prism' i Exp ([Pat], Exp)
+_LamE :: Prism' Exp ([Pat], Exp)
 _LamE
   = prism' reviewer remitter
   where
@@ -1502,7 +1502,7 @@ _LamE
       remitter (LamE x y) = Just (x, y)
       remitter _ = Nothing
 
-_LamCaseE :: Prism' i Exp [Match]
+_LamCaseE :: Prism' Exp [Match]
 _LamCaseE
   = prism' reviewer remitter
   where
@@ -1510,7 +1510,7 @@ _LamCaseE
       remitter (LamCaseE x) = Just x
       remitter _ = Nothing
 
-_TupE :: Prism' i Exp [Exp]
+_TupE :: Prism' Exp [Exp]
 _TupE
   = prism' reviewer remitter
   where
@@ -1518,7 +1518,7 @@ _TupE
       remitter (TupE x) = Just x
       remitter _ = Nothing
 
-_UnboxedTupE :: Prism' i Exp [Exp]
+_UnboxedTupE :: Prism' Exp [Exp]
 _UnboxedTupE
   = prism' reviewer remitter
   where
@@ -1527,7 +1527,7 @@ _UnboxedTupE
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_UnboxedSumE :: Prism' i Exp (Exp, SumAlt, SumArity)
+_UnboxedSumE :: Prism' Exp (Exp, SumAlt, SumArity)
 _UnboxedSumE
   = prism' reviewer remitter
   where
@@ -1536,7 +1536,7 @@ _UnboxedSumE
       remitter _ = Nothing
 #endif
 
-_CondE :: Prism' i Exp (Exp, Exp, Exp)
+_CondE :: Prism' Exp (Exp, Exp, Exp)
 _CondE
   = prism' reviewer remitter
   where
@@ -1544,7 +1544,7 @@ _CondE
       remitter (CondE x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_MultiIfE :: Prism' i Exp [(Guard, Exp)]
+_MultiIfE :: Prism' Exp [(Guard, Exp)]
 _MultiIfE
   = prism' reviewer remitter
   where
@@ -1552,7 +1552,7 @@ _MultiIfE
       remitter (MultiIfE x) = Just x
       remitter _ = Nothing
 
-_LetE :: Prism' i Exp ([Dec], Exp)
+_LetE :: Prism' Exp ([Dec], Exp)
 _LetE
   = prism' reviewer remitter
   where
@@ -1560,7 +1560,7 @@ _LetE
       remitter (LetE x y) = Just (x, y)
       remitter _ = Nothing
 
-_CaseE :: Prism' i Exp (Exp, [Match])
+_CaseE :: Prism' Exp (Exp, [Match])
 _CaseE
   = prism' reviewer remitter
   where
@@ -1568,7 +1568,7 @@ _CaseE
       remitter (CaseE x y) = Just (x, y)
       remitter _ = Nothing
 
-_DoE :: Prism' i Exp [Stmt]
+_DoE :: Prism' Exp [Stmt]
 _DoE
   = prism' reviewer remitter
   where
@@ -1576,7 +1576,7 @@ _DoE
       remitter (DoE x) = Just x
       remitter _ = Nothing
 
-_CompE :: Prism' i Exp [Stmt]
+_CompE :: Prism' Exp [Stmt]
 _CompE
   = prism' reviewer remitter
   where
@@ -1584,7 +1584,7 @@ _CompE
       remitter (CompE x) = Just x
       remitter _ = Nothing
 
-_ArithSeqE :: Prism' i Exp Range
+_ArithSeqE :: Prism' Exp Range
 _ArithSeqE
   = prism' reviewer remitter
   where
@@ -1592,7 +1592,7 @@ _ArithSeqE
       remitter (ArithSeqE x) = Just x
       remitter _ = Nothing
 
-_ListE :: Prism' i Exp [Exp]
+_ListE :: Prism' Exp [Exp]
 _ListE
   = prism' reviewer remitter
   where
@@ -1600,7 +1600,7 @@ _ListE
       remitter (ListE x) = Just x
       remitter _ = Nothing
 
-_SigE :: Prism' i Exp (Exp, Type)
+_SigE :: Prism' Exp (Exp, Type)
 _SigE
   = prism' reviewer remitter
   where
@@ -1608,7 +1608,7 @@ _SigE
       remitter (SigE x y) = Just (x, y)
       remitter _ = Nothing
 
-_RecConE :: Prism' i Exp (Name, [FieldExp])
+_RecConE :: Prism' Exp (Name, [FieldExp])
 _RecConE
   = prism' reviewer remitter
   where
@@ -1616,7 +1616,7 @@ _RecConE
       remitter (RecConE x y) = Just (x, y)
       remitter _ = Nothing
 
-_RecUpdE :: Prism' i Exp (Exp, [FieldExp])
+_RecUpdE :: Prism' Exp (Exp, [FieldExp])
 _RecUpdE
   = prism' reviewer remitter
   where
@@ -1624,7 +1624,7 @@ _RecUpdE
       remitter (RecUpdE x y) = Just (x, y)
       remitter _ = Nothing
 
-_StaticE :: Prism' i Exp Exp
+_StaticE :: Prism' Exp Exp
 _StaticE
   = prism' reviewer remitter
   where
@@ -1632,7 +1632,7 @@ _StaticE
       remitter (StaticE x) = Just x
       remitter _ = Nothing
 
-_UnboundVarE :: Prism' i Exp Name
+_UnboundVarE :: Prism' Exp Name
 _UnboundVarE
   = prism' reviewer remitter
   where
@@ -1641,7 +1641,7 @@ _UnboundVarE
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,13,0)
-_LabelE :: Prism' i Exp String
+_LabelE :: Prism' Exp String
 _LabelE
   = prism' reviewer remitter
   where
@@ -1650,7 +1650,7 @@ _LabelE
       remitter _ = Nothing
 #endif
 
-_GuardedB :: Prism' i Body [(Guard, Exp)]
+_GuardedB :: Prism' Body [(Guard, Exp)]
 _GuardedB
   = prism' reviewer remitter
   where
@@ -1658,7 +1658,7 @@ _GuardedB
       remitter (GuardedB x) = Just x
       remitter _ = Nothing
 
-_NormalB :: Prism' i Body Exp
+_NormalB :: Prism' Body Exp
 _NormalB
   = prism' reviewer remitter
   where
@@ -1666,7 +1666,7 @@ _NormalB
       remitter (NormalB x) = Just x
       remitter _ = Nothing
 
-_NormalG :: Prism' i Guard Exp
+_NormalG :: Prism' Guard Exp
 _NormalG
   = prism' reviewer remitter
   where
@@ -1674,7 +1674,7 @@ _NormalG
       remitter (NormalG x) = Just x
       remitter _ = Nothing
 
-_PatG :: Prism' i Guard [Stmt]
+_PatG :: Prism' Guard [Stmt]
 _PatG
   = prism' reviewer remitter
   where
@@ -1682,7 +1682,7 @@ _PatG
       remitter (PatG x) = Just x
       remitter _ = Nothing
 
-_BindS :: Prism' i Stmt (Pat, Exp)
+_BindS :: Prism' Stmt (Pat, Exp)
 _BindS
   = prism' reviewer remitter
   where
@@ -1690,7 +1690,7 @@ _BindS
       remitter (BindS x y) = Just (x, y)
       remitter _ = Nothing
 
-_LetS :: Prism' i Stmt [Dec]
+_LetS :: Prism' Stmt [Dec]
 _LetS
   = prism' reviewer remitter
   where
@@ -1698,7 +1698,7 @@ _LetS
       remitter (LetS x) = Just x
       remitter _ = Nothing
 
-_NoBindS :: Prism' i Stmt Exp
+_NoBindS :: Prism' Stmt Exp
 _NoBindS
   = prism' reviewer remitter
   where
@@ -1706,7 +1706,7 @@ _NoBindS
       remitter (NoBindS x) = Just x
       remitter _ = Nothing
 
-_ParS :: Prism' i Stmt [[Stmt]]
+_ParS :: Prism' Stmt [[Stmt]]
 _ParS
   = prism' reviewer remitter
   where
@@ -1714,7 +1714,7 @@ _ParS
       remitter (ParS x) = Just x
       remitter _ = Nothing
 
-_FromR :: Prism' i Range Exp
+_FromR :: Prism' Range Exp
 _FromR
   = prism' reviewer remitter
   where
@@ -1722,7 +1722,7 @@ _FromR
       remitter (FromR x) = Just x
       remitter _ = Nothing
 
-_FromThenR :: Prism' i Range (Exp, Exp)
+_FromThenR :: Prism' Range (Exp, Exp)
 _FromThenR
   = prism' reviewer remitter
   where
@@ -1730,7 +1730,7 @@ _FromThenR
       remitter (FromThenR x y) = Just (x, y)
       remitter _ = Nothing
 
-_FromToR :: Prism' i Range (Exp, Exp)
+_FromToR :: Prism' Range (Exp, Exp)
 _FromToR
   = prism' reviewer remitter
   where
@@ -1738,7 +1738,7 @@ _FromToR
       remitter (FromToR x y) = Just (x, y)
       remitter _ = Nothing
 
-_FromThenToR :: Prism' i Range (Exp, Exp, Exp)
+_FromThenToR :: Prism' Range (Exp, Exp, Exp)
 _FromThenToR
   = prism' reviewer remitter
   where
@@ -1746,7 +1746,7 @@ _FromThenToR
       remitter (FromThenToR x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_CharL :: Prism' i Lit Char
+_CharL :: Prism' Lit Char
 _CharL
   = prism' reviewer remitter
   where
@@ -1754,7 +1754,7 @@ _CharL
       remitter (CharL x) = Just x
       remitter _ = Nothing
 
-_StringL :: Prism' i Lit String
+_StringL :: Prism' Lit String
 _StringL
   = prism' reviewer remitter
   where
@@ -1762,7 +1762,7 @@ _StringL
       remitter (StringL x) = Just x
       remitter _ = Nothing
 
-_IntegerL :: Prism' i Lit Integer
+_IntegerL :: Prism' Lit Integer
 _IntegerL
   = prism' reviewer remitter
   where
@@ -1770,7 +1770,7 @@ _IntegerL
       remitter (IntegerL x) = Just x
       remitter _ = Nothing
 
-_RationalL :: Prism' i Lit Rational
+_RationalL :: Prism' Lit Rational
 _RationalL
   = prism' reviewer remitter
   where
@@ -1778,7 +1778,7 @@ _RationalL
       remitter (RationalL x) = Just x
       remitter _ = Nothing
 
-_IntPrimL :: Prism' i Lit Integer
+_IntPrimL :: Prism' Lit Integer
 _IntPrimL
   = prism' reviewer remitter
   where
@@ -1786,7 +1786,7 @@ _IntPrimL
       remitter (IntPrimL x) = Just x
       remitter _ = Nothing
 
-_WordPrimL :: Prism' i Lit Integer
+_WordPrimL :: Prism' Lit Integer
 _WordPrimL
   = prism' reviewer remitter
   where
@@ -1794,7 +1794,7 @@ _WordPrimL
       remitter (WordPrimL x) = Just x
       remitter _ = Nothing
 
-_FloatPrimL :: Prism' i Lit Rational
+_FloatPrimL :: Prism' Lit Rational
 _FloatPrimL
   = prism' reviewer remitter
   where
@@ -1802,7 +1802,7 @@ _FloatPrimL
       remitter (FloatPrimL x) = Just x
       remitter _ = Nothing
 
-_DoublePrimL :: Prism' i Lit Rational
+_DoublePrimL :: Prism' Lit Rational
 _DoublePrimL
   = prism' reviewer remitter
   where
@@ -1810,7 +1810,7 @@ _DoublePrimL
       remitter (DoublePrimL x) = Just x
       remitter _ = Nothing
 
-_StringPrimL :: Prism' i Lit [Word8]
+_StringPrimL :: Prism' Lit [Word8]
 _StringPrimL
   = prism' reviewer remitter
   where
@@ -1818,7 +1818,7 @@ _StringPrimL
       remitter (StringPrimL x) = Just x
       remitter _ = Nothing
 
-_CharPrimL :: Prism' i Lit Char
+_CharPrimL :: Prism' Lit Char
 _CharPrimL
   = prism' reviewer remitter
   where
@@ -1826,7 +1826,7 @@ _CharPrimL
       remitter (CharPrimL x) = Just x
       remitter _ = Nothing
 
-_LitP :: Prism' i Pat Lit
+_LitP :: Prism' Pat Lit
 _LitP
   = prism' reviewer remitter
   where
@@ -1834,7 +1834,7 @@ _LitP
       remitter (LitP x) = Just x
       remitter _ = Nothing
 
-_VarP :: Prism' i Pat Name
+_VarP :: Prism' Pat Name
 _VarP
   = prism' reviewer remitter
   where
@@ -1842,7 +1842,7 @@ _VarP
       remitter (VarP x) = Just x
       remitter _ = Nothing
 
-_TupP :: Prism' i Pat [Pat]
+_TupP :: Prism' Pat [Pat]
 _TupP
   = prism' reviewer remitter
   where
@@ -1850,7 +1850,7 @@ _TupP
       remitter (TupP x) = Just x
       remitter _ = Nothing
 
-_UnboxedTupP :: Prism' i Pat [Pat]
+_UnboxedTupP :: Prism' Pat [Pat]
 _UnboxedTupP
   = prism' reviewer remitter
   where
@@ -1859,7 +1859,7 @@ _UnboxedTupP
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_UnboxedSumP :: Prism' i Pat (Pat, SumAlt, SumArity)
+_UnboxedSumP :: Prism' Pat (Pat, SumAlt, SumArity)
 _UnboxedSumP
   = prism' reviewer remitter
   where
@@ -1868,7 +1868,7 @@ _UnboxedSumP
       remitter _ = Nothing
 #endif
 
-_ConP :: Prism' i Pat (Name, [Pat])
+_ConP :: Prism' Pat (Name, [Pat])
 _ConP
   = prism' reviewer remitter
   where
@@ -1876,7 +1876,7 @@ _ConP
       remitter (ConP x y) = Just (x, y)
       remitter _ = Nothing
 
-_InfixP :: Prism' i Pat (Pat, Name, Pat)
+_InfixP :: Prism' Pat (Pat, Name, Pat)
 _InfixP
   = prism' reviewer remitter
   where
@@ -1884,7 +1884,7 @@ _InfixP
       remitter (InfixP x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_UInfixP :: Prism' i Pat (Pat, Name, Pat)
+_UInfixP :: Prism' Pat (Pat, Name, Pat)
 _UInfixP
   = prism' reviewer remitter
   where
@@ -1892,7 +1892,7 @@ _UInfixP
       remitter (UInfixP x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_ParensP :: Prism' i Pat Pat
+_ParensP :: Prism' Pat Pat
 _ParensP
   = prism' reviewer remitter
   where
@@ -1900,7 +1900,7 @@ _ParensP
       remitter (ParensP x) = Just x
       remitter _ = Nothing
 
-_TildeP :: Prism' i Pat Pat
+_TildeP :: Prism' Pat Pat
 _TildeP
   = prism' reviewer remitter
   where
@@ -1908,7 +1908,7 @@ _TildeP
       remitter (TildeP x) = Just x
       remitter _ = Nothing
 
-_BangP :: Prism' i Pat Pat
+_BangP :: Prism' Pat Pat
 _BangP
   = prism' reviewer remitter
   where
@@ -1916,7 +1916,7 @@ _BangP
       remitter (BangP x) = Just x
       remitter _ = Nothing
 
-_AsP :: Prism' i Pat (Name, Pat)
+_AsP :: Prism' Pat (Name, Pat)
 _AsP
   = prism' reviewer remitter
   where
@@ -1924,7 +1924,7 @@ _AsP
       remitter (AsP x y) = Just (x, y)
       remitter _ = Nothing
 
-_WildP :: Prism' i Pat ()
+_WildP :: Prism' Pat ()
 _WildP
   = prism' reviewer remitter
   where
@@ -1932,7 +1932,7 @@ _WildP
       remitter WildP = Just ()
       remitter _ = Nothing
 
-_RecP :: Prism' i Pat (Name, [FieldPat])
+_RecP :: Prism' Pat (Name, [FieldPat])
 _RecP
   = prism' reviewer remitter
   where
@@ -1940,7 +1940,7 @@ _RecP
       remitter (RecP x y) = Just (x, y)
       remitter _ = Nothing
 
-_ListP :: Prism' i Pat [Pat]
+_ListP :: Prism' Pat [Pat]
 _ListP
   = prism' reviewer remitter
   where
@@ -1948,7 +1948,7 @@ _ListP
       remitter (ListP x) = Just x
       remitter _ = Nothing
 
-_SigP :: Prism' i Pat (Pat, Type)
+_SigP :: Prism' Pat (Pat, Type)
 _SigP
   = prism' reviewer remitter
   where
@@ -1956,7 +1956,7 @@ _SigP
       remitter (SigP x y) = Just (x, y)
       remitter _ = Nothing
 
-_ViewP :: Prism' i Pat (Exp, Pat)
+_ViewP :: Prism' Pat (Exp, Pat)
 _ViewP
   = prism' reviewer remitter
   where
@@ -1964,7 +1964,7 @@ _ViewP
       remitter (ViewP x y) = Just (x, y)
       remitter _ = Nothing
 
-_ForallT :: Prism' i Type ([TyVarBndr], Cxt, Type)
+_ForallT :: Prism' Type ([TyVarBndr], Cxt, Type)
 _ForallT
   = prism' reviewer remitter
   where
@@ -1972,7 +1972,7 @@ _ForallT
       remitter (ForallT x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_AppT :: Prism' i Type (Type, Type)
+_AppT :: Prism' Type (Type, Type)
 _AppT
   = prism' reviewer remitter
   where
@@ -1980,7 +1980,7 @@ _AppT
       remitter (AppT x y) = Just (x, y)
       remitter _ = Nothing
 
-_SigT :: Prism' i Type (Type, Kind)
+_SigT :: Prism' Type (Type, Kind)
 _SigT
   = prism' reviewer remitter
   where
@@ -1988,7 +1988,7 @@ _SigT
       remitter (SigT x y) = Just (x, y)
       remitter _ = Nothing
 
-_VarT :: Prism' i Type Name
+_VarT :: Prism' Type Name
 _VarT
   = prism' reviewer remitter
   where
@@ -1996,7 +1996,7 @@ _VarT
       remitter (VarT x) = Just x
       remitter _ = Nothing
 
-_ConT :: Prism' i Type Name
+_ConT :: Prism' Type Name
 _ConT
   = prism' reviewer remitter
   where
@@ -2004,7 +2004,7 @@ _ConT
       remitter (ConT x) = Just x
       remitter _ = Nothing
 
-_PromotedT :: Prism' i Type Name
+_PromotedT :: Prism' Type Name
 _PromotedT
   = prism' reviewer remitter
   where
@@ -2012,7 +2012,7 @@ _PromotedT
       remitter (PromotedT x) = Just x
       remitter _ = Nothing
 
-_TupleT :: Prism' i Type Int
+_TupleT :: Prism' Type Int
 _TupleT
   = prism' reviewer remitter
   where
@@ -2020,7 +2020,7 @@ _TupleT
       remitter (TupleT x) = Just x
       remitter _ = Nothing
 
-_UnboxedTupleT :: Prism' i Type Int
+_UnboxedTupleT :: Prism' Type Int
 _UnboxedTupleT
   = prism' reviewer remitter
   where
@@ -2029,7 +2029,7 @@ _UnboxedTupleT
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_UnboxedSumT :: Prism' i Type SumArity
+_UnboxedSumT :: Prism' Type SumArity
 _UnboxedSumT
   = prism' reviewer remitter
   where
@@ -2038,7 +2038,7 @@ _UnboxedSumT
       remitter _ = Nothing
 #endif
 
-_ArrowT :: Prism' i Type ()
+_ArrowT :: Prism' Type ()
 _ArrowT
   = prism' reviewer remitter
   where
@@ -2046,7 +2046,7 @@ _ArrowT
       remitter ArrowT = Just ()
       remitter _ = Nothing
 
-_EqualityT :: Prism' i Type ()
+_EqualityT :: Prism' Type ()
 _EqualityT
   = prism' reviewer remitter
   where
@@ -2054,7 +2054,7 @@ _EqualityT
       remitter EqualityT = Just ()
       remitter _ = Nothing
 
-_ListT :: Prism' i Type ()
+_ListT :: Prism' Type ()
 _ListT
   = prism' reviewer remitter
   where
@@ -2062,7 +2062,7 @@ _ListT
       remitter ListT = Just ()
       remitter _ = Nothing
 
-_PromotedTupleT :: Prism' i Type Int
+_PromotedTupleT :: Prism' Type Int
 _PromotedTupleT
   = prism' reviewer remitter
   where
@@ -2070,7 +2070,7 @@ _PromotedTupleT
       remitter (PromotedTupleT x) = Just x
       remitter _ = Nothing
 
-_PromotedNilT :: Prism' i Type ()
+_PromotedNilT :: Prism' Type ()
 _PromotedNilT
   = prism' reviewer remitter
   where
@@ -2078,7 +2078,7 @@ _PromotedNilT
       remitter PromotedNilT = Just ()
       remitter _ = Nothing
 
-_PromotedConsT :: Prism' i Type ()
+_PromotedConsT :: Prism' Type ()
 _PromotedConsT
   = prism' reviewer remitter
   where
@@ -2086,7 +2086,7 @@ _PromotedConsT
       remitter PromotedConsT = Just ()
       remitter _ = Nothing
 
-_StarT :: Prism' i Type ()
+_StarT :: Prism' Type ()
 _StarT
   = prism' reviewer remitter
   where
@@ -2094,7 +2094,7 @@ _StarT
       remitter StarT = Just ()
       remitter _ = Nothing
 
-_ConstraintT :: Prism' i Type ()
+_ConstraintT :: Prism' Type ()
 _ConstraintT
   = prism' reviewer remitter
   where
@@ -2102,7 +2102,7 @@ _ConstraintT
       remitter ConstraintT = Just ()
       remitter _ = Nothing
 
-_LitT :: Prism' i Type TyLit
+_LitT :: Prism' Type TyLit
 _LitT
   = prism' reviewer remitter
   where
@@ -2110,7 +2110,7 @@ _LitT
       remitter (LitT x) = Just x
       remitter _ = Nothing
 
-_InfixT :: Prism' i Type (Type, Name, Type)
+_InfixT :: Prism' Type (Type, Name, Type)
 _InfixT
   = prism' reviewer remitter
   where
@@ -2118,7 +2118,7 @@ _InfixT
       remitter (InfixT x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_UInfixT :: Prism' i Type (Type, Name, Type)
+_UInfixT :: Prism' Type (Type, Name, Type)
 _UInfixT
   = prism' reviewer remitter
   where
@@ -2126,7 +2126,7 @@ _UInfixT
       remitter (UInfixT x y z) = Just (x, y, z)
       remitter _ = Nothing
 
-_ParensT :: Prism' i Type Type
+_ParensT :: Prism' Type Type
 _ParensT
   = prism' reviewer remitter
   where
@@ -2134,7 +2134,7 @@ _ParensT
       remitter (ParensT x) = Just x
       remitter _ = Nothing
 
-_WildCardT :: Prism' i Type ()
+_WildCardT :: Prism' Type ()
 _WildCardT
   = prism' reviewer remitter
   where
@@ -2142,7 +2142,7 @@ _WildCardT
       remitter WildCardT = Just ()
       remitter _ = Nothing
 
-_PlainTV :: Prism' i TyVarBndr Name
+_PlainTV :: Prism' TyVarBndr Name
 _PlainTV
   = prism' reviewer remitter
   where
@@ -2150,7 +2150,7 @@ _PlainTV
       remitter (PlainTV x) = Just x
       remitter _ = Nothing
 
-_KindedTV :: Prism' i TyVarBndr (Name, Kind)
+_KindedTV :: Prism' TyVarBndr (Name, Kind)
 _KindedTV
   = prism' reviewer remitter
   where
@@ -2158,7 +2158,7 @@ _KindedTV
       remitter (KindedTV x y) = Just (x, y)
       remitter _ = Nothing
 
-_NoSig :: Prism' i FamilyResultSig ()
+_NoSig :: Prism' FamilyResultSig ()
 _NoSig
   = prism' reviewer remitter
   where
@@ -2166,7 +2166,7 @@ _NoSig
       remitter NoSig = Just ()
       remitter _ = Nothing
 
-_KindSig :: Prism' i FamilyResultSig Kind
+_KindSig :: Prism' FamilyResultSig Kind
 _KindSig
   = prism' reviewer remitter
   where
@@ -2174,7 +2174,7 @@ _KindSig
       remitter (KindSig x) = Just x
       remitter _ = Nothing
 
-_TyVarSig :: Prism' i FamilyResultSig TyVarBndr
+_TyVarSig :: Prism' FamilyResultSig TyVarBndr
 _TyVarSig
   = prism' reviewer remitter
   where
@@ -2182,7 +2182,7 @@ _TyVarSig
       remitter (TyVarSig x) = Just x
       remitter _ = Nothing
 
-_NumTyLit :: Prism' i TyLit Integer
+_NumTyLit :: Prism' TyLit Integer
 _NumTyLit
   = prism' reviewer remitter
   where
@@ -2190,7 +2190,7 @@ _NumTyLit
       remitter (NumTyLit x) = Just x
       remitter _ = Nothing
 
-_StrTyLit :: Prism' i TyLit String
+_StrTyLit :: Prism' TyLit String
 _StrTyLit
   = prism' reviewer remitter
   where
@@ -2198,7 +2198,7 @@ _StrTyLit
       remitter (StrTyLit x) = Just x
       remitter _ = Nothing
 
-_NominalR :: Prism' i Role ()
+_NominalR :: Prism' Role ()
 _NominalR
   = prism' reviewer remitter
   where
@@ -2206,7 +2206,7 @@ _NominalR
       remitter NominalR = Just ()
       remitter _ = Nothing
 
-_RepresentationalR :: Prism' i Role ()
+_RepresentationalR :: Prism' Role ()
 _RepresentationalR
   = prism' reviewer remitter
   where
@@ -2214,7 +2214,7 @@ _RepresentationalR
       remitter RepresentationalR = Just ()
       remitter _ = Nothing
 
-_PhantomR :: Prism' i Role ()
+_PhantomR :: Prism' Role ()
 _PhantomR
   = prism' reviewer remitter
   where
@@ -2222,7 +2222,7 @@ _PhantomR
       remitter PhantomR = Just ()
       remitter _ = Nothing
 
-_InferR :: Prism' i Role ()
+_InferR :: Prism' Role ()
 _InferR
   = prism' reviewer remitter
   where
@@ -2231,7 +2231,7 @@ _InferR
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
-_StockStrategy :: Prism' i DerivStrategy ()
+_StockStrategy :: Prism' DerivStrategy ()
 _StockStrategy
   = prism' reviewer remitter
   where
@@ -2239,7 +2239,7 @@ _StockStrategy
       remitter StockStrategy = Just ()
       remitter _ = Nothing
 
-_AnyclassStrategy :: Prism' i DerivStrategy ()
+_AnyclassStrategy :: Prism' DerivStrategy ()
 _AnyclassStrategy
   = prism' reviewer remitter
   where
@@ -2247,7 +2247,7 @@ _AnyclassStrategy
       remitter AnyclassStrategy = Just ()
       remitter _ = Nothing
 
-_NewtypeStrategy :: Prism' i DerivStrategy ()
+_NewtypeStrategy :: Prism' DerivStrategy ()
 _NewtypeStrategy
   = prism' reviewer remitter
   where

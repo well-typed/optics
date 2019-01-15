@@ -13,7 +13,7 @@ class ViewableOptic k r where
   -- Getters return exactly one, Prisms, AffineTraversals and AffineFolds return
   -- at most one, whereas Folds and Traversals return a sum (with respect to a
   -- Monoid instance) of all their results.
-  view :: Optic' k i i s r -> s -> ViewResult k r
+  view :: Optic' k is s r -> s -> ViewResult k r
 
 instance ViewableOptic An_Iso r where
   type ViewResult An_Iso r = r
@@ -63,6 +63,6 @@ instance Monoid r => ViewableOptic A_Fold r where
 -- | Generalization of 'view' from @(->) s@ to arbitrary @MonadReader s m@.
 viewM
   :: (ViewableOptic k r, MonadReader s m)
-  => Optic' k i i s r
+  => Optic' k is s r
   -> m (ViewResult k r)
 viewM = asks . view

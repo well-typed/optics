@@ -67,9 +67,9 @@ class Field1 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   --
   -- >>> (1,2,3,4,5) & _1 %~ (+41)
   -- (42,2,3,4,5)
-  _1 :: Lens i s t a b
+  _1 :: Lens s t a b
   default _1 :: (Generic s, Generic t, GIxed N0 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _1 = ix proxyN0
   {-# INLINE _1 #-}
 
@@ -167,9 +167,9 @@ class Field2 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- >>> traverseOf _2 print (1,2)
   -- 2
   -- (1,())
-  _2 :: Lens i s t a b
+  _2 :: Lens s t a b
   default _2 :: (Generic s, Generic t, GIxed N1 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _2 = ix proxyN1
   {-# INLINE _2 #-}
 
@@ -255,9 +255,9 @@ instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b',c,d,e,f,g,h,i,j,k
 -- | Provides access to the 3rd field of a tuple.
 class Field3 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 3rd field of a tuple.
-  _3 :: Lens i s t a b
+  _3 :: Lens s t a b
   default _3 :: (Generic s, Generic t, GIxed N2 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _3 = ix proxyN2
   {-# INLINE _3 #-}
 
@@ -332,9 +332,9 @@ instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c',d,e,f,g,h,i,j,k
 -- | Provide access to the 4th field of a tuple.
 class Field4 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 4th field of a tuple.
-  _4 :: Lens i s t a b
+  _4 :: Lens s t a b
   default _4 :: (Generic s, Generic t, GIxed N3 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _4 = ix proxyN3
   {-# INLINE _4 #-}
 
@@ -405,9 +405,9 @@ instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d',e,f,g,h,i,j,k
 -- | Provides access to the 5th field of a tuple.
 class Field5 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 5th field of a tuple.
-  _5 :: Lens i s t a b
+  _5 :: Lens s t a b
   default _5 :: (Generic s, Generic t, GIxed N4 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _5 = ix proxyN4
   {-# INLINE _5 #-}
 
@@ -474,9 +474,9 @@ instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e',f,g,h,i,j,k
 -- | Provides access to the 6th element of a tuple.
 class Field6 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 6th field of a tuple.
-  _6 :: Lens i s t a b
+  _6 :: Lens s t a b
   default _6 :: (Generic s, Generic t, GIxed N5 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _6 = ix proxyN5
   {-# INLINE _6 #-}
 
@@ -539,9 +539,9 @@ instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f',g,h,i,j,k
 -- | Provide access to the 7th field of a tuple.
 class Field7 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 7th field of a tuple.
-  _7 :: Lens i s t a b
+  _7 :: Lens s t a b
   default _7 :: (Generic s, Generic t, GIxed N6 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _7 = ix proxyN6
   {-# INLINE _7 #-}
 
@@ -600,9 +600,9 @@ instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g',h,i,j,k
 -- | Provide access to the 8th field of a tuple.
 class Field8 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 8th field of a tuple.
-  _8 :: Lens i s t a b
+  _8 :: Lens s t a b
   default _8 :: (Generic s, Generic t, GIxed N7 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _8 = ix proxyN7
   {-# INLINE _8 #-}
 
@@ -657,9 +657,9 @@ instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h',i,j,k
 -- | Provides access to the 9th field of a tuple.
 class Field9 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 9th field of a tuple.
-  _9 :: Lens i s t a b
+  _9 :: Lens s t a b
   default _9 :: (Generic s, Generic t, GIxed N8 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _9 = ix proxyN8
   {-# INLINE _9 #-}
 
@@ -710,9 +710,9 @@ instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i',j,k
 -- | Provides access to the 10th field of a tuple.
 class Field10 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 10th field of a tuple.
-  _10 :: Lens i s t a b
+  _10 :: Lens s t a b
   default _10 :: (Generic s, Generic t, GIxed N9 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _10 = ix proxyN9
   {-# INLINE _10 #-}
 
@@ -759,9 +759,9 @@ instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j',
 -- | Provides access to the 11th field of a tuple.
 class Field11 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 11th field of a tuple.
-  _11 :: Lens i s t a b
+  _11 :: Lens s t a b
   default _11 :: (Generic s, Generic t, GIxed N10 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _11 = ix proxyN10
   {-# INLINE _11 #-}
 
@@ -804,9 +804,9 @@ instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 12th field of a tuple.
 class Field12 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 12th field of a tuple.
-  _12 :: Lens i s t a b
+  _12 :: Lens s t a b
   default _12 :: (Generic s, Generic t, GIxed N11 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _12 = ix proxyN11
   {-# INLINE _12 #-}
 
@@ -845,9 +845,9 @@ instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 13th field of a tuple.
 class Field13 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 13th field of a tuple.
-  _13 :: Lens i s t a b
+  _13 :: Lens s t a b
   default _13 :: (Generic s, Generic t, GIxed N12 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _13 = ix proxyN12
   {-# INLINE _13 #-}
 
@@ -882,9 +882,9 @@ instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 14th field of a tuple.
 class Field14 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 14th field of a tuple.
-  _14 :: Lens i s t a b
+  _14 :: Lens s t a b
   default _14 :: (Generic s, Generic t, GIxed N13 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _14 = ix proxyN13
   {-# INLINE _14 #-}
 
@@ -915,9 +915,9 @@ instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 15th field of a tuple.
 class Field15 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 15th field of a tuple.
-  _15 :: Lens i s t a b
+  _15 :: Lens s t a b
   default _15 :: (Generic s, Generic t, GIxed N14 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _15 = ix proxyN14
   {-# INLINE _15 #-}
 
@@ -944,9 +944,9 @@ instance Field15 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 16th field of a tuple.
 class Field16 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 16th field of a tuple.
-  _16 :: Lens i s t a b
+  _16 :: Lens s t a b
   default _16 :: (Generic s, Generic t, GIxed N15 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _16 = ix proxyN15
   {-# INLINE _16 #-}
 
@@ -969,9 +969,9 @@ instance Field16 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 17th field of a tuple.
 class Field17 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 17th field of a tuple.
-  _17 :: Lens i s t a b
+  _17 :: Lens s t a b
   default _17 :: (Generic s, Generic t, GIxed N16 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _17 = ix proxyN16
   {-# INLINE _17 #-}
 
@@ -990,9 +990,9 @@ instance Field17 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 18th field of a tuple.
 class Field18 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 18th field of a tuple.
-  _18 :: Lens i s t a b
+  _18 :: Lens s t a b
   default _18 :: (Generic s, Generic t, GIxed N17 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _18 = ix proxyN17
   {-# INLINE _18 #-}
 
@@ -1007,9 +1007,9 @@ instance Field18 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- | Provides access to the 19th field of a tuple.
 class Field19 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 19th field of a tuple.
-  _19 :: Lens i s t a b
+  _19 :: Lens s t a b
   default _19 :: (Generic s, Generic t, GIxed N18 (Rep s) (Rep t) a b)
-             => Lens i s t a b
+             => Lens s t a b
   _19 = ix proxyN18
   {-# INLINE _19 #-}
 
@@ -1020,102 +1020,102 @@ instance Field19 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,k
 -- Strict versions of the _1 .. _19 operations
 
 -- | Strict version of '_1'
-_1' :: Field1 s t a b => Lens i s t a b
+_1' :: Field1 s t a b => Lens s t a b
 _1' = lensVL $ \f !x -> toLensVL _1 f x
 {-# INLINE _1' #-}
 
 -- | Strict version of '_2'
-_2' :: Field2 s t a b => Lens i s t a b
+_2' :: Field2 s t a b => Lens s t a b
 _2' = lensVL $ \f !x -> toLensVL _2 f x
 {-# INLINE _2' #-}
 
 -- | Strict version of '_3'
-_3' :: Field3 s t a b => Lens i s t a b
+_3' :: Field3 s t a b => Lens s t a b
 _3' = lensVL $ \f !x -> toLensVL _3 f x
 {-# INLINE _3' #-}
 
 -- | Strict version of '_4'
-_4' :: Field4 s t a b => Lens i s t a b
+_4' :: Field4 s t a b => Lens s t a b
 _4' = lensVL $ \f !x -> toLensVL _4 f x
 {-# INLINE _4' #-}
 
 -- | Strict version of '_5'
-_5' :: Field5 s t a b => Lens i s t a b
+_5' :: Field5 s t a b => Lens s t a b
 _5' = lensVL $ \f !x -> toLensVL _5 f x
 {-# INLINE _5' #-}
 
 -- | Strict version of '_6'
-_6' :: Field6 s t a b => Lens i s t a b
+_6' :: Field6 s t a b => Lens s t a b
 _6' = lensVL $ \f !x -> toLensVL _6 f x
 {-# INLINE _6' #-}
 
 -- | Strict version of '_7'
-_7' :: Field7 s t a b => Lens i s t a b
+_7' :: Field7 s t a b => Lens s t a b
 _7' = lensVL $ \f !x -> toLensVL _7 f x
 {-# INLINE _7' #-}
 
 -- | Strict version of '_8'
-_8' :: Field8 s t a b => Lens i s t a b
+_8' :: Field8 s t a b => Lens s t a b
 _8' = lensVL $ \f !x -> toLensVL _8 f x
 {-# INLINE _8' #-}
 
 -- | Strict version of '_9'
-_9' :: Field9 s t a b => Lens i s t a b
+_9' :: Field9 s t a b => Lens s t a b
 _9' = lensVL $ \f !x -> toLensVL _9 f x
 {-# INLINE _9' #-}
 
 -- | Strict version of '_10'
-_10' :: Field10 s t a b => Lens i s t a b
+_10' :: Field10 s t a b => Lens s t a b
 _10' = lensVL $ \f !x -> toLensVL _10 f x
 {-# INLINE _10' #-}
 
 -- | Strict version of '_11'
-_11' :: Field11 s t a b => Lens i s t a b
+_11' :: Field11 s t a b => Lens s t a b
 _11' = lensVL $ \f !x -> toLensVL _11 f x
 {-# INLINE _11' #-}
 
 -- | Strict version of '_12'
-_12' :: Field12 s t a b => Lens i s t a b
+_12' :: Field12 s t a b => Lens s t a b
 _12' = lensVL $ \f !x -> toLensVL _12 f x
 {-# INLINE _12' #-}
 
 -- | Strict version of '_13'
-_13' :: Field13 s t a b => Lens i s t a b
+_13' :: Field13 s t a b => Lens s t a b
 _13' = lensVL $ \f !x -> toLensVL _13 f x
 {-# INLINE _13' #-}
 
 -- | Strict version of '_14'
-_14' :: Field14 s t a b => Lens i s t a b
+_14' :: Field14 s t a b => Lens s t a b
 _14' = lensVL $ \f !x -> toLensVL _14 f x
 {-# INLINE _14' #-}
 
 -- | Strict version of '_15'
-_15' :: Field15 s t a b => Lens i s t a b
+_15' :: Field15 s t a b => Lens s t a b
 _15' = lensVL $ \f !x -> toLensVL _15 f x
 {-# INLINE _15' #-}
 
 -- | Strict version of '_16'
-_16' :: Field16 s t a b => Lens i s t a b
+_16' :: Field16 s t a b => Lens s t a b
 _16' = lensVL $ \f !x -> toLensVL _16 f x
 {-# INLINE _16' #-}
 
 -- | Strict version of '_17'
-_17' :: Field17 s t a b => Lens i s t a b
+_17' :: Field17 s t a b => Lens s t a b
 _17' = lensVL $ \f !x -> toLensVL _17 f x
 {-# INLINE _17' #-}
 
 -- | Strict version of '_18'
-_18' :: Field18 s t a b => Lens i s t a b
+_18' :: Field18 s t a b => Lens s t a b
 _18' = lensVL $ \f !x -> toLensVL _18 f x
 {-# INLINE _18' #-}
 
 -- | Strict version of '_19'
-_19' :: Field19 s t a b => Lens i s t a b
+_19' :: Field19 s t a b => Lens s t a b
 _19' = lensVL $ \f !x -> toLensVL _19 f x
 {-# INLINE _19' #-}
 
 
-ix :: (Generic s, Generic t, GIxed n (Rep s) (Rep t) a b) => f n -> Lens i s t a b
+ix :: (Generic s, Generic t, GIxed n (Rep s) (Rep t) a b) => f n -> Lens s t a b
 ix n = lensVL $ \f -> fmap to . gix n f . from
 {-# INLINE ix #-}
 
