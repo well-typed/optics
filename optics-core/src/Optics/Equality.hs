@@ -2,7 +2,7 @@ module Optics.Equality
   ( An_Equality
   , Equality
   , Equality'
-  , vlEquality
+  , equalityVL
   , equality
   , simple
   , withEq
