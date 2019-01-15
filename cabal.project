@@ -1,5 +1,6 @@
 packages:
-  optics-core/*.cabal,
+  optics-core/*.cabal
   optics-sop/*.cabal
+  generic-optics/*.cabal
 
 tests: true
