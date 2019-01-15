@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeInType #-}
 -- | Core optic types and subtyping machinery.
 --
 -- This module contains the core 'Optic' types, and the underlying
@@ -18,6 +19,7 @@ module Optics.Internal.Optic
   , module Optics.Internal.Optic.Types
   ) where
 
+import Data.Kind (Type)
 import Optics.Internal.Optic.Subtyping
 import Optics.Internal.Optic.Types
 
@@ -53,7 +55,7 @@ type Optic__ p i o s t a b = p i a b -> p o s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
-data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
+data IsProxy (k :: OpticKind) (l :: OpticKind) (p :: Type -> Type -> Type -> Type) =
   IsProxy
 
 -- | Explicit cast from one optic flavour to another.

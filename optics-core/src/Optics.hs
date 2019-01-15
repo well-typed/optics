@@ -36,7 +36,7 @@ module Optics
   -- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
   --
   -- >>> :kind! Join A_Lens A_Prism
-  -- Join A_Lens A_Prism :: *
+  -- Join A_Lens A_Prism :: Optics.Internal.Optic.Types.OpticKind_ -> *
   -- = An_AffineTraversal
   --
   -- There are also indexed variants of 'Traversal', 'Fold' and 'Setter'.
@@ -199,20 +199,20 @@ import Data.Either.Optics as P
 --
 --     >>> set (to fst)
 --     ...
---     ...'A_Getter cannot be used as 'A_Setter
+--     ...A_Getter cannot be used as A_Setter
 --     ...
 --
 -- * abstract interface: better type-inference (optics kind is preserved)
 --
 --     >>> :t traversed % to not
 --     traversed % to not
---       :: Traversable t => Optic 'A_Fold o o (t Bool) (t Bool) Bool Bool
+--       :: Traversable t => Optic A_Fold o o (t Bool) (t Bool) Bool Bool
 --
 -- * abstract interface: not all optics have 'Join'
 --
 --     >>> sets map % to not
 --     ...
---     ...'A_Setter cannot be composed with 'A_Getter
+--     ...A_Setter cannot be composed with A_Getter
 --     ...
 --
 -- * 'Optic' is a @Rank1Type@ (not really before #41), so there are no

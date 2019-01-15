@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeInType #-}
 module Optics.Internal.Re where
 
 import Optics.Internal.Bi
@@ -5,7 +6,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
-  type ReversedOptic k :: *
+  type ReversedOptic k :: OpticKind
   -- | Reverses optics, turning around 'Equality' into 'Equality', 'Iso' into
   -- 'Iso', 'Prism' into 'PrismaticGetter' (and back), 'Lens' into 'LensyReview'
   -- (and back) and 'Getter' into 'Review' (and back).

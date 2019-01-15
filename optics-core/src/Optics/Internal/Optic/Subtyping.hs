@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Instances to implement the subtyping hierarchy between optics.
@@ -134,7 +134,7 @@ instance Is An_IxTraversal     An_IxSetter        where implies _ = id
 -- l@. This means in particular that composition of an @Optic k@ and an @Optic
 -- k@ will yield an @Optic (Join k l)@.
 --
-type family Join (k :: *) (l :: *) where
+type family Join (k :: OpticKind) (l :: OpticKind) :: OpticKind where
   -- BEGIN GENERATED CONTENT
 
   Join An_Equality        An_Iso             = An_Iso
