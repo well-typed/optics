@@ -37,7 +37,7 @@ import Unsafe.Coerce (unsafeCoerce)
 --
 -- TODO: explain indices
 --
-newtype Optic (k :: *) is s t a b =
+newtype Optic (k :: *) (is :: [*]) s t a b =
   Optic { getOptic :: forall p j. Optic_ k p j (Curry is j) s t a b }
 
 -- | Common special case of 'Optic' where source and target types are equal.
