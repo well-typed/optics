@@ -236,4 +236,8 @@ import Data.Either.Optics as P
 -- * Indexed optics interface is different (let's expand in own section, when the implementation is stabilised)
 -- * There are no @Traversal1@
 -- * There is 'AffineTraversal'
+-- * We can't use 'traverse' as an optic directly, but there is a 'Traversal' called 'traversed'.
+-- * 'view' is compatible with @lens@, but it uses a type class which chooses between
+--   'view1', 'view01' and 'viewN' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'view' at all, and what '^.' should be)
+-- * There are no 'from', only 're' (Should there be a 'from' restricted to 'Iso' or an alias to 're'? <https://github.com/well-typed/optics/pull/43#discussion_r247121380>)
 --
