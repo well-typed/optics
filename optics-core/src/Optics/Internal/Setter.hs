@@ -5,10 +5,10 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying setter.
-type Setter s t a b = Optic A_Setter '[] s t a b
+type Setter s t a b = Optic A_Setter NoIx s t a b
 
 -- | Type synonym for a type-preserving setter.
-type Setter' s a = Optic' A_Setter '[] s a
+type Setter' s a = Optic' A_Setter NoIx s a
 
 -- | Explicitly cast an optic to a setter.
 toSetter

@@ -9,10 +9,10 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Type synonym for an indexed fold.
-type IxFold i s a = Optic' A_Fold '[i] s a
+type IxFold i s a = Optic' A_Fold (WithIx i) s a
 
 -- | Explicitly cast an optic to an indexed fold.
-toIxFold :: Is k A_Fold => Optic' k '[i] s a -> IxFold i s a
+toIxFold :: Is k A_Fold => Optic' k (WithIx i) s a -> IxFold i s a
 toIxFold = sub
 {-# INLINE toIxFold #-}
 

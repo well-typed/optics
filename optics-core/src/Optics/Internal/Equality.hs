@@ -3,10 +3,10 @@ module Optics.Internal.Equality where
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying equality.
-type Equality s t a b = Optic An_Equality '[] s t a b
+type Equality s t a b = Optic An_Equality NoIx s t a b
 
 -- | Type synonym for a type-preserving equality.
-type Equality' s a = Optic' An_Equality '[] s a
+type Equality' s a = Optic' An_Equality NoIx s a
 
 -- | Build an equality from the van Laarhoven representation.
 equalityVL :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b

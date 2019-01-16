@@ -5,7 +5,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for an affine fold.
-type AffineFold s a = Optic' An_AffineFold '[] s a
+type AffineFold s a = Optic' An_AffineFold NoIx s a
 
 -- | Explicitly cast an optic to an affine fold.
 toAffineFold :: Is k An_AffineFold => Optic' k is s a -> Optic' An_AffineFold is s a

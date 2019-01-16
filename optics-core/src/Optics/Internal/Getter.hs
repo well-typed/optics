@@ -7,7 +7,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a getter.
-type Getter s a = Optic' A_Getter '[] s a
+type Getter s a = Optic' A_Getter NoIx s a
 
 -- | Apply a getter.
 view1 :: Is k A_Getter => Optic' k is s a -> s -> a

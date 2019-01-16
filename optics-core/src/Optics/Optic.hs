@@ -1,6 +1,8 @@
 module Optics.Optic
   ( Optic
   , Optic'
+  , NoIx
+  , WithIx
   , Is
   , sub
   , Join
