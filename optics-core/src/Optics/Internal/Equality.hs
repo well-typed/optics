@@ -9,9 +9,9 @@ type Equality s t a b = Optic An_Equality '[] s t a b
 type Equality' s a = Optic' An_Equality '[] s a
 
 -- | Build an equality from the van Laarhoven representation.
-vlEquality :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
-vlEquality f = case f Identical of Identical -> Optic id
-{-# INLINE vlEquality #-}
+equalityVL :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
+equalityVL f = case f Identical of Identical -> Optic id
+{-# INLINE equalityVL #-}
 
 -- | Capture type constraints as an equality.
 equality :: (s ~ a, t ~ b) => Equality s t a b
