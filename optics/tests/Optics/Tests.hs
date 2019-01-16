@@ -1,5 +1,7 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-} -- TODO remove me
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-module-prefixes -dsuppress-type-signatures -dsuppress-uniques #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
 module Main where
 
@@ -52,13 +54,25 @@ lhs02, rhs02 :: (Applicative f, Traversable t, Traversable s) => (a -> f b) -> t
 lhs02 f = traverseOf (traversed % traversed) f
 rhs02 f = traverse . traverse $ f
 
+-- This tries to show that forgetting indices _sometimes_ isn't that bad.
+lhs03, lhs03b, rhs03 :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
+lhs03  f xxs = over (unIx (imapped % imapped)) f xxs
+lhs03b f xxs = over (imapped % imapped) f xxs
+rhs03  f xss = imap (\_ -> imap (\_ -> f)) xss
+
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
     [ testCase "traverseOf traversed = traverse" $
         assertSuccess $(inspectTest $ 'lhs01 === 'rhs01)
     , testCase "traverseOf (traversed % traversed) = traverse . traverse" $
         assertSuccess $(inspectTest $ 'lhs02 === 'rhs02)
-
+#if __GLASGOW_HASKELL__ >= 802
+    -- this almost work, but inspection-testing cannot approximate enough
+    , testCase "over (unIx (imapped % imapped)) = ..." $
+        assertSuccess $(inspectTest $ 'lhs03 === 'rhs03)
+    , testCase "over (imapped % imapped) = ..." $
+        assertSuccess $(inspectTest $ 'lhs03b === 'rhs03)
+#endif
     ]
 
 assertSuccess :: Result -> IO ()
