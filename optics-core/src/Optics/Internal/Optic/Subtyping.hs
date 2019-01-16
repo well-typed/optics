@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Instances to implement the subtyping hierarchy between optics.

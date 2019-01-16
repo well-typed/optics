@@ -8,8 +8,10 @@ module Optics.Optic
   , Join
   , (%)
   , (%%)
-  , Append,
+  , Append
+  , CheckIndices
   )
   where
 
+import Optics.Internal.Indexed
 import Optics.Internal.Optic
