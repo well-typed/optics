@@ -9,10 +9,10 @@ import Optics.Internal.Tagged
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying review.
-type Review s t a b = Optic A_Review '[] s t a b
+type Review s t a b = Optic A_Review NoIx s t a b
 
 -- | Type synonym for a type-preserving review.
-type Review' b t = Optic' A_Review '[] t b
+type Review' b t = Optic' A_Review NoIx t b
 
 -- | Explicitly cast an optic to a review.
 toReview :: Is k A_Review => Optic k is s t a b -> Optic A_Review is s t a b

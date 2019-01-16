@@ -16,7 +16,7 @@ toAffineTraversal = sub
 {-# INLINE toAffineTraversal #-}
 
 -- | Build an affine traversal from a matcher and an updater.
-atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal '[] s t a b
+atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal NoIx s t a b
 atraversal match update = Optic $
   dimap (\s -> (match s, update s))
         (\(etb, f) -> either id f etb)

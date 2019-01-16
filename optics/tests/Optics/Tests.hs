@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DataKinds #-} -- TODO remove me
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-module-prefixes -dsuppress-type-signatures -dsuppress-uniques #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
@@ -14,19 +13,19 @@ import Data.Tuple.Optics
 import Optics
 
 -- | Composing a lens and a traversal yields a traversal
-comp1 :: Traversable t => Optic A_Traversal '[] (t a, y) (t b, y) a b
+comp1 :: Traversable t => Optic A_Traversal NoIx (t a, y) (t b, y) a b
 comp1 = _1 % traversed
 
 -- | Composing two lenses yields a lens
-comp2 :: Optic A_Lens '[] ((a, y), y1) ((b, y), y1) a b
+comp2 :: Optic A_Lens NoIx ((a, y), y1) ((b, y), y1) a b
 comp2 = _1 % _1
 
 -- | Composing a getter and a lens yields a getter
-comp3 :: Optic A_Getter '[] ((b, y), b1) ((b, y), b1) b b
+comp3 :: Optic A_Getter NoIx ((b, y), b1) ((b, y), b1) b b
 comp3 = to fst % _1
 
 -- | Composing a prism and a lens yields a traversal
-comp4 :: Optic An_AffineTraversal '[] (Either c (a, y)) (Either c (b, y)) a b
+comp4 :: Optic An_AffineTraversal NoIx (Either c (a, y)) (Either c (b, y)) a b
 comp4 = _Right % _1
 
 -- | An iso can be used as a getter

@@ -9,7 +9,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Type synonym for a fold.
-type Fold s a = Optic' A_Fold '[] s a
+type Fold s a = Optic' A_Fold NoIx s a
 
 -- | View the result of folding over all the results of a 'Fold' or 'Traversal'
 -- that points at a monoidal value.

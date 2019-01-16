@@ -4,10 +4,10 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying iso.
-type Iso s t a b = Optic An_Iso '[] s t a b
+type Iso s t a b = Optic An_Iso NoIx s t a b
 
 -- | Type synonym for a type-preserving iso.
-type Iso' s a = Optic' An_Iso '[] s a
+type Iso' s a = Optic' An_Iso NoIx s a
 
 -- | Explicitly cast an optic to an iso.
 toIso :: Is k An_Iso => Optic k is s t a b -> Optic An_Iso is s t a b

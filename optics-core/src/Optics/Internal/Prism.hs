@@ -4,10 +4,10 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying prism.
-type Prism s t a b = Optic A_Prism '[] s t a b
+type Prism s t a b = Optic A_Prism NoIx s t a b
 
 -- | Type synonym for a type-preserving prism.
-type Prism' s a = Optic' A_Prism '[] s a
+type Prism' s a = Optic' A_Prism NoIx s a
 
 -- | Explicitly cast an optic to a prism.
 toPrism :: Is k A_Prism => Optic k is s t a b -> Optic A_Prism is s t a b

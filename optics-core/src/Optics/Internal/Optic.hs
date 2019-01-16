@@ -11,6 +11,8 @@ module Optics.Internal.Optic
   , Optic'
   , Optic_
   , Optic__
+  , NoIx
+  , WithIx
   , sub
   , (%)
   , (%%)
@@ -26,6 +28,12 @@ import Optics.Internal.Optic.TypeLevel (Curry, Append)
 
 -- to make %% simpler
 import Unsafe.Coerce (unsafeCoerce)
+
+-- | An alias for an empty index-list
+type NoIx = '[]
+
+-- | Singleton index list
+type WithIx i = '[i]
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
 --
