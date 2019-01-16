@@ -84,6 +84,7 @@ library
 
   default-extensions:
     BangPatterns
+    DataKinds
     DefaultSignatures
     DeriveFunctor
     FlexibleContexts
@@ -97,5 +98,3 @@ library
     TupleSections
     TypeFamilies
     TypeOperators
-
-  default-extensions: DataKinds
