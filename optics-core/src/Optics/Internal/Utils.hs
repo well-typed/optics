@@ -13,5 +13,5 @@ data IxContext i a b t = IxContext (i -> b -> t) a
 {-# INLINE (#.) #-}
 
 (.#) :: Coercible a b => (b -> c) -> (a -> b) -> (a -> c)
-(.#) f _g = \a -> f (coerce a)
+(.#) f _g = coerce f
 {-# INLINE (.#) #-}
