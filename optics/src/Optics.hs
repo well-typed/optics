@@ -197,7 +197,7 @@ module Optics
   -- >>> :t fst' % itraversed
   -- fst' % itraversed
   --   :: TraversableWithIndex i t =>
-  --      Optic A_Traversal '[i] (t a, c) (t b, c) a b
+  --      Optic A_Traversal (WithIx i) (t a, c) (t b, c) a b
   --
   -- <<indexedoptics.png Indexed Optics>>
   --
@@ -300,7 +300,7 @@ import Data.Either.Optics as P
 --
 --     >>> :t traversed % to not
 --     traversed % to not
---       :: Traversable t => Optic A_Fold '[] (t Bool) (t Bool) Bool Bool
+--       :: Traversable t => Optic A_Fold NoIx (t Bool) (t Bool) Bool Bool
 --
 -- * abstract interface: not all optics have 'Join'
 --

@@ -7,16 +7,19 @@ module Optics.Iso
   , withIso
   -- * Isomorphisms
   , mapping
+  , coerced
   , curried
   , uncurried
   , flipped
   , Swapped(..)
+  -- * Re-exprots
   , module Optics.Optic
   )
   where
 
 import Data.Tuple
 import Data.Bifunctor
+import Data.Coerce (Coercible, coerce)
 
 import Optics.Internal.Iso
 import Optics.Internal.Optic
@@ -25,10 +28,18 @@ import Optics.Optic
 -- | This can be used to lift any 'Iso' into an arbitrary 'Functor'.
 mapping
   :: (Is k An_Iso, Functor f, Functor g)
-  => Optic k '[] s t a b
+  => Optic k is s t a b
   -> Iso (f s) (g t) (f a) (g b)
 mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 {-# INLINE mapping #-}
+
+-- | Data types that are representationally equal are isomorphic.
+--
+-- >>> view1 coerced 'x' :: Identity Char
+-- Identity 'x'
+--
+coerced :: (Coercible s a, Coercible t b) => Iso s t a b
+coerced = iso coerce coerce
 
 -- | The canonical isomorphism for currying and uncurrying a function.
 --
@@ -94,3 +105,4 @@ instance Swapped Either where
 
 -- $setup
 -- >>> import Optics.Core
+-- >>> import Data.Functor.Identity
