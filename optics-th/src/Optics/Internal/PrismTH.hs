@@ -312,9 +312,9 @@ makeSimpleRemitter conName fields =
      xs <- newNames "y" fields
      let matches =
            [ match (conP conName (map varP xs))
-                   (normalB (appE (conE rightDataName) (toTupleE (map varE xs))))
+                   (normalB (appE (conE '(.)) (toTupleE (map varE xs))))
                    []
-           , match wildP (normalB (appE (conE leftDataName) (varE x))) []
+           , match wildP (normalB (appE (conE 'Left) (varE x))) []
            ]
      lam1E (varP x) (caseE (varE x) matches)
 
@@ -335,8 +335,8 @@ makeFullRemitter cons target =
        match (conP conName (map varP xs))
              (normalB
                (if conName == target
-                  then appE (conE rightDataName) (toTupleE (map varE xs))
-                  else appE (conE leftDataName) (conE conName `appsE1` map varE xs)))
+                  then appE (conE 'Right) (toTupleE (map varE xs))
+                  else appE (conE 'Left) (conE conName `appsE1` map varE xs)))
              []
 
 
@@ -381,7 +381,7 @@ makeClassyPrismClass t className methodName cons =
     do Stab cx o _ _ _ b <- computeOpticType t cons con
        let stab' = Stab cx o r r b b
            defName = view nconName con
-           body    = appsE [varE composeValName, varE methodName, varE defName]
+           body    = appsE [varE '(.), varE methodName, varE defName]
        sequenceA
          [ sigD defName        (return (stabToType stab'))
          , valD (varP defName) (normalB body) []
@@ -412,7 +412,7 @@ makeClassyPrismInstance s className methodName cons =
 
      instanceD (cxt[]) (return cls)
        (   valD (varP methodName)
-                (normalB (varE idValName)) []
+                (normalB (varE 'id)) []
        : [ do stab <- computeOpticType s cons con
               let stab' = simplifyStab stab
               valD (varP (prismName conName))

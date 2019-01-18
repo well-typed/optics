@@ -351,7 +351,7 @@ makeClassyClass className methodName s defs = do
         ] ++
         inlinePragma defName
       | (TopName defName, (_, stab, _)) <- defs
-      , let body = appsE [varE composeValName, varE methodName, varE defName]
+      , let body = appsE [varE '(.), varE methodName, varE defName]
       , let ty   = quantifyType' (S.fromList (c:vars))
                                  (stabToContext stab)
                  $ stabToOptic stab `conAppsT`
@@ -370,7 +370,7 @@ makeClassyInstance rules className methodName s defs = do
   methodss <- traverse (makeFieldOptic rules') defs
 
   lift $ instanceD (cxt[]) (return instanceHead)
-           $ valD (varP methodName) (normalB (varE idValName)) []
+           $ valD (varP methodName) (normalB (varE 'id)) []
            : map return (concat methodss)
 
   where
@@ -455,7 +455,7 @@ makePureClause conName fieldCount =
   do xs <- newNames "x" fieldCount
      -- clause: _ (Con x1..xn) = pure (Con x1..xn)
      clause [wildP, conP conName (map varP xs)]
-            (normalB (appE (varE pureValName) (appsE (conE conName : map varE xs))))
+            (normalB (appE (varE 'pure) (appsE (conE conName : map varE xs))))
             []
 
 
@@ -473,7 +473,7 @@ makeGetterClause conName fieldCount fields =
          pats is     _  = map (const wildP) is
 
          fxs   = [ appE (varE f) (varE x) | x <- xs ]
-         body  = foldl (\a b -> appsE [varE apValName, a, b])
+         body  = foldl (\a b -> appsE [varE '(<*>), a, b])
                        (appE (varE 'phantom) (head fxs))
                        (tail fxs)
 
@@ -497,12 +497,12 @@ makeFieldOpticClause conName fieldCount (field:fields) irref =
 
          mkFx i = appE (varE f) (varE (xs !! i))
 
-         body0 = appsE [ varE fmapValName
+         body0 = appsE [ varE 'fmap
                        , lamE (map varP ys) (appsE (conE conName : map varE xs'))
                        , mkFx field
                        ]
 
-         body = foldl (\a b -> appsE [varE apValName, a, mkFx b]) body0 fields
+         body = foldl (\a b -> appsE [varE '(<*>), a, mkFx b]) body0 fields
 
      let wrap = if irref then tildeP else id
 
