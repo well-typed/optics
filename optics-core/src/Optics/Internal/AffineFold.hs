@@ -8,8 +8,11 @@ import Optics.Internal.Profunctor
 type AffineFold s a = Optic' An_AffineFold NoIx s a
 
 -- | Explicitly cast an optic to an affine fold.
-toAffineFold :: Is k An_AffineFold => Optic' k is s a -> Optic' An_AffineFold is s a
-toAffineFold = sub
+toAffineFold
+  :: Is k An_AffineFold
+  => Optic' k             is s a
+  -> Optic' An_AffineFold is s a
+toAffineFold = castOptic
 {-# INLINE toAffineFold #-}
 
 -- | View through 'AffineFold'.
@@ -28,12 +31,12 @@ view01 o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
 
 -- | Create a an 'AffineFold' from a partial function.
 --
--- >>> view01 (afolding listToMaybe) "foo"
+-- >>> view01 (afold listToMaybe) "foo"
 -- Just 'f'
 --
-afolding :: (s -> Maybe a) -> AffineFold s a
-afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
-{-# INLINE afolding #-}
+afold :: (s -> Maybe a) -> AffineFold s a
+afold f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
+{-# INLINE afold #-}
 
 -- $setup
 -- >>> import Optics.Core

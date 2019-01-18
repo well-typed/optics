@@ -4,7 +4,7 @@ module Optics.Optic
   , NoIx
   , WithIx
   , Is
-  , sub
+  , castOptic
   , Join
   , (%)
   , (%%)

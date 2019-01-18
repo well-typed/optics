@@ -12,7 +12,7 @@ type IxSetter' i s a = Optic' A_Setter (WithIx i) s a
 
 -- | Explicitly cast an optic to an indexeed setter.
 toIxSetter :: Is k A_Setter => Optic k (WithIx i) s t a b -> IxSetter i s t a b
-toIxSetter = sub
+toIxSetter = castOptic
 {-# INLINE toIxSetter #-}
 
 -- | Apply an indexed setter as a modifier.

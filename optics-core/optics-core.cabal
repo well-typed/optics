@@ -55,6 +55,9 @@ library
     Optics.Traversal
     Optics.Unindexed
     Optics.View
+    Data.Either.Optics
+    Data.Maybe.Optics
+    Data.Tuple.Optics
 
   other-modules:
     Optics.Internal.AffineFold

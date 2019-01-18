@@ -13,7 +13,7 @@ module Optics.Internal.Optic
   , Optic__
   , NoIx
   , WithIx
-  , sub
+  , castOptic
   , (%)
   , (%%)
   , IsProxy (..)
@@ -76,12 +76,19 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
 --
 -- TODO: add a graph
 --
-sub :: forall k l is s t a b . Is k l => Optic k is s t a b -> Optic l is s t a b
-sub (Optic o) = Optic (implies' o)
+castOptic
+  :: forall k l is s t a b
+  .  Is k l
+  => Optic k is s t a b
+  -> Optic l is s t a b
+castOptic (Optic o) = Optic (implies' o)
   where
-    implies' :: forall p j. Optic_ k p j (Curry is j) s t a b -> Optic_ l p j (Curry is j) s t a b
+    implies'
+      :: forall p j
+      .  Optic_ k p j (Curry is j) s t a b
+      -> Optic_ l p j (Curry is j) s t a b
     implies' x = implies (IsProxy :: IsProxy k l p) x
-{-# INLINE sub #-}
+{-# INLINE castOptic #-}
 
 -- | Compose two optics of compatible flavours.
 --
@@ -91,18 +98,20 @@ sub (Optic o) = Optic (implies' o)
     => Optic k is s t u v
     -> Optic l js u v a b
     -> Optic m ks s t a b
-o % o' = sub o %% sub o'
+o % o' = castOptic o %% castOptic o'
 {-# INLINE (%) #-}
 
 -- | Compose two optics of the same flavour.
 (%%) :: forall k is js ks s t u v a b. Append is js ks
      => Optic k is s t u v
      -> Optic k js u v a b
-     -> Optic k ks  s t a b
+     -> Optic k ks s t a b
 Optic o %% Optic o' = Optic oo
   where
     -- unsafeCoerce to the rescue
     oo :: forall p j. Optic_ k p j (Curry ks j) s t a b
-    oo = (unsafeCoerce :: Optic_ k p j (Curry is (Curry js j)) s t a b -> Optic_ k p i (Curry ks j) s t a b)
+    oo = (unsafeCoerce
+           :: Optic_ k p j (Curry is (Curry js j)) s t a b
+           -> Optic_ k p i (Curry ks j           ) s t a b)
       (o . o')
 {-# INLINE (%%) #-}

@@ -2,8 +2,8 @@ module Optics.Getter
   ( A_Getter
   , Getter
   , toGetter
-  , to
   , view1
+  , to
   , module Optics.Optic
   )
   where

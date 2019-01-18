@@ -11,7 +11,7 @@ type Iso' s a = Optic' An_Iso NoIx s a
 
 -- | Explicitly cast an optic to an iso.
 toIso :: Is k An_Iso => Optic k is s t a b -> Optic An_Iso is s t a b
-toIso = sub
+toIso = castOptic
 {-# INLINE toIso #-}
 
 -- | Build an iso from a pair of inverse functions.

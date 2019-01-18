@@ -1,7 +1,6 @@
 module Optics.Review
   ( A_Review
   , Review
-  , Review'
   , toReview
   , review
   , unto

@@ -11,7 +11,7 @@ type Prism' s a = Optic' A_Prism NoIx s a
 
 -- | Explicitly cast an optic to a prism.
 toPrism :: Is k A_Prism => Optic k is s t a b -> Optic A_Prism is s t a b
-toPrism = sub
+toPrism = castOptic
 {-# INLINE toPrism #-}
 
 -- | Build a prism from a constructor and a matcher.

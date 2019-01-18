@@ -15,6 +15,7 @@ module Optics.Fold
   , folded
   , folding
     -- * Concrete folds
+  , has
   , andOf
   , orOf
   , allOf
@@ -44,6 +45,24 @@ import Optics.View
 import Optics.Optic
 
 -- Concrete folds
+
+-- | Check to see if this optic matches 1 or more entries.
+--
+-- >>> has (element 0) []
+-- False
+--
+-- >>> has _Left (Left 12)
+-- True
+--
+-- >>> has _Right (Left 12)
+-- False
+--
+-- This will always return 'True' for a 'Lens' or 'Getter'.
+--
+-- >>> has _1 ("hello","world")
+-- True
+has :: Is k A_Fold => Optic' k is s a -> s -> Bool
+has l = getAny #. foldMapOf l (\_ -> Any True)
 
 andOf :: Is k A_Fold => Optic' k is s Bool -> s -> Bool
 andOf o = getAll #. foldMapOf o All

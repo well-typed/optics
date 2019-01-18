@@ -27,7 +27,7 @@ toFold
   :: Is k A_Fold
   => Optic' k is s a
   -> Optic' A_Fold is s a
-toFold = sub
+toFold = castOptic
 {-# INLINE toFold #-}
 
 -- | Fold via embedding into a monoid.

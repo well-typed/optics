@@ -84,13 +84,19 @@ icompose5 = icomposeN
 
 -- Implementation of icompose*
 icomposeN
-  :: forall k l i is s t a b. (Is A_Traversal l, Is k l, Join A_Traversal k ~ l, CurryCompose is)
+  :: forall k l i is s t a b
+  . (Is A_Traversal l, Is k l, Join A_Traversal k ~ l, CurryCompose is)
   => Curry is i
   -> Optic k is s t a b
   -> Optic l '[i] s t a b
-icomposeN f o = Optic (implies' (ixcontramap (\ij -> composeN @is ij f)) . getOptic (sub @k @l o))
+icomposeN f o = Optic $
+    implies' (ixcontramap (\ij -> composeN @is ij f))
+  . getOptic (castOptic @k @l o)
   where
-    implies' :: forall p ij. Optic_ A_Traversal p (Curry is ij) (i -> ij) s t s t -> Optic_ l p (Curry is ij) (i -> ij) s t s t
+    implies'
+      :: forall p ij
+      .  Optic_ A_Traversal p (Curry is ij) (i -> ij) s t s t
+      -> Optic_ l           p (Curry is ij) (i -> ij) s t s t
     implies' x = implies (IsProxy :: IsProxy A_Traversal l p) x
 {-# INLINE icomposeN #-}
 

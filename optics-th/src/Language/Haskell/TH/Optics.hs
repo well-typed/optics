@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP              #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase       #-}
 -----------------------------------------------------------------------------
 -- |
@@ -329,7 +328,9 @@ import Data.Word
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 
+import Data.Tuple.Optics
 import Optics.Core
+import Optics.Internal.TH
 
 -- | Has a 'Name'
 class HasName t where
@@ -2249,19 +2250,3 @@ _NewtypeStrategy
       remitter NewtypeStrategy = Just ()
       remitter _ = Nothing
 #endif
-
--------------------------------------------------------------------------------
--- Own variants
--------------------------------------------------------------------------------
-
-setOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Set a
-setOf l = foldMapOf l Set.singleton
-
-_1 :: Lens (a, c) (b, c) a b
-_1 = lens fst $ \(_, c) b -> (b, c)
-
-_2 :: Lens (c, a) (c, b) a b
-_2 = lens snd $ \(c, _) b -> (c, b)
-
-_3 :: Lens' (a, b, x) x
-_3 = lens (\(_,_,x) -> x) (\(a,b,_) x -> (a,b,x))

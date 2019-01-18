@@ -22,7 +22,7 @@ toTraversal
   :: Is k A_Traversal
   => Optic k is s t a b
   -> Optic A_Traversal is s t a b
-toTraversal = sub
+toTraversal = castOptic
 {-# INLINE toTraversal #-}
 
 -- | Build a traversal from the van Laarhoven representation.

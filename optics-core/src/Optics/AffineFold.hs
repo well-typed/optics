@@ -3,7 +3,7 @@ module Optics.AffineFold
   ( An_AffineFold
   , AffineFold
   , view01
-  , afolding
+  , afold
   , module Optics.Optic
   ) where
 
