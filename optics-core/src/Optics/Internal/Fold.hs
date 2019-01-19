@@ -1,6 +1,5 @@
 module Optics.Internal.Fold where
 
-import Data.Functor
 import Data.Foldable
 import Data.Monoid
 
@@ -59,7 +58,7 @@ sequenceOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s (f a)
   -> s -> f ()
-sequenceOf_ o = void . getTraversed #. foldMapOf o Traversed
+sequenceOf_ o = runTraversed . foldMapOf o Traversed
 {-# INLINE sequenceOf_ #-}
 
 -- | Traverse over all of the targets of an optic, computing an 'Applicative'
@@ -72,7 +71,7 @@ traverseOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (a -> f r) -> s -> f ()
-traverseOf_ o f = void . getTraversed #. foldMapOf o (Traversed #. f)
+traverseOf_ o f = runTraversed . foldMapOf o (Traversed #. f)
 {-# INLINE traverseOf_ #-}
 
 ----------------------------------------

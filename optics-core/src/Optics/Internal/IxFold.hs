@@ -1,6 +1,5 @@
 module Optics.Internal.IxFold where
 
-import Data.Functor
 import Data.Monoid
 
 import Optics.Internal.Bi
@@ -64,7 +63,7 @@ itraverseOf_
   :: (CheckIndices i is, Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
-itraverseOf_ o f = void . getTraversed #. ifoldMapOf o (\i -> Traversed #. f i)
+itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 {-# INLINE itraverseOf_ #-}
 
 ----------------------------------------

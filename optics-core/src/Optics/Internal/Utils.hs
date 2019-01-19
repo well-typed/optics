@@ -23,7 +23,10 @@ infixr 9 #.
 -- foldrOf-based version.
 --
 -- Note that the argument 'a' of the result should not be used.
-newtype Traversed f a = Traversed { getTraversed :: f a }
+newtype Traversed f a = Traversed (f a)
+
+runTraversed :: Functor f => Traversed f a -> f ()
+runTraversed (Traversed fa) = () <$ fa
 
 instance Applicative f => SG.Semigroup (Traversed f a) where
   Traversed ma <> Traversed mb = Traversed (ma *> mb)

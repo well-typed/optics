@@ -7,7 +7,6 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Reader
 import Data.Foldable
-import Data.Functor
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Functor.Product
@@ -120,7 +119,7 @@ class (FunctorWithIndex i f, Foldable f
 
 -- | Traverse 'FoldableWithIndex' ignoring the results.
 itraverse_ :: (FoldableWithIndex i t, Applicative f) => (i -> a -> f b) -> t a -> f ()
-itraverse_ f = void . getTraversed #. ifoldMap (\i -> Traversed #. f i)
+itraverse_ f = runTraversed . ifoldMap (\i -> Traversed #. f i)
 {-# INLINE itraverse_ #-}
 
 -- | Flipped 'itraverse_'.
