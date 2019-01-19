@@ -172,14 +172,14 @@ buildScaffold rules s cons defName =
      let defType
            | Just (_,cx,a') <- preview _ForallT a =
                let optic | lensCase   = GetterType
---                         | affineCase = AffineFoldType
+                         | affineCase = AffineFoldType
                          | otherwise  = FoldType
                in OpticSa cx optic s' a'
 
            -- Getter and Fold are always simple
            | not (_allowUpdates rules) =
                let optic | lensCase   = GetterType
---                         | affineCase = AffineFoldType
+                         | affineCase = AffineFoldType
                          | otherwise  = FoldType
                in OpticSa [] optic s' a
 
@@ -187,7 +187,7 @@ buildScaffold rules s cons defName =
            | _simpleLenses rules || s' == t && a == b =
                let optic | isoCase && _allowIsos rules = IsoType
                          | lensCase                    = LensType
---                         | affineCase                  = AffineTraversalType
+                         | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
                in OpticSa [] optic s' a
 
@@ -195,7 +195,7 @@ buildScaffold rules s cons defName =
            | otherwise =
                let optic | isoCase && _allowIsos rules = IsoType
                          | lensCase                    = LensType
---                         | affineCase                  = AffineTraversalType
+                         | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
                in OpticStab optic s' t a b
 
@@ -223,8 +223,8 @@ buildScaffold rules s cons defName =
     lensCase :: Bool
     lensCase = all (== 1) affectedFields
 
-    _affineCase :: Bool
-    _affineCase = all (<= 1) affectedFields
+    affineCase :: Bool
+    affineCase = all (<= 1) affectedFields
 
     isoCase :: Bool
     isoCase = case scaffolds of
@@ -448,8 +448,10 @@ makeFieldInstance defType className decs =
     go ty = or <$> traverse go (toListOf typeSelf ty)
 
     -- We want to catch type families, but not *data* families. See #799.
-    hasTypeFamilyD ty = has (_FamilyI % _1 % _OpenTypeFamilyD) ty
-                     || has (_FamilyI % _1 % _ClosedTypeFamilyD) ty
+    hasTypeFamilyD ty = case view01 (_FamilyI % _1) ty of
+      Nothing       -> False
+      Just instDecs -> has _OpenTypeFamilyD instDecs
+                    || has _ClosedTypeFamilyD instDecs
 
   pickInstanceDec hasFamilies
     | hasFamilies = do
@@ -469,20 +471,52 @@ makeFieldInstance defType className decs =
 makeFieldClause :: LensRules -> OpticType -> [(Name, Int, [Int])] -> ClauseQ
 makeFieldClause rules opticType cons =
   case opticType of
-    FoldType      -> makeFoldClause cons
-    IsoType       -> makeIsoClause cons
-    GetterType    -> makeGetterClause cons
-    LensType      -> makeLensClause cons irref
-    TraversalType -> makeTraversalClause cons irref
-    ty            -> error $ show ty
+    AffineFoldType      -> makeAffineFoldClause cons
+    AffineTraversalType -> makeAffineTraversalClause cons irref
+    FoldType            -> makeFoldClause cons
+    IsoType             -> makeIsoClause cons irref
+    GetterType          -> makeGetterClause cons
+    LensType            -> makeLensClause cons irref
+    TraversalType       -> makeTraversalClause cons irref
   where
     irref = _lazyPatterns rules && length cons == 1
+
+makeAffineFoldClause :: [(Name, Int, [Int])] -> ClauseQ
+makeAffineFoldClause cons = do
+  s <- newName "s"
+  clause
+    []
+    (normalB $ appsE
+      [ varE 'afolding
+      , lamE [varP s] $ caseE (varE s)
+        [ makeAffineFoldMatch conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      ])
+    []
+  where
+    makeAffineFoldMatch conName fieldCount fields = do
+      xs <- newNames "x" $ length fields
+
+      let args = foldr (\(i, x) -> setIx i (varP x))
+                       (replicate fieldCount wildP)
+                       (zip fields xs)
+
+          body = case xs of
+            -- Con _ .. _ -> Nothing
+            []  -> conE 'Nothing
+            -- Con _ .. x_i .. _ -> Just x_i
+            [x] -> conE 'Just `appE` varE x
+            _   -> error "AffineFold focuses on at most one field"
+
+      match (conP conName args)
+            (normalB body)
+            []
 
 makeFoldClause :: [(Name, Int, [Int])] -> ClauseQ
 makeFoldClause cons = do
   f <- newName "f"
   s <- newName "s"
-
   clause
     []
     (normalB $ appsE
@@ -514,20 +548,6 @@ makeFoldClause cons = do
             (normalB body)
             []
 
--- | Build a clause that constructs an Iso.
-makeIsoClause :: [(Name, Int, [Int])] -> ClauseQ
-makeIsoClause = \case
-  [(conName, 1, [0])] ->
-    let construct = conE conName
-        destruct = do
-          x <- newName "x"
-          lam1E (conP conName [varP x]) (varE x)
-    in clause
-         []
-         (normalB (appsE [varE 'iso, destruct, construct]))
-         []
-  _ -> error "Iso works only for types with one constructor and one field"
-
 -- | Build a getter clause that retrieves the field at the given index.
 makeGetterClause :: [(Name, Int, [Int])] -> ClauseQ
 makeGetterClause cons = do
@@ -542,7 +562,6 @@ makeGetterClause cons = do
         ]
       ])
     []
-
   where
     makeGetterMatch conName fieldCount = \case
       [field] -> do
@@ -553,6 +572,21 @@ makeGetterClause cons = do
               []
       _       -> error "Getter focuses on exactly one field"
 
+-- | Build a clause that constructs an Iso.
+makeIsoClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
+makeIsoClause fields irref = case fields of
+  [(conName, 1, [0])] -> do
+    x <- newName "x"
+    clause []
+           (normalB $ appsE
+             [ varE 'iso
+             , lamE [irrefP $ conP conName [varP x]] (varE x)
+             , conE conName
+             ])
+           []
+  _ -> error "Iso works only for types with one constructor and one field"
+  where
+    irrefP = if irref then tildeP else id
 
 -- | Build a lens clause that updates the field at the given index. When irref
 -- is 'True' the value with be matched with an irrefutable pattern.
@@ -560,7 +594,6 @@ makeLensClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
 makeLensClause cons irref = do
   f <- newName "f"
   s <- newName "s"
-
   clause
     []
     (normalB $ appsE
@@ -571,9 +604,8 @@ makeLensClause cons irref = do
         ]
       ])
     []
-
   where
-    wrap = if irref then tildeP else id
+    irrefP = if irref then tildeP else id
 
     makeLensMatch f conName fieldCount = \case
       [field] -> do
@@ -588,16 +620,64 @@ makeLensClause cons irref = do
               ]
 
         -- Con x_1 .. x_n -> fmap (\y_i -> Con x_1 .. y_i .. x_n) (f x_i)
-        match (wrap . conP conName $ map varP xs)
+        match (irrefP . conP conName $ map varP xs)
               (normalB body)
               []
       _       -> error "Lens focuses on exactly one field"
+
+makeAffineTraversalClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
+makeAffineTraversalClause cons irref = do
+  s <- newName "s"
+  clause
+    []
+    (normalB $ appsE
+      [ varE 'atraversal
+      , lamE [varP s] $ caseE (varE s)
+        [ makeAffineTraversalMatcherMatch conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      , lamE [varP s] $ caseE (varE s)
+        [ makeAffineTraversalUpdaterMatch conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      ])
+    []
+  where
+    irrefP = if irref then tildeP else id
+
+    makeAffineTraversalMatcherMatch conName fieldCount = \case
+      [] -> do
+        xs <- newNames "x" fieldCount
+        -- Con x_1 ... x_n -> Left (Con x_1 .. x_n)
+        match (irrefP . conP conName $ map varP xs)
+              (normalB $ conE 'Left `appE` appsE (conE conName : map varE xs))
+              []
+      [field] -> do
+        x <- newName "x"
+        match (conP conName . setIx field (varP x) $ replicate fieldCount wildP)
+              (normalB $ conE 'Right `appE` varE x)
+              []
+      _ -> error "Affine traversal focuses on at most one field"
+
+    makeAffineTraversalUpdaterMatch conName fieldCount fields = do
+      xs <- newNames "x" fieldCount
+      case fields of
+        [] -> do
+          match (irrefP . conP conName $ map varP xs)
+                (normalB . lamE [wildP] . appsE $ conE conName : map varE xs)
+                []
+        [field] -> do
+          y <- newName "y"
+          match (irrefP . conP conName . setIx field wildP $ map varP xs)
+                (normalB . lamE [varP y] . appsE $
+                  conE conName : (setIx field (varE y) $ map varE xs))
+                []
+        _  -> error "Affine traversal focuses on at most one field"
 
 makeTraversalClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
 makeTraversalClause cons irref = do
   f <- newName "f"
   s <- newName "s"
-
   clause
     []
     (normalB $ appsE
@@ -609,14 +689,14 @@ makeTraversalClause cons irref = do
       ])
     []
   where
-    wrap = if irref then tildeP else id
+    irrefP = if irref then tildeP else id
 
     makeTraversalMatch f conName fieldCount fields = do
       xs <- newNames "x" fieldCount
       case fields of
-        [] -> -- Con x1 .. xn -> pure (Con x1 .. xn)
-          match (conP conName (map varP xs))
-                (normalB (appE (varE 'pure) (appsE (conE conName : map varE xs))))
+        [] -> -- Con x_1 .. x_n -> pure (Con x_1 .. x_n)
+          match (irrefP . conP conName $ map varP xs)
+                (normalB $ varE 'pure `appE` appsE (conE conName : map varE xs))
                 []
         _ -> do
           ys <- newNames "y" $ length fields
@@ -637,7 +717,7 @@ makeTraversalClause cons irref = do
           -- Con x_1 .. x_n ->
           --  pure (\y_1 .. y_k -> Con x_1 .. y_1 .. x_l .. y_k .. x_n)
           --    <*> f x_i_y_1 <*> .. <*> f x_i_y_k
-          match (wrap . conP conName $ map varP xs)
+          match (irrefP . conP conName $ map varP xs)
                 (normalB body)
                 []
 

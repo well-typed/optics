@@ -35,7 +35,6 @@ withAffineTraversal o k =
   case getOptic (toAffineTraversal o) (AffineMarket (\_ b -> b) Right) of
     AffineMarket setter match -> k setter match
 
-
 ----------------------------------------
 
 -- | Type to represent the components of a affine traversal

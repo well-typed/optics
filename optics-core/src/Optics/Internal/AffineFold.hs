@@ -31,12 +31,12 @@ view01 o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
 
 -- | Create an 'AffineFold' from a partial function.
 --
--- >>> view01 (afold listToMaybe) "foo"
+-- >>> view01 (afolding listToMaybe) "foo"
 -- Just 'f'
 --
-afold :: (s -> Maybe a) -> AffineFold s a
-afold f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
-{-# INLINE afold #-}
+afolding :: (s -> Maybe a) -> AffineFold s a
+afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
+{-# INLINE afolding #-}
 
 -- $setup
 -- >>> import Optics.Core

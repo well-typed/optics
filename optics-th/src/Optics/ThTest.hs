@@ -8,6 +8,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Optics.ThTest where
 
+import Optics.AffineFold
+import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Getter
 import Optics.Iso
@@ -39,7 +41,7 @@ makeLenses ''Quark
 checkGaffer :: Lens' (Quark a) a
 checkGaffer = gaffer
 
-checkTape :: Traversal' (Quark a) a
+checkTape :: AffineTraversal' (Quark a) a
 checkTape = tape
 
 data Hadron a b = Science { _a1 :: a, _a2 :: a, _c :: b }
@@ -62,10 +64,10 @@ makeLenses ''Perambulation
 checkTerrain :: Lens' (Perambulation a b) a
 checkTerrain = terrain
 
-checkAltitude :: Traversal (Perambulation a b) (Perambulation a b') b b'
+checkAltitude :: AffineTraversal (Perambulation a b) (Perambulation a b') b b'
 checkAltitude = altitude
 
-checkDunes :: Traversal' (Perambulation a b) a
+checkDunes :: AffineTraversal' (Perambulation a b) a
 checkDunes = dunes
 
 makeLensesFor [("_terrain", "allTerrain"), ("_dunes", "allTerrain")] ''Perambulation
@@ -261,7 +263,7 @@ declareLenses [d|
 checkGaffer1 :: Lens' (Quark1 a) a
 checkGaffer1 = gaffer1
 
-checkTape1 :: Traversal' (Quark1 a) a
+checkTape1 :: AffineTraversal' (Quark1 a) a
 checkTape1 = tape1
 
 declarePrisms [d|
@@ -335,22 +337,22 @@ declareFields [d|
     deriving (Show)
   |]
 
-checkA0 :: HasA0 t a => Traversal' t a
+checkA0 :: HasA0 t a => AffineTraversal' t a
 checkA0 = a0
 
 checkB0 :: HasB0 t a => Lens' t a
 checkB0 = b0
 
-checkC0 :: HasC0 t a => Traversal' t a
+checkC0 :: HasC0 t a => AffineTraversal' t a
 checkC0 = c0
 
-checkA0' :: Traversal' (DeclaredFields f a) (f a)
+checkA0' :: AffineTraversal' (DeclaredFields f a) (f a)
 checkA0' = a0
 
 checkB0' :: Lens' (DeclaredFields f a) Int
 checkB0' = b0
 
-checkC0' :: Traversal' (DeclaredFields f a) String
+checkC0' :: AffineTraversal' (DeclaredFields f a) String
 checkC0' = c0
 
 declareFields [d|
@@ -375,7 +377,7 @@ makeLenses ''Rank2Tests
 checkR2length :: Getter Rank2Tests ([a] -> Int)
 checkR2length = r2length
 
-checkR2nub :: Eq a => Fold Rank2Tests ([a] -> [a])
+checkR2nub :: Eq a => AffineFold Rank2Tests ([a] -> [a])
 checkR2nub = r2nub
 
 data PureNoFields = PureNoFieldsA | PureNoFieldsB { _pureNoFields :: Int }
