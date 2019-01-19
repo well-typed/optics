@@ -27,6 +27,7 @@ newtype Traversed f a = Traversed (f a)
 
 runTraversed :: Functor f => Traversed f a -> f ()
 runTraversed (Traversed fa) = () <$ fa
+{-# INLINE runTraversed #-}
 
 instance Applicative f => SG.Semigroup (Traversed f a) where
   Traversed ma <> Traversed mb = Traversed (ma *> mb)
