@@ -19,6 +19,8 @@ import Optics.Operators
 import Optics.TH
 import Optics.Traversal
 
+import Optics.TH.Tests.T799 ()
+
 data Bar a b c = Bar { _baz :: (a, b) }
 makeLenses ''Bar
 
