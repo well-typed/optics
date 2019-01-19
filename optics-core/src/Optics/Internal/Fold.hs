@@ -1,5 +1,6 @@
 module Optics.Internal.Fold where
 
+import Data.Functor
 import Data.Foldable
 import Data.Monoid
 
@@ -52,18 +53,26 @@ toListOf o = foldrOf o (:) []
 
 ----------------------------------------
 
+-- | Evaluate each applicative action referenced by a 'Fold' on the structure
+-- from left to right, and ignore the results.
 sequenceOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s (f a)
   -> s -> f ()
-sequenceOf_ o = foldrOf o (*>) (pure ())
+sequenceOf_ o = void . getTraversed #. foldMapOf o Traversed
 {-# INLINE sequenceOf_ #-}
 
+-- | Traverse over all of the targets of an optic, computing an 'Applicative'
+-- (or 'Functor')-based answer, but unlike 'Optics.Traversal.traverseOf' do not
+-- construct a new structure.
+--
+-- 'traverseOf_' generalizes 'Data.Foldable.traverse_' to work over any 'Fold'.
+--
 traverseOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (a -> f r) -> s -> f ()
-traverseOf_ o f = foldrOf o ((*>) . f) (pure ())
+traverseOf_ o f = void . getTraversed #. foldMapOf o (Traversed #. f)
 {-# INLINE traverseOf_ #-}
 
 ----------------------------------------
@@ -73,6 +82,13 @@ folded :: Foldable f => Fold (f a) a
 folded = Optic (contrasecond (\_ -> ()) . wander traverse_)
 {-# INLINE folded #-}
 
+-- | Obtain a 'Fold' by lifting an operation that returns a 'Foldable' result.
+--
+-- This can be useful to lift operations from @Data.List@ and elsewhere into a
+-- 'Fold'.
+--
+-- >>> toListOf (folding tail) [1,2,3,4]
+-- [2,3,4]
 folding :: Foldable f => (s -> f a) -> Fold s a
 folding f = Optic (contrabimap f (\_ -> ()) . wander traverse_)
 {-# INLINE folding #-}

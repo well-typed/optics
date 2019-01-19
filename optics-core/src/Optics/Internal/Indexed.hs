@@ -7,6 +7,7 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Reader
 import Data.Foldable
+import Data.Functor
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Functor.Product
@@ -106,7 +107,7 @@ class (FunctorWithIndex i f, Foldable f
   ifoldMap :: Monoid m => (i -> a -> m) -> f a -> m
   default ifoldMap
     :: (TraversableWithIndex i f, Monoid m) => (i -> a -> m) -> f a -> m
-  ifoldMap f = (fold .# runIdentity) . itraverse (\i -> Identity #. f i)
+  ifoldMap f = fold . runIdentity #. itraverse (\i -> Identity #. f i)
   {-# INLINE ifoldMap #-}
 
   ifoldr :: (i -> a -> b -> b) -> b -> f a -> b
@@ -119,11 +120,13 @@ class (FunctorWithIndex i f, Foldable f
 
 -- | Traverse 'FoldableWithIndex' ignoring the results.
 itraverse_ :: (FoldableWithIndex i t, Applicative f) => (i -> a -> f b) -> t a -> f ()
-itraverse_ f = ifoldr (\i -> (*>) . f i) (pure ())
+itraverse_ f = void . getTraversed #. ifoldMap (\i -> Traversed #. f i)
+{-# INLINE itraverse_ #-}
 
 -- | Flipped 'itraverse_'.
 ifor_ :: (FoldableWithIndex i t, Applicative f) => t a -> (i -> a -> f b) -> f ()
 ifor_ = flip itraverse_
+{-# INLINE ifor_ #-}
 
 class (FoldableWithIndex i t, Traversable t
       ) => TraversableWithIndex i t | t -> i where
@@ -132,6 +135,7 @@ class (FoldableWithIndex i t, Traversable t
 -- | Flipped 'itraverse'
 ifor :: (TraversableWithIndex i t, Applicative f) => t a -> (i -> a -> f b) -> f (t b)
 ifor = flip itraverse
+{-# INLINE ifor #-}
 
 ----------------------------------------
 -- Instances
