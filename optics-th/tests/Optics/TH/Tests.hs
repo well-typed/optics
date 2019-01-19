@@ -6,7 +6,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Optics.ThTest where
+module Main where
 
 import Optics.AffineFold
 import Optics.AffineTraversal
@@ -426,3 +426,6 @@ data CheckAbbreviatedNamer = CheckAbbreviatedNamer
 makeLensesWith (defaultFieldRules & lensField .~ abbreviatedNamer ) ''CheckAbbreviatedNamer
 checkAbbreviatedNamer :: Lens' CheckAbbreviatedNamer Int
 checkAbbreviatedNamer = fieldAbbreviatedNamer
+
+main :: IO ()
+main = putStrLn "optics-th-tests: ok"
