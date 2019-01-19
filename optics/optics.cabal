@@ -92,6 +92,7 @@ library
 
   -- optics-th
   reexported-modules: Language.Haskell.TH.Optics
+                    , Optics.TH
 
 test-suite optics-tests
   default-language: Haskell2010

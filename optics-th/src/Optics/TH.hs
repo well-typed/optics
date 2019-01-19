@@ -88,8 +88,7 @@ simpleLenses :: Lens' LensRules Bool
 simpleLenses = lensVL $ \f r ->
   fmap (\x -> r { _simpleLenses = x}) (f (_simpleLenses r))
 
--- | Indicate whether or not to supply the signatures for the generated
--- lenses.
+-- | Indicate whether or not to supply the signatures for the generated lenses.
 --
 -- Disabling this can be useful if you want to provide a more restricted type
 -- signature or if you want to supply hand-written haddocks.
@@ -97,9 +96,9 @@ generateSignatures :: Lens' LensRules Bool
 generateSignatures = lensVL $ \f r ->
   fmap (\x -> r { _generateSigs = x}) (f (_generateSigs r))
 
--- | Generate "updateable" optics when 'True'. When 'False', 'Fold's will be
--- generated instead of 'Traversal's and 'Getter's will be generated instead
--- of 'Lens'es. This mode is intended to be used for types with invariants
+-- | Generate "updateable" optics when 'True'. When 'False', (affine) folds will
+-- be generated instead of (affine) traversals and getters will be generated
+-- instead of lenses. This mode is intended to be used for types with invariants
 -- which must be maintained by "smart" constructors.
 generateUpdateableOptics :: Lens' LensRules Bool
 generateUpdateableOptics = lensVL $ \f r ->
@@ -121,11 +120,11 @@ generateUpdateableOptics = lensVL $ \f r ->
 -- @
 --
 -- The downside of this flag is that it can lead to space-leaks and
--- code-size/compile-time increases when generated for large records. By
--- default this flag is turned off, and strict optics are generated.
+-- code-size/compile-time increases when generated for large records. By default
+-- this flag is turned off, and strict optics are generated.
 --
--- When using lazy optics the strict optic can be recovered by composing
--- with '$!':
+-- When using lazy optics the strict optic can be recovered by composing with
+-- '$!':
 --
 -- @
 -- strictOptic = ($!) . lazyOptic
@@ -134,8 +133,8 @@ generateLazyPatterns :: Lens' LensRules Bool
 generateLazyPatterns = lensVL $ \f r ->
   fmap (\x -> r { _lazyPatterns = x}) (f (_lazyPatterns r))
 
--- | Create the class if the constructor is 'Control.Lens.Type.Simple' and the
--- 'lensClass' rule matches.
+-- | Create the class if the constructor if generated lenses would be
+-- type-preserving and the 'lensClass' rule matches.
 createClass :: Lens' LensRules Bool
 createClass = lensVL $ \f r ->
   fmap (\x -> r { _generateClasses = x}) (f (_generateClasses r))
@@ -151,8 +150,8 @@ lensClass = lensVL $ \f r ->
   fmap (\x -> r { _classyLenses = x }) (f (_classyLenses r))
 
 -- | Rules for making fairly simple partial lenses, ignoring the special cases
--- for isomorphisms and traversals, and not making any classes.
--- It uses 'underscoreNoPrefixNamer'.
+-- for isomorphisms and traversals, and not making any classes. It uses
+-- 'underscoreNoPrefixNamer'.
 lensRules :: LensRules
 lensRules = LensRules
   { _simpleLenses    = False
@@ -165,9 +164,8 @@ lensRules = LensRules
   , _fieldToDef      = underscoreNoPrefixNamer
   }
 
--- | A 'FieldNamer' that strips the _ off of the field name,
--- lowercases the name, and skips the field if it doesn't start with
--- an '_'.
+-- | A 'FieldNamer' that strips the _ off of the field name, lowercases the
+-- name, and skips the field if it doesn't start with an '_'.
 underscoreNoPrefixNamer :: FieldNamer
 underscoreNoPrefixNamer _ _ n =
   case nameBase n of
@@ -175,8 +173,8 @@ underscoreNoPrefixNamer _ _ n =
     _        -> []
 
 
--- | Construct a 'LensRules' value for generating top-level definitions
--- using the given map from field names to definition names.
+-- | Construct a 'LensRules' value for generating top-level definitions using
+-- the given map from field names to definition names.
 lensRulesFor ::
   [(String, String)] {- ^ [(Field Name, Definition Name)] -} ->
   LensRules
@@ -187,9 +185,10 @@ lookingupNamer :: [(String,String)] -> FieldNamer
 lookingupNamer kvs _ _ field =
   [ TopName (mkName v) | (k,v) <- kvs, k == nameBase field]
 
--- | Create a 'FieldNamer' from a mapping function. If the function
--- returns @[]@, it creates no lens for the field.
-mappingNamer :: (String -> [String]) -- ^ A function that maps a @fieldName@ to @lensName@s.
+-- | Create a 'FieldNamer' from a mapping function. If the function returns
+-- @[]@, it creates no lens for the field.
+mappingNamer :: (String -> [String]) -- ^ A function that maps a @fieldName@ to
+                                     -- @lensName@s.
              -> FieldNamer
 mappingNamer mapper _ _ = fmap (TopName . mkName) . mapper . nameBase
 
@@ -209,9 +208,9 @@ classyRules = LensRules
   , _fieldToDef      = underscoreNoPrefixNamer
   }
 
--- | Rules for making lenses and traversals that precompose another 'Lens'
--- using a custom function for naming the class, main class method, and a
--- mapping from field names to definition names.
+-- | Rules for making lenses and traversals that precompose another 'Lens' using
+-- a custom function for naming the class, main class method, and a mapping from
+-- field names to definition names.
 classyRulesFor
   :: (String -> Maybe (String, String)) {- ^ Type Name -> Maybe (Class Name, Method Name) -} ->
   [(String, String)] {- ^ [(Field Name, Method Name)] -} ->
@@ -225,26 +224,42 @@ classyRules_ :: LensRules
 classyRules_
   = classyRules & lensField .~ \_ _ n -> [TopName (mkName ('_':nameBase n))]
 
--- | Build lenses (and traversals) with a sensible default configuration.
+-- | Build lenses and (affine) traversals with a sensible default configuration.
 --
 -- /e.g./
 --
 -- @
--- data FooBar
---   = Foo { _x, _y :: 'Int' }
---   | Bar { _x :: 'Int' }
--- 'makeLenses' ''FooBar
+-- data Animal
+--   = Cat { _age  :: 'Int'
+--         , _name :: 'String'
+--         }
+--   | Dog { _age    :: 'Int'
+--         , _absurd :: forall a b. a -> b
+--         }
+-- 'makeLenses' ''Animal
 -- @
 --
 -- will create
 --
 -- @
--- x :: 'Lens'' FooBar 'Int'
--- x f (Foo a b) = (\\a\' -> Foo a\' b) \<$\> f a
--- x f (Bar a)   = Bar \<$\> f a
--- y :: 'Traversal'' FooBar 'Int'
--- y f (Foo a b) = (\\b\' -> Foo a  b\') \<$\> f b
--- y _ c\@(Bar _) = pure c
+-- absurd :: forall a b. AffineFold Animal (a -> b)
+-- absurd = afolding $ \\s -> case s of
+--   Cat _ _ -> Nothing
+--   Dog _ x -> Just x
+--
+-- age :: Lens' Animal Int
+-- age = lensVL $ \\f s -> case s of
+--   Cat x1 x2 -> fmap (\\y -> Cat y x2) (f x1)
+--   Dog x1 x2 -> fmap (\\y -> Dog y x2) (f x1)
+--
+-- name :: AffineTraversal' Animal String
+-- name = atraversal
+--   (\\s -> case s of
+--       Cat _ x   -> Right x
+--       Dog x1 x2 -> Left (Dog x1 x2))
+--   (\\s -> case s of
+--       Cat x1 _  -> \\y -> Cat x1 y
+--       Dog x1 x2 -> \\_ -> Dog x1 x2)
 -- @
 --
 -- @
@@ -266,14 +281,19 @@ makeLenses = makeFieldOptics lensRules
 -- will create
 --
 -- @
--- class HasFoo t where
---   foo :: 'Lens'' t Foo
---   fooX :: 'Lens'' t 'Int'
---   fooX = foo . go where go f (Foo x y) = (\\x\' -> Foo x' y) \<$\> f x
---   fooY :: 'Lens'' t 'Int'
---   fooY = foo . go where go f (Foo x y) = (\\y\' -> Foo x y') \<$\> f y
+-- class HasFoo c where
+--   foo  :: Lens' c Foo
+--   fooX :: Lens' c Int
+--   fooY :: Lens' c Int
+--   fooX = foo % fooX
+--   fooY = foo % fooY
+--
 -- instance HasFoo Foo where
---   foo = id
+--   foo  = lensVL id
+--   fooX = lensVL $ \\f s -> case s of
+--     Foo x1 x2 -> fmap (\\y -> Foo y x2) (f x1)
+--   fooY = lensVL $ \\f s -> case s of
+--     Foo x1 x2 -> fmap (\\y -> Foo x1 y) (f x2)
 -- @
 --
 -- @
@@ -542,19 +562,23 @@ abbreviatedNamer _ fields field = maybeToList $ do
 -- will create
 --
 -- @
--- _fooXLens :: Lens' (Foo a) Int
--- _fooYLens :: Lens (Foo a) (Foo b) a b
 -- class HasX s a | s -> a where
 --   x :: Lens' s a
+--
 -- instance HasX (Foo a) Int where
---   x = _fooXLens
+--   x = lensVL $ \\f s -> case s of
+--     Foo x1 x2 -> fmap (\\y -> Foo y x2) (f x1)
+--
 -- class HasY s a | s -> a where
 --   y :: Lens' s a
+--
 -- instance HasY (Foo a) a where
---   y = _fooYLens
--- _barXLens :: Iso' Bar Char
+--   y = lensVL $ \\f s -> case s of
+--     Foo x1 x2 -> fmap (\\y -> Foo x1 y) (f x2)
+--
 -- instance HasX Bar Char where
---   x = _barXLens
+--   x = lensVL $ \\f s -> case s of
+--     Bar x1 -> fmap (\\y -> Bar y) (f x1)
 -- @
 --
 -- For details, see 'camelCaseFields'.
