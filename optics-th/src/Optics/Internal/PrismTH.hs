@@ -20,8 +20,8 @@ import Data.Char
 import Data.List
 import Data.Traversable
 import Language.Haskell.TH
-import qualified Data.Map as Map
-import qualified Data.Set as Set
+import qualified Data.Map as M
+import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
 
 import Language.Haskell.TH.Optics
@@ -198,8 +198,8 @@ computeReviewType s' cx tys =
 computePrismType :: Type -> Cxt -> [NCon] -> NCon -> Q Stab
 computePrismType t cx cons con =
   do let ts      = view nconTypes con
-         unbound = setOf typeVars t Set.\\ setOf typeVars cons
-     sub <- sequenceA (Map.fromSet (newName . nameBase) unbound)
+         unbound = setOf typeVars t S.\\ setOf typeVars cons
+     sub <- sequenceA (M.fromSet (newName . nameBase) unbound)
      b   <- toTupleT (map return ts)
      a   <- toTupleT (map return (substTypeVars sub ts))
      let s = substTypeVars sub t
@@ -208,13 +208,13 @@ computePrismType t cx cons con =
 
 computeIsoType :: Type -> [Type] -> TypeQ
 computeIsoType t' fields =
-  do sub <- sequenceA (Map.fromSet (newName . nameBase) (setOf typeVars t'))
+  do sub <- sequenceA (M.fromSet (newName . nameBase) (setOf typeVars t'))
      let t = return                    t'
          s = return (substTypeVars sub t')
          b = toTupleT (map return                    fields)
          a = toTupleT (map return (substTypeVars sub fields))
 
-         ty | Map.null sub = appsT (conT ''Iso') [t,b]
+         ty | M.null sub = appsT (conT ''Iso') [t,b]
             | otherwise    = appsT (conT ''Iso) [s,t,a,b]
 
      close =<< ty
@@ -388,7 +388,7 @@ makeClassyPrismClass t className methodName cons =
          ]
 
   cons'         = map (over nconName prismName) cons
-  vs            = Set.toList (setOf typeVars t)
+  vs            = S.toList (setOf typeVars t)
   fds r
     | null vs   = []
     | otherwise = [FunDep [r] vs]
@@ -407,7 +407,7 @@ makeClassyPrismInstance ::
   [NCon] {- Constructors    -} ->
   DecQ
 makeClassyPrismInstance s className methodName cons =
-  do let vs = Set.toList (setOf typeVars s)
+  do let vs = S.toList (setOf typeVars s)
          cls = className `conAppsT` (s : map VarT vs)
 
      instanceD (cxt[]) (return cls)
@@ -439,7 +439,7 @@ data NCon = NCon
 
 instance HasTypeVars NCon where
   typeVarsEx s = traversalVL $ \f (NCon x vars y z) ->
-    let s' = foldl' (flip Set.insert) s vars
+    let s' = foldl' (flip S.insert) s vars
     in NCon x vars <$> traverseOf (typeVarsEx s') f y
                    <*> traverseOf (typeVarsEx s') f z
 
@@ -472,6 +472,6 @@ prismName n = case nameBase n of
 
 -- | Quantify all the free variables in a type.
 close :: Type -> TypeQ
-close t = forallT (map PlainTV (Set.toList vs)) (cxt[]) (return t)
+close t = forallT (map PlainTV (S.toList vs)) (cxt[]) (return t)
   where
   vs = setOf typeVars t

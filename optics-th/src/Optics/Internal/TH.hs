@@ -64,9 +64,6 @@ inlinePragma methodName = [pragInlD methodName Inline FunLike AllPhases]
 -- Utility functions
 ------------------------------------------------------------------------
 
-phantom :: f a -> f b
-phantom = undefined
-
 both :: Traversal (a, a) (b, b) a b
 both = traversalVL $ \f (a1, a2) -> (,) <$> f a1 <*> f a2
 

@@ -28,7 +28,6 @@ module Optics.Internal.FieldTH
 
 import Control.Monad
 import Control.Monad.State
-import Data.Data
 import Data.Either
 import Data.List
 import Data.Maybe
@@ -51,26 +50,22 @@ import Optics.Internal.TH
 import Optics.Setter
 import Optics.Traversal
 
-setIx :: Int -> a -> [a] -> [a]
-setIx n x xs = case splitAt n xs of
-  (xss, [])       -> xss
-  (xss, _ : rest) -> xss ++ (x : rest)
+------------------------------------------------------------------------
+-- Utilities
+------------------------------------------------------------------------
 
-tinplate :: (Data s, Typeable a) => Traversal' s a
-tinplate = traversalVL tinplateVL
-
-tinplateVL :: (Data s, Typeable a) => TraversalVL' s a
-tinplateVL = \f -> gfoldl (step f) pure
-  where
-    mightBe :: forall a b. (Typeable a, Typeable b) => Maybe (a :~: b)
-    mightBe = gcast Refl
-
-    step
-      :: forall s a f r. (Applicative f, Typeable a, Data s)
-      => (a -> f a) -> f (s -> r) -> s -> f r
-    step f w s = w <*> case mightBe :: Maybe (s :~: a) of
-      Just Refl -> f s
-      Nothing   -> traverseOf tinplate f s
+typeSelf :: Traversal' Type Type
+typeSelf = traversalVL $ \f -> \case
+  ForallT tyVarBndrs ctx ty ->
+    let go (KindedTV nam kind) = KindedTV <$> pure nam <*> f kind
+        go (PlainTV nam)       = pure (PlainTV nam)
+    in ForallT <$> traverse go tyVarBndrs <*> traverse f ctx <*> f ty
+  AppT ty1 ty2              -> AppT <$> f ty1 <*> f ty2
+  SigT ty kind              -> SigT <$> f ty <*> f kind
+  InfixT ty1 nam ty2        -> InfixT <$> f ty1 <*> pure nam <*> f ty2
+  UInfixT ty1 nam ty2       -> UInfixT <$> f ty1 <*> pure nam <*> f ty2
+  ParensT ty                -> ParensT <$> f ty
+  ty                        -> pure ty
 
 rewriteOf :: Is k A_Setter => Optic k is a b a b -> (b -> Maybe a) -> a -> b
 rewriteOf l f = go where
@@ -79,6 +74,11 @@ rewriteOf l f = go where
 transformOf :: Is k A_Setter => Optic k is a b a b -> (b -> b) -> a -> b
 transformOf l f = go where
   go = f . over l go
+
+setIx :: Int -> a -> [a] -> [a]
+setIx n x xs = case splitAt n xs of
+  (xss, [])       -> xss
+  (xss, _ : rest) -> xss ++ (x : rest)
 
 ------------------------------------------------------------------------
 -- Field generation entry point
@@ -445,7 +445,7 @@ makeFieldInstance defType className decs =
   containsTypeFamilies = go <=< D.resolveTypeSynonyms
     where
     go (ConT nm) = hasTypeFamilyD <$> reify nm
-    go ty = or <$> traverse go (toListOf tinplate ty)
+    go ty = or <$> traverse go (toListOf typeSelf ty)
 
     -- We want to catch type families, but not *data* families. See #799.
     hasTypeFamilyD ty = has (_FamilyI % _1 % _OpenTypeFamilyD) ty
@@ -706,7 +706,7 @@ limitedSubst _ tv = return tv
 -- | Apply a substitution to a type. This is used after unifying
 -- the types of the fields in unifyTypes.
 applyTypeSubst :: M.Map Name Type -> Type -> Type
-applyTypeSubst sub = rewriteOf tinplate aux
+applyTypeSubst sub = rewriteOf typeSelf aux
   where
   aux (VarT n) = M.lookup n sub
   aux _        = Nothing
