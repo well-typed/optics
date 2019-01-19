@@ -2,10 +2,11 @@ module Optics.Fold
   ( A_Fold
   , Fold
   , toFold
-  , ViewableOptic(..)
-  , viewM
   , viewN
   , preview
+  , ViewableOptic(..)
+  , viewM
+  , foldVL
   , foldMapOf
   , foldrOf
   , foldlOf'

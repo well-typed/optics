@@ -29,7 +29,7 @@ view01 :: Is k An_AffineFold => Optic' k is s a -> s -> Maybe a
 view01 o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
 {-# INLINE view01 #-}
 
--- | Create a an 'AffineFold' from a partial function.
+-- | Create an 'AffineFold' from a partial function.
 --
 -- >>> view01 (afold listToMaybe) "foo"
 -- Just 'f'

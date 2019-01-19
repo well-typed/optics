@@ -48,10 +48,7 @@ library
 
   -- data
   exposed-modules:
-    Data.Either.Optics
-    Data.Maybe.Optics
     Data.Set.Optics
-    Data.Tuple.Optics
     GHC.Generics.Optics
 
   -- optics-core optics
@@ -77,7 +74,10 @@ library
 
   -- optics-core goodies
   reexported-modules:
-    Optics.Indexed
+      Data.Either.Optics
+    , Data.Maybe.Optics
+    , Data.Tuple.Optics
+    , Optics.Indexed
     , Optics.Arrow
     , Optics.Operators
     , Optics.Passthrough

@@ -41,9 +41,11 @@ import qualified Language.Haskell.TH.Datatype as D
 import Data.Either.Optics
 import Data.Tuple.Optics
 import Language.Haskell.TH.Optics
+import Optics.AffineFold
+import Optics.AffineTraversal
+import Optics.Fold
 import Optics.Getter
 import Optics.Iso
-import Optics.Fold
 import Optics.Lens
 import Optics.Internal.TH
 import Optics.Setter
@@ -152,8 +154,6 @@ normalizeConstructor con =
         unallowable = D.constructorVars con
     checkForExistentials fieldname fieldtype = (fieldname, fieldtype)
 
-data OpticType = GetterType | LensType | IsoType
-
 -- | Compute the positional location of the fields involved in
 -- each constructor for a given optic definition as well as the
 -- type of clauses to generate and the type to annotate the declaration
@@ -163,7 +163,7 @@ buildScaffold ::
   Type                              {- ^ outer type                       -} ->
   [(Name, [([DefName], Type)])]     {- ^ normalized constructors          -} ->
   DefName                           {- ^ target definition                -} ->
-  Q (OpticType, OpticStab, [(Name, Int, [Int])])
+  Q (OpticStab, [(Name, Int, [Int])])
               {- ^ optic type, definition type, field count, target fields -}
 buildScaffold rules s cons defName =
 
@@ -171,76 +171,113 @@ buildScaffold rules s cons defName =
 
      let defType
            | Just (_,cx,a') <- preview _ForallT a =
-               let optic | lensCase  = ''Getter
-                         | otherwise = ''Fold
+               let optic | lensCase   = GetterType
+--                         | affineCase = AffineFoldType
+                         | otherwise  = FoldType
                in OpticSa cx optic s' a'
 
            -- Getter and Fold are always simple
            | not (_allowUpdates rules) =
-               let optic | lensCase  = ''Getter
-                         | otherwise = ''Fold
+               let optic | lensCase   = GetterType
+--                         | affineCase = AffineFoldType
+                         | otherwise  = FoldType
                in OpticSa [] optic s' a
 
            -- Generate simple Lens and Traversal where possible
            | _simpleLenses rules || s' == t && a == b =
-               let optic | isoCase && _allowIsos rules = ''Iso
-                         | lensCase                    = ''LensVL'
-                         | otherwise                   = ''TraversalVL'
+               let optic | isoCase && _allowIsos rules = IsoType
+                         | lensCase                    = LensType
+--                         | affineCase                  = AffineTraversalType
+                         | otherwise                   = TraversalType
                in OpticSa [] optic s' a
 
            -- Generate type-changing Lens and Traversal otherwise
            | otherwise =
-               let optic | isoCase && _allowIsos rules = ''Iso
-                         | lensCase                    = ''LensVL
-                         | otherwise                   = ''TraversalVL
+               let optic | isoCase && _allowIsos rules = IsoType
+                         | lensCase                    = LensType
+--                         | affineCase                  = AffineTraversalType
+                         | otherwise                   = TraversalType
                in OpticStab optic s' t a b
 
-         opticType | has _ForallT a            = GetterType
-                   | not (_allowUpdates rules) = GetterType
-                   | isoCase                   = IsoType
-                   | otherwise                 = LensType
-
-     return (opticType, defType, scaffolds)
+     return (defType, scaffolds)
   where
-  consForDef :: [(Name, [Either Type Type])]
-  consForDef = over (mapped % _2 % mapped) categorize cons
+    consForDef :: [(Name, [Either Type Type])]
+    consForDef = over (mapped % _2 % mapped) categorize cons
 
-  scaffolds :: [(Name, Int, [Int])]
-  scaffolds = [ (n, length ts, rightIndices ts) | (n,ts) <- consForDef ]
+    scaffolds :: [(Name, Int, [Int])]
+    scaffolds = [ (n, length ts, rightIndices ts) | (n,ts) <- consForDef ]
 
-  rightIndices :: [Either Type Type] -> [Int]
-  rightIndices = findIndices (has _Right)
+    rightIndices :: [Either Type Type] -> [Int]
+    rightIndices = findIndices (has _Right)
 
-  -- Right: types for this definition
-  -- Left : other types
-  categorize :: ([DefName], Type) -> Either Type Type
-  categorize (defNames, t)
-    | defName `elem` defNames = Right t
-    | otherwise               = Left  t
+    -- Right: types for this definition
+    -- Left : other types
+    categorize :: ([DefName], Type) -> Either Type Type
+    categorize (defNames, t)
+      | defName `elem` defNames = Right t
+      | otherwise               = Left  t
 
-  lensCase :: Bool
-  lensCase = all (\x -> lengthOf (_2 % folded % _Right) x == 1) consForDef
+    affectedFields :: [Int]
+    affectedFields = toListOf (folded % _3 % to length) scaffolds
 
-  isoCase :: Bool
-  isoCase = case scaffolds of
-              [(_,1,[0])] -> True
-              _           -> False
+    lensCase :: Bool
+    lensCase = all (== 1) affectedFields
 
+    _affineCase :: Bool
+    _affineCase = all (<= 1) affectedFields
 
-data OpticStab = OpticStab     Name Type Type Type Type
-               | OpticSa   Cxt Name Type Type
+    isoCase :: Bool
+    isoCase = case scaffolds of
+                [(_,1,[0])] -> True
+                _           -> False
+
+data OpticType
+  = AffineFoldType
+  | AffineTraversalType
+  | FoldType
+  | GetterType
+  | IsoType
+  | LensType
+  | TraversalType
+  deriving Show
+
+opticTypeName :: Bool -> OpticType -> Name
+opticTypeName typeChanging  AffineTraversalType = if typeChanging
+                                                  then ''AffineTraversal
+                                                  else ''AffineTraversal'
+opticTypeName _typeChanging AffineFoldType      = ''AffineFold
+opticTypeName _typeChanging FoldType            = ''Fold
+opticTypeName _typeChanging GetterType          = ''Getter
+opticTypeName typeChanging  IsoType             = if typeChanging
+                                                  then ''Iso
+                                                  else ''Iso'
+opticTypeName typeChanging  LensType            = if typeChanging
+                                                  then ''Lens
+                                                  else ''Lens'
+opticTypeName typeChanging  TraversalType       = if typeChanging
+                                                  then ''Traversal
+                                                  else ''Traversal'
+
+data OpticStab = OpticStab     OpticType Type Type Type Type
+               | OpticSa   Cxt OpticType Type Type
 
 stabToType :: OpticStab -> Type
-stabToType (OpticStab  c s t a b) = quantifyType [] (c `conAppsT` [s,t,a,b])
-stabToType (OpticSa cx c s   a  ) = quantifyType cx (c `conAppsT` [s,a])
+stabToType (OpticStab  c s t a b) =
+  quantifyType [] (opticTypeName True c `conAppsT` [s,t,a,b])
+stabToType (OpticSa cx c s   a  ) =
+  quantifyType cx (opticTypeName False c `conAppsT` [s,a])
 
 stabToContext :: OpticStab -> Cxt
 stabToContext OpticStab{}        = []
 stabToContext (OpticSa cx _ _ _) = cx
 
+stabToOpticType :: OpticStab -> OpticType
+stabToOpticType (OpticStab c _ _ _ _) = c
+stabToOpticType (OpticSa _ c _ _) = c
+
 stabToOptic :: OpticStab -> Name
-stabToOptic (OpticStab c _ _ _ _) = c
-stabToOptic (OpticSa _ c _ _) = c
+stabToOptic (OpticStab c _ _ _ _) = opticTypeName True c
+stabToOptic (OpticSa _ c _ _) = opticTypeName False c
 
 stabToS :: OpticStab -> Type
 stabToS (OpticStab _ s _ _ _) = s
@@ -276,9 +313,9 @@ buildStab s categorizedFields =
 -- used to enable the resulting lenses to be used on a bottom value.
 makeFieldOptic ::
   LensRules ->
-  (DefName, (OpticType, OpticStab, [(Name, Int, [Int])])) ->
+  (DefName, (OpticStab, [(Name, Int, [Int])])) ->
   HasFieldClasses [Dec]
-makeFieldOptic rules (defName, (opticType, defType, cons)) = do
+makeFieldOptic rules (defName, (defType, cons)) = do
   locals <- get
   addName
   lift $ do cls <- mkCls locals
@@ -299,13 +336,13 @@ makeFieldOptic rules (defName, (opticType, defType, cons)) = do
           TopName n -> [sigD n (return (stabToType defType))]
           MethodName{} -> []
 
-  fun n = funD n clauses : inlinePragma n
+  fun n = funD n [funDef] : inlinePragma n
 
   def = case defName of
           TopName n      -> fun n
           MethodName c n -> [makeFieldInstance defType c (fun n)]
 
-  clauses = makeFieldClauses rules opticType cons
+  funDef = makeFieldClause rules (stabToOpticType defType) cons
 
 ------------------------------------------------------------------------
 -- Classy class generator
@@ -317,7 +354,7 @@ makeClassyDriver ::
   Name ->
   Name ->
   Type {- ^ Outer 's' type -} ->
-  [(DefName, (OpticType, OpticStab, [(Name, Int, [Int])]))] ->
+  [(DefName, (OpticStab, [(Name, Int, [Int])]))] ->
   HasFieldClasses [Dec]
 makeClassyDriver rules className methodName s defs = T.sequenceA (cls ++ inst)
 
@@ -332,10 +369,10 @@ makeClassyClass ::
   Name ->
   Name ->
   Type {- ^ Outer 's' type -} ->
-  [(DefName, (OpticType, OpticStab, [(Name, Int, [Int])]))] ->
+  [(DefName, (OpticStab, [(Name, Int, [Int])]))] ->
   DecQ
 makeClassyClass className methodName s defs = do
-  let ss   = map (stabToS . view (_2 % _2)) defs
+  let ss   = map (stabToS . view (_2 % _1)) defs
   (sub,s') <- unifyTypes (s : ss)
   c <- newName "c"
   let vars = toListOf typeVars s'
@@ -344,14 +381,14 @@ makeClassyClass className methodName s defs = do
 
 
   classD (cxt[]) className (map PlainTV (c:vars)) fd
-    $ sigD methodName (return (''LensVL' `conAppsT` [VarT c, s']))
+    $ sigD methodName (return (''Lens' `conAppsT` [VarT c, s']))
     : concat
       [ [sigD defName (return ty)
         ,valD (varP defName) (normalB body) []
         ] ++
         inlinePragma defName
-      | (TopName defName, (_, stab, _)) <- defs
-      , let body = appsE [varE '(.), varE methodName, varE defName]
+      | (TopName defName, (stab, _)) <- defs
+      , let body = infixApp (varE methodName) (varE '(%)) (varE defName)
       , let ty   = quantifyType' (S.fromList (c:vars))
                                  (stabToContext stab)
                  $ stabToOptic stab `conAppsT`
@@ -364,13 +401,13 @@ makeClassyInstance ::
   Name ->
   Name ->
   Type {- ^ Outer 's' type -} ->
-  [(DefName, (OpticType, OpticStab, [(Name, Int, [Int])]))] ->
+  [(DefName, (OpticStab, [(Name, Int, [Int])]))] ->
   HasFieldClasses Dec
 makeClassyInstance rules className methodName s defs = do
   methodss <- traverse (makeFieldOptic rules') defs
 
   lift $ instanceD (cxt[]) (return instanceHead)
-           $ valD (varP methodName) (normalB (varE 'id)) []
+           $ valD (varP methodName) (normalB (varE 'lensVL `appE` varE 'id)) []
            : map return (concat methodss)
 
   where
@@ -429,97 +466,180 @@ makeFieldInstance defType className decs =
 -- Optic clause generators
 ------------------------------------------------------------------------
 
-
-makeFieldClauses :: LensRules -> OpticType -> [(Name, Int, [Int])] -> [ClauseQ]
-makeFieldClauses rules opticType cons =
+makeFieldClause :: LensRules -> OpticType -> [(Name, Int, [Int])] -> ClauseQ
+makeFieldClause rules opticType cons =
   case opticType of
-
-    IsoType    -> [ makeIsoClause conName | (conName, _, _) <- cons ]
-
-    GetterType -> [ makeGetterClause conName fieldCount fields
-                    | (conName, fieldCount, fields) <- cons ]
-
-    LensType   -> [ makeFieldOpticClause conName fieldCount fields irref
-                    | (conName, fieldCount, fields) <- cons ]
-      where
-      irref = _lazyPatterns rules
-           && length cons == 1
-
-
-
--- | Construct an optic clause that returns an unmodified value
--- given a constructor name and the number of fields on that
--- constructor.
-makePureClause :: Name -> Int -> ClauseQ
-makePureClause conName fieldCount =
-  do xs <- newNames "x" fieldCount
-     -- clause: _ (Con x1..xn) = pure (Con x1..xn)
-     clause [wildP, conP conName (map varP xs)]
-            (normalB (appE (varE 'pure) (appsE (conE conName : map varE xs))))
-            []
-
-
--- | Construct an optic clause suitable for a Getter or Fold
--- by visited the fields identified by their 0 indexed positions
-makeGetterClause :: Name -> Int -> [Int] -> ClauseQ
-makeGetterClause conName fieldCount []     = makePureClause conName fieldCount
-makeGetterClause conName fieldCount fields =
-  do f  <- newName "f"
-     xs <- newNames "x" (length fields)
-
-     let pats (i:is) (y:ys)
-           | i `elem` fields = varP y : pats is ys
-           | otherwise = wildP : pats is (y:ys)
-         pats is     _  = map (const wildP) is
-
-         fxs   = [ appE (varE f) (varE x) | x <- xs ]
-         body  = foldl (\a b -> appsE [varE '(<*>), a, b])
-                       (appE (varE 'phantom) (head fxs))
-                       (tail fxs)
-
-     -- clause f (Con x1..xn) = coerce (f x1) <*> ... <*> f xn
-     clause [varP f, conP conName (pats [0..fieldCount - 1] xs)]
-            (normalB body)
-            []
-
--- | Build a clause that updates the field at the given indexes
--- When irref is 'True' the value with me matched with an irrefutable
--- pattern. This is suitable for Lens and Traversal construction
-makeFieldOpticClause :: Name -> Int -> [Int] -> Bool -> ClauseQ
-makeFieldOpticClause conName fieldCount [] _ =
-  makePureClause conName fieldCount
-makeFieldOpticClause conName fieldCount (field:fields) irref =
-  do f  <- newName "f"
-     xs <- newNames "x" fieldCount
-     ys <- newNames "y" (1 + length fields)
-
-     let xs' = foldr (\(i,x) -> setIx i x) xs (zip (field:fields) ys)
-
-         mkFx i = appE (varE f) (varE (xs !! i))
-
-         body0 = appsE [ varE 'fmap
-                       , lamE (map varP ys) (appsE (conE conName : map varE xs'))
-                       , mkFx field
-                       ]
-
-         body = foldl (\a b -> appsE [varE '(<*>), a, mkFx b]) body0 fields
-
-     let wrap = if irref then tildeP else id
-
-     clause [varP f, wrap (conP conName (map varP xs))]
-            (normalB body)
-            []
-
-
--- | Build a clause that constructs an Iso
-makeIsoClause :: Name -> ClauseQ
-makeIsoClause conName = clause [] (normalB (appsE [varE 'iso, destruct, construct])) []
+    FoldType      -> makeFoldClause cons
+    IsoType       -> makeIsoClause cons
+    GetterType    -> makeGetterClause cons
+    LensType      -> makeLensClause cons irref
+    TraversalType -> makeTraversalClause cons irref
+    ty            -> error $ show ty
   where
-  destruct  = do x <- newName "x"
-                 lam1E (conP conName [varP x]) (varE x)
+    irref = _lazyPatterns rules && length cons == 1
 
-  construct = conE conName
+makeFoldClause :: [(Name, Int, [Int])] -> ClauseQ
+makeFoldClause cons = do
+  f <- newName "f"
+  s <- newName "s"
 
+  clause
+    []
+    (normalB $ appsE
+      [ varE 'foldVL
+      , lamE [varP f, varP s] $ caseE (varE s)
+        [ makeFoldMatch f conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      ])
+    []
+  where
+    makeFoldMatch f conName fieldCount fields = do
+      xs <- newNames "x" $ length fields
+
+      let args = foldr (\(i, x) -> setIx i (varP x))
+                       (replicate fieldCount wildP)
+                       (zip fields xs)
+
+          fxs = case xs of
+            [] -> [varE 'pure `appE` conE '()]
+            _  -> map (\x -> varE f `appE` varE x) xs
+
+          -- Con _ .. x_1 .. _ .. x_k .. _ -> f x_1 *> .. f x_k
+          body = appsE
+            [ foldr1 (\fx -> infixApp fx (varE '(*>))) fxs
+            ]
+
+      match (conP conName args)
+            (normalB body)
+            []
+
+-- | Build a clause that constructs an Iso.
+makeIsoClause :: [(Name, Int, [Int])] -> ClauseQ
+makeIsoClause = \case
+  [(conName, 1, [0])] ->
+    let construct = conE conName
+        destruct = do
+          x <- newName "x"
+          lam1E (conP conName [varP x]) (varE x)
+    in clause
+         []
+         (normalB (appsE [varE 'iso, destruct, construct]))
+         []
+  _ -> error "Iso works only for types with one constructor and one field"
+
+-- | Build a getter clause that retrieves the field at the given index.
+makeGetterClause :: [(Name, Int, [Int])] -> ClauseQ
+makeGetterClause cons = do
+  s <- newName "s"
+  clause
+    []
+    (normalB $ appsE
+      [ varE 'to
+      , lamE [varP s] $ caseE (varE s)
+        [ makeGetterMatch conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      ])
+    []
+
+  where
+    makeGetterMatch conName fieldCount = \case
+      [field] -> do
+        x <- newName "x"
+        -- Con _ .. x_i .. _ -> x_i
+        match (conP conName . setIx field (varP x) $ replicate fieldCount wildP)
+              (normalB $ varE x)
+              []
+      _       -> error "Getter focuses on exactly one field"
+
+
+-- | Build a lens clause that updates the field at the given index. When irref
+-- is 'True' the value with be matched with an irrefutable pattern.
+makeLensClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
+makeLensClause cons irref = do
+  f <- newName "f"
+  s <- newName "s"
+
+  clause
+    []
+    (normalB $ appsE
+      [ varE 'lensVL
+      , lamE [varP f, varP s] $ caseE (varE s)
+        [ makeLensMatch f conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      ])
+    []
+
+  where
+    wrap = if irref then tildeP else id
+
+    makeLensMatch f conName fieldCount = \case
+      [field] -> do
+        xs <- newNames "x" fieldCount
+        y  <- newName "y"
+
+        let body = appsE
+              [ varE 'fmap
+              , lamE [varP y] . appsE $
+                conE conName : map varE (setIx field y xs)
+              , appE (varE f) . varE $ xs !! field
+              ]
+
+        -- Con x_1 .. x_n -> fmap (\y_i -> Con x_1 .. y_i .. x_n) (f x_i)
+        match (wrap . conP conName $ map varP xs)
+              (normalB body)
+              []
+      _       -> error "Lens focuses on exactly one field"
+
+makeTraversalClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
+makeTraversalClause cons irref = do
+  f <- newName "f"
+  s <- newName "s"
+
+  clause
+    []
+    (normalB $ appsE
+      [ varE 'traversalVL
+      , lamE [varP f, varP s] $ caseE (varE s)
+        [ makeTraversalMatch f conName fieldCount fields
+        | (conName, fieldCount, fields) <- cons
+        ]
+      ])
+    []
+  where
+    wrap = if irref then tildeP else id
+
+    makeTraversalMatch f conName fieldCount fields = do
+      xs <- newNames "x" fieldCount
+      case fields of
+        [] -> -- Con x1 .. xn -> pure (Con x1 .. xn)
+          match (conP conName (map varP xs))
+                (normalB (appE (varE 'pure) (appsE (conE conName : map varE xs))))
+                []
+        _ -> do
+          ys <- newNames "y" $ length fields
+
+          let xs' = foldr (\(i, x) -> setIx i x) xs (zip fields ys)
+
+              mkFx i = varE f `appE` varE (xs !! i)
+
+              body0 = appsE
+                [ varE 'pure
+                , lamE (map varP ys) $ appsE $ conE conName : map varE xs'
+                ]
+
+              body = foldl (\acc i -> infixApp acc (varE '(<*>)) $ mkFx i)
+                           body0
+                           fields
+
+          -- Con x_1 .. x_n ->
+          --  pure (\y_1 .. y_k -> Con x_1 .. y_1 .. x_l .. y_k .. x_n)
+          --    <*> f x_i_y_1 <*> .. <*> f x_i_y_k
+          match (wrap . conP conName $ map varP xs)
+                (normalB body)
+                []
 
 ------------------------------------------------------------------------
 -- Unification logic

@@ -312,7 +312,7 @@ makeSimpleRemitter conName fields =
      xs <- newNames "y" fields
      let matches =
            [ match (conP conName (map varP xs))
-                   (normalB (appE (conE '(.)) (toTupleE (map varE xs))))
+                   (normalB (appE (conE 'Right) (toTupleE (map varE xs))))
                    []
            , match wildP (normalB (appE (conE 'Left) (varE x))) []
            ]

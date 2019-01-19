@@ -34,3 +34,4 @@ library
                     Optics.Internal.FieldTH
                     Optics.Internal.PrismTH
                     Optics.TH
+                    Optics.ThTest
