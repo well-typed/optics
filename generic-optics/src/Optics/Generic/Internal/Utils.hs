@@ -1,0 +1,37 @@
+{-# LANGUAGE RankNTypes #-}
+module Optics.Generic.Internal.Utils where
+
+import Data.Functor.Identity
+import qualified Data.Generics.Internal.VL.Prism as GL
+import qualified Data.Profunctor as P
+
+import Optics.Internal.Optic
+import Optics.Internal.Profunctor
+import Optics.Internal.Utils
+import Optics.Prism
+
+newtype  WrappedProfunctor p i a b =
+  WrapProfunctor { unwrapProfunctor :: p i a b }
+
+instance Profunctor p => P.Profunctor (WrappedProfunctor p i) where
+  dimap f g (WrapProfunctor pab) = WrapProfunctor (dimap f g pab)
+  lmap  f   (WrapProfunctor pab) = WrapProfunctor (lmap  f   pab)
+  rmap    g (WrapProfunctor pab) = WrapProfunctor (rmap    g pab)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+instance Choice p => P.Choice (WrappedProfunctor p i) where
+  left'  (WrapProfunctor pab) = WrapProfunctor (left'  pab)
+  right' (WrapProfunctor pab) = WrapProfunctor (right' pab)
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
+-- | Build a 'Prism' from the van Laarhoven representation.
+prismVL
+  :: GL.Prism s t a b
+  -> Prism    s t a b
+prismVL f = Optic $ rmap runIdentity
+                  . (unwrapProfunctor #. f .# WrapProfunctor)
+                  . rmap Identity
+{-# INLINE prismVL #-}
