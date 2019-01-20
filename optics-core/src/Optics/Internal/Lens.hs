@@ -65,7 +65,11 @@ data Store a b i s t = Store (s -> a) (s -> b -> t)
 
 instance Profunctor (Store a b) where
   dimap f g (Store get set) = Store (get . f) (\s -> g . set (f s))
+  lmap  f   (Store get set) = Store (get . f) (\s -> set (f s))
+  rmap    g (Store get set) = Store get       (\s -> g . set s)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Strong (Store a b) where
   first' (Store get set) = Store (get . fst) (\(s, c) b -> (set s b, c))

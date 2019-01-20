@@ -66,7 +66,11 @@ newtype Re p s t i a b = Re { unRe :: p i b a -> p i t s }
 
 instance Profunctor p => Profunctor (Re p s t) where
   dimap f g (Re p) = Re (p . dimap g f)
+  lmap  f   (Re p) = Re (p . rmap f)
+  rmap    g (Re p) = Re (p . lmap g)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Bicontravariant p => Bifunctor (Re p s t) where
   bimap  f g (Re p) = Re (p . contrabimap g f)

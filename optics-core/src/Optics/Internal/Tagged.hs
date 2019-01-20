@@ -27,6 +27,8 @@ instance Bifunctor Tagged where
 
 instance Profunctor Tagged where
   dimap _f g = Tagged #. g .# unTagged
+  lmap  _f   = coerce
+  rmap     g = Tagged #. g .# unTagged
   {-# INLINE dimap #-}
 
 instance Choice Tagged where

@@ -33,4 +33,8 @@ data Exchange a b i s t =
 
 instance Profunctor (Exchange a b) where
   dimap ss tt (Exchange sa bt) = Exchange (sa . ss) (tt . bt)
+  lmap  ss    (Exchange sa bt) = Exchange (sa . ss) bt
+  rmap     tt (Exchange sa bt) = Exchange sa        (tt . bt)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}

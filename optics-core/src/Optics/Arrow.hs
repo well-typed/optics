@@ -33,7 +33,11 @@ instance Arrow p => Arrow (WrappedArrow p i) where
 
 instance Arrow p => Profunctor (WrappedArrow p) where
   dimap f g k = arr f >>> k >>> arr g
+  lmap  f   k = arr f >>> k
+  rmap    g k =           k >>> arr g
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Arrow p => Strong (WrappedArrow p) where
   first'  (WrapArrow k) = WrapArrow (first k)
