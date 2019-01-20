@@ -29,11 +29,14 @@ library
     , transformers  >=0.5     && <0.6
 
   ghc-options:        -Wall
+
+  -- main module to land with repl
+  exposed-modules: Optics.Core
+
   exposed-modules:
     Optics.AffineFold
     Optics.AffineTraversal
     Optics.Arrow
-    Optics.Core
     Optics.Equality
     Optics.Fold
     Optics.Getter
@@ -59,7 +62,7 @@ library
     Data.Maybe.Optics
     Data.Tuple.Optics
 
-  other-modules:
+    -- internal modules
     Optics.Internal.AffineFold
     Optics.Internal.AffineTraversal
     Optics.Internal.Bi
