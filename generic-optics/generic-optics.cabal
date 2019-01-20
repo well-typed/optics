@@ -21,7 +21,10 @@ library
       base          >=4.9 && <5
     , generic-lens  >=1.1 && <1.2
     , optics-core   >=0.1 && <1
+    , profunctors   >=5.0 && <6.0
 
-  exposed-modules:
-    Optics.Generic.Product.Fields
-    Optics.Labels
+  exposed-modules: Optics.Generic.Product.Fields
+                   Optics.Labels
+
+                   -- internal modules
+                   Optics.Generic.Internal.Utils
