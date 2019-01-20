@@ -42,8 +42,16 @@ itraversed = ixTraversalVL itraverse
 {-# INLINE itraversed #-}
 
 itraverseOf
-  :: (CheckIndices i is, Is k A_Traversal)
+  :: (Is k A_Traversal, CheckIndices i is, Applicative f)
   => Optic k is s t a b
-  -> (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
+  -> (i -> a -> f b) -> s -> f t
 itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
 {-# INLINE itraverseOf #-}
+
+-- | A version of 'itraverseOf' with the arguments flipped.
+iforOf
+  :: (Is k A_Traversal, CheckIndices i is, Applicative f)
+  => Optic k is s t a b
+  -> s -> (i -> a -> f b) -> f t
+iforOf = flip . itraverseOf
+{-# INLINE iforOf #-}

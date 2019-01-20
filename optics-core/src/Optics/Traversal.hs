@@ -9,6 +9,7 @@ module Optics.Traversal
   , toTraversal
   -- * Elimination
   , traverseOf
+  , forOf
   , elementsOf
   -- * van Laarhoven encoding
   , TraversalVL

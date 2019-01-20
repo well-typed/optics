@@ -76,11 +76,19 @@ itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
 ----------------------------------------
 
 itraverseOf_
-  :: (CheckIndices i is, Is k A_Fold, Applicative f)
+  :: (Is k A_Fold, CheckIndices i is, Applicative f)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
 itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 {-# INLINE itraverseOf_ #-}
+
+-- | A version of 'itraverseOf_' with the arguments flipped.
+iforOf_
+  :: (Is k A_Fold, CheckIndices i is, Applicative f)
+  => Optic' k is s a
+  -> s -> (i -> a -> f r) -> f ()
+iforOf_ = flip . itraverseOf_
+{-# INLINE iforOf_ #-}
 
 ----------------------------------------
 

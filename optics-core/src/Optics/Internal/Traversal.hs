@@ -49,6 +49,14 @@ traverseOf
 traverseOf o = runStar #. getOptic (toTraversal o) .# Star
 {-# INLINE traverseOf #-}
 
+-- | A version of 'traverseOf' with the arguments flipped.
+forOf
+  :: (Is k A_Traversal, Applicative f)
+  => Optic k is s t a b
+  -> s -> (a -> f b) -> f t
+forOf = flip . traverseOf
+{-# INLINE forOf #-}
+
 ----------------------------------------
 
 -- Traverse selected elements of a 'Traversal' where their ordinal positions

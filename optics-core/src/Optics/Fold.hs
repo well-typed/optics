@@ -13,6 +13,7 @@ module Optics.Fold
   , toListOf
   , sequenceOf_
   , traverseOf_
+  , forOf_
   , folded
   , folding
     -- * Concrete folds

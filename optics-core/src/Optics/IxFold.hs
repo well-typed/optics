@@ -7,6 +7,7 @@ module Optics.IxFold
   , ifoldlOf'
   , itoListOf
   , itraverseOf_
+  , iforOf_
   , ifolded
   , module Optics.Optic
   ) where
