@@ -36,34 +36,64 @@ newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
 class Profunctor p where
   dimap :: (a -> b) -> (c -> d) -> p i b c -> p i a d
+  lmap  :: (a -> b)             -> p i b c -> p i a c
+  rmap  ::             (c -> d) -> p i b c -> p i b d
 
 instance Functor f => Profunctor (Star f) where
   dimap f g (Star k) = Star (fmap g . k . f)
+  lmap  f   (Star k) = Star (k . f)
+  rmap    g (Star k) = Star (fmap g . k)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Profunctor (Forget r) where
   dimap f _ (Forget k) = Forget (k . f)
+  lmap  f   (Forget k) = Forget (k . f)
+  rmap   _g (Forget k) = Forget k
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Profunctor (ForgetM r) where
   dimap f _ (ForgetM k) = ForgetM (k . f)
+  lmap  f   (ForgetM k) = ForgetM (k . f)
+  rmap   _g (ForgetM k) = ForgetM k
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Profunctor FunArrow where
   dimap f g (FunArrow k) = FunArrow (g . k . f)
+  lmap  f   (FunArrow k) = FunArrow (k . f)
+  rmap    g (FunArrow k) = FunArrow (g . k)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Functor f => Profunctor (IxStar f) where
   dimap f g (IxStar k) = IxStar (\i -> fmap g . k i . f)
+  lmap  f   (IxStar k) = IxStar (\i -> k i . f)
+  rmap    g (IxStar k) = IxStar (\i -> fmap g . k i)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Profunctor (IxForget r) where
   dimap f _ (IxForget k) = IxForget (\i -> k i . f)
+  lmap  f   (IxForget k) = IxForget (\i -> k i . f)
+  rmap   _g (IxForget k) = IxForget k
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Profunctor IxFunArrow where
   dimap f g (IxFunArrow k) = IxFunArrow (\i -> g . k i . f)
+  lmap  f   (IxFunArrow k) = IxFunArrow (\i -> k i . f)
+  rmap    g (IxFunArrow k) = IxFunArrow (\i -> g . k i)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 ----------------------------------------
 

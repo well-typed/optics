@@ -44,7 +44,15 @@ instance Profunctor (AffineMarket a b) where
   dimap f g (AffineMarket sbt seta) = AffineMarket
     (\s b -> g (sbt (f s) b))
     (either (Left . g) Right . seta . f)
+  lmap f (AffineMarket sbt seta) = AffineMarket
+    (\s b -> sbt (f s) b)
+    (seta . f)
+  rmap g (AffineMarket sbt seta) = AffineMarket
+    (\s b -> g (sbt s b))
+    (either (Left . g) Right . seta)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Choice (AffineMarket a b) where
   left' (AffineMarket sbt seta) = AffineMarket

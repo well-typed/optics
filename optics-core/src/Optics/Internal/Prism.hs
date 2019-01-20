@@ -45,7 +45,11 @@ instance Functor (Market a b i s) where
 
 instance Profunctor (Market a b) where
   dimap f g (Market bt seta) = Market (g . bt) (either (Left . g) Right . seta . f)
+  lmap  f   (Market bt seta) = Market bt (seta . f)
+  rmap    g (Market bt seta) = Market (g . bt) (either (Left . g) Right . seta)
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Choice (Market a b) where
   left' (Market bt seta) = Market (Left . bt) $ \sc -> case sc of
