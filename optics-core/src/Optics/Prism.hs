@@ -22,7 +22,7 @@ import Optics.Internal.Prism
 import Optics.Optic
 
 -- | Use a 'Prism' to work over part of a structure.
-aside :: Is k A_Prism => Optic k '[] s t a b -> Prism (e, s) (e, t) (e, a) (e, b)
+aside :: Is k A_Prism => Optic k is s t a b -> Prism (e, s) (e, t) (e, a) (e, b)
 aside k =
   withPrism k     $ \bt seta ->
   prism (fmap bt) $ \(e,s) ->
@@ -34,8 +34,8 @@ aside k =
 -- | Given a pair of prisms, project sums.
 without
   :: (Is k A_Prism, Is l A_Prism)
-  => Optic k '[] s t a b
-  -> Optic l '[] u v c d
+  => Optic k is s t a b
+  -> Optic l is u v c d
   -> Prism (Either s u) (Either t v) (Either a c) (Either b d)
 without k =
   withPrism k         $ \bt seta k' ->
@@ -50,7 +50,7 @@ without k =
 -- matches only if all the elements of the container match the 'Prism'.
 below
   :: (Is k A_Prism, Traversable f)
-  => Optic' k '[] s a
+  => Optic' k is s a
   -> Prism' (f s) (f a)
 below k =
   withPrism k     $ \bt seta ->

@@ -1,7 +1,8 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE InstanceSigs #-}
 module Optics.Internal.Optic.TypeLevel where
 
 import Data.Type.Equality

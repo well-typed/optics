@@ -87,7 +87,6 @@ library
 
   default-extensions:
     BangPatterns
-    DataKinds
     DefaultSignatures
     DeriveFunctor
     FlexibleContexts
