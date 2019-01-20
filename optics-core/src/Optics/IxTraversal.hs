@@ -5,6 +5,7 @@ module Optics.IxTraversal
   , TraversableWithIndex(..)
   , toIxTraversal
   , ixTraversalVL
+  , conjoinedTraversal
   , itraversed
   , itraverseOf
   , iforOf

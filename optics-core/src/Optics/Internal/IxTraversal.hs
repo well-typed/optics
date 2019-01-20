@@ -30,6 +30,23 @@ ixTraversalVL
 ixTraversalVL t = Optic (iwander t)
 {-# INLINE ixTraversalVL #-}
 
+-- | Build an indexed traversal from the van Laarhoven representation of both
+-- its unindexed and indexed version.
+--
+-- Appropriate version of the traversal will be automatically picked for maximum
+-- efficiency depending on whether it is used as indexed or regular one.
+--
+-- @
+-- 'traverseOf'  ('conjoinedTraversal' f g) ≡ 'traverseOf'  ('traversalVL' f)
+-- 'itraverseOf' ('conjoinedTraversal' f g) ≡ 'itraverseOf' ('ixTraversalVL' g)
+-- @
+conjoinedTraversal
+  :: (forall f. Applicative f => (     a -> f b) -> s -> f t)
+  -> (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
+  -> IxTraversal i s t a b
+conjoinedTraversal f g = Optic $ conjoined (wander f) (iwander g)
+{-# INLINE conjoinedTraversal #-}
+
 -- | Indexed traversal via the 'TraversableWithIndex' class.
 --
 -- >>> iover (icompose (,) $ itraversed % itraversed) (,) ["ab", "cd"]
@@ -38,14 +55,14 @@ ixTraversalVL t = Optic (iwander t)
 itraversed
   :: TraversableWithIndex i t
   => IxTraversal i (t a) (t b) a b
-itraversed = ixTraversalVL itraverse
+itraversed = conjoinedTraversal traverse itraverse
 {-# INLINE itraversed #-}
 
 itraverseOf
   :: (Is k A_Traversal, CheckIndices i is, Applicative f)
   => Optic k is s t a b
   -> (i -> a -> f b) -> s -> f t
-itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
+itraverseOf o = \f -> runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
 {-# INLINE itraverseOf #-}
 
 -- | A version of 'itraverseOf' with the arguments flipped.

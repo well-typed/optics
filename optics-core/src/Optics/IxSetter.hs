@@ -7,6 +7,7 @@ module Optics.IxSetter
   , iover
   , iset
   , isets
+  , conjoinedSets
   , imapped
   , module Optics.Optic
   ) where

@@ -83,7 +83,7 @@ traverseOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (a -> f r) -> s -> f ()
-traverseOf_ o f = runTraversed . foldMapOf o (Traversed #. f)
+traverseOf_ o = \f -> runTraversed . foldMapOf o (Traversed #. f)
 {-# INLINE traverseOf_ #-}
 
 -- | A version of 'traverseOf_' with the arguments flipped.

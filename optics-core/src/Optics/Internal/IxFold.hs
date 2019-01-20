@@ -1,5 +1,6 @@
 module Optics.Internal.IxFold where
 
+import Data.Foldable
 import Data.Monoid
 
 import Optics.Internal.Bi
@@ -27,6 +28,24 @@ ixFoldVL
   -> IxFold i s a
 ixFoldVL f = Optic (rphantom . iwander f . rphantom)
 {-# INLINE ixFoldVL #-}
+
+-- | Build an indexed fold from the van Laarhoven representation of both its
+-- unindexed and indexed version.
+--
+-- Appropriate version of the fold will be automatically picked for maximum
+-- efficiency depending on whether it is used as indexed or regular one.
+--
+-- @
+-- 'traverseOf_'  ('conjoinedFold' f g) ≡ 'traverseOf_'  ('foldVL' f)
+-- 'itraverseOf_' ('conjoinedFold' f g) ≡ 'itraverseOf_' ('ixFoldVL' g)
+-- @
+conjoinedFold
+  :: (forall f. Applicative f => (     a -> f r) -> s -> f ())
+  -> (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+  -> IxFold i s a
+conjoinedFold f g = Optic $ conjoined (rphantom . wander f  . rphantom)
+                                      (rphantom . iwander g . rphantom)
+{-# INLINE conjoinedFold #-}
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
@@ -90,7 +109,7 @@ iforOf_ = flip . itraverseOf_
 
 -- | Indexed fold via 'FoldableWithIndex' class.
 ifolded :: FoldableWithIndex i f => IxFold i (f a) a
-ifolded = ixFoldVL itraverse_
+ifolded = conjoinedFold traverse_ itraverse_
 {-# INLINE ifolded #-}
 
 -- $setup
