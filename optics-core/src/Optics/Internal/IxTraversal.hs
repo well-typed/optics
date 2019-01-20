@@ -19,6 +19,11 @@ toIxTraversal = castOptic
 {-# INLINE toIxTraversal #-}
 
 -- | Build an indexed traversal from the van Laarhoven representation.
+--
+-- @
+-- 'ixTraversalVL' '.' 'itraverseOf' ≡ 'id'
+-- 'itraverseOf' '.' 'ixTraversalVL' ≡ 'id'
+-- @
 ixTraversalVL
   :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
   -> IxTraversal i s t a b

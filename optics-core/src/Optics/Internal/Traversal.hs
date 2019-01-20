@@ -26,6 +26,11 @@ toTraversal = castOptic
 {-# INLINE toTraversal #-}
 
 -- | Build a traversal from the van Laarhoven representation.
+--
+-- @
+-- 'traversalVL' '.' 'traverseOf' ≡ 'id'
+-- 'traverseOf' '.' 'traversalVL' ≡ 'id'
+-- @
 traversalVL :: TraversalVL s t a b -> Traversal s t a b
 traversalVL t = Optic (wander t)
 {-# INLINE traversalVL #-}

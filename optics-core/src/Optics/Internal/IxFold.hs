@@ -1,6 +1,7 @@
 module Optics.Internal.IxFold where
 
 import Data.Monoid
+import Data.Void
 
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
@@ -15,6 +16,21 @@ type IxFold i s a = Optic' A_Fold (WithIx i) s a
 toIxFold :: Is k A_Fold => Optic' k (WithIx i) s a -> IxFold i s a
 toIxFold = castOptic
 {-# INLINE toIxFold #-}
+
+-- | Build an indexed fold from the "almost van Laarhoven" representation.
+--
+-- @
+-- 'ixFoldVL' '.' 'itraverseOf_' ≡ 'id'
+-- 'itraverseOf_' '.' 'ixFoldVL' ≡ 'id'
+-- @
+ixFoldVL
+  :: (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+  -> IxFold i s a
+ixFoldVL f = Optic $ contrasecond (\_ -> ())
+                   . iwander f
+                   . dimap id absurd
+                   . contrasecond absurd
+{-# INLINE ixFoldVL #-}
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf

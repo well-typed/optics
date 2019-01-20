@@ -31,7 +31,12 @@ preview :: Is k A_Fold => Optic' k is s a -> s -> Maybe a
 preview o = getFirst #. foldMapOf o (First #. Just)
 {-# INLINE preview #-}
 
--- | Create a 'Fold' from its "almost van Laarhoven" representation.
+-- | Build a 'Fold' from the "almost van Laarhoven" representation.
+--
+-- @
+-- 'foldVL' '.' 'traverseOf_' ≡ 'id'
+-- 'traverseOf_' '.' 'foldVL' ≡ 'id'
+-- @
 foldVL
   :: (forall f. Applicative f => (a -> f r) -> s -> f ())
   -> Fold s a
