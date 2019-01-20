@@ -59,8 +59,15 @@ checkC :: Lens (Hadron a b) (Hadron a b') b b'
 checkC = c
 
 data Perambulation a b
-  = Mountains { _terrain :: a, _altitude :: b }
-  | Beaches   { _terrain :: a, _dunes :: a }
+  = Mountains { _terrain    :: a
+              , _altitude   :: b
+              , _absurdity1 :: forall x y. x -> y
+              , _absurdity2 :: forall x y. x -> y
+              }
+  | Beaches   { _terrain    :: a
+              , _dunes      :: a
+              , _absurdity1 :: forall x y. x -> y
+              }
 makeLenses ''Perambulation
 
 checkTerrain :: Lens' (Perambulation a b) a
@@ -69,13 +76,25 @@ checkTerrain = terrain
 checkAltitude :: AffineTraversal (Perambulation a b) (Perambulation a b') b b'
 checkAltitude = altitude
 
+checkAbsurdity1 :: Getter (Perambulation a b) (x -> y)
+checkAbsurdity1 = absurdity1
+
+checkAbsurdity2 :: AffineFold (Perambulation a b) (x -> y)
+checkAbsurdity2 = absurdity2
+
 checkDunes :: AffineTraversal' (Perambulation a b) a
 checkDunes = dunes
 
-makeLensesFor [("_terrain", "allTerrain"), ("_dunes", "allTerrain")] ''Perambulation
+makeLensesFor [ ("_terrain", "allTerrain"), ("_dunes", "allTerrain")
+              , ("_absurdity1", "absurdities"), ("_absurdity2", "absurdities")
+              ]
+  ''Perambulation
 
 checkAllTerrain :: Traversal (Perambulation a b) (Perambulation a' b) a a'
 checkAllTerrain = allTerrain
+
+checkAbsurdities :: Fold (Perambulation a b) (x -> y)
+checkAbsurdities = absurdities
 
 data LensCrafted a = Still { _still :: a }
                    | Works { _still :: a }

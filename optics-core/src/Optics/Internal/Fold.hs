@@ -2,6 +2,7 @@ module Optics.Internal.Fold where
 
 import Data.Foldable
 import Data.Monoid
+import Data.Void
 
 import Optics.Internal.Bi
 import Optics.Internal.Optic
@@ -32,9 +33,12 @@ preview o = getFirst #. foldMapOf o (First #. Just)
 
 -- | Create a 'Fold' from its "almost van Laarhoven" representation.
 foldVL
-  :: (forall f. Applicative f => (a -> f ()) -> s -> f ())
+  :: (forall f. Applicative f => (a -> f r) -> s -> f ())
   -> Fold s a
-foldVL f = Optic (contrasecond (\_ -> ()) . wander f . dimap id (\_ -> ()))
+foldVL f = Optic $ contrasecond (\_ -> ())
+                 . wander f
+                 . dimap id absurd
+                 . contrasecond absurd
 {-# INLINE foldVL #-}
 
 -- | Fold via embedding into a monoid.
