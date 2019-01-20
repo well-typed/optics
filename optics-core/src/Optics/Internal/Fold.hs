@@ -2,6 +2,7 @@ module Optics.Internal.Fold where
 
 import Data.Foldable
 import Data.Monoid
+import Data.Void
 
 import Optics.Internal.Bi
 import Optics.Internal.Optic
@@ -10,6 +11,14 @@ import Optics.Internal.Utils
 
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a
+
+-- | Explicitly cast an optic to a fold.
+toFold
+  :: Is k A_Fold
+  => Optic' k is s a
+  -> Optic' A_Fold is s a
+toFold = castOptic
+{-# INLINE toFold #-}
 
 -- | View the result of folding over all the results of a 'Fold' or 'Traversal'
 -- that points at a monoidal value.
@@ -22,13 +31,15 @@ preview :: Is k A_Fold => Optic' k is s a -> s -> Maybe a
 preview o = getFirst #. foldMapOf o (First #. Just)
 {-# INLINE preview #-}
 
--- | Explicitly cast an optic to a fold.
-toFold
-  :: Is k A_Fold
-  => Optic' k is s a
-  -> Optic' A_Fold is s a
-toFold = sub
-{-# INLINE toFold #-}
+-- | Create a 'Fold' from its "almost van Laarhoven" representation.
+foldVL
+  :: (forall f. Applicative f => (a -> f r) -> s -> f ())
+  -> Fold s a
+foldVL f = Optic $ contrasecond (\_ -> ())
+                 . wander f
+                 . dimap id absurd
+                 . contrasecond absurd
+{-# INLINE foldVL #-}
 
 -- | Fold via embedding into a monoid.
 foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k is s a -> (a -> r) -> s -> r

@@ -15,7 +15,7 @@ toIxTraversal
   :: Is k A_Traversal
   => Optic k (WithIx i) s t a b
   -> IxTraversal i s t a b
-toIxTraversal = sub
+toIxTraversal = castOptic
 {-# INLINE toIxTraversal #-}
 
 -- | Build an indexed traversal from the van Laarhoven representation.

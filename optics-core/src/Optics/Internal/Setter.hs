@@ -15,7 +15,7 @@ toSetter
   :: Is k A_Setter
   => Optic k is s t a b
   -> Optic A_Setter is s t a b
-toSetter = sub
+toSetter = castOptic
 {-# INLINE toSetter #-}
 
 -- | Apply a setter as a modifier.

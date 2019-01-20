@@ -18,7 +18,7 @@ type LensVL' s a = LensVL s s a a
 
 -- | Explicitly cast an optic to a lens.
 toLens :: Is k A_Lens => Optic k is s t a b -> Optic A_Lens is s t a b
-toLens = sub
+toLens = castOptic
 {-# INLINE toLens #-}
 
 -- | Build a lens from a getter and a setter.

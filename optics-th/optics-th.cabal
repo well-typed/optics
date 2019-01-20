@@ -14,16 +14,37 @@ description:
   .
   * optics to work with @template-haskell@ types,
   .
-  * machinery to construct optics using @TemplateHaskell@ (/TODO/)
+  * machinery to construct optics using @TemplateHaskell@
 
 library
   default-language: Haskell2010
   hs-source-dirs:   src
   ghc-options:      -Wall
   build-depends:
-      base              >=4.9  && <5
-    , optics-core       >=0.1  && <1
-    , containers >= 0.5.7.1 && < 0.7
-    , template-haskell  >=2.11 && <2.15
+      base              >=4.9       && <5
+    , optics-core       >=0.1       && <1
+    , containers        >=0.5.7.1   && <0.7
+    , mtl               >=2.2.2     && <2.3
+    , template-haskell  >=2.11      && <2.15
+    , th-abstraction    >=0.2.1     && <0.3
+    , transformers      >=0.5       && <0.6
 
   exposed-modules:  Language.Haskell.TH.Optics
+                    Optics.Internal.TH
+                    Optics.Internal.FieldTH
+                    Optics.Internal.PrismTH
+                    Optics.TH
+
+test-suite optics-th-tests
+  default-language: Haskell2010
+  hs-source-dirs:   tests
+  ghc-options:      -Wall
+
+  build-depends:    base
+                  , optics-core
+                  , optics-th
+
+  type:             exitcode-stdio-1.0
+  main-is:          Optics/TH/Tests.hs
+
+  other-modules:    Optics.TH.Tests.T799
