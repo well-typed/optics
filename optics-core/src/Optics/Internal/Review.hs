@@ -1,7 +1,5 @@
 module Optics.Internal.Review where
 
-import Data.Void
-
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
@@ -23,5 +21,5 @@ review o = unTagged #. getOptic (toReview o) .# Tagged
 
 -- | An analogue of 'to' for review.
 unto :: (b -> t) -> Review t b
-unto f = Optic (first absurd . dimap absurd f)
+unto f = Optic (lphantom . rmap f)
 {-# INLINE unto #-}

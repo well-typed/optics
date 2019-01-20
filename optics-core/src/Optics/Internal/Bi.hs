@@ -1,5 +1,7 @@
 module Optics.Internal.Bi where
 
+import Data.Void
+
 import Optics.Internal.Profunctor
 
 class Bifunctor p where
@@ -35,3 +37,13 @@ instance Bicontravariant (IxForget r) where
   {-# INLINE contrabimap #-}
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
+
+----------------------------------------
+
+lphantom :: (Profunctor p, Bifunctor p) => p i a c -> p i b c
+lphantom = first absurd . lmap absurd
+{-# INLINE lphantom #-}
+
+rphantom :: (Profunctor p, Bicontravariant p) => p i c a -> p i c b
+rphantom = rmap absurd . contrasecond absurd
+{-# INLINE rphantom #-}

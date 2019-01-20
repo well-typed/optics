@@ -1,7 +1,6 @@
 module Optics.Internal.IxFold where
 
 import Data.Monoid
-import Data.Void
 
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
@@ -26,10 +25,7 @@ toIxFold = castOptic
 ixFoldVL
   :: (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
   -> IxFold i s a
-ixFoldVL f = Optic $ contrasecond (\_ -> ())
-                   . iwander f
-                   . dimap id absurd
-                   . contrasecond absurd
+ixFoldVL f = Optic (rphantom . iwander f . rphantom)
 {-# INLINE ixFoldVL #-}
 
 -- | Fold with index via embedding into a monoid.
@@ -94,7 +90,7 @@ iforOf_ = flip . itraverseOf_
 
 -- | Indexed fold via 'FoldableWithIndex' class.
 ifolded :: FoldableWithIndex i f => IxFold i (f a) a
-ifolded = Optic (contrasecond (\_ -> ()) . iwander itraverse_)
+ifolded = ixFoldVL itraverse_
 {-# INLINE ifolded #-}
 
 -- $setup

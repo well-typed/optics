@@ -1,7 +1,5 @@
 module Optics.Internal.Getter where
 
-import Data.Void
-
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
@@ -21,5 +19,5 @@ view1 o = runForget (getOptic (toGetter o) (Forget id))
 
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a
-to f = Optic (dimap f absurd . contrasecond absurd)
+to f = Optic (lmap f . rphantom)
 {-# INLINE to #-}
