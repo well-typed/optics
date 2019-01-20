@@ -7,7 +7,6 @@ import Control.Applicative
 import Control.Applicative.Backwards
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Reader
-import Data.Foldable
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Functor.Product
@@ -26,6 +25,7 @@ import qualified Data.IntMap as IntMap
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
+import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Generate sensible error messages in case a user tries to use regular optic
@@ -95,7 +95,7 @@ class Functor f => FunctorWithIndex i f | f -> i where
   imap :: (i -> a -> b) -> f a -> f b
   default imap
     :: TraversableWithIndex i f => (i -> a -> b) -> f a -> f b
-  imap f = runIdentity #. itraverse (\i -> Identity #. f i)
+  imap f = runIxFunArrow (iwander itraverse (IxFunArrow f)) id
   {-# INLINE imap #-}
 
 instance FunctorWithIndex i (IxContext i a b) where
@@ -107,7 +107,7 @@ class (FunctorWithIndex i f, Foldable f
   ifoldMap :: Monoid m => (i -> a -> m) -> f a -> m
   default ifoldMap
     :: (TraversableWithIndex i f, Monoid m) => (i -> a -> m) -> f a -> m
-  ifoldMap f = fold . runIdentity #. itraverse (\i -> Identity #. f i)
+  ifoldMap f = runIxForget (iwander itraverse (IxForget f)) id
   {-# INLINE ifoldMap #-}
 
   ifoldr :: (i -> a -> b -> b) -> b -> f a -> b
