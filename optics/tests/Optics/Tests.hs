@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-module-prefixes -dsuppress-type-signatures -dsuppress-uniques #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
@@ -45,33 +44,66 @@ eg2 = view _1
 -------------------------------------------------------------------------------
 
 -- eta-expansion is required
-lhs01, rhs01 :: (Applicative f, Traversable t) => (a -> f b) -> t a -> f (t b)
+lhs01, rhs01
+  :: (Applicative f, Traversable t)
+  => (a -> f b) -> t a -> f (t b)
 lhs01 f = traverseOf traversed f
 rhs01 f = traverse f
 
-lhs02, rhs02 :: (Applicative f, Traversable t, Traversable s) => (a -> f b) -> t (s a) -> f (t (s b))
+lhs02, rhs02
+  :: (Applicative f, Traversable t, Traversable s)
+  => (a -> f b) -> t (s a) -> f (t (s b))
 lhs02 f = traverseOf (traversed % traversed) f
 rhs02 f = traverse . traverse $ f
 
--- This tries to show that forgetting indices _sometimes_ isn't that bad.
-lhs03, lhs03b, rhs03 :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
-lhs03  f xxs = over (unIx (imapped % imapped)) f xxs
-lhs03b f xxs = over (imapped % imapped) f xxs
-rhs03  f xss = imap (\_ -> imap (\_ -> f)) xss
+lhs03, rhs03
+  :: (Applicative f, TraversableWithIndex i t, TraversableWithIndex j s)
+  => (a -> f b) -> t (s a) -> f (t (s b))
+lhs03 = traverseOf (traversed % traversed)
+rhs03 = traverseOf (itraversed % itraversed)
+
+lhs04, rhs04
+  :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
+  => (a -> f r) -> t (s a) -> f ()
+lhs04 = traverseOf_ (folded % folded)
+rhs04 = traverseOf_ (ifolded % ifolded)
+
+lhs05, lhs05b, rhs05
+  :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
+lhs05  = over (unIx (imapped % imapped))
+lhs05b = over (imapped % imapped)
+rhs05  = over (mapped % mapped)
+
+lhs06, rhs06 ::
+  (Applicative f, TraversableWithIndex i t, FoldableWithIndex j f)
+  => (a -> f r)
+  -> (Either (t (f a, c)) b)
+  -> f ()
+lhs06 = traverseOf_ (_Left % itraversed % _1 % ifolded)
+rhs06 = traverseOf_ (_Left % traversed % _1 % folded)
 
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
     [ testCase "traverseOf traversed = traverse" $
         assertSuccess $(inspectTest $ 'lhs01 === 'rhs01)
-    , testCase "traverseOf (traversed % traversed) = traverse . traverse" $
+    , testCase "traverseOf (traversed % traversed) = \
+                \traverse . traverse" $
         assertSuccess $(inspectTest $ 'lhs02 === 'rhs02)
-#if __GLASGOW_HASKELL__ >= 802
-    -- this almost work, but inspection-testing cannot approximate enough
-    , testCase "over (unIx (imapped % imapped)) = ..." $
+    , testCase "traverseOf (traversed % traversed) = \
+               \traverseOf (itraversed % itraversed)" $
         assertSuccess $(inspectTest $ 'lhs03 === 'rhs03)
-    , testCase "over (imapped % imapped) = ..." $
-        assertSuccess $(inspectTest $ 'lhs03b === 'rhs03)
-#endif
+    , testCase "traverseOf_ (folded % folded) = \
+               \traverseOf_ (ifolded % ifolded)" $
+        assertSuccess $(inspectTest $ 'lhs04 === 'rhs04)
+    , testCase "over (unIx (imapped % imapped)) = \
+               \over (mapped % mapped)" $
+        assertSuccess $(inspectTest $ 'lhs05 === 'rhs05)
+    , testCase "over (imapped % imapped) = \
+               \over (mapped % mapped)" $
+        assertSuccess $(inspectTest $ 'lhs05b === 'rhs05)
+    , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \
+               \traverseOf_ ..." $
+        assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)
     ]
 
 assertSuccess :: Result -> IO ()

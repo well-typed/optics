@@ -2,6 +2,8 @@ module Optics.IxFold
   ( A_Fold
   , IxFold
   , toIxFold
+  , ixFoldVL
+  , conjoinedFold
   , ifoldMapOf
   , ifoldrOf
   , ifoldlOf'
