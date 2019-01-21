@@ -4,7 +4,7 @@ version:       0.1
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
-tested-with:   ghc ==8.0.2 ghc ==8.2.2 ghc ==8.4.4 ghc ==8.6.3
+tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.3
 maintainer:    oleg@well-typed.com
 synopsis:      Generate optics documentation diagrams
 category:      Optics, Examples
@@ -18,7 +18,7 @@ executable metametapost-optics
   main-is:          MetaMetaPost.hs
   hs-source-dirs:   src
   build-depends:
-      base            >=4.9 && <5
+      base            >=4.10 && <5
     , generic-optics
     , generics-sop
     , mtl

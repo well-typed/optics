@@ -6,7 +6,7 @@ build-type:      Simple
 maintainer:      oleg@well-typed.com
 author:          Adam Gundry, Andres Löh, Andrzej Rybczak
 cabal-version:   1.24
-tested-with:     ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
+tested-with:     ghc ==8.2.2 || ==8.4.4 || ==8.6.3
 synopsis:        Optics for generics-sop, and using generics-sop
 category:        Data, Optics, Lenses, Generics
 description:
@@ -26,9 +26,9 @@ library
   hs-source-dirs:     src
   ghc-options:        -Wall
   build-depends:
-      array           >=0.5.1.1 && <0.6
-    , base            >=4.9     && <5
-    , containers      >=0.5.7.1 && <0.7
+      array           >=0.5.2.0 && <0.6
+    , base            >=4.10    && <5
+    , containers      >=0.5.8.1 && <0.7
     , generic-optics  >=0.1     && <1
     , mtl             >=2.2.2   && <2.3
     , optics-core     >=0.1     && <1

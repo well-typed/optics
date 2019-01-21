@@ -78,7 +78,7 @@ import Language.Haskell.TH
 import Optics.Lens
 import Optics.Operators
 import Optics.Setter
-import Optics.Internal.TH
+import Optics.Traversal
 import Optics.Internal.FieldTH
 import Optics.Internal.PrismTH
 

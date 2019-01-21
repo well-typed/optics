@@ -1,5 +1,4 @@
 {-# LANGUAGE AllowAmbiguousTypes    #-}
-{-# LANGUAGE CPP                    #-}
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -76,11 +75,7 @@ instance {-# INCOHERENT #-} HasField' name s a => Field name s s a a where
 -- we have simple instance for IsLabel, as we don't support prisms yet
 
 instance (Field name s t a b, is ~ '[], k ~ A_Lens) => IsLabel name (Optic k is s t a b) where
-#if __GLASGOW_HASKELL__ >= 802
   fromLabel = fieldLens @name @s @t @a @b
-#else
-  fromLabel _ = fieldLens @name @s @t @a @b
-#endif
 
 -- $setup
 -- >>> import Optics
