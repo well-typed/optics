@@ -171,14 +171,14 @@ module Optics
   --
   -- >>> :t unIx (ifolded % simple)
   -- unIx (ifolded % simple)
-  --   :: FoldableWithIndex i f => Optic A_Fold '[] (f b) (f b) b b
+  --   :: FoldableWithIndex i f => Optic A_Fold NoIx (f b) (f b) b b
   --
   -- 'unIx' can erase all indices
   --
   -- >>> :t unIx (ifolded % ifolded)
   -- unIx (ifolded % ifolded)
   --   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
-  --      Optic A_Fold '[] (f1 (f2 b)) (f1 (f2 b)) b b
+  --      Optic A_Fold NoIx (f1 (f2 b)) (f1 (f2 b)) b b
   --
   -- As the example above illustrates (/TODO:/ will do),
   -- regular and indexed optics have the same kind, in this case @'Optic' 'A_Fold'@.

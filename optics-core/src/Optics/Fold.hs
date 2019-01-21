@@ -50,9 +50,6 @@ import Optics.Optic
 
 -- | Check to see if this optic matches 1 or more entries.
 --
--- >>> has (element 0) []
--- False
---
 -- >>> has _Left (Left 12)
 -- True
 --
