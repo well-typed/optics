@@ -28,6 +28,10 @@ import qualified Data.Sequence as Seq
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
+#if !MIN_VERSION_containers(0,5,8)
+import Data.Foldable (fold)
+#endif
+
 -- | Generate sensible error messages in case a user tries to use regular optic
 -- as an indexed one or doesn't call appropriate icompose function to flatten
 -- the indices before trying to use an indexed optic.
@@ -249,7 +253,7 @@ instance FoldableWithIndex Int Seq.Seq where
 #if MIN_VERSION_containers(0,5,8)
   ifoldMap = Seq.foldMapWithIndex
 #else
-  ifoldMap f = Data.Foldable.fold . Seq.mapWithIndex f
+  ifoldMap f = fold . Seq.mapWithIndex f
 #endif
   {-# INLINE ifoldMap #-}
 
