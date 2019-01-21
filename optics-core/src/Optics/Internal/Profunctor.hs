@@ -10,6 +10,7 @@ import Data.Functor.Const
 import Data.Functor.Identity
 
 import Optics.Internal.Utils
+import Optics.Internal.Pointed
 
 -- | Needed for traversals.
 newtype Star f i a b = Star { runStar :: a -> f b }
@@ -252,7 +253,89 @@ instance Cochoice (IxForget r) where
 
 ----------------------------------------
 
-class (Choice p, Strong p) => Traversing p where
+-- Affine is not (much) more than 'Strong' and 'Choice'.
+class (Strong p, Choice p) => Visiting p where
+  visit
+    :: (forall f. Pointed f => (a -> f b) -> s -> f t)
+    -> p i a b -> p i s t
+  visit f = dimap
+      (\s -> (f Left s, s))
+      (\(ebt, s) -> either (\b -> runIdentity $ f (\_ -> Identity b) $ s) id ebt)
+    . first'
+    . left'
+
+  ivisit
+    :: (forall f. Pointed f => (i -> a -> f b) -> s -> f t)
+    -> p j a b -> p (i -> j) s t
+
+  -- TODO: move this to 'Profunctor'
+  ixcontramap :: (i -> j) -> p j a b -> p i a b
+  default ixcontramap :: Coercible (p j a b) (p i a b) => (i -> j) -> p j a b -> p i a b
+  ixcontramap _ = coerce
+  {-# INLINE ixcontramap #-}
+
+instance Applicative f => Visiting (Star f) where
+  visit f (Star k) = Star $ unwrapPointed #. f (WrapPointed #. k)
+
+  ivisit f (Star k) = Star $ unwrapPointed #. f (\_ -> WrapPointed #. k)
+
+instance Visiting (ForgetM r) where
+  visit f (ForgetM k) = ForgetM $ getConstM #. f (ConstM #. k)
+  {-# INLINE visit #-}
+
+  ivisit f (ForgetM k) = ForgetM $ getConstM #. f (\_ -> ConstM #. k)
+  {-# INLINE ivisit #-}
+
+instance Monoid r => Visiting (Forget r) where
+  visit f (Forget k) = Forget $ getConst #. f (Const #. k)
+  {-# INLINE visit #-}
+
+  ivisit f (Forget k) = Forget $ getConst #. f (\_ -> Const #. k)
+  {-# INLINE ivisit #-}
+
+instance Visiting FunArrow where
+  visit f (FunArrow k) = FunArrow $ runIdentity #. f (Identity #. k)
+  {-# INLINE visit #-}
+
+  ivisit f (FunArrow k) =
+    FunArrow $ runIdentity #. f (\_ -> Identity #. k)
+  {-# INLINE ivisit #-}
+
+instance Applicative f => Visiting (IxStar f) where
+  visit f (IxStar k) = IxStar $ \i -> unwrapPointed #. f (WrapPointed #. k i)
+  {-# INLINE visit #-}
+
+  ivisit f (IxStar k) = IxStar $ \ij -> unwrapPointed #. f (\i -> WrapPointed #. k (ij i))
+  {-# INLINE ivisit #-}
+
+  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
+  {-# INLINE ixcontramap #-}
+
+instance Monoid r => Visiting (IxForget r) where
+  visit f (IxForget k) = IxForget $ \i -> getConst #. f (Const #. k i)
+  {-# INLINE visit #-}
+
+  ivisit f (IxForget k) =
+    IxForget $ \ij -> getConst #. f (\i -> Const #. k (ij i))
+  {-# INLINE ivisit #-}
+
+  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
+  {-# INLINE ixcontramap #-}
+
+instance Visiting IxFunArrow where
+  visit f (IxFunArrow k) = IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
+  {-# INLINE visit #-}
+
+  ivisit f (IxFunArrow k) =
+    IxFunArrow $ \ij -> runIdentity #. f (\i -> Identity #. k (ij i))
+  {-# INLINE ivisit #-}
+
+  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
+  {-# INLINE ixcontramap #-}
+
+----------------------------------------
+
+class Visiting p => Traversing p where
   wander
     :: (forall f. Applicative f => (a -> f b) -> s -> f t)
     -> p i a b -> p i s t
@@ -261,11 +344,6 @@ class (Choice p, Strong p) => Traversing p where
     :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
     -> p j a b -> p (i -> j) s t
 
-  -- TODO: move this to 'Profunctor'
-  ixcontramap :: (i -> j) -> p j a b -> p i a b
-  default ixcontramap :: Coercible (p j a b) (p i a b) => (i -> j) -> p j a b -> p i a b
-  ixcontramap _ = coerce
-  {-# INLINE ixcontramap #-}
 
 instance Applicative f => Traversing (Star f) where
   wander f (Star k) = Star (f k)
@@ -296,9 +374,6 @@ instance Applicative f => Traversing (IxStar f) where
   iwander f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
   {-# INLINE iwander #-}
 
-  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
-  {-# INLINE ixcontramap #-}
-
 instance Monoid r => Traversing (IxForget r) where
   wander f (IxForget k) = IxForget $ \i -> getConst #. f (Const #. k i)
   {-# INLINE wander #-}
@@ -307,9 +382,6 @@ instance Monoid r => Traversing (IxForget r) where
     IxForget $ \ij -> getConst #. f (\i -> Const #. k (ij i))
   {-# INLINE iwander #-}
 
-  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
-  {-# INLINE ixcontramap #-}
-
 instance Traversing IxFunArrow where
   wander f (IxFunArrow k) = IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
   {-# INLINE wander #-}
@@ -317,9 +389,6 @@ instance Traversing IxFunArrow where
   iwander f (IxFunArrow k) =
     IxFunArrow $ \ij -> runIdentity #. f (\i -> Identity #. k (ij i))
   {-# INLINE iwander #-}
-
-  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
-  {-# INLINE ixcontramap #-}
 
 ----------------------------------------
 

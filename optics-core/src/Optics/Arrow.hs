@@ -3,6 +3,7 @@ module Optics.Arrow
   , assignA
   ) where
 
+import Data.Coerce (coerce)
 import Control.Arrow
 import qualified Control.Category as C
 
@@ -50,6 +51,9 @@ instance ArrowChoice p => Choice (WrappedArrow p) where
   right' (WrapArrow k) = WrapArrow (right k)
   {-# INLINE left' #-}
   {-# INLINE right' #-}
+
+instance ArrowChoice p => Visiting (WrappedArrow p) where
+  ivisit f = coerce . visit (f . const)
 
 class Arrow arr => ArrowOptic k arr where
   -- | Turn an optic into an arrow transformer.

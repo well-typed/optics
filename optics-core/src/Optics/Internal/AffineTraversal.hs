@@ -1,6 +1,9 @@
 module Optics.Internal.AffineTraversal where
 
+import Data.Functor.Identity
+
 import Optics.Internal.Optic
+import Optics.Internal.Pointed
 import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying affine traversal.
@@ -19,12 +22,16 @@ toAffineTraversal = castOptic
 
 -- | Build an affine traversal from a matcher and an updater.
 atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal s t a b
-atraversal match update = Optic $
-  dimap (\s -> (match s, update s))
-        (\(etb, f) -> either id f etb)
-  . first'
-  . right'
+atraversal match update = Optic $ visit $ \afb s -> case match s of
+    Left t  -> point t
+    Right a -> update s <$> afb a
 {-# INLINE atraversal #-}
+
+ixatraversal :: (s -> Either t (i, a)) -> (s -> b -> t) -> Optic An_AffineTraversal (WithIx i) s t a b
+ixatraversal match update = Optic $ ivisit $ \iafb s -> case match s of
+    Left t       -> point t
+    Right (i, a) -> update s <$> iafb i a
+{-# INLINE ixatraversal #-}
 
 withAffineTraversal
   :: Is k An_AffineTraversal
@@ -80,6 +87,19 @@ instance Strong (AffineMarket a b) where
 
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+instance Visiting (AffineMarket a b) where
+  visit f (AffineMarket abt seta) = AffineMarket
+      (\s b -> runIdentity $ f (Identity . flip abt b) $ s)
+      (\s -> swapE $ f (swapE . seta) s )
+
+  ivisit f (AffineMarket abt seta) = AffineMarket
+      (\s b -> runIdentity $ f (\_ -> Identity . flip abt b) $ s)
+      (\s -> swapE $ f (\_ -> swapE . seta) s )
+
+swapE :: Either a b -> Either b a
+swapE (Left x)  = Right x
+swapE (Right y) = Left y
 
 bimapE :: (a -> b) -> (c -> d) -> Either a c -> Either  b d
 bimapE f _ (Left a)  = Left (f a)
