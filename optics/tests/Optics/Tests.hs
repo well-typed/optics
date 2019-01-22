@@ -68,10 +68,16 @@ lhs04, rhs04
 lhs04 = traverseOf_ (folded % folded)
 rhs04 = traverseOf_ (ifolded % ifolded)
 
-lhs05, lhs05b, rhs05
+-- | Optimised 'imapped' without using internals.
+imapped2 :: FunctorWithIndex i f => IxSetter i (f a) (f b) a b
+imapped2 = conjoined' (sets fmap) (isets imap)
+{-# INLINE imapped2 #-}
+
+lhs05, lhs05b, lhs05c, rhs05
   :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
 lhs05  = over (unIx (imapped % imapped))
 lhs05b = over (imapped % imapped)
+lhs05c = over (imapped2 % imapped2)
 rhs05  = over (mapped % mapped)
 
 lhs06, rhs06 ::
@@ -101,6 +107,9 @@ inspectionTests = testGroup "inspection"
     , testCase "over (imapped % imapped) = \
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05b === 'rhs05)
+    , testCase "over (imappedManual % imappedManual) = \
+               \over (mapped % mapped)" $
+        assertSuccess $(inspectTest $ 'lhs05c === 'rhs05)
     , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \
                \traverseOf_ ..." $
         assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)

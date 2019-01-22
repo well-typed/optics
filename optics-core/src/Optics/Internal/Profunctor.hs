@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 -- | Copied from the profunctors package.
 --
 -- We include this here, at least for now, with the goal
@@ -268,6 +269,14 @@ class (Choice p, Strong p) => Traversing p where
   conjoined _ f = f
   {-# INLINE conjoined #-}
 
+  conjoined2
+    :: forall i j s t a b
+    .  (p j a b -> p j s t)
+    -> (p j a b -> p i s t)
+    -> p j a b -> p  i s t
+  conjoined2 _ f = f
+  {-# INLINE conjoined2 #-}
+
   -- TODO: move this to 'Profunctor'
   ixcontramap :: (i -> j) -> p j a b -> p i a b
   default ixcontramap
@@ -285,7 +294,8 @@ instance Applicative f => Traversing (Star f) where
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
   {-# INLINE conjoined #-}
-
+  conjoined2 f _ = coerce f
+  -- {-# INLINE conjoined2 #-}
 instance Monoid r => Traversing (Forget r) where
   wander  f (Forget k) = Forget $ getConst #. f (Const #. k)
   iwander f (Forget k) = Forget $ getConst #. f (\_ -> Const #. k)
@@ -301,6 +311,9 @@ instance Traversing FunArrow where
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
   {-# INLINE conjoined #-}
+
+  conjoined2 f _ = coerce f
+  {-# INLINE conjoined2 #-}
 
 instance Applicative f => Traversing (IxStar f) where
   wander  f (IxStar k) = IxStar $ \i -> f (k i)

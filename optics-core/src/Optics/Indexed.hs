@@ -14,6 +14,8 @@ module Optics.Indexed
   , icompose4
   , icompose5
 
+  , conjoined'
+
   -- * Functors with index
   , FunctorWithIndex (..)
   -- ** Foldable with index
@@ -101,5 +103,30 @@ icomposeN f o = Optic $
     implies' x = implies (IsProxy :: IsProxy A_Traversal l p) x
 {-# INLINE icomposeN #-}
 
+-- | Proper documentation TBW
+--
+-- @conjoined' a b@ behaves like @b@ when @a@ behaves like @'noIx' b@,
+-- otherwise behaviour is undefined.
+--
+conjoined'
+  :: forall k l is s t a b. (Is A_Traversal l, Is k l, Join A_Traversal k ~ l)
+  => Optic k NoIx s t a b
+  -> Optic k is   s t a b
+  -> Optic l is   s t a b
+conjoined' noix withix =
+  case (castOptic noix :: Optic l NoIx s t a b, castOptic withix :: Optic l is s t a b) of
+    (Optic p, Optic q) -> Optic $ impl conjoined2 p q
+  where
+    impl :: forall p j
+      . (Constraints A_Traversal p
+          => Optic__ p j           j  s t a b
+          -> Optic__ p j (Curry is j) s t a b
+          -> Optic__ p j (Curry is j) s t a b)
+      -> (Constraints l p
+          => Optic__ p j           j  s t a b
+          -> Optic__ p j (Curry is j) s t a b
+          -> Optic__ p j (Curry is j) s t a b)
+    impl x = implies (IsProxy :: IsProxy A_Traversal l p) x
+
 -- $setup
--- >>> import Optics.Core
+-- >>> import Optics
