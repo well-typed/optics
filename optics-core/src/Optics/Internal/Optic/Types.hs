@@ -19,8 +19,6 @@ data An_AffineTraversal
 data A_Traversal
 -- | Tag for a setter.
 data A_Setter
--- | Tag for an indexed setter.
-data An_IxSetter
 -- | Tag for a prismatic getter.
 data A_PrismaticGetter
 -- | Tag for a getter.
