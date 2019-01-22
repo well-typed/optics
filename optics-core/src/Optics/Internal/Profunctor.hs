@@ -39,6 +39,32 @@ class Profunctor p where
   lmap  :: (a -> b)             -> p i b c -> p i a c
   rmap  ::             (c -> d) -> p i b c -> p i b d
 
+  lcoerce' :: Coercible a b => p i a c -> p i b c
+  default lcoerce'
+    :: Coercible (p i a c) (p i b c)
+    => p i a c
+    -> p i b c
+  lcoerce' = coerce
+  {-# INLINE lcoerce' #-}
+
+  rcoerce' :: Coercible a b => p i c a -> p i c b
+  default rcoerce'
+    :: Coercible (p i c a) (p i c b)
+    => p i c a
+    -> p i c b
+  rcoerce' = coerce
+  {-# INLINE rcoerce' #-}
+
+-- | 'rcoerce'' with type arguments rearranged for TypeApplications.
+rcoerce :: (Coercible a b, Profunctor p) => p i c a -> p i c b
+rcoerce = rcoerce'
+{-# INLINE rcoerce #-}
+
+-- | 'lcoerce'' with type arguments rearranged for TypeApplications.
+lcoerce :: (Coercible a b, Profunctor p) => p i a c -> p i b c
+lcoerce = lcoerce'
+{-# INLINE lcoerce #-}
+
 instance Functor f => Profunctor (Star f) where
   dimap f g (Star k) = Star (fmap g . k . f)
   lmap  f   (Star k) = Star (k . f)
@@ -46,6 +72,9 @@ instance Functor f => Profunctor (Star f) where
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
+
+  rcoerce' = rmap coerce
+  {-# INLINE rcoerce' #-}
 
 instance Profunctor (Forget r) where
   dimap f _ (Forget k) = Forget (k . f)
@@ -78,6 +107,9 @@ instance Functor f => Profunctor (IxStar f) where
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
+
+  rcoerce' = rmap coerce
+  {-# INLINE rcoerce' #-}
 
 instance Profunctor (IxForget r) where
   dimap f _ (IxForget k) = IxForget (\i -> k i . f)

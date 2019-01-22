@@ -4,6 +4,7 @@ module Optics.Arrow
   ) where
 
 import Control.Arrow
+import Data.Coerce
 import qualified Control.Category as C
 
 import Optics.Core
@@ -38,6 +39,11 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
+
+  lcoerce' = lmap coerce
+  rcoerce' = rmap coerce
+  {-# INLINE lcoerce' #-}
+  {-# INLINE rcoerce' #-}
 
 instance Arrow p => Strong (WrappedArrow p) where
   first'  (WrapArrow k) = WrapArrow (first k)
