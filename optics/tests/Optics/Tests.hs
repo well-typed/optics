@@ -70,7 +70,7 @@ rhs04 = traverseOf_ (ifolded % ifolded)
 
 lhs05, lhs05b, rhs05
   :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
-lhs05  = over (unIx (imapped % imapped))
+lhs05  = over (noIx (imapped % imapped))
 lhs05b = over (imapped % imapped)
 rhs05  = over (mapped % mapped)
 
@@ -81,6 +81,32 @@ lhs06, rhs06 ::
   -> f ()
 lhs06 = traverseOf_ (_Left % itraversed % _1 % ifolded)
 rhs06 = traverseOf_ (_Left % traversed % _1 % folded)
+
+lhs07, rhs07 ::
+  (Applicative f, TraversableWithIndex i t, TraversableWithIndex j s)
+  => (j -> a -> f b)
+  -> t (s a)
+  -> f (t (s b))
+lhs07 = itraverseOf (noIx itraversed % itraversed)
+rhs07 = itraverseOf (traversed % itraversed)
+
+-- This doesn't quite work, i.e. it seems to generate the same code, but modulo
+-- coercions.
+lhs08, rhs08 ::
+  (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
+  => (j -> a -> f ())
+  -> t (s a)
+  -> f ()
+lhs08 = itraverseOf_ (noIx ifolded % ifolded)
+rhs08 = itraverseOf_ (folded % ifolded)
+
+lhs09, rhs09 ::
+  (FunctorWithIndex i t, FunctorWithIndex j s)
+  => (j -> a -> b)
+  -> t (s a)
+  -> t (s b)
+lhs09 = iover (noIx imapped % imapped)
+rhs09 = iover (mapped % imapped)
 
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
@@ -95,7 +121,7 @@ inspectionTests = testGroup "inspection"
     , testCase "traverseOf_ (folded % folded) = \
                \traverseOf_ (ifolded % ifolded)" $
         assertSuccess $(inspectTest $ 'lhs04 === 'rhs04)
-    , testCase "over (unIx (imapped % imapped)) = \
+    , testCase "over (noIx (imapped % imapped)) = \
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05 === 'rhs05)
     , testCase "over (imapped % imapped) = \
@@ -104,6 +130,15 @@ inspectionTests = testGroup "inspection"
     , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \
                \traverseOf_ ..." $
         assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)
+    , testCase "itraverseOf (noIx itraversed % itraversed) = \
+               \itraverseOf (traversed % itraversed)" $
+        assertSuccess $(inspectTest $ 'lhs07 === 'rhs07)
+    , testCase "itraverseOf_ (noIx ifolded % ifolded) =/= \
+               \itraverseOf (folded % ifolded)" $
+        assertFailure' $(inspectTest $ 'lhs08 === 'rhs08)
+    , testCase "iover (noIx imapped % imapped) = \
+               \iover (imapped % imapped)" $
+        assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
     ]
 
 assertSuccess :: Result -> IO ()

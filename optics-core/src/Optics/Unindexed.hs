@@ -1,35 +1,26 @@
-{-# LANGUAGE InstanceSigs     #-}
-{-# LANGUAGE TypeApplications #-}
 module Optics.Unindexed where
 
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
-import Optics.Internal.Optic.TypeLevel
 
-class UnindexableOptic k where
+import Optics.Internal.Setter
+import Optics.Internal.Fold
+import Optics.Internal.Traversal
+
+class NoIxOptic k s t a b where
   -- | Downcast an indexed optic to its unindexed equivalent.
-  unIx :: ConstN is => Optic k is s t a b -> Optic k NoIx s t a b
+  noIx :: Optic k is s t a b -> Optic k NoIx s t a b
 
-instance UnindexableOptic A_Traversal where
-  unIx
-    :: forall is s t a b. ConstN is
-    => Optic A_Traversal is   s t a b
-    -> Optic A_Traversal NoIx s t a b
-  unIx (Optic o) = Optic (ixcontramap (constN @is). o)
-  {-# INLINE unIx #-}
+instance NoIxOptic A_Traversal s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = traversalVL (traverseOf o)
+  {-# INLINE noIx #-}
 
-instance UnindexableOptic A_Fold where
-  unIx
-    :: forall is s t a b. ConstN is
-    => Optic A_Fold is   s t a b
-    -> Optic A_Fold NoIx s t a b
-  unIx (Optic o) = Optic (ixcontramap (constN @is). o)
-  {-# INLINE unIx #-}
+instance (s ~ t, a ~ b) => NoIxOptic A_Fold s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = foldVL (traverseOf_ o)
+  {-# INLINE noIx #-}
 
-instance UnindexableOptic A_Setter where
-  unIx
-    :: forall is s t a b. ConstN is
-    => Optic A_Setter is   s t a b
-    -> Optic A_Setter NoIx s t a b
-  unIx (Optic o) = Optic (ixcontramap (constN @is). o)
-  {-# INLINE unIx #-}
+instance NoIxOptic A_Setter s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = sets (over o)
+  {-# INLINE noIx #-}
