@@ -209,7 +209,9 @@ instance FunctorWithIndex r ((->) r) where
 
 -- []
 
-instance FunctorWithIndex Int []
+instance FunctorWithIndex Int [] where
+  imap = imapList
+  {-# INLINE imap #-}
 instance FoldableWithIndex Int []
 instance TraversableWithIndex Int [] where
   itraverse = indexing traverse
@@ -248,7 +250,7 @@ instance TraversableWithIndex () Maybe where
 -- | The position in the 'Seq' is available as the index.
 instance FunctorWithIndex Int Seq.Seq where
   imap = Seq.mapWithIndex
-
+  {-# INLINE imap #-}
 instance FoldableWithIndex Int Seq.Seq where
 #if MIN_VERSION_containers(0,5,8)
   ifoldMap = Seq.foldMapWithIndex
@@ -270,16 +272,24 @@ instance TraversableWithIndex Int Seq.Seq where
 
 -- IntMap
 
-instance FunctorWithIndex Int IntMap.IntMap
-instance FoldableWithIndex Int IntMap.IntMap
+instance FunctorWithIndex Int IntMap.IntMap where
+  imap = IntMap.mapWithKey
+  {-# INLINE imap #-}
+instance FoldableWithIndex Int IntMap.IntMap where
+  ifoldMap = IntMap.foldMapWithKey
+  {-# INLINE ifoldMap #-}
 instance TraversableWithIndex Int IntMap.IntMap where
   itraverse = IntMap.traverseWithKey
   {-# INLINE itraverse #-}
 
 -- Map
 
-instance FunctorWithIndex k (Map.Map k)
-instance FoldableWithIndex k (Map.Map k)
+instance FunctorWithIndex k (Map.Map k) where
+  imap = Map.mapWithKey
+  {-# INLINE imap #-}
+instance FoldableWithIndex k (Map.Map k) where
+  ifoldMap = Map.foldMapWithKey
+  {-# INLINE ifoldMap #-}
 instance TraversableWithIndex k (Map.Map k) where
   itraverse = Map.traverseWithKey
   {-# INLINE itraverse #-}

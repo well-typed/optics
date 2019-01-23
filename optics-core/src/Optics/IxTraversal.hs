@@ -6,9 +6,9 @@ module Optics.IxTraversal
   , toIxTraversal
   , ixTraversalVL
   , conjoinedTraversal
-  , itraversed
   , itraverseOf
   , iforOf
+  , itraversed
   , module Optics.Optic
   ) where
 

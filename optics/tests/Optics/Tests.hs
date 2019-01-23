@@ -74,16 +74,16 @@ lhs05  = over (noIx (imapped % imapped))
 lhs05b = over (imapped % imapped)
 rhs05  = over (mapped % mapped)
 
-lhs06, rhs06 ::
-  (Applicative f, TraversableWithIndex i t, FoldableWithIndex j f)
+lhs06, rhs06
+  :: (Applicative f, TraversableWithIndex i t, FoldableWithIndex j f)
   => (a -> f r)
   -> (Either (t (f a, c)) b)
   -> f ()
-lhs06 = traverseOf_ (_Left % itraversed % _1 % ifolded)
-rhs06 = traverseOf_ (_Left % traversed % _1 % folded)
+lhs06 = traverseOf_ (_Left % ifolded % _1 % ifolded)
+rhs06 = traverseOf_ (_Left % folded % _1 % folded)
 
-lhs07, rhs07 ::
-  (Applicative f, TraversableWithIndex i t, TraversableWithIndex j s)
+lhs07, rhs07
+  :: (Applicative f, TraversableWithIndex i t, TraversableWithIndex j s)
   => (j -> a -> f b)
   -> t (s a)
   -> f (t (s b))
@@ -92,21 +92,39 @@ rhs07 = itraverseOf (traversed % itraversed)
 
 -- This doesn't quite work, i.e. it seems to generate the same code, but modulo
 -- coercions.
-lhs08, rhs08 ::
-  (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
+lhs08, rhs08
+  :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
   => (j -> a -> f ())
   -> t (s a)
   -> f ()
 lhs08 = itraverseOf_ (noIx ifolded % ifolded)
 rhs08 = itraverseOf_ (folded % ifolded)
 
-lhs09, rhs09 ::
-  (FunctorWithIndex i t, FunctorWithIndex j s)
+lhs09, rhs09
+  :: (FunctorWithIndex i t, FunctorWithIndex j s)
   => (j -> a -> b)
   -> t (s a)
   -> t (s b)
 lhs09 = iover (noIx imapped % imapped)
 rhs09 = iover (mapped % imapped)
+
+-- Rewrite rule "itraversed__ -> ifolded__"
+lhs10, rhs10
+  :: (Applicative f, TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> f r)
+  -> s (Either (t a) b)
+  -> f ()
+lhs10 = itraverseOf_ (icompose (,) $ itraversed % _Left % itraversed)
+rhs10 = itraverseOf_ (icompose (,) $ ifolded % _Left % ifolded)
+
+-- Rewrite rule "itraversed__ -> imapped__"
+lhs11, rhs11
+  :: (TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> b)
+  -> s (Either c (t a))
+  -> s (Either c (t b))
+lhs11 = iover (icompose (,) $ itraversed % _Right % itraversed)
+rhs11 = iover (icompose (,) $ imapped % _Right % imapped)
 
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
@@ -138,6 +156,12 @@ inspectionTests = testGroup "inspection"
         assertFailure' $(inspectTest $ 'lhs08 === 'rhs08)
     , testCase "iover (noIx imapped % imapped) = \
                \iover (imapped % imapped)" $
+        assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
+    , testCase "itraverseOf_ (itraversed..itraversed) = \
+               \itraverseOf_ (ifolded..ifolded)" $
+        assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
+    , testCase "iover (itraversed..itraversed) = \
+               \iover (imapped..imapped)" $
         assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
     ]
 

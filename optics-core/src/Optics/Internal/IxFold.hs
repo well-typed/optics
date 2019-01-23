@@ -43,8 +43,7 @@ conjoinedFold
   :: (forall f. Applicative f => (     a -> f r) -> s -> f ())
   -> (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
   -> IxFold i s a
-conjoinedFold f g = Optic $ conjoined (rphantom . wander f  . rphantom)
-                                      (rphantom . iwander g . rphantom)
+conjoinedFold f g = Optic (conjoinedFold__ f g)
 {-# INLINE conjoinedFold #-}
 
 -- | Fold with index via embedding into a monoid.
@@ -105,12 +104,30 @@ iforOf_
 iforOf_ = flip . itraverseOf_
 {-# INLINE iforOf_ #-}
 
-----------------------------------------
-
 -- | Indexed fold via 'FoldableWithIndex' class.
 ifolded :: FoldableWithIndex i f => IxFold i (f a) a
-ifolded = conjoinedFold traverse_ itraverse_
+ifolded = Optic (conjoinedFold__ traverse_ itraverse_)
 {-# INLINE ifolded #-}
+
+----------------------------------------
+-- Internal implementations
+
+-- | Internal implementation of 'ifolded'.
+ifolded__
+  :: (Bicontravariant p, Traversing p, FoldableWithIndex i f)
+  => Optic__ p j (i -> j) (f a) (f b) a b
+ifolded__ = conjoinedFold__ traverse_ itraverse_
+{-# INLINE ifolded__ #-}
+
+-- | Internal implementation of 'conjoinedFold'.
+conjoinedFold__
+  :: (Bicontravariant p, Traversing p)
+  => (forall f. Applicative f => (     a -> f r) -> s -> f ())
+  -> (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+  -> Optic__ p j (i -> j) s t a b
+conjoinedFold__ f g = conjoined (rphantom . wander  f . rphantom)
+                                (rphantom . iwander g . rphantom)
+{-# INLINE conjoinedFold__ #-}
 
 -- $setup
 -- >>> import Optics.Core
