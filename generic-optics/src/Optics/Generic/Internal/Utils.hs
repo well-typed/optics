@@ -1,4 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Optics.Generic.Internal.Utils where
 
 import Data.Functor.Identity
@@ -28,10 +30,8 @@ instance Choice p => P.Choice (WrappedProfunctor p i) where
   {-# INLINE right' #-}
 
 -- | Build a 'Prism' from the van Laarhoven representation.
-prismVL
-  :: GL.Prism s t a b
-  -> Prism    s t a b
-prismVL f = Optic $ rmap runIdentity
+prismVL :: forall s t a b. GL.Prism s t a b -> Prism s t a b
+prismVL f = Optic $ rcoerce @(Identity t) @t
                   . (unwrapProfunctor #. f .# WrapProfunctor)
-                  . rmap Identity
+                  . rcoerce @b @(Identity b)
 {-# INLINE prismVL #-}

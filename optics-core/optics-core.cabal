@@ -37,6 +37,7 @@ library
     Optics.AffineFold
     Optics.AffineTraversal
     Optics.Arrow
+    Optics.Coerce
     Optics.Equality
     Optics.Fold
     Optics.Getter

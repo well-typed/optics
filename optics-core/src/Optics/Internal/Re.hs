@@ -1,5 +1,7 @@
 module Optics.Internal.Re where
 
+import Data.Coerce
+
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
@@ -71,6 +73,11 @@ instance Profunctor p => Profunctor (Re p s t) where
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
+
+  lcoerce' = lmap coerce
+  rcoerce' = rmap coerce
+  {-# INLINE lcoerce' #-}
+  {-# INLINE rcoerce' #-}
 
 instance Bicontravariant p => Bifunctor (Re p s t) where
   bimap  f g (Re p) = Re (p . contrabimap g f)
