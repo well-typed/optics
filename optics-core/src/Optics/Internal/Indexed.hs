@@ -65,7 +65,7 @@ instance
   ) => CheckIndices i '[i1, i2, i3, i4, i5]
 
 instance
-  ( TypeError ('Text "Use icompose* variants to flatten indices")
+  ( TypeError ('Text "Use icomposeN to flatten indices")
   , (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is) ~ '[i]
   ) => CheckIndices i (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is)
 

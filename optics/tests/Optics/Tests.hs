@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-module-prefixes -dsuppress-type-signatures -dsuppress-uniques #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
@@ -131,37 +132,43 @@ inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
     [ testCase "traverseOf traversed = traverse" $
         assertSuccess $(inspectTest $ 'lhs01 === 'rhs01)
-    , testCase "traverseOf (traversed % traversed) = \
+    , testCase "traverseOf (traversed % traversed) = \\
                 \traverse . traverse" $
         assertSuccess $(inspectTest $ 'lhs02 === 'rhs02)
-    , testCase "traverseOf (traversed % traversed) = \
+    , testCase "traverseOf (traversed % traversed) = \\
                \traverseOf (itraversed % itraversed)" $
         assertSuccess $(inspectTest $ 'lhs03 === 'rhs03)
-    , testCase "traverseOf_ (folded % folded) = \
+    , testCase "traverseOf_ (folded % folded) = \\
                \traverseOf_ (ifolded % ifolded)" $
         assertSuccess $(inspectTest $ 'lhs04 === 'rhs04)
-    , testCase "over (noIx (imapped % imapped)) = \
+    , testCase "over (noIx (imapped % imapped)) = \\
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05 === 'rhs05)
-    , testCase "over (imapped % imapped) = \
+    , testCase "over (imapped % imapped) = \\
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05b === 'rhs05)
-    , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \
+    , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \\
                \traverseOf_ ..." $
         assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)
-    , testCase "itraverseOf (itraversed %> itraversed) = \
+    , testCase "itraverseOf (itraversed %> itraversed) = \\
                \itraverseOf (traversed % itraversed)" $
         assertSuccess $(inspectTest $ 'lhs07 === 'rhs07)
-    , testCase "itraverseOf_ (ifolded %> ifolded) =/= \
+    , testCase "itraverseOf_ (ifolded %> ifolded) =/= \\
                \itraverseOf (folded % ifolded)" $
         assertFailure' $(inspectTest $ 'lhs08 === 'rhs08)
-    , testCase "iover (imapped <% imapped) = \
+    , testCase "iover (imapped <% imapped) = \\
                \iover (imapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
-    , testCase "itraverseOf_ (itraversed..itraversed) =/= \
+#if __GLASGOW_HASKELL__ >= 802
+    , testCase "itraverseOf_ (itraversed..itraversed) =/= \\
                \itraverseOf_ (ifolded..ifolded)" $
         assertFailure' $(inspectTest $ 'lhs10 === 'rhs10)
-    , testCase "iover (itraversed..itraversed) = \
+#else
+    , testCase "itraverseOf_ (itraversed..itraversed) = \\
+               \itraverseOf_ (ifolded..ifolded)" $
+        assertSuccess $(inspectTest $ 'lhs10 === 'rhs10)
+#endif
+    , testCase "iover (itraversed..itraversed) = \\
                \iover (imapped..imapped)" $
         assertSuccess $(inspectTest $ 'lhs11 === 'rhs11)
     ]
