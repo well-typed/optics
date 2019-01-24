@@ -28,7 +28,7 @@ iset
   :: (CheckIndices i is, Is k A_Setter)
   => Optic k is s t a b
   -> (i -> b) -> s -> t
-iset o f = iover o (\i _ -> f i)
+iset o = \f -> iover o (\i _ -> f i)
 {-# INLINE iset #-}
 
 -- | Build an indexed setter from a function to modify the element(s).

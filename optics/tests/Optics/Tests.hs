@@ -43,7 +43,10 @@ eg2 = view _1
 -- Inspection tests
 -------------------------------------------------------------------------------
 
--- eta-expansion is required
+-- Sometimes we need to eta expand, as without it pretty much equivalent code is
+-- produced, but somewhat rearranged. Expanding allows us to get rid of these
+-- differences to satisfy the check.
+
 lhs01, rhs01
   :: (Applicative f, Traversable t)
   => (a -> f b) -> t a -> f (t b)
@@ -90,14 +93,13 @@ lhs07, rhs07
 lhs07 = itraverseOf (itraversed %> itraversed)
 rhs07 = itraverseOf (traversed % itraversed)
 
--- Same code modulo coercions.
 lhs08, rhs08
   :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
   => (j -> a -> f ())
   -> t (s a)
   -> f ()
-lhs08 = itraverseOf_ (ifolded %> ifolded)
-rhs08 = itraverseOf_ (folded % ifolded)
+lhs08 f = itraverseOf_ (ifolded %> ifolded) f
+rhs08 f = itraverseOf_ (folded % ifolded) f
 
 lhs09, rhs09
   :: (FunctorWithIndex i t, FunctorWithIndex j s)
@@ -107,16 +109,14 @@ lhs09, rhs09
 lhs09 = iover (imapped <% imapped)
 rhs09 = iover (imapped % mapped)
 
--- Rewrite rule "itraversed__ -> ifolded__". If you compose more optics (as in
--- example with rule imapped__ below), the generated code is very similar, but
--- not the same, at least with GHC >= 8.2.
+-- Rewrite rule "itraversed__ -> ifolded__"
 lhs10, rhs10
-  :: (Applicative f, TraversableWithIndex i t)
-  => (i -> a -> f r)
-  -> t a
+  :: (Applicative f, TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> f r)
+  -> s (Either (t a) b)
   -> f ()
-lhs10 = itraverseOf_ itraversed
-rhs10 = itraverseOf_ ifolded
+lhs10 f s = itraverseOf_ (icompose (,) $ itraversed % _Left % itraversed) f s
+rhs10 f s = itraverseOf_ (icompose (,) $ ifolded % _Left % ifolded) f s
 
 -- Rewrite rule "itraversed__ -> imapped__"
 lhs11, rhs11
@@ -154,6 +154,7 @@ inspectionTests = testGroup "inspection"
         assertSuccess $(inspectTest $ 'lhs07 === 'rhs07)
     , testCase "itraverseOf_ (ifolded %> ifolded) ==- \
                \itraverseOf (folded % ifolded)" $
+        -- Same code modulo coercions.
         assertSuccess $(inspectTest $ 'lhs08 ==- 'rhs08)
     , testCase "iover (imapped <% imapped) = \
                \iover (imapped % mapped)" $
