@@ -8,11 +8,17 @@ module Optics.Indexed
   , module Optics.IxSetter
 
   -- * Index composition
+  , (<%>)
+  , (%>)
+  , (<%)
   , reindex
   , icompose
   , icompose3
   , icompose4
   , icompose5
+
+  -- * Index removal
+  , NoIxOptic(..)
 
   -- * Functors with index
   , FunctorWithIndex (..)
@@ -30,9 +36,56 @@ import Optics.Internal.Optic
 import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Profunctor
 
-import Optics.IxTraversal
+import Optics.Fold
 import Optics.IxFold
 import Optics.IxSetter
+import Optics.IxTraversal
+import Optics.Setter
+import Optics.Traversal
+
+-- | Compose two indexed optics. Their indices are composed as a pair.
+--
+-- >>> itoListOf (ifolded <%> ifolded) ["foo", "bar"]
+-- [((0,0),'f'),((0,1),'o'),((0,2),'o'),((1,0),'b'),((1,1),'a'),((1,2),'r')]
+--
+infixr 9 <%>
+(<%>)
+  :: ( m ~ Join k l, n ~ Join A_Traversal m
+     , Is k m, Is l m, Is m n, Is A_Traversal n
+     , Append is js ~ '[i, j])
+  => Optic k is        s t u v
+  -> Optic l js        u v a b
+  -> Optic n '[(i, j)] s t a b
+o <%> o' = icompose (,) (o % o')
+{-# INLINE (<%>) #-}
+
+-- | Compose two indexed optics and preserve indices of the right one.
+--
+-- >>> itoListOf (ifolded %> ifolded) ["foo", "bar"]
+-- [(0,'f'),(1,'o'),(2,'o'),(0,'b'),(1,'a'),(2,'r')]
+--
+infixr 9 %>
+(%>)
+  :: (Is k m, Is l m, m ~ Join k l, NoIxOptic k s t u v)
+  => Optic k is s t u v
+  -> Optic l js u v a b
+  -> Optic m js s t a b
+o %> o' = noIx o % o'
+{-# INLINE (%>) #-}
+
+-- | Compose two indexed optics and preserve indices of the left one.
+--
+-- >>> itoListOf (ifolded <% ifolded) ["foo", "bar"]
+-- [(0,'f'),(0,'o'),(0,'o'),(1,'b'),(1,'a'),(1,'r')]
+--
+infixr 9 <%
+(<%)
+ :: (Is l m, Is k m, m ~ Join k l, NoIxOptic l u v a b)
+ => Optic k is s t u v
+ -> Optic l js u v a b
+ -> Optic m is s t a b
+o <% o' = o % noIx o'
+{-# INLINE (<%) #-}
 
 -- | Remap the index.
 --
@@ -82,6 +135,31 @@ icompose5
   -> Optic l '[ix] s t a b
 icompose5 = icomposeN
 {-# INLINE icompose5 #-}
+
+----------------------------------------
+-- NoIxOptic
+
+class NoIxOptic k s t a b where
+  -- | Downcast an indexed optic to its unindexed equivalent.
+  noIx :: Optic k is s t a b -> Optic k NoIx s t a b
+
+instance NoIxOptic A_Traversal s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = traversalVL (traverseOf o)
+  {-# INLINE noIx #-}
+
+instance (s ~ t, a ~ b) => NoIxOptic A_Fold s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = foldVL (traverseOf_ o)
+  {-# INLINE noIx #-}
+
+instance NoIxOptic A_Setter s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = sets (over o)
+  {-# INLINE noIx #-}
+
+----------------------------------------
+-- Internal
 
 -- Implementation of icompose*
 icomposeN

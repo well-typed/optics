@@ -169,14 +169,14 @@ module Optics
   -- (ifolded % simple)
   --   :: FoldableWithIndex i f => Optic A_Fold '[i] (f b) (f b) b b
   --
-  -- >>> :t unIx (ifolded % simple)
-  -- unIx (ifolded % simple)
+  -- >>> :t noIx (ifolded % simple)
+  -- noIx (ifolded % simple)
   --   :: FoldableWithIndex i f => Optic A_Fold NoIx (f b) (f b) b b
   --
   -- 'unIx' can erase all indices
   --
-  -- >>> :t unIx (ifolded % ifolded)
-  -- unIx (ifolded % ifolded)
+  -- >>> :t noIx (ifolded % ifolded)
+  -- noIx (ifolded % ifolded)
   --   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
   --      Optic A_Fold NoIx (f1 (f2 b)) (f1 (f2 b)) b b
   --
@@ -206,7 +206,6 @@ module Optics
   -- There are yet no @IxAffineFold@, @IxAffineTraversal@ etc, but they can be added.
   --
   , module Optics.Indexed
-  , module Optics.Unindexed
 
   -- ** Each
 
@@ -250,7 +249,6 @@ import Optics.AffineFold      as O
 
 -- Optics utilities
 import Optics.Each
-import Optics.Unindexed
 import Optics.Indexed
 import Optics.Re
 import Optics.Labels ()

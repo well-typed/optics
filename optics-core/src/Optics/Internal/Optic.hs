@@ -95,7 +95,8 @@ castOptic (Optic o) = Optic (implies' o)
 --
 -- Returns an optic of the appropriate supertype.
 --
-(%) :: (Is k m, Is l m, m ~ Join k l, Append is js ks)
+infixr 9 %
+(%) :: (Is k m, Is l m, m ~ Join k l, ks ~ Append is js)
     => Optic k is s t u v
     -> Optic l js u v a b
     -> Optic m ks s t a b
@@ -103,7 +104,8 @@ o % o' = castOptic o %% castOptic o'
 {-# INLINE (%) #-}
 
 -- | Compose two optics of the same flavour.
-(%%) :: forall k is js ks s t u v a b. Append is js ks
+infixr 9 %%
+(%%) :: forall k is js ks s t u v a b. ks ~ Append is js
      => Optic k is s t u v
      -> Optic k js u v a b
      -> Optic k ks s t a b
