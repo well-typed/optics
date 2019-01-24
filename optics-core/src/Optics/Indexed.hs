@@ -49,9 +49,9 @@ import Optics.Traversal
 infixr 9 <%>
 (<%>)
   :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b)
-  => Optic k '[i]      s t u v
-  -> Optic l '[j]      u v a b
-  -> Optic m '[(i, j)] s t a b
+  => Optic k (WithIx i)      s t u v
+  -> Optic l (WithIx j)      u v a b
+  -> Optic m (WithIx (i, j)) s t a b
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
 
@@ -91,8 +91,8 @@ o <% o' = o % noIx o'
 reindex
   :: IxOptic k s t a b
   => (i -> j)
-  -> Optic k '[i] s t a b
-  -> Optic k '[j] s t a b
+  -> Optic k (WithIx i) s t a b
+  -> Optic k (WithIx j) s t a b
 reindex = icomposeN
 {-# INLINE reindex #-}
 
@@ -100,8 +100,8 @@ reindex = icomposeN
 icompose
   :: IxOptic k s t a b
   => (i -> j -> ix)
-  -> Optic k '[i, j] s t a b
-  -> Optic k '[ix] s t a b
+  -> Optic k '[i, j]     s t a b
+  -> Optic k (WithIx ix) s t a b
 icompose = icomposeN
 {-# INLINE icompose #-}
 
@@ -110,7 +110,7 @@ icompose3
   :: IxOptic k s t a b
   => (i1 -> i2 -> i3 -> ix)
   -> Optic k '[i1, i2, i3] s t a b
-  -> Optic k '[ix] s t a b
+  -> Optic k (WithIx ix)   s t a b
 icompose3 = icomposeN
 {-# INLINE icompose3 #-}
 
@@ -119,7 +119,7 @@ icompose4
   :: IxOptic k s t a b
   => (i1 -> i2 -> i3 -> i4 -> ix)
   -> Optic k '[i1, i2, i3, i4] s t a b
-  -> Optic k '[ix] s t a b
+  -> Optic k (WithIx ix)       s t a b
 icompose4 = icomposeN
 {-# INLINE icompose4 #-}
 
@@ -128,7 +128,7 @@ icompose5
   :: IxOptic k s t a b
   => (i1 -> i2 -> i3 -> i4 -> i5 -> ix)
   -> Optic k '[i1, i2, i3, i4, i5] s t a b
-  -> Optic k '[ix] s t a b
+  -> Optic k (WithIx ix)           s t a b
 icompose5 = icomposeN
 {-# INLINE icompose5 #-}
 
@@ -143,8 +143,8 @@ class IxOptic k s t a b where
   icomposeN
     :: CurryCompose is
     => Curry is i
-    -> Optic k is   s t a b
-    -> Optic k '[i] s t a b
+    -> Optic k is         s t a b
+    -> Optic k (WithIx i) s t a b
 
 instance IxOptic A_Traversal s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
@@ -178,8 +178,8 @@ icomposeN__
   :: forall k l i is s t a b
   . (Is A_Traversal l, Is k l, Join A_Traversal k ~ l, CurryCompose is)
   => Curry is i
-  -> Optic k is s t a b
-  -> Optic l '[i] s t a b
+  -> Optic k is         s t a b
+  -> Optic l (WithIx i) s t a b
 icomposeN__ f o = Optic $
     implies' (ixcontramap (\ij -> composeN @is ij f))
   . getOptic (castOptic @k @l o)
