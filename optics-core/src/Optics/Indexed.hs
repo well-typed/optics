@@ -48,9 +48,9 @@ import Optics.Traversal
 --
 infixr 9 <%>
 (<%>)
-  :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b, '[i, j] ~ Append is js)
-  => Optic k is        s t u v
-  -> Optic l js        u v a b
+  :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b)
+  => Optic k '[i]      s t u v
+  -> Optic l '[j]      u v a b
   -> Optic m '[(i, j)] s t a b
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
