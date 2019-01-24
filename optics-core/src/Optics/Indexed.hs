@@ -59,7 +59,7 @@ infixr 9 <%>
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
 
--- | Compose two indexed optics and preserve indices of the right one.
+-- | Compose two optics and preserve indices of the right one.
 --
 -- >>> itoListOf (ifolded %> ifolded) ["foo", "bar"]
 -- [(0,'f'),(1,'o'),(2,'o'),(0,'b'),(1,'a'),(2,'r')]
@@ -73,7 +73,7 @@ infixr 9 %>
 o %> o' = noIx o % o'
 {-# INLINE (%>) #-}
 
--- | Compose two indexed optics and preserve indices of the left one.
+-- | Compose two optics and preserve indices of the left one.
 --
 -- >>> itoListOf (ifolded <% ifolded) ["foo", "bar"]
 -- [(0,'f'),(0,'o'),(0,'o'),(1,'b'),(1,'a'),(1,'r')]
@@ -140,7 +140,7 @@ icompose5 = icomposeN
 -- NoIxOptic
 
 class NoIxOptic k s t a b where
-  -- | Downcast an indexed optic to its unindexed equivalent.
+  -- | Convert an indexed optic to its unindexed equivalent.
   noIx :: Optic k is s t a b -> Optic k NoIx s t a b
 
 instance NoIxOptic A_Traversal s t a b where
