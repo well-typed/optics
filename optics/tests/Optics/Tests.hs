@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-module-prefixes -dsuppress-type-signatures -dsuppress-uniques #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
@@ -91,8 +90,7 @@ lhs07, rhs07
 lhs07 = itraverseOf (itraversed %> itraversed)
 rhs07 = itraverseOf (traversed % itraversed)
 
--- This doesn't quite work, i.e. it seems to generate the same code, but modulo
--- coercions.
+-- Same code modulo coercions.
 lhs08, rhs08
   :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
   => (j -> a -> f ())
@@ -109,15 +107,16 @@ lhs09, rhs09
 lhs09 = iover (imapped <% imapped)
 rhs09 = iover (imapped % mapped)
 
--- Rewrite rule "itraversed__ -> ifolded__" - doesn't quite work similarly to
--- 08, seems to generate the same code, but modulo coercions.
+-- Rewrite rule "itraversed__ -> ifolded__". If you compose more optics (as in
+-- example with rule imapped__ below), the generated code is very similar, but
+-- not the same, at least with GHC >= 8.2.
 lhs10, rhs10
-  :: (Applicative f, TraversableWithIndex i s, TraversableWithIndex j t)
-  => ((i, j) -> a -> f r)
-  -> s (Either (t a) b)
+  :: (Applicative f, TraversableWithIndex i t)
+  => (i -> a -> f r)
+  -> t a
   -> f ()
-lhs10 = itraverseOf_ (icompose (,) $ itraversed % _Left % itraversed)
-rhs10 = itraverseOf_ (icompose (,) $ ifolded % _Left % ifolded)
+lhs10 = itraverseOf_ itraversed
+rhs10 = itraverseOf_ ifolded
 
 -- Rewrite rule "itraversed__ -> imapped__"
 lhs11, rhs11
@@ -132,43 +131,37 @@ inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
     [ testCase "traverseOf traversed = traverse" $
         assertSuccess $(inspectTest $ 'lhs01 === 'rhs01)
-    , testCase "traverseOf (traversed % traversed) = \\
+    , testCase "traverseOf (traversed % traversed) = \
                 \traverse . traverse" $
         assertSuccess $(inspectTest $ 'lhs02 === 'rhs02)
-    , testCase "traverseOf (traversed % traversed) = \\
+    , testCase "traverseOf (traversed % traversed) = \
                \traverseOf (itraversed % itraversed)" $
         assertSuccess $(inspectTest $ 'lhs03 === 'rhs03)
-    , testCase "traverseOf_ (folded % folded) = \\
+    , testCase "traverseOf_ (folded % folded) = \
                \traverseOf_ (ifolded % ifolded)" $
         assertSuccess $(inspectTest $ 'lhs04 === 'rhs04)
-    , testCase "over (noIx (imapped % imapped)) = \\
+    , testCase "over (noIx (imapped % imapped)) = \
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05 === 'rhs05)
-    , testCase "over (imapped % imapped) = \\
+    , testCase "over (imapped % imapped) = \
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05b === 'rhs05)
-    , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \\
+    , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \
                \traverseOf_ ..." $
         assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)
-    , testCase "itraverseOf (itraversed %> itraversed) = \\
+    , testCase "itraverseOf (itraversed %> itraversed) = \
                \itraverseOf (traversed % itraversed)" $
         assertSuccess $(inspectTest $ 'lhs07 === 'rhs07)
-    , testCase "itraverseOf_ (ifolded %> ifolded) =/= \\
+    , testCase "itraverseOf_ (ifolded %> ifolded) ==- \
                \itraverseOf (folded % ifolded)" $
-        assertFailure' $(inspectTest $ 'lhs08 === 'rhs08)
-    , testCase "iover (imapped <% imapped) = \\
+        assertSuccess $(inspectTest $ 'lhs08 ==- 'rhs08)
+    , testCase "iover (imapped <% imapped) = \
                \iover (imapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
-#if __GLASGOW_HASKELL__ >= 802
-    , testCase "itraverseOf_ (itraversed..itraversed) =/= \\
-               \itraverseOf_ (ifolded..ifolded)" $
-        assertFailure' $(inspectTest $ 'lhs10 === 'rhs10)
-#else
-    , testCase "itraverseOf_ (itraversed..itraversed) = \\
-               \itraverseOf_ (ifolded..ifolded)" $
+    , testCase "itraverseOf_ itraversed = \
+               \itraverseOf_ ifolded" $
         assertSuccess $(inspectTest $ 'lhs10 === 'rhs10)
-#endif
-    , testCase "iover (itraversed..itraversed) = \\
+    , testCase "iover (itraversed..itraversed) = \
                \iover (imapped..imapped)" $
         assertSuccess $(inspectTest $ 'lhs11 === 'rhs11)
     ]
