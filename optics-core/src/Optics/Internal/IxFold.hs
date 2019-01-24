@@ -51,7 +51,7 @@ ifoldMapOf
   :: (CheckIndices i is, Monoid r, Is k A_Fold)
   => Optic' k is s a
   -> (i -> a -> r) -> s -> r
-ifoldMapOf o = \f -> runIxForget (getOptic (toIxFold o) (IxForget f)) id
+ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
 {-# INLINE ifoldMapOf #-}
 
 -- | Fold with index right-associatively.
@@ -93,7 +93,7 @@ itraverseOf_
   :: (Is k A_Fold, CheckIndices i is, Applicative f)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
-itraverseOf_ o = \f -> runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
+itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 {-# INLINE itraverseOf_ #-}
 
 -- | A version of 'itraverseOf_' with the arguments flipped.
@@ -106,7 +106,7 @@ iforOf_ = flip . itraverseOf_
 
 -- | Indexed fold via 'FoldableWithIndex' class.
 ifolded :: FoldableWithIndex i f => IxFold i (f a) a
-ifolded = Optic (conjoinedFold__ traverse_ itraverse_)
+ifolded = Optic ifolded__
 {-# INLINE ifolded #-}
 
 ----------------------------------------

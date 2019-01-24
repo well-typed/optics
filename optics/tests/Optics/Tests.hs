@@ -73,9 +73,9 @@ rhs04 = traverseOf_ (ifolded % ifolded)
 
 lhs05, lhs05b, rhs05
   :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
-lhs05  = over (noIx (imapped % imapped))
-lhs05b = over (imapped % imapped)
-rhs05  = over (mapped % mapped)
+lhs05  f = over (noIx (imapped % imapped)) f
+lhs05b f = over (imapped % imapped) f
+rhs05  f = over (mapped % mapped) f
 
 lhs06, rhs06
   :: (Applicative f, TraversableWithIndex i t, FoldableWithIndex j f)
@@ -90,8 +90,8 @@ lhs07, rhs07
   => (j -> a -> f b)
   -> t (s a)
   -> f (t (s b))
-lhs07 = itraverseOf (itraversed %> itraversed)
-rhs07 = itraverseOf (traversed % itraversed)
+lhs07 f = itraverseOf (itraversed %> itraversed) f
+rhs07 f = itraverseOf (traversed % itraversed) f
 
 lhs08, rhs08
   :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
@@ -106,8 +106,8 @@ lhs09, rhs09
   => (i -> a -> b)
   -> t (s a)
   -> t (s b)
-lhs09 = iover (imapped <% imapped)
-rhs09 = iover (imapped % mapped)
+lhs09 f = iover (imapped <% imapped) f
+rhs09 f = iover (imapped % mapped) f
 
 -- Rewrite rule "itraversed__ -> ifolded__"
 lhs10, rhs10
@@ -124,8 +124,8 @@ lhs11, rhs11
   => ((i, j) -> a -> b)
   -> s (Either c (t a))
   -> s (Either c (t b))
-lhs11 = iover (icompose (,) $ itraversed % _Right % itraversed)
-rhs11 = iover (icompose (,) $ imapped % _Right % imapped)
+lhs11 f = iover (icompose (,) $ itraversed % _Right % itraversed) f
+rhs11 f = iover (icompose (,) $ imapped % _Right % imapped) f
 
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
