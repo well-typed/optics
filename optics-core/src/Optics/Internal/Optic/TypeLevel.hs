@@ -22,9 +22,8 @@ type family Curry (xs :: [*]) (y :: *) :: * where
 
 -- | Append two type-level lists together.
 type family Append (xs :: [*]) (ys :: [*]) :: [*] where
-  Append '[]       '[] = '[]
-  Append '[]       ys  = ys
-  Append xs        '[] = xs
+  Append '[]       ys  = ys -- needed for (<%>) and (%>)
+  Append xs        '[] = xs -- needed for (<%)
   Append (x ': xs) ys  = x ': Append xs ys
 
 -- |
