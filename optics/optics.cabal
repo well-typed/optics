@@ -81,7 +81,6 @@ library
     , Optics.Arrow
     , Optics.Operators
     , Optics.Passthrough
-    , Optics.Unindexed
     , Optics.View
 
   -- optics-sop

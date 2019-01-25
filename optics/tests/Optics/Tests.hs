@@ -43,7 +43,10 @@ eg2 = view _1
 -- Inspection tests
 -------------------------------------------------------------------------------
 
--- eta-expansion is required
+-- Sometimes we need to eta expand, as without it pretty much equivalent code is
+-- produced, but somewhat rearranged. Expanding allows us to get rid of these
+-- differences to satisfy the check.
+
 lhs01, rhs01
   :: (Applicative f, Traversable t)
   => (a -> f b) -> t a -> f (t b)
@@ -70,17 +73,59 @@ rhs04 = traverseOf_ (ifolded % ifolded)
 
 lhs05, lhs05b, rhs05
   :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
-lhs05  = over (unIx (imapped % imapped))
-lhs05b = over (imapped % imapped)
-rhs05  = over (mapped % mapped)
+lhs05  f = over (noIx (imapped % imapped)) f
+lhs05b f = over (imapped % imapped) f
+rhs05  f = over (mapped % mapped) f
 
-lhs06, rhs06 ::
-  (Applicative f, TraversableWithIndex i t, FoldableWithIndex j f)
+lhs06, rhs06
+  :: (Applicative f, TraversableWithIndex i t, FoldableWithIndex j f)
   => (a -> f r)
   -> (Either (t (f a, c)) b)
   -> f ()
-lhs06 = traverseOf_ (_Left % itraversed % _1 % ifolded)
-rhs06 = traverseOf_ (_Left % traversed % _1 % folded)
+lhs06 = traverseOf_ (_Left % ifolded % _1 % ifolded)
+rhs06 = traverseOf_ (_Left % folded % _1 % folded)
+
+lhs07, rhs07
+  :: (Applicative f, TraversableWithIndex i t, TraversableWithIndex j s)
+  => (j -> a -> f b)
+  -> t (s a)
+  -> f (t (s b))
+lhs07 f = itraverseOf (itraversed %> itraversed) f
+rhs07 f = itraverseOf (traversed % itraversed) f
+
+lhs08, rhs08
+  :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
+  => (j -> a -> f ())
+  -> t (s a)
+  -> f ()
+lhs08 f = itraverseOf_ (ifolded %> ifolded) f
+rhs08 f = itraverseOf_ (folded % ifolded) f
+
+lhs09, rhs09
+  :: (FunctorWithIndex i t, FunctorWithIndex j s)
+  => (i -> a -> b)
+  -> t (s a)
+  -> t (s b)
+lhs09 f = iover (imapped <% imapped) f
+rhs09 f = iover (imapped % mapped) f
+
+-- Rewrite rule "itraversed__ -> ifolded__"
+lhs10, rhs10
+  :: (Applicative f, TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> f r)
+  -> s (Either (t a) b)
+  -> f ()
+lhs10 f s = itraverseOf_ (icompose (,) $ itraversed % _Left % itraversed) f s
+rhs10 f s = itraverseOf_ (icompose (,) $ ifolded % _Left % ifolded) f s
+
+-- Rewrite rule "itraversed__ -> imapped__"
+lhs11, rhs11
+  :: (TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> b)
+  -> s (Either c (t a))
+  -> s (Either c (t b))
+lhs11 f = iover (icompose (,) $ itraversed % _Right % itraversed) f
+rhs11 f = iover (icompose (,) $ imapped % _Right % imapped) f
 
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
@@ -95,7 +140,7 @@ inspectionTests = testGroup "inspection"
     , testCase "traverseOf_ (folded % folded) = \
                \traverseOf_ (ifolded % ifolded)" $
         assertSuccess $(inspectTest $ 'lhs04 === 'rhs04)
-    , testCase "over (unIx (imapped % imapped)) = \
+    , testCase "over (noIx (imapped % imapped)) = \
                \over (mapped % mapped)" $
         assertSuccess $(inspectTest $ 'lhs05 === 'rhs05)
     , testCase "over (imapped % imapped) = \
@@ -104,6 +149,22 @@ inspectionTests = testGroup "inspection"
     , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = \
                \traverseOf_ ..." $
         assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)
+    , testCase "itraverseOf (itraversed %> itraversed) = \
+               \itraverseOf (traversed % itraversed)" $
+        assertSuccess $(inspectTest $ 'lhs07 === 'rhs07)
+    , testCase "itraverseOf_ (ifolded %> ifolded) ==- \
+               \itraverseOf (folded % ifolded)" $
+        -- Same code modulo coercions.
+        assertSuccess $(inspectTest $ 'lhs08 ==- 'rhs08)
+    , testCase "iover (imapped <% imapped) = \
+               \iover (imapped % mapped)" $
+        assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
+    , testCase "itraverseOf_ itraversed = \
+               \itraverseOf_ ifolded" $
+        assertSuccess $(inspectTest $ 'lhs10 === 'rhs10)
+    , testCase "iover (itraversed..itraversed) = \
+               \iover (imapped..imapped)" $
+        assertSuccess $(inspectTest $ 'lhs11 === 'rhs11)
     ]
 
 assertSuccess :: Result -> IO ()

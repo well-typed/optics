@@ -1,4 +1,8 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 -- | Core optic types and subtyping machinery.
 --
 -- This module contains the core 'Optic' types, and the underlying
@@ -22,6 +26,9 @@ module Optics.Internal.Optic
   , module Optics.Internal.Optic.Types
   , module Optics.Internal.Optic.TypeLevel
   ) where
+
+import Data.Proxy (Proxy (..))
+import Data.Type.Equality
 
 import Optics.Internal.Optic.Subtyping
 import Optics.Internal.Optic.Types
@@ -95,7 +102,8 @@ castOptic (Optic o) = Optic (implies' o)
 --
 -- Returns an optic of the appropriate supertype.
 --
-(%) :: (Is k m, Is l m, m ~ Join k l, Append is js ks)
+infixr 9 %
+(%) :: (Is k m, Is l m, m ~ Join k l, ks ~ Append is js)
     => Optic k is s t u v
     -> Optic l js u v a b
     -> Optic m ks s t a b
@@ -103,16 +111,44 @@ o % o' = castOptic o %% castOptic o'
 {-# INLINE (%) #-}
 
 -- | Compose two optics of the same flavour.
-(%%) :: forall k is js ks s t u v a b. Append is js ks
+infixr 9 %%
+(%%) :: forall k is js ks s t u v a b. ks ~ Append is js
      => Optic k is s t u v
      -> Optic k js u v a b
      -> Optic k ks s t a b
 Optic o %% Optic o' = Optic oo
   where
-    -- unsafeCoerce to the rescue
+    -- unsafeCoerce to the rescue, for a proof see below.
     oo :: forall p j. Optic_ k p j (Curry ks j) s t a b
     oo = (unsafeCoerce
            :: Optic_ k p j (Curry is (Curry js j)) s t a b
            -> Optic_ k p i (Curry ks j           ) s t a b)
       (o . o')
 {-# INLINE (%%) #-}
+
+-- |
+--
+-- 'AppendProof' is a very simple class which provides a witness
+--
+-- @
+-- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
+--    where f = (->)
+-- @
+--
+-- It shows that usage of 'unsafeCoerce' in '(%%)' is, in fact, safe.
+--
+class Append xs ys ~ zs => AppendProof (xs :: [*]) (ys :: [*]) (zs :: [*])
+  | xs ys -> zs, zs xs -> ys {- , zs ys -> xs -} where
+  appendProof :: Proxy i -> Curry xs (Curry ys i) :~: Curry zs i
+
+instance ys ~ zs => AppendProof '[] ys zs where
+  appendProof _ = Refl
+
+instance
+  (Append (x : xs) ys ~ (x : zs), AppendProof xs ys zs
+  ) => AppendProof (x ': xs) ys (x ': zs) where
+  appendProof
+    :: forall i. Proxy i
+    -> Curry (x ': xs) (Curry ys i) :~: Curry (x ': zs) i
+  appendProof i = case appendProof @xs @ys @zs i of
+    Refl -> Refl

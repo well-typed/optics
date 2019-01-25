@@ -53,7 +53,7 @@ lenses = hmap (coerce (productRep %)) (go sList)
 npPrisms ::
   forall a xss .
   (Generic a, Code a ~ xss) => NP (WrappedNPPrism a) xss
-npPrisms = hmap (coerce (rep % sop %)) (go sList)
+npPrisms = hmap (coerce ((rep % sop) %)) (go sList)
   where
     go :: forall yss . SList yss -> NP (WrappedNPPrism (NS (NP I) yss)) yss
     go SNil  = Nil
