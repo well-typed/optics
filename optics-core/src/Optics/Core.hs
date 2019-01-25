@@ -21,6 +21,7 @@ import Optics.Indexed         as O
 import Optics.Iso             as O
 import Optics.Lens            as O
 import Optics.LensyReview     as O
+import Optics.Operators       as O
 import Optics.Passthrough     as O
 import Optics.Prism           as O
 import Optics.PrismaticGetter as O

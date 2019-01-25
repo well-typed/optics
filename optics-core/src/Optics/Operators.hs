@@ -58,7 +58,7 @@ infixl 8 ^..
 
 infixl 8 ^?
 
--- | Flipped infix version of 'review'.
+-- | Infix version of 'review'.
 (#) :: Is k A_Review => Optic' k is t b -> b -> t
 (#) = review
 {-# INLINE (#) #-}
