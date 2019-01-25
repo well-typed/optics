@@ -48,9 +48,10 @@ import Optics.Traversal
 --
 infixr 9 <%>
 (<%>)
-  :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b)
-  => Optic k (WithIx i)      s t u v
-  -> Optic l (WithIx j)      u v a b
+  :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b,
+      CheckIndices "(<%>)" 1 i is, CheckIndices "(<%>)" 2 j js)
+  => Optic k is              s t u v
+  -> Optic l js              u v a b
   -> Optic m (WithIx (i, j)) s t a b
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
@@ -89,9 +90,9 @@ o <% o' = o % noIx o'
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
 reindex
-  :: IxOptic k s t a b
+  :: (IxOptic k s t a b, CheckIndices "reindex" 2 i is)
   => (i -> j)
-  -> Optic k (WithIx i) s t a b
+  -> Optic k is         s t a b
   -> Optic k (WithIx j) s t a b
 reindex = icomposeN
 {-# INLINE reindex #-}

@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 module Optics.Internal.IxSetter where
 
 import Optics.Internal.Indexed
@@ -17,7 +18,7 @@ toIxSetter = castOptic
 
 -- | Apply an indexed setter as a modifier.
 iover
-  :: (CheckIndices i is, Is k A_Setter)
+  :: (Is k A_Setter, CheckIndices "iover" 1 i is)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
 iover o f = runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
@@ -25,7 +26,7 @@ iover o f = runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
 
 -- | Apply an indexed setter.
 iset
-  :: (CheckIndices i is, Is k A_Setter)
+  :: (Is k A_Setter, CheckIndices "iset" 1 i is)
   => Optic k is s t a b
   -> (i -> b) -> s -> t
 iset o f = iover o (\i _ -> f i)

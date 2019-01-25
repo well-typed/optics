@@ -19,7 +19,7 @@ import Data.Proxy
 import Data.Tree
 import Data.Void
 import GHC.Generics
-import GHC.TypeLits (ErrorMessage(..), TypeError)
+import GHC.TypeLits
 import qualified Data.Array as Array
 import qualified Data.IntMap as IntMap
 import qualified Data.Map as Map
@@ -32,44 +32,86 @@ import Optics.Internal.Utils
 import Data.Foldable (fold)
 #endif
 
--- | Generate sensible error messages in case a user tries to use regular optic
--- as an indexed one or doesn't call appropriate icompose function to flatten
--- the indices before trying to use an indexed optic.
-class is ~ '[i] => CheckIndices i is
+-- | Generate sensible error messages in case a user tries to pass either a
+-- unindexed optic or indexed optic with unflattened indices where indexed optic
+-- with a single index is expected.
+class is ~ '[i] => CheckIndices (f :: Symbol) (arg :: Nat) (i :: *) (is :: [*])
 
-instance CheckIndices i '[i]
+instance CheckIndices arg f i '[i]
 
 instance
-  ( TypeError ('Text "Regular optic cannot be used as an indexed one")
+  ( TypeError
+    ('Text "Indexed optic is expected"
+     ':$$: FunInfo f arg)
   , '[] ~ '[i]
-  ) => CheckIndices i '[]
+  ) => CheckIndices f arg i '[]
 
 instance
-  ( TypeError ('Text "Use icompose to flatten indices")
-  , '[i1, i2] ~ '[i]
-  ) => CheckIndices i '[i1, i2]
+  ( TypeError
+    ('Text "Use (<%>) or icompose to combine indices of type "
+     ':<>: ShowTypes is
+     ':$$: FunInfo f arg)
+  , is ~ '[i1, i2]
+  , is ~ '[i]
+  ) => CheckIndices f arg i '[i1, i2]
 
 instance
-  ( TypeError ('Text "Use icompose3 to flatten indices")
-  , '[i1, i2, i3] ~ '[i]
-  ) => CheckIndices i [i1, i2, i3]
+  ( TypeError
+    ('Text "Use icompose3 to combine indices of type "
+     ':<>: ShowTypes is
+     ':$$: FunInfo f arg)
+  , is ~ '[i1, i2, i3]
+  , is ~ '[i]
+  ) => CheckIndices f arg i [i1, i2, i3]
 
 instance
-  ( TypeError ('Text "Use icompose4 to flatten indices")
-  , '[i1, i2, i3, i4] ~ '[i]
-  ) => CheckIndices i '[i1, i2, i3, i4]
+  ( TypeError
+    ('Text "Use icompose4 to combine indices of type "
+     ':<>: ShowTypes is
+     ':$$: FunInfo f arg)
+  , is ~ '[i1, i2, i3, i4]
+  , is ~ '[i]
+  ) => CheckIndices f arg i '[i1, i2, i3, i4]
 
 instance
-  ( TypeError ('Text "Use icompose5 to flatten indices")
-  , '[i1, i2, i3, i4, i5] ~ '[i]
-  ) => CheckIndices i '[i1, i2, i3, i4, i5]
+  ( TypeError
+    ('Text "Use icompose5 to flatten indices of type "
+     ':<>: ShowTypes is
+     ':$$: FunInfo f arg)
+  , is ~ '[i1, i2, i3, i4, i5]
+  , is ~ '[i]
+  ) => CheckIndices f arg i '[i1, i2, i3, i4, i5]
 
 instance
-  ( TypeError ('Text "Use icomposeN to flatten indices")
-  , (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is) ~ '[i]
-  ) => CheckIndices i (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is)
+  ( TypeError
+    ('Text "Use icomposeN to flatten indices of type "
+     ':<>: ShowTypes is
+     ':$$: FunInfo f arg)
+  , is ~ (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is')
+  , is ~ '[i]
+  ) => CheckIndices f arg i (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is')
 
 ----------------------------------------
+-- Helpers for CheckIndices.
+
+type family FunInfo (f :: Symbol) (arg :: Nat) :: ErrorMessage where
+  FunInfo f arg = 'Text "  (in the " ':<>: 'Text (ArgToSymbol arg)
+    ':<>: 'Text " argument of '" ':<>: 'Text f ':<>: 'Text "')"
+
+type family ArgToSymbol (arg :: Nat) :: Symbol where
+  ArgToSymbol 1 = "first"
+  ArgToSymbol 2 = "second"
+  ArgToSymbol 3 = "third"
+  ArgToSymbol 4 = "fourth"
+  ArgToSymbol 5 = "fifth"
+
+type family ShowTypes (types :: [*]) :: ErrorMessage where
+  ShowTypes '[i]      = QuoteType i
+  ShowTypes '[i, j]   = QuoteType i ':<>: 'Text " and " ':<>: QuoteType j
+  ShowTypes (i ': is) = QuoteType i ':<>: 'Text ", " ':<>: ShowTypes is
+
+type family QuoteType (x :: *) :: ErrorMessage where
+  QuoteType x = 'Text "'" ':<>: 'ShowType x ':<>: 'Text "'"
 
 newtype Indexing f a = Indexing { runIndexing :: Int -> (Int, f a) }
 
@@ -86,6 +128,7 @@ instance Applicative f => Applicative (Indexing f) where
        ~(k, fa) -> (k, ff <*> fa)
   {-# INLINE (<*>) #-}
 
+-- | Index a traversal by position of visited elements.
 indexing
   :: ((a -> Indexing f b) -> s -> Indexing f t)
   -> ((Int -> a -> f b) -> s -> f t)

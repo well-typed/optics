@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 module Optics.Internal.IxTraversal where
 
 import Optics.Internal.Indexed
@@ -52,7 +53,7 @@ conjoinedTraversal f g = Optic (conjoinedTraversal__ f g)
 ----------------------------------------
 
 itraverseOf
-  :: (Is k A_Traversal, CheckIndices i is, Applicative f)
+  :: (Is k A_Traversal, Applicative f, CheckIndices "itraverseOf" 1 i is)
   => Optic k is s t a b
   -> (i -> a -> f b) -> s -> f t
 itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
@@ -60,7 +61,7 @@ itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
 
 -- | A version of 'itraverseOf' with the arguments flipped.
 iforOf
-  :: (Is k A_Traversal, CheckIndices i is, Applicative f)
+  :: (Is k A_Traversal, Applicative f, CheckIndices "iforOf" 1 i is)
   => Optic k is s t a b
   -> s -> (i -> a -> f b) -> f t
 iforOf = flip . itraverseOf

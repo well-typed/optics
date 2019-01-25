@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 module Optics.Internal.IxFold where
 
 import Data.Foldable
@@ -48,7 +49,7 @@ conjoinedFold f g = Optic (conjoinedFold__ f g)
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
-  :: (CheckIndices i is, Monoid r, Is k A_Fold)
+  :: (Is k A_Fold, Monoid r, CheckIndices "ifoldMapOf" 1 i is)
   => Optic' k is s a
   -> (i -> a -> r) -> s -> r
 ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
@@ -56,7 +57,7 @@ ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
 
 -- | Fold with index right-associatively.
 ifoldrOf
-  :: (CheckIndices i is, Is k A_Fold)
+  :: (Is k A_Fold, CheckIndices "ifoldrOf" 1 i is)
   => Optic' k is s a
   -> (i -> a -> r -> r) -> r -> s -> r
 ifoldrOf o iarr r0 = (\e -> appEndo e r0) . ifoldMapOf o (\i -> Endo #. iarr i)
@@ -64,7 +65,7 @@ ifoldrOf o iarr r0 = (\e -> appEndo e r0) . ifoldMapOf o (\i -> Endo #. iarr i)
 
 -- | Fold with index left-associatively, and strictly.
 ifoldlOf'
-  :: (CheckIndices i is, Is k A_Fold)
+  :: (Is k A_Fold, CheckIndices "ifoldlOf'" 1 i is)
   => Optic' k is s a
   -> (i -> r -> a -> r) -> r -> s -> r
 ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
@@ -81,7 +82,7 @@ ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
 -- "abcdef"
 --
 itoListOf
-  :: (CheckIndices i is, Is k A_Fold)
+  :: (Is k A_Fold, CheckIndices "itoListOf" 1 i is)
   => Optic' k is s a
   -> s -> [(i, a)]
 itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
@@ -90,7 +91,7 @@ itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
 ----------------------------------------
 
 itraverseOf_
-  :: (Is k A_Fold, CheckIndices i is, Applicative f)
+  :: (Is k A_Fold, Applicative f, CheckIndices "itraverseOf_" 1 i is)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
 itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
@@ -98,7 +99,7 @@ itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 
 -- | A version of 'itraverseOf_' with the arguments flipped.
 iforOf_
-  :: (Is k A_Fold, CheckIndices i is, Applicative f)
+  :: (Is k A_Fold, Applicative f, CheckIndices "iforOf_" 1 i is)
   => Optic' k is s a
   -> s -> (i -> a -> f r) -> f ()
 iforOf_ = flip . itraverseOf_
