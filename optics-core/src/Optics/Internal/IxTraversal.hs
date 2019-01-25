@@ -69,7 +69,7 @@ iforOf = flip . itraverseOf
 
 -- | Indexed traversal via the 'TraversableWithIndex' class.
 --
--- >>> iover (icompose (,) $ itraversed % itraversed) (,) ["ab", "cd"]
+-- >>> iover (itraversed <%> itraversed) (,) ["ab", "cd"]
 -- [[((0,0),'a'),((0,1),'b')],[((1,0),'c'),((1,1),'d')]]
 --
 itraversed
