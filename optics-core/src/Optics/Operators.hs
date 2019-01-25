@@ -38,7 +38,7 @@ infixl 1 <&>
 #endif
 
 -- | Flipped infix version of 'view'.
-(^.) :: ViewableOptic k a => s -> Optic' k is s a -> ViewResult k a
+(^.) :: ViewableOptic k is a => s -> Optic' k is s a -> ViewResult k is a
 (^.) = flip view
 {-# INLINE (^.) #-}
 

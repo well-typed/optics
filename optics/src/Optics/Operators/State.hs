@@ -16,17 +16,28 @@ import Control.Monad.State (MonadState)
 import qualified Control.Monad.State as State
 
 import Optics.Core
-import Optics.Operators
 
 infix 4 .=, ?=, %=
 
-(.=) :: (MonadState s m, Is k A_Setter) => Optic k is s s a b -> b -> m ()
+(.=)
+  :: (Is k A_Setter, MonadState s m)
+  => Optic k is s s a b
+  -> b
+  -> m ()
 o .= x = o %= const x
 
-(?=) :: (MonadState s m, Is k A_Setter) => Optic k is s s (Maybe a) (Maybe b) -> b -> m ()
+(?=)
+  :: (Is k A_Setter, MonadState s m)
+  => Optic k is s s (Maybe a) (Maybe b)
+  -> b
+  -> m ()
 o ?= x = o %= const (Just x)
 
-(%=) :: (MonadState s m, Is k A_Setter) => Optic k is s s a b -> (a -> b) -> m ()
+(%=)
+  :: (Is k A_Setter, MonadState s m)
+  => Optic k is s s a b
+  -> (a -> b)
+  -> m ()
 o %= f = State.modify (o %~ f)
 
 -------------------------------------------------------------------------------
@@ -34,7 +45,11 @@ o %= f = State.modify (o %~ f)
 -------------------------------------------------------------------------------
 
 infix 4 %%=
-(%%=) :: (MonadState s m, PermeableOptic k r) => Optic k is s s a b -> (a -> (r, b)) -> m (ViewResult k r)
+(%%=)
+  :: (PermeableOptic k is r, MonadState s m)
+  => Optic k is s s a b
+  -> (a -> (r, b))
+  -> m (ViewResult k is r)
 o %%= f = State.state (passthrough o f)
 
 -------------------------------------------------------------------------------
@@ -43,13 +58,25 @@ o %%= f = State.state (passthrough o f)
 
 infix 4 <.=, <?=, <%=
 
-(<%=) :: (MonadState s m, PermeableOptic k b) => Optic k is s s a b -> (a -> b) -> m (ViewResult k b)
+(<%=)
+  :: (PermeableOptic k is b, MonadState s m)
+  => Optic k is s s a b
+  -> (a -> b)
+  -> m (ViewResult k is b)
 o <%= f = o %%= \a -> let b = f a in (b, b)
 
-(<?=) :: (MonadState s m, PermeableOptic k (Maybe b)) => Optic k is s s (Maybe a) (Maybe b) -> b -> m (ViewResult k (Maybe b))
+(<?=)
+  :: (PermeableOptic k is (Maybe b), MonadState s m)
+  => Optic k is s s (Maybe a) (Maybe b)
+  -> b
+  -> m (ViewResult k is (Maybe b))
 o <?= b = o <.= Just b
 
-(<.=) :: (MonadState s m, PermeableOptic k b) => Optic k is s s a b -> b -> m (ViewResult k b)
+(<.=)
+  :: (PermeableOptic k is b, MonadState s m)
+  => Optic k is s s a b
+  -> b
+  -> m (ViewResult k is b)
 o <.= b = o <%= const b
 
 -------------------------------------------------------------------------------
@@ -58,11 +85,23 @@ o <.= b = o <%= const b
 
 infix 4 <<.=, <<?=, <<%=
 
-(<<%=) :: (MonadState s m, PermeableOptic k a) => Optic k is s s a b -> (a -> b) -> m (ViewResult k a)
+(<<%=)
+  :: (PermeableOptic k is a, MonadState s m)
+  => Optic k is s s a b
+  -> (a -> b)
+  -> m (ViewResult k is a)
 o <<%= f = o %%= \a -> (a, f a)
 
-(<<?=) :: (MonadState s m, PermeableOptic k (Maybe a)) => Optic k is s s (Maybe a) (Maybe b) -> b -> m (ViewResult k (Maybe a))
+(<<?=)
+  :: (PermeableOptic k is (Maybe a), MonadState s m)
+  => Optic k is s s (Maybe a) (Maybe b)
+  -> b
+  -> m (ViewResult k is (Maybe a))
 o <<?= b = o <<.= Just b
 
-(<<.=) :: (MonadState s m, PermeableOptic k a) => Optic k is s s a b -> b -> m (ViewResult k a)
+(<<.=)
+  :: (PermeableOptic k is a, MonadState s m)
+  => Optic k is s s a b
+  -> b
+  -> m (ViewResult k is a)
 o <<.= b = o <<%= const b

@@ -1,68 +1,99 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Optics.View where
 
 import Control.Monad.Reader.Class
 
 import Optics.AffineFold
+import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Getter
-import Optics.Internal.Optic.Types
+import Optics.Iso
+import Optics.IxFold
+import Optics.IxTraversal
+import Optics.Lens
+import Optics.Prism
+import Optics.PrismaticGetter
 
-class ViewableOptic k r where
-  type ViewResult k r :: *
-  -- | Apply an optic to view its result. Isos, Lenses, PrismaticGetters and
-  -- Getters return exactly one, Prisms, AffineTraversals and AffineFolds return
-  -- at most one, whereas Folds and Traversals return a sum (with respect to a
-  -- Monoid instance) of all their results.
-  view :: Optic' k is s r -> s -> ViewResult k r
+-- | View the value(s) pointed to by an optic.
+--
+-- The type of the result depends on the optic. You get:
+--
+--   * Exactly one result @a@ with 'Iso', 'Lens', 'PrismaticGetter' and
+--   'Getter'.
+--
+--   * At most one result @Maybe a@ with 'Prism', 'AffineTraversal' and
+--   'AffineFold'.
+--
+--   * Multiple results @[a]@ with 'Optics.Traversal.Traversal' and 'Fold'.
+--
+--   * Multiple results along with their indices @[(i, a)]@ with
+--   'IxTraversal' and 'IxFold'.
+--
+class ViewableOptic k is a where
+  type ViewResult k is a :: *
+  view :: Optic' k is s a -> s -> ViewResult k is a
 
-instance ViewableOptic An_Iso r where
-  type ViewResult An_Iso r = r
+instance is ~ NoIx => ViewableOptic An_Iso is a where
+  type ViewResult An_Iso is a = a
   view = view1
   {-# INLINE view #-}
 
-instance ViewableOptic A_Lens r where
-  type ViewResult A_Lens r = r
+instance is ~ NoIx => ViewableOptic A_Lens is a where
+  type ViewResult A_Lens is a = a
   view = view1
   {-# INLINE view #-}
 
-instance ViewableOptic A_PrismaticGetter r where
-  type ViewResult A_PrismaticGetter r = r
+instance is ~ NoIx => ViewableOptic A_PrismaticGetter is a where
+  type ViewResult A_PrismaticGetter is a = a
   view = view1
   {-# INLINE view #-}
 
-instance ViewableOptic A_Getter r where
-  type ViewResult A_Getter r = r
+instance is ~ NoIx => ViewableOptic A_Getter is a where
+  type ViewResult A_Getter is a = a
   view = view1
   {-# INLINE view #-}
 
-instance ViewableOptic A_Prism r where
-  type ViewResult A_Prism r = Maybe r
+instance is ~ NoIx => ViewableOptic A_Prism is a where
+  type ViewResult A_Prism is a = Maybe a
   view = view01
   {-# INLINE view #-}
 
-instance ViewableOptic An_AffineTraversal r where
-  type ViewResult An_AffineTraversal r = Maybe r
+instance is ~ NoIx => ViewableOptic An_AffineTraversal is a where
+  type ViewResult An_AffineTraversal is a = Maybe a
   view = view01
   {-# INLINE view #-}
 
-instance ViewableOptic An_AffineFold r where
-  type ViewResult An_AffineFold r = Maybe r
+instance is ~ NoIx => ViewableOptic An_AffineFold is a where
+  type ViewResult An_AffineFold is a = Maybe a
   view = view01
   {-# INLINE view #-}
 
-instance Monoid r => ViewableOptic A_Traversal r where
-  type ViewResult A_Traversal r = r
-  view = viewN
+instance ViewableOptic A_Traversal NoIx a where
+  type ViewResult A_Traversal NoIx a = [a]
+  view = toListOf
   {-# INLINE view #-}
 
-instance Monoid r => ViewableOptic A_Fold r where
-  type ViewResult A_Fold r = r
-  view = viewN
+instance (CheckIndices "view" 1 i (i ': is)
+         ) => ViewableOptic A_Traversal (i ': is) a where
+  type ViewResult A_Traversal (i ': is) a = [(i, a)]
+  view = itoListOf
+  {-# INLINE view #-}
+
+instance ViewableOptic A_Fold NoIx a where
+  type ViewResult A_Fold NoIx a = [a]
+  view = toListOf
+  {-# INLINE view #-}
+
+instance (CheckIndices "view" 1 i (i ': is)
+         ) => ViewableOptic A_Fold (i ': is) a where
+  type ViewResult A_Fold (i ': is) a = [(i, a)]
+  view = itoListOf
   {-# INLINE view #-}
 
 -- | Generalization of 'view' from @(->) s@ to arbitrary @MonadReader s m@.
 viewM
-  :: (ViewableOptic k r, MonadReader s m)
-  => Optic' k is s r
-  -> m (ViewResult k r)
+  :: (ViewableOptic k is a, MonadReader s m)
+  => Optic' k is s a
+  -> m (ViewResult k is a)
 viewM = asks . view
