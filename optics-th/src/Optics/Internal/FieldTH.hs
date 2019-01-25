@@ -40,15 +40,8 @@ import qualified Language.Haskell.TH.Datatype as D
 import Data.Either.Optics
 import Data.Tuple.Optics
 import Language.Haskell.TH.Optics
-import Optics.AffineFold
-import Optics.AffineTraversal
-import Optics.Fold
-import Optics.Getter
-import Optics.Iso
-import Optics.Lens
+import Optics.Core
 import Optics.Internal.TH
-import Optics.Setter
-import Optics.Traversal
 
 ------------------------------------------------------------------------
 -- Utilities

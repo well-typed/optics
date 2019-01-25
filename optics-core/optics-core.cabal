@@ -63,29 +63,19 @@ library
     Data.Tuple.Optics
 
     -- internal modules
-    Optics.Internal.AffineFold
-    Optics.Internal.AffineTraversal
     Optics.Internal.Bi
-    Optics.Internal.Equality
-    Optics.Internal.Fold
-    Optics.Internal.Getter
+    Optics.Internal.Concrete
     Optics.Internal.Indexed
-    Optics.Internal.Iso
     Optics.Internal.IxFold
     Optics.Internal.IxSetter
     Optics.Internal.IxTraversal
-    Optics.Internal.Lens
     Optics.Internal.Optic
     Optics.Internal.Optic.Subtyping
     Optics.Internal.Optic.TypeLevel
     Optics.Internal.Optic.Types
-    Optics.Internal.Prism
     Optics.Internal.Profunctor
     Optics.Internal.Re
-    Optics.Internal.Review
-    Optics.Internal.Setter
     Optics.Internal.Tagged
-    Optics.Internal.Traversal
     Optics.Internal.Utils
 
   default-extensions:

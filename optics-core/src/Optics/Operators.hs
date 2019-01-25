@@ -21,6 +21,7 @@ import Data.Function
 import Optics.Fold
 import Optics.Review
 import Optics.Setter
+import Optics.View
 
 #if MIN_VERSION_base(4,11,0)
 import Data.Functor ((<&>))

@@ -25,14 +25,8 @@ import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
 
 import Language.Haskell.TH.Optics
-import Optics.Fold
+import Optics.Core
 import Optics.Internal.TH
-import Optics.Iso
-import Optics.Lens
-import Optics.Prism
-import Optics.Review
-import Optics.Setter
-import Optics.Traversal
 
 -- | Generate a 'Prism' for each constructor of a data type.
 -- Isos generated when possible.

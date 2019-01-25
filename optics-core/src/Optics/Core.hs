@@ -28,3 +28,4 @@ import Optics.Re              as O
 import Optics.Review          as O
 import Optics.Setter          as O
 import Optics.Traversal       as O
+import Optics.View            as O

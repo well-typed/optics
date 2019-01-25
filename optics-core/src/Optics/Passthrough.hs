@@ -1,15 +1,19 @@
 module Optics.Passthrough where
 
-import Optics.Internal.AffineTraversal
-import Optics.Internal.Lens
 import Optics.Internal.Optic
-import Optics.Internal.Prism
-import Optics.Internal.Traversal
+import Optics.AffineTraversal
+import Optics.Lens
+import Optics.Prism
+import Optics.Traversal
 import Optics.View
 
 class (Is k A_Traversal, ViewableOptic k r) => PermeableOptic k r where
   -- | Modify the target of an 'Optic' returning some extra information of type 'r'.
-  passthrough :: Optic k is s t a b -> (a -> (r, b)) -> s -> (ViewResult k r, t)
+  passthrough
+    :: Optic k is s t a b
+    -> (a -> (r, b))
+    -> s
+    -> (ViewResult k r, t)
 
 instance PermeableOptic An_Iso r where
   passthrough = toLensVL
