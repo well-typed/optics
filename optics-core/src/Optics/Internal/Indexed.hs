@@ -96,7 +96,7 @@ instance
 
 type family FunInfo (f :: Symbol) (arg :: Nat) :: ErrorMessage where
   FunInfo f arg = 'Text "  (in the " ':<>: 'Text (ArgToSymbol arg)
-    ':<>: 'Text " argument of '" ':<>: 'Text f ':<>: 'Text "')"
+    ':<>: 'Text " argument of ‘" ':<>: 'Text f ':<>: 'Text "’)"
 
 type family ArgToSymbol (arg :: Nat) :: Symbol where
   ArgToSymbol 1 = "first"
@@ -111,7 +111,9 @@ type family ShowTypes (types :: [*]) :: ErrorMessage where
   ShowTypes (i ': is) = QuoteType i ':<>: 'Text ", " ':<>: ShowTypes is
 
 type family QuoteType (x :: *) :: ErrorMessage where
-  QuoteType x = 'Text "'" ':<>: 'ShowType x ':<>: 'Text "'"
+  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
+
+----------------------------------------
 
 newtype Indexing f a = Indexing { runIndexing :: Int -> (Int, f a) }
 
