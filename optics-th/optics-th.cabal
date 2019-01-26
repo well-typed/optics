@@ -30,10 +30,10 @@ library
     , transformers      >=0.5       && <0.6
 
   exposed-modules:  Language.Haskell.TH.Optics
-                    Optics.Internal.TH
-                    Optics.Internal.FieldTH
-                    Optics.Internal.PrismTH
                     Optics.TH
+                    Optics.TH.Internal.Utils
+                    Optics.TH.Internal.Product
+                    Optics.TH.Internal.Sum
 
 test-suite optics-th-tests
   default-language: Haskell2010

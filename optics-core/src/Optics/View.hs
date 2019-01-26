@@ -2,10 +2,10 @@ module Optics.View where
 
 import Control.Monad.Reader.Class
 
-import Optics.Internal.AffineFold
-import Optics.Internal.Fold
-import Optics.Internal.Getter
-import Optics.Internal.Optic
+import Optics.AffineFold
+import Optics.Fold
+import Optics.Getter
+import Optics.Internal.Optic.Types
 
 class ViewableOptic k r where
   type ViewResult k r :: *

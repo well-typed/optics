@@ -6,7 +6,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Control.Lens.Internal.FieldTH
+-- Module      :  Optics.TH.Internal.Product
 -- Copyright   :  (C) 2014-2016 Edward Kmett, (C) 2014 Eric Mertens
 -- License     :  BSD-style (see the file LICENSE)
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -15,7 +15,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Optics.Internal.FieldTH
+module Optics.TH.Internal.Product
   ( LensRules(..)
   , FieldNamer
   , DefName(..)
@@ -40,15 +40,8 @@ import qualified Language.Haskell.TH.Datatype as D
 import Data.Either.Optics
 import Data.Tuple.Optics
 import Language.Haskell.TH.Optics
-import Optics.AffineFold
-import Optics.AffineTraversal
-import Optics.Fold
-import Optics.Getter
-import Optics.Iso
-import Optics.Lens
-import Optics.Internal.TH
-import Optics.Setter
-import Optics.Traversal
+import Optics.Core
+import Optics.TH.Internal.Utils
 
 ------------------------------------------------------------------------
 -- Utilities

@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Control.Lens.Internal.PrismTH
+-- Module      :  Optics.TH.Internal.Sum
 -- Copyright   :  (C) 2014-2016 Edward Kmett and Eric Mertens
 -- License     :  BSD-style (see the file LICENSE)
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -10,7 +10,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Optics.Internal.PrismTH
+module Optics.TH.Internal.Sum
   ( makePrisms
   , makeClassyPrisms
   , makeDecPrisms
@@ -25,14 +25,8 @@ import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
 
 import Language.Haskell.TH.Optics
-import Optics.Fold
-import Optics.Internal.TH
-import Optics.Iso
-import Optics.Lens
-import Optics.Prism
-import Optics.Review
-import Optics.Setter
-import Optics.Traversal
+import Optics.Core
+import Optics.TH.Internal.Utils
 
 -- | Generate a 'Prism' for each constructor of a data type.
 -- Isos generated when possible.

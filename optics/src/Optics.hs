@@ -246,6 +246,7 @@ import Optics.Fold            as O
 import Optics.Equality        as O
 import Optics.AffineTraversal as O
 import Optics.AffineFold      as O
+import Optics.View            as O
 
 -- Optics utilities
 import Optics.Each
