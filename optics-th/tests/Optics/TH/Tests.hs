@@ -8,16 +8,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Main where
 
-import Optics.AffineFold
-import Optics.AffineTraversal
-import Optics.Fold
-import Optics.Getter
-import Optics.Iso
-import Optics.Lens
-import Optics.Prism
+import Optics.Core
 import Optics.Operators
 import Optics.TH
-import Optics.Traversal
 
 import Optics.TH.Tests.T799 ()
 

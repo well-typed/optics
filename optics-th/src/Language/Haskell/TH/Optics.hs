@@ -330,7 +330,7 @@ import Language.Haskell.TH.Syntax
 
 import Data.Tuple.Optics
 import Optics.Core
-import Optics.Internal.TH
+import Optics.TH.Internal.Utils
 
 -- | Has a 'Name'
 class HasName t where

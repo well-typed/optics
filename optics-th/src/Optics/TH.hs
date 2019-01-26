@@ -75,12 +75,11 @@ import Data.Set (Set)
 import Language.Haskell.TH.Syntax hiding (lift)
 
 import Language.Haskell.TH
-import Optics.Lens
+import Optics.Core
 import Optics.Operators
-import Optics.Setter
-import Optics.Internal.TH
-import Optics.Internal.FieldTH
-import Optics.Internal.PrismTH
+import Optics.TH.Internal.Product
+import Optics.TH.Internal.Sum
+import Optics.TH.Internal.Utils
 
 -- | Generate "simple" optics even when type-changing optics are possible.
 -- (e.g. 'Lens'' instead of 'Lens')
