@@ -44,7 +44,8 @@ library
     Optics.Each
 
   -- operators
-  exposed-modules:    Optics.Operators.State
+  exposed-modules:    Optics.Operators.Compat
+                    , Optics.Operators.State
 
   -- data
   exposed-modules:

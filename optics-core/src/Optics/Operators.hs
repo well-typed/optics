@@ -8,8 +8,6 @@ module Optics.Operators
   ( (&)
   , (<&>)
   , (^.)
-  , (^..)
-  , (^?)
   , (#)
   , (%~)
   , (.~)
@@ -43,20 +41,6 @@ infixl 1 <&>
 {-# INLINE (^.) #-}
 
 infixl 8 ^.
-
--- | Flipped infix version of 'toListOf'.
-(^..) :: Is k A_Fold => s -> Optic' k is s a -> [a]
-(^..) = flip toListOf
-{-# INLINE (^..) #-}
-
-infixl 8 ^..
-
--- | Flipped infix version of 'preview'.
-(^?) :: Is k A_Fold => s -> Optic' k is s a -> Maybe a
-(^?) = flip preview
-{-# INLINE (^?) #-}
-
-infixl 8 ^?
 
 -- | Infix version of 'review'.
 (#) :: Is k A_Review => Optic' k is t b -> b -> t
