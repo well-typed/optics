@@ -62,6 +62,7 @@ library
     -- internal modules
     Optics.Internal.Bi
     Optics.Internal.Concrete
+    Optics.Internal.Fold
     Optics.Internal.Indexed
     Optics.Internal.IxFold
     Optics.Internal.IxSetter
@@ -73,6 +74,7 @@ library
     Optics.Internal.Profunctor
     Optics.Internal.Re
     Optics.Internal.Tagged
+    Optics.Internal.Traversal
     Optics.Internal.Utils
 
   default-extensions:

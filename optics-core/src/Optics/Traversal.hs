@@ -25,6 +25,7 @@ module Optics.Traversal
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
+import Optics.Internal.Traversal
 import Optics.Internal.Utils
 import Optics.Optic
 
@@ -60,7 +61,7 @@ traversalVL t = Optic (wander t)
 
 -- | Traversal via the 'Traversable' class.
 traversed :: Traversable t => Traversal (t a) (t b) a b
-traversed = traversalVL traverse
+traversed = Optic traversed__
 {-# INLINE traversed #-}
 
 -- | Map each element of a structure targeted by a 'Traversal', evaluate these

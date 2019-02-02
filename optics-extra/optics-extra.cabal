@@ -18,14 +18,14 @@ library
 
   build-depends: base >=4.9 && <5
                , optics-core
-
-  -- this is for 'viewM'
-  build-depends: mtl >=2.2.2 && <2.3
-
-  -- these dependencies are to provide FunctorWithIndex instances
-  build-depends: array         >=0.5.1.1 && <0.6
-               , containers    >=0.5.7.1 && <0.7
-               , transformers  >=0.5     && <0.6
+               , array         >=0.5.1.1  && <0.6
+               , bytestring    >=0.10.8.0 && <0.11
+               , containers    >=0.5.7.1  && <0.7
+               , mtl           >=2.2.2    && <2.3
+               , text
+               , transformers  >=0.5      && <0.6
+               , unordered-containers
+               , vector        >=0.11     && <0.13
 
   ghc-options:        -Wall
 
@@ -36,6 +36,9 @@ library
                    Optics.Operators.State
                    Data.Set.Optics
                    GHC.Generics.Optics
+                   Data.Text.Optics
+                   Data.Text.Strict.Optics
+                   Data.Text.Lazy.Optics
 
   default-extensions:
     BangPatterns

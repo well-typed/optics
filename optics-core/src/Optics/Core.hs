@@ -9,11 +9,14 @@
 --
 module Optics.Core
   ( module O
+  , module D
   )
   where
 
 import Optics.AffineFold      as O
 import Optics.AffineTraversal as O
+import Optics.Arrow           as O
+import Optics.Coerce          as O
 import Optics.Equality        as O
 import Optics.Fold            as O
 import Optics.Getter          as O
@@ -29,3 +32,7 @@ import Optics.Review          as O
 import Optics.Setter          as O
 import Optics.Traversal       as O
 import Optics.View            as O
+
+import Data.Either.Optics     as D
+import Data.Maybe.Optics      as D
+import Data.Tuple.Optics      as D
