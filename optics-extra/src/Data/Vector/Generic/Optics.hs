@@ -23,7 +23,7 @@ import Data.Vector.Generic.New (New)
 import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
 
 import Optics.Core
-import Optics.Extra.Internal
+import Optics.Extra.Internal.Vector
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.IxTraversal

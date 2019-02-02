@@ -1,4 +1,4 @@
-module Optics.Extra.Internal
+module Optics.Extra.Internal.Vector
   ( ordinalNub
   ) where
 

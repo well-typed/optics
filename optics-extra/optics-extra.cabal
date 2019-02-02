@@ -33,7 +33,11 @@ library
   exposed-modules: Optics.Extra
 
 
-  exposed-modules: Optics.Extra.Internal
+  exposed-modules: Optics.Extra.Internal.ByteString
+                   Optics.Extra.Internal.Vector
+                   Data.ByteString.Lazy.Optics
+                   Data.ByteString.Optics
+                   Data.ByteString.Strict.Optics
                    Data.Set.Optics
                    Data.Text.Lazy.Optics
                    Data.Text.Optics

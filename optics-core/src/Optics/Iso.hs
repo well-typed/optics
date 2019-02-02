@@ -88,7 +88,7 @@ curried = iso curry uncurry
 -- @
 --
 -- @
--- 'uncurried' = 'from' 'curried'
+-- 'uncurried' = 're' 'curried'
 -- @
 --
 -- >>> (view1 uncurried (+)) (1,2)

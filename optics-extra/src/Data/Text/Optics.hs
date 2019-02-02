@@ -25,8 +25,8 @@ class IsText t where
   --
   -- @
   -- 'pack' x ≡ x '^.' 'packed'
-  -- 'unpack' x ≡ x '^.' 'from' 'packed'
-  -- 'packed' ≡ 'from' 'unpacked'
+  -- 'unpack' x ≡ x '^.' 're' 'packed'
+  -- 'packed' ≡ 're' 'unpacked'
   -- @
   packed :: Iso' String t
 
@@ -77,7 +77,7 @@ unpacked = re packed
 -- @('#')@.
 --
 -- @
--- '_Text' = 'from' 'packed'
+-- '_Text' = 're' 'packed'
 -- @
 --
 -- >>> _Text # "hello" :: Strict.Text
