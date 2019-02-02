@@ -188,14 +188,14 @@ compL02 f g s b = set (lens f g) b s
 compR02 _ g s b = g s b
 
 compL03, compR03, compR03_ :: (s -> Either t a) -> (s -> b -> t) -> (s -> b -> t)
-compL03 f g s b = withAffineTraversal (atraversal f g) (\h _ -> h) s b
+compL03 f g s b = withAffineTraversal (atraversal f g) (\_ g' -> g') s b
 compR03 _ g s b = g s b
 compR03_ f g s b = case f s of
     Left t  -> t
     Right _ -> g s b
 
 compL04, compR04 :: (s -> Either t a) -> (s -> b -> t) -> (s -> Either t a)
-compL04 f g s = withAffineTraversal (atraversal f g) (\_ h -> h) s
+compL04 f g s = withAffineTraversal (atraversal f g) (\f' _ -> f') s
 compR04 f _ s = f s
 
 compL05, compR05 :: ((a -> b) -> s -> t) -> ((a -> b) -> s -> t)

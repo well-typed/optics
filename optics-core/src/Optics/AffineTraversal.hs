@@ -37,11 +37,12 @@ atraversal match update = Optic $
   . right'
 {-# INLINE atraversal #-}
 
+-- With with an affine traversal as a matcher and an updater.
 withAffineTraversal
   :: Is k An_AffineTraversal
   => Optic k is s t a b
-  -> ((s -> b -> t) -> (s -> Either t a) -> r)
+  -> ((s -> Either t a) -> (s -> b -> t) -> r)
   -> r
 withAffineTraversal o k =
   case getOptic (toAffineTraversal o) (AffineMarket (\_ b -> b) Right) of
-    AffineMarket setter match -> k setter match
+    AffineMarket update match -> k match update
