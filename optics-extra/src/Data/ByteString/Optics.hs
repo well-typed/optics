@@ -10,7 +10,8 @@ module Data.ByteString.Optics
 
 import Data.ByteString as Strict
 import Data.ByteString.Lazy as Lazy
-import Data.Word (Word8)
+import Data.Int
+import Data.Word
 import qualified Data.ByteString.Lazy.Optics as Lazy
 import qualified Data.ByteString.Strict.Optics as Strict
 
@@ -56,9 +57,7 @@ class IsByteString t where
   -- @
   -- 'anyOf' 'bytes' ('==' 0x80) :: 'ByteString' -> 'Bool'
   -- @
-  bytes :: IxTraversal' Int t Word8
-  bytes = re packedBytes % itraversed
-  {-# INLINE bytes #-}
+  bytes :: IxTraversal' Int64 t Word8
 
   -- | Traverse the individual bytes in a strict or lazy 'ByteString' as
   -- characters.
@@ -78,9 +77,7 @@ class IsByteString t where
   -- @
   -- 'anyOf' 'chars' ('==' \'c\') :: 'ByteString' -> 'Bool'
   -- @
-  chars :: IxTraversal' Int t Char
-  chars = re packedChars % itraversed
-  {-# INLINE chars #-}
+  chars :: IxTraversal' Int64 t Char
 
 -- | 'Data.ByteString.unpack' (or 'Data.ByteString.pack') a 'ByteString' into a
 -- list of bytes.
@@ -130,8 +127,8 @@ unpackedChars = re packedChars
 instance IsByteString Strict.ByteString where
   packedBytes = Strict.packedBytes
   packedChars = Strict.packedChars
-  bytes = Strict.bytes
-  chars = Strict.chars
+  bytes       = reindex fromIntegral Strict.bytes
+  chars       = reindex fromIntegral Strict.chars
   {-# INLINE packedBytes #-}
   {-# INLINE packedChars #-}
   {-# INLINE bytes #-}
@@ -140,5 +137,9 @@ instance IsByteString Strict.ByteString where
 instance IsByteString Lazy.ByteString where
   packedBytes = Lazy.packedBytes
   packedChars = Lazy.packedChars
+  bytes       = Lazy.bytes
+  chars       = Lazy.chars
   {-# INLINE packedBytes #-}
   {-# INLINE packedChars #-}
+  {-# INLINE bytes #-}
+  {-# INLINE chars #-}
