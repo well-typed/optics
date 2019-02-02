@@ -109,7 +109,10 @@ itraverseOf_
   :: (Is k A_Fold, Applicative f, CheckIndices "itraverseOf_" 1 i is)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
-itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
+itraverseOf_ o f s =
+  -- We want to have the definition fully eta-expanded as it allows GHC to
+  -- generate better code (in particular for folding over a Vector).
+  runTraversed $ ifoldMapOf o (\i -> Traversed #. f i) s
 {-# INLINE itraverseOf_ #-}
 
 -- | A version of 'itraverseOf_' with the arguments flipped.

@@ -72,6 +72,7 @@ library
     Optics.Internal.Optic.Types
     Optics.Internal.Profunctor
     Optics.Internal.Re
+    Optics.Internal.Setter
     Optics.Internal.Tagged
     Optics.Internal.Traversal
     Optics.Internal.Utils

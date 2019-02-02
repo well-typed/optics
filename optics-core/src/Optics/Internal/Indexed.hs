@@ -24,10 +24,6 @@ import qualified Data.Sequence as Seq
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
-#if !MIN_VERSION_containers(0,5,8)
-import Data.Foldable (fold)
-#endif
-
 -- | Generate sensible error messages in case a user tries to pass either a
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
 -- with a single index is expected.
@@ -267,7 +263,7 @@ instance FoldableWithIndex Int Seq.Seq where
 #if MIN_VERSION_containers(0,5,8)
   ifoldMap = Seq.foldMapWithIndex
 #else
-  ifoldMap f = fold . Seq.mapWithIndex f
+  ifoldMap f = ifoldr (\i -> mappend . f i) mempty
 #endif
   {-# INLINE ifoldMap #-}
 
@@ -275,11 +271,8 @@ instance FoldableWithIndex Int Seq.Seq where
   {-# INLINE ifoldr #-}
 
 instance TraversableWithIndex Int Seq.Seq where
-#if MIN_VERSION_containers(0,5,8)
-  itraverse = Seq.traverseWithIndex
-#else
+  -- This is much faster than Seq.traverseWithIndex. wut?
   itraverse f = sequenceA . Seq.mapWithIndex f
-#endif
   {-# INLINE itraverse #-}
 
 -- IntMap

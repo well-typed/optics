@@ -122,7 +122,7 @@ traverseOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (a -> f r) -> s -> f ()
-traverseOf_ o = \f -> runTraversed . foldMapOf o (Traversed #. f)
+traverseOf_ o f = runTraversed . foldMapOf o (Traversed #. f)
 {-# INLINE traverseOf_ #-}
 
 -- | A version of 'traverseOf_' with the arguments flipped.
@@ -137,7 +137,7 @@ forOf_ = flip . traverseOf_
 
 -- | Fold via the 'Foldable' class.
 folded :: Foldable f => Fold (f a) a
-folded = foldVL traverse_
+folded = Optic folded__
 {-# INLINE folded #-}
 
 -- | Obtain a 'Fold' by lifting an operation that returns a 'Foldable' result.

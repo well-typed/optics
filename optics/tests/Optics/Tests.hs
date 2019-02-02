@@ -68,8 +68,8 @@ rhs03 = traverseOf (itraversed % itraversed)
 lhs04, rhs04
   :: (Applicative f, FoldableWithIndex i t, FoldableWithIndex j s)
   => (a -> f r) -> t (s a) -> f ()
-lhs04 = traverseOf_ (folded % folded)
-rhs04 = traverseOf_ (ifolded % ifolded)
+lhs04 f = traverseOf_ (folded % folded) f
+rhs04 f = traverseOf_ (ifolded % ifolded) f
 
 lhs05, lhs05b, rhs05
   :: (FunctorWithIndex i f, FunctorWithIndex j g) => (a -> b) -> f (g a) -> f (g b)
@@ -82,8 +82,8 @@ lhs06, rhs06
   => (a -> f r)
   -> (Either (t (f a, c)) b)
   -> f ()
-lhs06 = traverseOf_ (_Left % ifolded % _1 % ifolded)
-rhs06 = traverseOf_ (_Left % folded % _1 % folded)
+lhs06 f = traverseOf_ (_Left % ifolded % _1 % ifolded) f
+rhs06 f = traverseOf_ (_Left % folded % _1 % folded) f
 
 lhs07, rhs07
   :: (Applicative f, TraversableWithIndex i t, TraversableWithIndex j s)
@@ -98,8 +98,8 @@ lhs08, rhs08
   => (j -> a -> f ())
   -> t (s a)
   -> f ()
-lhs08 f = itraverseOf_ (ifolded %> ifolded) f
-rhs08 f = itraverseOf_ (folded % ifolded) f
+lhs08 f s = itraverseOf_ (ifolded %> ifolded) f s
+rhs08 f s = itraverseOf_ (folded % ifolded) f s
 
 lhs09, rhs09
   :: (FunctorWithIndex i t, FunctorWithIndex j s)

@@ -94,8 +94,10 @@ instance FunctorWithIndex Int V.Vector where
   imap = V.imap
   {-# INLINE imap #-}
 instance FoldableWithIndex Int V.Vector where
-  ifoldr  = V.ifoldr
-  ifoldl' = V.ifoldl' . flip
+  ifoldMap f = ifoldr (\i -> mappend . f i) mempty
+  ifoldr     = V.ifoldr
+  ifoldl'    = V.ifoldl' . flip
+  {-# INLINE ifoldMap #-}
   {-# INLINE ifoldr #-}
   {-# INLINE ifoldl' #-}
 instance TraversableWithIndex Int V.Vector where

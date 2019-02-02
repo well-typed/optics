@@ -34,6 +34,23 @@ newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
 ----------------------------------------
 
+-- | Repack 'Star' to change its index type.
+reStar :: Star f i a b -> Star f j a b
+reStar (Star k) = Star k
+{-# INLINE reStar #-}
+
+-- | Repack 'Forget' to change its index type.
+reForget :: Forget r i a b -> Forget r j a b
+reForget (Forget k) = Forget k
+{-# INLINE reForget #-}
+
+-- | Repack 'FunArrow' to change its index type.
+reFunArrow :: FunArrow i a b -> FunArrow j a b
+reFunArrow (FunArrow k) = FunArrow k
+{-# INLINE reFunArrow #-}
+
+----------------------------------------
+
 class Profunctor p where
   dimap :: (a -> b) -> (c -> d) -> p i b c -> p i a d
   lmap  :: (a -> b)             -> p i b c -> p i a c

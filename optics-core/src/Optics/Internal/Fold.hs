@@ -1,6 +1,7 @@
 module Optics.Internal.Fold where
 
 import Data.Functor
+import Data.Foldable
 
 import Optics.Internal.Bi
 import Optics.Internal.Optic
@@ -13,6 +14,13 @@ foldVL__
   -> Optic__ p i i s t a b
 foldVL__ f = rphantom . wander f . rphantom
 {-# INLINE foldVL__ #-}
+
+-- | Internal implementation of 'folded'.
+folded__
+  :: (Bicontravariant p, Traversing p, Foldable f)
+  => Optic__ p i i (f a) (f b) a b
+folded__ = foldVL__ traverse_
+{-# INLINE folded__ #-}
 
 -- | Internal implementation of 'foldring'.
 foldring__
