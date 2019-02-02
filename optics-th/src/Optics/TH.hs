@@ -1,13 +1,3 @@
------------------------------------------------------------------------------
--- |
--- Module      :  Control.Lens.TH
--- Copyright   :  (C) 2012-16 Edward Kmett, 2012-13 Michael Sloan
--- License     :  BSD-style (see the file LICENSE)
--- Maintainer  :  Edward Kmett <ekmett@gmail.com>
--- Stability   :  experimental
--- Portability :  non-portable
---
------------------------------------------------------------------------------
 module Optics.TH
   (
   -- * Constructing Lenses Automatically

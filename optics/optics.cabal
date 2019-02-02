@@ -4,7 +4,7 @@ license:         BSD3
 license-file:    LICENSE
 build-type:      Simple
 maintainer:      oleg@well-typed.com
-author:          Adam Gundry, Andres Löh, Andrzej Rybczak
+author:          Edward Kmett, Adam Gundry, Andres Löh, Andrzej Rybczak
 cabal-version:   1.24
 tested-with:     ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
 synopsis:        Optics for generics-sop, and using generics-sop

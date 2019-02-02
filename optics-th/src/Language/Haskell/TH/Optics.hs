@@ -1,16 +1,5 @@
 {-# LANGUAGE CPP              #-}
 {-# LANGUAGE LambdaCase       #-}
------------------------------------------------------------------------------
--- |
--- Module      :  Language.Haskell.TH.Optics
--- Copyright   :  (C) 2012-2016 Edward Kmett
--- License     :  BSD-style (see the file LICENSE)
--- Maintainer  :  Edward Kmett <ekmett@gmail.com>
--- Stability   :  experimental
--- Portability :  TemplateHaskell
---
--- Lenses, Prisms, and Traversals for working with Template Haskell
-----------------------------------------------------------------------------
 module Language.Haskell.TH.Optics
   (
   -- * Traversals

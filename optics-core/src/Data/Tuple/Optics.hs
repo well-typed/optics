@@ -1,14 +1,4 @@
 {-# LANGUAGE UndecidableInstances   #-}
--------------------------------------------------------------------------------
--- |
--- Module      :  Data.Tuple.Optics
--- Copyright   :  (C) 2012-16 Edward Kmett
--- License     :  BSD-style (see the file LICENSE)
--- Maintainer  :  Edward Kmett <ekmett@gmail.com>
--- Stability   :  provisional
--- Portability :  Rank2Types
---
--------------------------------------------------------------------------------
 module Data.Tuple.Optics
   (
   -- * Tuples

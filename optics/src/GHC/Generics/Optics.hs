@@ -4,22 +4,19 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE PolyKinds #-}
------------------------------------------------------------------------------
--- |
--- Module      :  GHC.Generics.Lens
--- Copyright   :  (C) 2012-16 Edward Kmett, (C) 2018 Well-Typed LLP
+-- | Note: "GHC.Generics" exports a number of names that collide with "Optics"
+-- (at least 'to').
 --
--- Note: "GHC.Generics" exports a number of names that collide with "Optics" (at least 'to').
---
--- You can use hiding or imports to mitigate this to an extent, and the following imports,
--- represent a fair compromise for user code:
+-- You can use hiding or imports to mitigate this to an extent, and the
+-- following imports, represent a fair compromise for user code:
 --
 -- @
 -- import "Optics"
 -- import "GHC.Generics" hiding (to)
 -- @
 --
--- You can use 'generic' to replace 'GHC.Generics.from' and 'GHC.Generics.to' from "GHC.Generics".
+-- You can use 'generic' to replace 'GHC.Generics.from' and 'GHC.Generics.to'
+-- from "GHC.Generics".
 --
 module GHC.Generics.Optics
   (
