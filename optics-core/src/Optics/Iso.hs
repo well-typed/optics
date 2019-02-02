@@ -11,6 +11,7 @@ module Optics.Iso
   , curried
   , uncurried
   , flipped
+  , involuted
   , Swapped(..)
   -- * Re-exports
   , module Optics.Optic
@@ -105,6 +106,22 @@ uncurried = iso uncurry curry
 flipped :: Iso (a -> b -> c) (a' -> b' -> c') (b -> a -> c) (b' -> a' -> c')
 flipped = iso flip flip
 {-# INLINE flipped #-}
+
+-- | Given a function that is its own inverse, this gives you an 'Iso' using it
+-- in both directions.
+--
+-- @
+-- 'involuted' ≡ 'Control.Monad.join' 'iso'
+-- @
+--
+-- >>> "live" ^. involuted reverse
+-- "evil"
+--
+-- >>> "live" & involuted reverse %~ ('d':)
+-- "lived"
+involuted :: (a -> a) -> Iso' a a
+involuted a = iso a a
+{-# INLINE involuted #-}
 
 -- | This class provides for symmetric bifunctors.
 class Bifunctor p => Swapped p where

@@ -12,7 +12,7 @@ import Optics.Internal.Optic
 ixFoldVL__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
-  -> Optic__ p j (i -> j) s s a a
+  -> Optic__ p j (i -> j) s t a b
 ixFoldVL__ f = rphantom . iwander f . rphantom
 {-# INLINE ixFoldVL__ #-}
 
@@ -27,7 +27,7 @@ ifolded__ = conjoinedFold__ traverse_ itraverse_
 ifoldring__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (i -> a -> f r -> f r) -> f r -> s -> f r)
-  -> Optic__ p j (i -> j) s s a a
+  -> Optic__ p j (i -> j) s t a b
 ifoldring__ fr = ixFoldVL__ $ \f -> void . fr (\i a -> (f i a *>)) (pure v)
   where
     v = error "ifoldring__: value used"
