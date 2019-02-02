@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Optics.Operators.State (
     -- * State modifying optics
     (.=), (?=), (%=),

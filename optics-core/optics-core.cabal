@@ -86,10 +86,12 @@ library
     FlexibleInstances
     FunctionalDependencies
     GADTs
+    InstanceSigs
     LambdaCase
     MultiParamTypeClasses
     RankNTypes
     ScopedTypeVariables
     TupleSections
+    TypeApplications
     TypeFamilies
     TypeOperators

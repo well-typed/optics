@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 module Data.Set.Optics
   ( setmapped
   , setOf
