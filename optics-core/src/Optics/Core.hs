@@ -20,8 +20,11 @@ import Optics.Coerce          as O
 import Optics.Equality        as O
 import Optics.Fold            as O
 import Optics.Getter          as O
-import Optics.Indexed         as O
+import Optics.Indexed.Core    as O
 import Optics.Iso             as O
+import Optics.IxFold          as O
+import Optics.IxSetter        as O
+import Optics.IxTraversal     as O
 import Optics.Lens            as O
 import Optics.LensyReview     as O
 import Optics.Passthrough     as O

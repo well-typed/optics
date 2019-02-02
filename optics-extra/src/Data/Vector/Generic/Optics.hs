@@ -147,10 +147,10 @@ vectorTraverse__
 vectorTraverse__ = conjoinedTraversal__ noix withix
   where
     noix :: Applicative f => (a -> f b) -> v a -> f (w b)
-    noix f v = V.fromListN (V.length v) <$> traverse f (V.toList v)
+    noix f v = let !n = V.length v in V.fromListN n <$> traverse f (V.toList v)
 
     withix :: Applicative f => (Int -> a -> f b) -> (v a) -> f (w b)
-    withix f v = V.fromListN (V.length v) <$> itraverse f (V.toList v)
+    withix f v = let !n = V.length v in V.fromListN n <$> itraverse f (V.toList v)
 {-# INLINE [0] vectorTraverse__ #-}
 
 {-# RULES

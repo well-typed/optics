@@ -46,6 +46,7 @@ library
                    Data.Vector.Optics
                    GHC.Generics.Optics
                    Optics.Each
+                   Optics.Indexed
                    Optics.Operators.State
 
   default-extensions:

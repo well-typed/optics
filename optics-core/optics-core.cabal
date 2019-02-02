@@ -19,11 +19,10 @@ library
   hs-source-dirs:     src
   build-depends:      base >=4.9 && <5
 
-  -- these dependencies are to provide FunctorWithIndex instances
+  -- base *WithIndex instances
   build-depends:
       array         >=0.5.1.1 && <0.6
     , containers    >=0.5.7.1 && <0.7
-    , transformers  >=0.5     && <0.6
 
   ghc-options:        -Wall
 
@@ -38,7 +37,7 @@ library
     Optics.Equality
     Optics.Fold
     Optics.Getter
-    Optics.Indexed
+    Optics.Indexed.Core
     Optics.Iso
     Optics.IxFold
     Optics.IxSetter
