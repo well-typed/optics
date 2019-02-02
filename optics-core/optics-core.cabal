@@ -19,9 +19,6 @@ library
   hs-source-dirs:     src
   build-depends:      base >=4.9 && <5
 
-  -- this is for 'viewM'
-  build-depends:      mtl >=2.2.2 && <2.3
-
   -- these dependencies are to provide FunctorWithIndex instances
   build-depends:
       array         >=0.5.1.1 && <0.6

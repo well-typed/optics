@@ -1,7 +1,5 @@
 module Optics.View where
 
-import Control.Monad.Reader.Class
-
 import Optics.AffineFold
 import Optics.Fold
 import Optics.Getter
@@ -59,10 +57,3 @@ instance Monoid r => ViewableOptic A_Fold r where
   type ViewResult A_Fold r = r
   view = viewN
   {-# INLINE view #-}
-
--- | Generalization of 'view' from @(->) s@ to arbitrary @MonadReader s m@.
-viewM
-  :: (ViewableOptic k r, MonadReader s m)
-  => Optic' k is s r
-  -> m (ViewResult k r)
-viewM = asks . view
