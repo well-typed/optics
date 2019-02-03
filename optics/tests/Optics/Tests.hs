@@ -212,11 +212,11 @@ computationTests = testGroup "computation"
         ]
     , testGroup "AffineTraversal"
         -- this doesn't hold definitionally: we need law here
-        [ testCase "withAffineTraversal (atraversal f g) (\\ h _ -> h) /= g" $
+        [ testCase "withAffineTraversal (atraversal f g) (\\ _ g' -> g') /= g" $
              assertFailure' $(inspectTest $ 'compL03 === 'compR03)
-        , testCase "withAffineTraversal (atraversal f g) (\\ h _ -> h) = ..." $
-             assertSuccess $(inspectTest $ 'compL03 === 'compR03_)
-        , testCase "withAffineTraversal (atraversal f g) (\\ _ h -> h) = f" $
+        , testCase "withAffineTraversal (atraversal f g) (\\ _ g' -> g') = ..." $
+             assertSuccess $(inspectTest $ 'compL03 ==- 'compR03_)
+        , testCase "withAffineTraversal (atraversal f g) (\\ f' _ -> f') = f" $
             assertSuccess $(inspectTest $ 'compL04 === 'compR04)
         ]
 

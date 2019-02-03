@@ -44,10 +44,10 @@ type family Constraints (k :: *) (p :: * -> * -> * -> *) :: Constraint where
   Constraints A_LensyReview      p = Costrong p
   Constraints A_Prism            p = Choice p
   Constraints A_PrismaticGetter  p = Cochoice p
-  Constraints An_AffineTraversal p = (Strong p, Choice p)
+  Constraints An_AffineTraversal p = Visiting p
   Constraints A_Traversal        p = Traversing p
   Constraints A_Setter           p = Mapping p
   Constraints A_Getter           p = (Bicontravariant p, Cochoice p, Strong p)
-  Constraints An_AffineFold      p = (Bicontravariant p, Cochoice p, Strong p, Choice p)
+  Constraints An_AffineFold      p = (Bicontravariant p, Cochoice p, Visiting p)
   Constraints A_Fold             p = (Bicontravariant p, Cochoice p, Traversing p)
   Constraints A_Review           p = (Bifunctor p, Choice p, Costrong p)
