@@ -50,6 +50,7 @@ library
                    Optics.Cons
                    Optics.Each
                    Optics.Indexed
+                   Optics.Empty
                    Optics.Operators.State
 
   default-extensions:
