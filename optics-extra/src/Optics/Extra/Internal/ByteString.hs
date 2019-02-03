@@ -88,7 +88,7 @@ traversedStrictTree__ = iwander $ \f bs ->
 
 "bytes -> map"
   forall (o :: FunArrow j Word8 Word8). traversedStrictTree__ o
-                                      = roam B.map (FunArrow (runFunArrow o))
+                                      = roam B.map (reFunArrow o)
     :: FunArrow (Int -> j) B.ByteString B.ByteString
 
 "bytes -> imap"
@@ -97,7 +97,7 @@ traversedStrictTree__ = iwander $ \f bs ->
 
 "bytes -> foldr"
   forall (o :: Forget r j Word8 Word8). traversedStrictTree__ o
-                                      = foldring__ B.foldr (Forget (runForget o))
+                                      = foldring__ B.foldr (reForget o)
     :: Forget r (Int -> j) B.ByteString B.ByteString
 
 "bytes -> ifoldr"
@@ -143,7 +143,7 @@ traversedStrictTree8__ = iwander $ \f bs ->
 
 "chars -> map"
   forall (o :: FunArrow j Char Char). traversedStrictTree8__ o
-                                    = roam B8.map (FunArrow (runFunArrow o))
+                                    = roam B8.map (reFunArrow o)
     :: FunArrow (Int -> j) B8.ByteString B8.ByteString
 
 "chars -> imap"
@@ -152,7 +152,7 @@ traversedStrictTree8__ = iwander $ \f bs ->
 
 "chars -> foldr"
   forall (o :: Forget r j Char Char). traversedStrictTree8__ o
-                                    = foldring__ B8.foldr (Forget (runForget o))
+                                    = foldring__ B8.foldr (reForget o)
     :: Forget r (Int -> j) B8.ByteString B8.ByteString
 
 "chars -> ifoldr"
@@ -190,7 +190,7 @@ traversedLazy__ = iwander $ \f lbs ->
 
 "sets lazy bytestring"
   forall (o :: FunArrow j Word8 Word8). traversedLazy__ o
-                                      = roam BL.map (FunArrow (runFunArrow o))
+                                      = roam BL.map (reFunArrow o)
     :: FunArrow (Int64 -> j) BL.ByteString BL.ByteString
 
 "isets lazy bytestring"
@@ -199,7 +199,7 @@ traversedLazy__ = iwander $ \f lbs ->
 
 "gets lazy bytestring"
   forall (o :: Forget r j Word8 Word8). traversedLazy__ o
-                                      = foldring__ BL.foldr (Forget (runForget o))
+                                      = foldring__ BL.foldr (reForget o)
     :: Forget r (Int64 -> j) BL.ByteString BL.ByteString
 
 "igets lazy bytestring"
@@ -236,7 +236,7 @@ traversedLazy8__ = iwander $ \f lbs ->
 
 "sets lazy char bytestring"
   forall (o :: FunArrow j Char Char). traversedLazy8__ o
-                                    = roam BL8.map (FunArrow (runFunArrow o))
+                                    = roam BL8.map (reFunArrow o)
     :: FunArrow (Int64 -> j) BL8.ByteString BL8.ByteString
 
 "isets lazy char bytestring"
@@ -245,7 +245,7 @@ traversedLazy8__ = iwander $ \f lbs ->
 
 "gets lazy char bytestring"
   forall (o :: Forget r j Char Char). traversedLazy8__ o
-                                    = foldring__ BL8.foldr (Forget (runForget o))
+                                    = foldring__ BL8.foldr (reForget o)
     :: Forget r (Int64 -> j) BL8.ByteString BL8.ByteString
 
 "igets lazy char bytestring"

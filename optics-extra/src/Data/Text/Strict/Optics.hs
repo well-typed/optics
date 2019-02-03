@@ -129,8 +129,7 @@ text__ = unpacked__ . itraversed__
 {-# RULES
 
 "strict text__ -> foldr"
-  forall (o :: Forget r j Char Char). text__ o
-                                    = foldring__ Strict.foldr (Forget (runForget o))
+  forall (o :: Forget r j Char Char). text__ o = foldring__ Strict.foldr (reForget o)
     :: Forget r (Int -> j) Text Text
 
 "strict text__ -> ifoldr"
@@ -138,8 +137,7 @@ text__ = unpacked__ . itraversed__
     :: IxForget r (Int -> j) Text Text
 
 "strict text__ -> map"
-  forall (o :: FunArrow j Char Char). text__ o
-                                    = roam Strict.map (FunArrow (runFunArrow o))
+  forall (o :: FunArrow j Char Char). text__ o = roam Strict.map (reFunArrow o)
     :: FunArrow (Int -> j) Text Text
 
 "strict text__ -> imap"

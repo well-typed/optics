@@ -135,8 +135,7 @@ text__ = unpacked__ . itraversed__
 {-# RULES
 
 "lazy text__ -> foldr"
-  forall (o :: Forget r j Char Char). text__ o
-                                    = foldring__ Text.foldr (Forget (runForget o))
+  forall (o :: Forget r j Char Char). text__ o = foldring__ Text.foldr (reForget o)
     :: Forget r (Int -> j) Text Text
 
 "lazy text__ -> ifoldr"
@@ -145,7 +144,7 @@ text__ = unpacked__ . itraversed__
 
 "lazy text__ -> map"
   forall (o :: FunArrow j Char Char). text__ o
-                                    = roam Text.map (FunArrow (runFunArrow o))
+                                    = roam Text.map (reFunArrow o)
     :: FunArrow (Int -> j) Text Text
 
 "lazy text__ -> imap"

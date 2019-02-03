@@ -156,8 +156,7 @@ vectorTraverse__ = conjoinedTraversal__ noix withix
 {-# RULES
 
 "vectorTraverse__ -> mapped"
-  forall (o :: FunArrow j a b). vectorTraverse__ o
-                              = roam V.map (FunArrow (runFunArrow o))
+  forall (o :: FunArrow j a b). vectorTraverse__ o = roam V.map (reFunArrow o)
     :: (V.Vector v a, V.Vector v b) => FunArrow (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> imapped"
@@ -165,8 +164,7 @@ vectorTraverse__ = conjoinedTraversal__ noix withix
     :: (V.Vector v a, V.Vector v b) => IxFunArrow (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> foldr"
-  forall (o :: Forget r j a b). vectorTraverse__ o
-                              = foldring__ V.foldr (Forget (runForget o))
+  forall (o :: Forget r j a b). vectorTraverse__ o = foldring__ V.foldr (reForget o)
     :: (V.Vector v a, V.Vector v b) => Forget r (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> ifoldr"
