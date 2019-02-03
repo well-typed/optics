@@ -64,9 +64,9 @@ conjoinedFold f g = Optic (conjoinedFold__ f g)
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
-  :: (Is k A_Fold, Monoid r, (is `HasSingleIndex` i) "ifoldMapOf" 1)
+  :: (Is k A_Fold, Monoid m, (is `HasSingleIndex` i) "ifoldMapOf" 1)
   => Optic' k is s a
-  -> (i -> a -> r) -> s -> r
+  -> (i -> a -> m) -> s -> m
 ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
 {-# INLINE ifoldMapOf #-}
 

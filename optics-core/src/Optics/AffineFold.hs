@@ -2,7 +2,7 @@
 module Optics.AffineFold
   ( An_AffineFold
   , AffineFold
-  , view01
+  , preview
   , afolding
   , module Optics.Optic
   ) where
@@ -27,19 +27,19 @@ toAffineFold = castOptic
 --
 -- >>> let _Right = prism Right $ either (Left . Left) Right
 --
--- >>> view01 _Right (Right 'x')
+-- >>> preview _Right (Right 'x')
 -- Just 'x'
 --
--- >>> view01 _Right (Left 'y')
+-- >>> preview _Right (Left 'y')
 -- Nothing
 --
-view01 :: Is k An_AffineFold => Optic' k is s a -> s -> Maybe a
-view01 o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
-{-# INLINE view01 #-}
+preview :: Is k An_AffineFold => Optic' k is s a -> s -> Maybe a
+preview o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
+{-# INLINE preview #-}
 
 -- | Create an 'AffineFold' from a partial function.
 --
--- >>> view01 (afolding listToMaybe) "foo"
+-- >>> preview (afolding listToMaybe) "foo"
 -- Just 'f'
 --
 afolding :: (s -> Maybe a) -> AffineFold s a

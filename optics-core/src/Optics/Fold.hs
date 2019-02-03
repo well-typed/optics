@@ -2,9 +2,8 @@ module Optics.Fold
   ( A_Fold
   , Fold
   , toFold
-  , viewN
-  , preview
   , foldVL
+  , foldOf
   , foldMapOf
   , foldrOf
   , foldlOf'
@@ -58,17 +57,6 @@ toFold
 toFold = castOptic
 {-# INLINE toFold #-}
 
--- | View the result of folding over all the results of a 'Fold' or 'Traversal'
--- that points at a monoidal value.
-viewN :: (Is k A_Fold, Monoid a) => Optic' k is s a -> s -> a
-viewN o = runForget (getOptic (toFold o) (Forget id))
-{-# INLINE viewN #-}
-
--- | Fold to the first element (if it exists).
-preview :: Is k A_Fold => Optic' k is s a -> s -> Maybe a
-preview o = getFirst #. foldMapOf o (First #. Just)
-{-# INLINE preview #-}
-
 -- | Build a 'Fold' from the "almost van Laarhoven" representation.
 --
 -- @
@@ -81,8 +69,13 @@ foldVL
 foldVL f = Optic (foldVL__ f)
 {-# INLINE foldVL #-}
 
+-- | Combine the results of a fold using a monoid.
+foldOf :: (Is k A_Fold, Monoid a) => Optic' k is s a -> s -> a
+foldOf o = foldMapOf o id
+{-# INLINE foldOf #-}
+
 -- | Fold via embedding into a monoid.
-foldMapOf :: (Monoid r, Is k A_Fold) => Optic' k is s a -> (a -> r) -> s -> r
+foldMapOf :: (Is k A_Fold, Monoid m) => Optic' k is s a -> (a -> m) -> s -> m
 foldMapOf o = runForget #. getOptic (toFold o) .# Forget
 {-# INLINE foldMapOf #-}
 

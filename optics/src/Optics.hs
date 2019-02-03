@@ -76,9 +76,9 @@ module Optics
   --     @
   --     -- 'Lens' is a 'Setter' and a 'Getter', therefore you can
   --
-  --     'view1' :: 'Lens' i s t a b -> s -> a
-  --     'set'   :: 'Lens' i s t a b -> b -> s -> t
-  --     'over'  :: 'Lens' i s t a b -> (a -> b) -> s -> t
+  --     'view' :: 'Lens' i s t a b -> s -> a
+  --     'set'  :: 'Lens' i s t a b -> b -> s -> t
+  --     'over' :: 'Lens' i s t a b -> (a -> b) -> s -> t
   --     @
   --
   -- * __Computation__ rules tie introduction and
@@ -86,8 +86,8 @@ module Optics
   --   fulfilled.
   --
   --     @
-  --     'view1' ('lens' f g)   s = f s
-  --     'set'   ('lens' f g) a s = g s a
+  --     'view' ('lens' f g)   s = f s
+  --     'set'  ('lens' f g) a s = g s a
   --     @
   --
   -- * All optics provided by the library are __well-formed__.
@@ -120,7 +120,7 @@ module Optics
   -- 're' is mainly useful to invert 'Iso's:
   --
   -- >>> let _Identity = iso runIdentity Identity
-  -- >>> view1 (_1 % re _Identity) ('x', "yz")
+  -- >>> view (_1 % re _Identity) ('x', "yz")
   -- Identity 'x'
   --
   -- Yet we can use a 'Lens' as a 'Review' too:
@@ -323,16 +323,19 @@ import Data.Either.Optics as P
 -- === Technical differences
 --
 -- * Composition operator is '%'
--- * 'view' is /smart/
 -- * 'set'' is a strict version of 'set', not 'set' for type-preserving optics
+-- * 'view' is for getters
+-- * 'preview' is for affine folds
+-- * 'foldOf' is the equivalent of view for folds
 -- * None of operators is exported from main module
 -- * All ordinary optics are index-preserving by default
 -- * Indexed optics interface is different (let's expand in own section, when the implementation is stabilised)
 -- * There are no @Traversal1@
 -- * There is 'AffineTraversal'
 -- * We can't use 'traverse' as an optic directly, but there is a 'Traversal' called 'traversed'.
--- * 'view' is compatible with @lens@, but it uses a type class which chooses between
---   'view1', 'view01' and 'viewN' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'view' at all, and what '^.' should be)
+-- * 'gview' is compatible with @lens@, but it uses a type class which chooses between
+--   'view', 'preview' and 'foldOf' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'gview' at all, and what '^.' should be)
+
 -- * There are no 'from', only 're' (Should there be a 'from' restricted to 'Iso' or an alias to 're'? <https://github.com/well-typed/optics/pull/43#discussion_r247121380>)
 --
 

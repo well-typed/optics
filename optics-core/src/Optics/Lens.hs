@@ -13,7 +13,7 @@
 --
 -- Which we can use as a 'Getter'
 --
--- >>> view1 name human
+-- >>> view name human
 -- "Bob"
 --
 -- or a 'Setter'
@@ -37,9 +37,9 @@ module Optics.Lens
   -- | 'Lens' is a 'Setter' and a 'Getter', therefore you can
   --
   -- @
-  -- 'view1' :: 'Lens' i s t a b -> s -> a
-  -- 'set'   :: 'Lens' i s t a b -> b -> s -> t
-  -- 'over'  :: 'Lens' i s t a b -> (a -> b) -> s -> t
+  -- 'view' :: 'Lens' i s t a b -> s -> a
+  -- 'set'  :: 'Lens' i s t a b -> b -> s -> t
+  -- 'over' :: 'Lens' i s t a b -> (a -> b) -> s -> t
   -- @
   --
 
@@ -47,8 +47,8 @@ module Optics.Lens
   -- |
   --
   -- @
-  -- 'view1' ('lens' f g)   s = f s
-  -- 'set'   ('lens' f g) a s = g s a
+  -- 'view' ('lens' f g)   s = f s
+  -- 'set'  ('lens' f g) a s = g s a
   -- @
 
   -- * Well-formedness

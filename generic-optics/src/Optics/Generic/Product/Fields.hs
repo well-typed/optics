@@ -45,7 +45,7 @@ import           Optics.Core
 
 -- | A 'Lens' that focuses on a field with a given name.
 --
--- >>> view1 (field @"age") human
+-- >>> view (field @"age") human
 -- 50
 --
 -- === /Type changing/

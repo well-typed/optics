@@ -27,14 +27,12 @@ import Optics.IxSetter        as O
 import Optics.IxTraversal     as O
 import Optics.Lens            as O
 import Optics.LensyReview     as O
-import Optics.Passthrough     as O
 import Optics.Prism           as O
 import Optics.PrismaticGetter as O
 import Optics.Re              as O
 import Optics.Review          as O
 import Optics.Setter          as O
 import Optics.Traversal       as O
-import Optics.View            as O
 
 import Data.Either.Optics     as D
 import Data.Maybe.Optics      as D

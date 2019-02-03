@@ -36,7 +36,7 @@ import Optics.Prism
 
 -- | Convert from the data type to its representation (or back)
 --
--- >>> view1 (generic % re generic) "hello" :: String
+-- >>> view (generic % re generic) "hello" :: String
 -- "hello"
 --
 generic :: Generic a => Iso' a (Rep a b)
