@@ -197,28 +197,16 @@ instance Ixed (Seq a) where
   {-# INLINE ix #-}
 
 type instance IxValue (IntMap a) = a
-instance Ixed (IntMap a) where
-  ix k = atraversalVL $ \point f m ->
-    case IntMap.lookup k m of
-      Just v -> f v <&> \v' -> IntMap.insert k v' m
-      Nothing -> point m
-  {-# INLINE ix #-}
+-- Default implementation uses IntMap.alterF
+instance Ixed (IntMap a)
 
 type instance IxValue (Map k a) = a
-instance Ord k => Ixed (Map k a) where
-  ix k = atraversalVL $ \point f m ->
-    case Map.lookup k m of
-      Just v  -> f v <&> \v' -> Map.insert k v' m
-      Nothing -> point m
-  {-# INLINE ix #-}
+-- Default implementation uses Map.alterF
+instance Ord k => Ixed (Map k a)
 
 type instance IxValue (HashMap k a) = a
-instance (Eq k, Hashable k) => Ixed (HashMap k a) where
-  ix k = atraversalVL $ \point f m ->
-    case HashMap.lookup k m of
-      Just v  -> f v <&> \v' -> HashMap.insert k v' m
-      Nothing -> point m
-  {-# INLINE ix #-}
+-- Default implementation uses HashMap.alterF
+instance (Eq k, Hashable k) => Ixed (HashMap k a)
 
 type instance IxValue (Set k) = ()
 instance Ord k => Ixed (Set k) where
@@ -505,11 +493,15 @@ instance Ord k => At (Map k a) where
   {-# INLINE at #-}
 
 instance (Eq k, Hashable k) => At (HashMap k a) where
+#if MIN_VERSION_unordered_containers(0,2,9)
+  at k = lensVL $ \f -> HashMap.alterF f k
+#else
   at k = lensVL $ \f m ->
     let mv = HashMap.lookup k m
     in f mv <&> \r -> case r of
       Nothing -> maybe m (const (HashMap.delete k m)) mv
       Just v' -> HashMap.insert k v' m
+#endif
   {-# INLINE at #-}
 
 instance At IntSet where
