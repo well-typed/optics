@@ -1,15 +1,5 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
------------------------------------------------------------------------------
--- |
--- Module      :  Optics.TH.Internal.Utils
--- Copyright   :  (C) 2013-2016 Edward Kmett and Eric Mertens
--- License     :  BSD-style (see the file LICENSE)
--- Maintainer  :  Edward Kmett <ekmett@gmail.com>
--- Stability   :  experimental
--- Portability :  non-portable
---
-----------------------------------------------------------------------------
 module Optics.TH.Internal.Utils where
 
 import Language.Haskell.TH

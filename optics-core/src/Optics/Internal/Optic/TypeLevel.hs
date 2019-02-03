@@ -1,6 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeApplications #-}
 module Optics.Internal.Optic.TypeLevel where
 
 -- | Curry a type-level list.

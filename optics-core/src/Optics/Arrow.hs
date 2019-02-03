@@ -7,7 +7,9 @@ import Control.Arrow
 import Data.Coerce
 import qualified Control.Category as C
 
-import Optics.Core
+import Optics.AffineTraversal
+import Optics.Prism
+import Optics.Setter
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils

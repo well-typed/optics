@@ -14,6 +14,7 @@ module Optics.Fold
   , forOf_
   , folded
   , folding
+  , foldring
     -- * Concrete folds
   , has
   , andOf
@@ -40,6 +41,7 @@ import Data.Foldable
 import Data.Monoid
 
 import Optics.Internal.Bi
+import Optics.Internal.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
@@ -76,7 +78,7 @@ preview o = getFirst #. foldMapOf o (First #. Just)
 foldVL
   :: (forall f. Applicative f => (a -> f r) -> s -> f ())
   -> Fold s a
-foldVL f = Optic (rphantom . wander f . rphantom)
+foldVL f = Optic (foldVL__ f)
 {-# INLINE foldVL #-}
 
 -- | Fold via embedding into a monoid.
@@ -120,7 +122,7 @@ traverseOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (a -> f r) -> s -> f ()
-traverseOf_ o = \f -> runTraversed . foldMapOf o (Traversed #. f)
+traverseOf_ o f = runTraversed . foldMapOf o (Traversed #. f)
 {-# INLINE traverseOf_ #-}
 
 -- | A version of 'traverseOf_' with the arguments flipped.
@@ -135,7 +137,7 @@ forOf_ = flip . traverseOf_
 
 -- | Fold via the 'Foldable' class.
 folded :: Foldable f => Fold (f a) a
-folded = foldVL traverse_
+folded = Optic folded__
 {-# INLINE folded #-}
 
 -- | Obtain a 'Fold' by lifting an operation that returns a 'Foldable' result.
@@ -148,6 +150,16 @@ folded = foldVL traverse_
 folding :: Foldable f => (s -> f a) -> Fold s a
 folding f = Optic (contrabimap f (\_ -> ()) . wander traverse_)
 {-# INLINE folding #-}
+
+-- | Obtain a 'Fold' by lifting 'foldr' like function.
+--
+-- >>> toListOf (foldring foldr) [1,2,3,4]
+-- [1,2,3,4]
+foldring
+  :: (forall f. Applicative f => (a -> f r -> f r) -> f r -> s -> f r)
+  -> Fold s a
+foldring fr = Optic (foldring__ fr)
+{-# INLINE foldring #-}
 
 ----------------------------------------
 -- Concrete folds

@@ -12,12 +12,12 @@ module Optics.IxFold
   , itraverseOf_
   , iforOf_
   , ifolded
+  , ifoldring
   , module Optics.Optic
   ) where
 
 import Data.Monoid
 
-import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.IxFold
 import Optics.Internal.Optic
@@ -42,7 +42,7 @@ toIxFold = castOptic
 ixFoldVL
   :: (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
   -> IxFold i s a
-ixFoldVL f = Optic (rphantom . iwander f . rphantom)
+ixFoldVL f = Optic (ixFoldVL__ f)
 {-# INLINE ixFoldVL #-}
 
 -- | Build an indexed fold from the van Laarhoven representation of both its
@@ -109,7 +109,10 @@ itraverseOf_
   :: (Is k A_Fold, Applicative f, CheckIndices "itraverseOf_" 1 i is)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
-itraverseOf_ o f = runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
+itraverseOf_ o f s =
+  -- We want to have the definition fully eta-expanded as it allows GHC to
+  -- generate better code (in particular for folding over a Vector).
+  runTraversed $ ifoldMapOf o (\i -> Traversed #. f i) s
 {-# INLINE itraverseOf_ #-}
 
 -- | A version of 'itraverseOf_' with the arguments flipped.
@@ -124,3 +127,13 @@ iforOf_ = flip . itraverseOf_
 ifolded :: FoldableWithIndex i f => IxFold i (f a) a
 ifolded = Optic ifolded__
 {-# INLINE ifolded #-}
+
+-- | Obtain an 'IxFold' by lifting 'ifoldr' like function.
+--
+-- >>> itoListOf (ifoldring ifoldr) "hello"
+-- [(0,'h'),(1,'e'),(2,'l'),(3,'l'),(4,'o')]
+ifoldring
+  :: (forall f. Applicative f => (i -> a -> f r -> f r) -> f r -> s -> f r)
+  -> IxFold i s a
+ifoldring fr = Optic (ifoldring__ fr)
+{-# INLINE ifoldring #-}

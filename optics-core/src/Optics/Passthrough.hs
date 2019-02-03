@@ -31,7 +31,7 @@ instance PermeableOptic A_Prism r where
   {-# INLINE passthrough #-}
 
 instance PermeableOptic An_AffineTraversal r where
-  passthrough o f s = withAffineTraversal o $ \sbt sta -> case sta s of
+  passthrough o f s = withAffineTraversal o $ \sta sbt -> case sta s of
     Left t -> (Nothing, t)
     Right a -> case f a of
       (r, b) -> (Just r, sbt s b)

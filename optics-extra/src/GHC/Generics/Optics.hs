@@ -1,29 +1,20 @@
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE PolyKinds #-}
------------------------------------------------------------------------------
--- |
--- Module      :  GHC.Generics.Lens
--- Copyright   :  (C) 2012-16 Edward Kmett, (C) 2018 Well-Typed LLP
+-- | Note: "GHC.Generics" exports a number of names that collide with "Optics"
+-- (at least 'to').
 --
--- Note: "GHC.Generics" exports a number of names that collide with "Optics" (at least 'to').
---
--- You can use hiding or imports to mitigate this to an extent, and the following imports,
--- represent a fair compromise for user code:
+-- You can use hiding or imports to mitigate this to an extent, and the
+-- following imports, represent a fair compromise for user code:
 --
 -- @
 -- import "Optics"
 -- import "GHC.Generics" hiding (to)
 -- @
 --
--- You can use 'generic' to replace 'GHC.Generics.from' and 'GHC.Generics.to' from "GHC.Generics".
+-- You can use 'generic' to replace 'GHC.Generics.from' and 'GHC.Generics.to'
+-- from "GHC.Generics".
 --
 module GHC.Generics.Optics
-  (
-    generic
+  ( generic
   , generic1
   , _V1
   , _U1
@@ -36,9 +27,12 @@ module GHC.Generics.Optics
   ) where
 
 import qualified GHC.Generics as GHC (to, from, to1, from1)
-import GHC.Generics (Generic, Rep, Generic1, Rep1, (:+:) (..), V1, U1 (..), K1 (..), M1 (..), Par1 (..), Rec1 (..))
+import GHC.Generics (Generic, Rep, Generic1, Rep1, (:+:) (..), V1, U1 (..),
+                     K1 (..), M1 (..), Par1 (..), Rec1 (..))
 
-import Optics
+import Optics.Iso
+import Optics.Lens
+import Optics.Prism
 
 -- | Convert from the data type to its representation (or back)
 --

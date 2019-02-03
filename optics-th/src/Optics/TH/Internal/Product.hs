@@ -4,17 +4,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TemplateHaskell #-}
------------------------------------------------------------------------------
--- |
--- Module      :  Optics.TH.Internal.Product
--- Copyright   :  (C) 2014-2016 Edward Kmett, (C) 2014 Eric Mertens
--- License     :  BSD-style (see the file LICENSE)
--- Maintainer  :  Edward Kmett <ekmett@gmail.com>
--- Stability   :  experimental
--- Portability :  non-portable
---
------------------------------------------------------------------------------
-
 module Optics.TH.Internal.Product
   ( LensRules(..)
   , FieldNamer

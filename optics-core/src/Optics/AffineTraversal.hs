@@ -4,6 +4,7 @@ module Optics.AffineTraversal
   , AffineTraversal'
   , toAffineTraversal
   , atraversal
+  , atraversal'
   , withAffineTraversal
   , module Optics.Optic
   )
@@ -37,11 +38,17 @@ atraversal match update = Optic $
   . right'
 {-# INLINE atraversal #-}
 
+-- | Build a type-preserving affine traversal from a matcher and an updater.
+atraversal' :: (s -> Maybe a) -> (s -> b -> s) -> AffineTraversal s s a b
+atraversal' sma sbs = atraversal (\s -> maybe (Left s) Right (sma s)) sbs
+{-# INLINE atraversal' #-}
+
+-- With with an affine traversal as a matcher and an updater.
 withAffineTraversal
   :: Is k An_AffineTraversal
   => Optic k is s t a b
-  -> ((s -> b -> t) -> (s -> Either t a) -> r)
+  -> ((s -> Either t a) -> (s -> b -> t) -> r)
   -> r
 withAffineTraversal o k =
   case getOptic (toAffineTraversal o) (AffineMarket (\_ b -> b) Right) of
-    AffineMarket setter match -> k setter match
+    AffineMarket update match -> k match update

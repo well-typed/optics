@@ -1,14 +1,6 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeApplications #-}
-module Optics.Indexed
-  (
-  -- * Indexed optics
-    module Optics.IxTraversal
-  , module Optics.IxFold
-  , module Optics.IxSetter
-
-  -- * Index composition and modification
-  , (<%>)
+module Optics.Indexed.Core
+  ( (<%>)
   , (%>)
   , (<%)
   , reindex
@@ -17,16 +9,6 @@ module Optics.Indexed
   , icompose4
   , icompose5
   , IxOptic(..)
-
-  -- * Functors with index
-  , FunctorWithIndex (..)
-  -- ** Foldable with index
-  , FoldableWithIndex (..)
-  , itraverse_
-  , ifor_
-  -- ** Traversable with index
-  , TraversableWithIndex (..)
-  , ifor
   ) where
 
 import Optics.Internal.Indexed
@@ -35,9 +17,6 @@ import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Profunctor
 
 import Optics.Fold
-import Optics.IxFold
-import Optics.IxSetter
-import Optics.IxTraversal
 import Optics.Setter
 import Optics.Traversal
 

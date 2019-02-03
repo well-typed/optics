@@ -12,6 +12,7 @@ module Optics.Setter
 
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
+import Optics.Internal.Setter
 import Optics.Internal.Utils
 import Optics.Optic
 
@@ -59,5 +60,5 @@ sets f = Optic (roam f)
 
 -- | Setter via the 'Functor' class.
 mapped :: Functor f => Setter (f a) (f b) a b
-mapped = sets fmap
+mapped = Optic mapped__
 {-# INLINE mapped #-}

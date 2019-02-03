@@ -68,10 +68,10 @@ install:
   - "sed -i.bak 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config"
   - rm -fv cabal.project cabal.project.local
   - grep -Ev -- '^\s*--' ${HOME}/.cabal/config | grep -Ev '^\s*$'
-  - "printf 'packages: \"optics\" \"optics-core\" \"optics-sop\" \"optics-th\" \"generic-optics\" \"metametapost\"\\n' > cabal.project"
+  - "printf 'packages: \"optics\" \"optics-core\" \"optics-extra\" \"optics-sop\" \"optics-th\" \"generic-optics\" \"metametapost\"\\n' > cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics | grep -vw -- optics-core | grep -vw -- optics-sop | grep -vw -- optics-th | grep -vw -- generic-optics | grep -vw -- metametapost | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
+  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics | grep -vw -- optics-core | grep -vw -- optics-extra | grep -vw -- optics-sop | grep -vw -- optics-th | grep -vw -- generic-optics | grep -vw -- metametapost | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "optics/configure.ac" ]; then
@@ -79,6 +79,9 @@ install:
     fi
   - if [ -f "optics-core/configure.ac" ]; then
       (cd "optics-core" && autoreconf -i);
+    fi
+  - if [ -f "optics-extra/configure.ac" ]; then
+      (cd "optics-extra" && autoreconf -i);
     fi
   - if [ -f "optics-sop/configure.ac" ]; then
       (cd "optics-sop" && autoreconf -i);
@@ -95,7 +98,7 @@ install:
   - rm -f cabal.project.freeze
   - cabal new-build -w ${HC} ${TEST} ${BENCH} --project-file="cabal.project" --dep -j2 all
   - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --project-file="cabal.project" --dep -j2 all
-  - rm -rf .ghc.environment.* "optics"/dist "optics-core"/dist "optics-sop"/dist "optics-th"/dist "generic-optics"/dist "metametapost"/dist
+  - rm -rf .ghc.environment.* "optics"/dist "optics-core"/dist "optics-extra"/dist "optics-sop"/dist "optics-th"/dist "generic-optics"/dist "metametapost"/dist
   - DISTDIR=$(mktemp -d /tmp/dist-test.XXXX)
 
 # Here starts the actual work to be performed for the package under test;
@@ -106,10 +109,10 @@ script:
   - mv dist-newstyle/sdist/*.tar.gz ${DISTDIR}/
   - cd ${DISTDIR} || false
   - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
-  - "printf 'packages: optics-*/*.cabal optics-core-*/*.cabal optics-sop-*/*.cabal optics-th-*/*.cabal generic-optics-*/*.cabal metametapost-*/*.cabal\\n' > cabal.project"
+  - "printf 'packages: optics-*/*.cabal optics-core-*/*.cabal optics-extra-*/*.cabal optics-sop-*/*.cabal optics-th-*/*.cabal generic-optics-*/*.cabal metametapost-*/*.cabal\\n' > cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics | grep -vw -- optics-core | grep -vw -- optics-sop | grep -vw -- optics-th | grep -vw -- generic-optics | grep -vw -- metametapost | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
+  - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- optics | grep -vw -- optics-core | grep -vw -- optics-extra | grep -vw -- optics-sop | grep -vw -- optics-th | grep -vw -- generic-optics | grep -vw -- metametapost | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # this builds all libraries and executables (without tests/benchmarks)
@@ -122,6 +125,7 @@ script:
   # cabal check
   - (cd optics-* && cabal check)
   - (cd optics-core-* && cabal check)
+  - (cd optics-extra-* && cabal check)
   - (cd optics-sop-* && cabal check)
   - (cd optics-th-* && cabal check)
   - (cd generic-optics-* && cabal check)

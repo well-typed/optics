@@ -5,7 +5,7 @@ license-file:  LICENSE
 build-type:    Simple
 cabal-version: 1.24
 maintainer:    oleg@well-typed.com
-author:        Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
+author:        Edward Kmett, Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
 tested-with:   ghc ==8.0.2 ghc ==8.2.2 ghc ==8.4.4 ghc ==8.6.3
 synopsis:      Optics as an abstract interface: core definitions
 category:      Data, Optics, Lenses, Generics
@@ -19,14 +19,10 @@ library
   hs-source-dirs:     src
   build-depends:      base >=4.9 && <5
 
-  -- this is for 'viewM'
-  build-depends:      mtl >=2.2.2 && <2.3
-
-  -- these dependencies are to provide FunctorWithIndex instances
+  -- base *WithIndex instances
   build-depends:
       array         >=0.5.1.1 && <0.6
     , containers    >=0.5.7.1 && <0.7
-    , transformers  >=0.5     && <0.6
 
   ghc-options:        -Wall
 
@@ -41,7 +37,7 @@ library
     Optics.Equality
     Optics.Fold
     Optics.Getter
-    Optics.Indexed
+    Optics.Indexed.Core
     Optics.Iso
     Optics.IxFold
     Optics.IxSetter
@@ -65,6 +61,7 @@ library
     -- internal modules
     Optics.Internal.Bi
     Optics.Internal.Concrete
+    Optics.Internal.Fold
     Optics.Internal.Indexed
     Optics.Internal.IxFold
     Optics.Internal.IxSetter
@@ -75,7 +72,9 @@ library
     Optics.Internal.Optic.Types
     Optics.Internal.Profunctor
     Optics.Internal.Re
+    Optics.Internal.Setter
     Optics.Internal.Tagged
+    Optics.Internal.Traversal
     Optics.Internal.Utils
 
   default-extensions:
@@ -86,10 +85,12 @@ library
     FlexibleInstances
     FunctionalDependencies
     GADTs
+    InstanceSigs
     LambdaCase
     MultiParamTypeClasses
     RankNTypes
     ScopedTypeVariables
     TupleSections
+    TypeApplications
     TypeFamilies
     TypeOperators
