@@ -47,6 +47,7 @@ library
                    Data.Vector.Optics
                    GHC.Generics.Optics
                    Optics.At
+                   Optics.Cons
                    Optics.Each
                    Optics.Indexed
                    Optics.Operators.State
