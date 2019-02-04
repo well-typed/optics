@@ -1,6 +1,8 @@
 module Optics.View where
 
 import Control.Monad.Reader.Class
+import Control.Monad.State
+import Control.Monad.Writer
 
 import Optics.Core
 
@@ -22,59 +24,134 @@ import Optics.Core
 -- When in doubt, use specific, flavour restricted versions. This function is
 -- mostly useful for things such as 'Passthrough'.
 --
-class ViewableOptic k a where
-  type ViewResult k a :: *
-  gview :: MonadReader s m => Optic' k is s a -> m (ViewResult k a)
+class ViewableOptic k r where
+  type ViewResult k r :: *
+  gview
+    :: MonadReader s m
+    => Optic' k is s r
+    -> m (ViewResult k r)
+  gviews
+    :: MonadReader s m
+    => Optic' k is s a
+    -> (a -> r)
+    -> m (ViewResult k r)
 
-instance ViewableOptic An_Iso a where
-  type ViewResult An_Iso a = a
-  gview = asks . view
+instance ViewableOptic An_Iso r where
+  type ViewResult An_Iso r = r
+  gview      = asks . view
+  gviews o f = f <$> asks (view o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance ViewableOptic A_Lens a where
-  type ViewResult A_Lens a = a
-  gview = asks . view
+instance ViewableOptic A_Lens r where
+  type ViewResult A_Lens r = r
+  gview      = asks . view
+  gviews o f = f <$> asks (view o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance ViewableOptic A_PrismaticGetter a where
-  type ViewResult A_PrismaticGetter a = a
-  gview = asks . view
+instance ViewableOptic A_PrismaticGetter r where
+  type ViewResult A_PrismaticGetter r = r
+  gview      = asks . view
+  gviews o f = f <$> asks (view o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance ViewableOptic A_Getter a where
-  type ViewResult A_Getter a = a
-  gview = asks . view
+instance ViewableOptic A_Getter r where
+  type ViewResult A_Getter r = r
+  gview      = asks . view
+  gviews o f = f <$> asks (view o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance ViewableOptic A_Prism a where
-  type ViewResult A_Prism a = Maybe a
-  gview = asks . preview
+instance ViewableOptic A_Prism r where
+  type ViewResult A_Prism r = Maybe r
+  gview      = asks . preview
+  gviews o f = fmap f <$> asks (preview o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance ViewableOptic An_AffineTraversal a where
-  type ViewResult An_AffineTraversal a = Maybe a
-  gview = asks . preview
+instance ViewableOptic An_AffineTraversal r where
+  type ViewResult An_AffineTraversal r = Maybe r
+  gview      = asks . preview
+  gviews o f = fmap f <$> asks (preview o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance ViewableOptic An_AffineFold a where
-  type ViewResult An_AffineFold a = Maybe a
-  gview = asks . preview
+instance ViewableOptic An_AffineFold r where
+  type ViewResult An_AffineFold r = Maybe r
+  gview      = asks . preview
+  gviews o f = fmap f <$> asks (preview o)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance Monoid a => ViewableOptic A_Traversal a where
-  type ViewResult A_Traversal a = a
-  gview = asks . foldOf
+instance Monoid r => ViewableOptic A_Traversal r where
+  type ViewResult A_Traversal r = r
+  gview      = asks . foldOf
+  gviews o f = asks (foldMapOf o f)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-instance Monoid a => ViewableOptic A_Fold a where
-  type ViewResult A_Fold a = a
-  gview = asks . foldOf
+instance Monoid r => ViewableOptic A_Fold r where
+  type ViewResult A_Fold r = r
+  gview      = asks . foldOf
+  gviews o f = asks (foldMapOf o f)
   {-# INLINE gview #-}
+  {-# INLINE gviews #-}
 
-gviews
-  :: (ViewableOptic k a, MonadReader s m)
+-- | Use the target of a 'Lens', 'Iso', or 'Getter' in the current state, or use
+-- a summary of a 'Fold' or 'Traversal' that points to a monoidal value.
+--
+-- >>> evalState (use _1) (a,b)
+-- a
+--
+-- >>> evalState (use _1) ("hello","world")
+-- "hello"
+use
+  :: (ViewableOptic k a, MonadState s m)
   => Optic' k is s a
-  -> (ViewResult k a -> r)
-  -> m r
-gviews o f = f <$> gview o
-{-# INLINE gviews #-}
+  -> m (ViewResult k a)
+use o = gets (gview o)
+{-# INLINE use #-}
+
+-- | Use the target of a 'Lens', 'Iso' or 'Getter' in the current state, or use
+-- a summary of a 'Fold' or 'Traversal' that points to a monoidal value.
+--
+-- >>> evalState (uses _1 length) ("hello","world")
+-- 5
+uses
+  :: (ViewableOptic k r, MonadState s m)
+  => Optic' k is s a
+  -> (a -> r)
+  -> m (ViewResult k r)
+uses o f = gets (gviews o f)
+{-# INLINE uses #-}
+
+-- | This is a generalized form of 'listen' that only extracts the portion of
+-- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
+-- then a monoidal summary of the parts of the log that are visited will be
+-- returned.
+listening
+  :: (ViewableOptic k r, MonadWriter s m)
+  => Optic' k is s r
+  -> m a
+  -> m (a, ViewResult k r)
+listening o m = do
+  (a, w) <- listen m
+  return (a, gview o w)
+{-# INLINE listening #-}
+
+-- | This is a generalized form of 'listen' that only extracts the portion of
+-- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
+-- then a monoidal summary of the parts of the log that are visited will be
+-- returned.
+listenings
+  :: (ViewableOptic k r, MonadWriter s m)
+  => Optic' k is s a
+  -> (a -> r)
+  -> m b
+  -> m (b, ViewResult k r)
+listenings o f m = do
+  (a, w) <- listen m
+  return (a, gviews o f w)
+{-# INLINE listenings #-}
