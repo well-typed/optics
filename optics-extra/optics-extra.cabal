@@ -33,10 +33,14 @@ library
   -- main module to land with repl
   exposed-modules: Optics.Extra
 
+  exposed-modules: Optics.At
+                   Optics.Cons
+                   Optics.Each
+                   Optics.Empty
+                   Optics.Indexed
+                   Optics.Operators.State
 
-  exposed-modules: Optics.Extra.Internal.ByteString
-                   Optics.Extra.Internal.Vector
-                   Data.ByteString.Lazy.Optics
+  exposed-modules: Data.ByteString.Lazy.Optics
                    Data.ByteString.Optics
                    Data.ByteString.Strict.Optics
                    Data.Set.Optics
@@ -46,12 +50,10 @@ library
                    Data.Vector.Generic.Optics
                    Data.Vector.Optics
                    GHC.Generics.Optics
-                   Optics.At
-                   Optics.Cons
-                   Optics.Each
-                   Optics.Indexed
-                   Optics.Empty
-                   Optics.Operators.State
+
+  -- internal modules
+  exposed-modules: Optics.Extra.Internal.ByteString
+                   Optics.Extra.Internal.Vector
 
   default-extensions:
     BangPatterns
