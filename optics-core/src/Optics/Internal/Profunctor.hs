@@ -11,6 +11,9 @@ import Data.Functor.Identity
 
 import Optics.Internal.Utils
 
+-- | Needed for conversion of affine traversal back to its VL representation.
+data StarA f i a b = StarA (forall r. r -> f r) (a -> f b)
+
 -- | Needed for traversals.
 newtype Star f i a b = Star { runStar :: a -> f b }
 
@@ -33,6 +36,11 @@ newtype IxForget r i a b = IxForget { runIxForget :: i -> a -> r }
 newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
 ----------------------------------------
+-- Utils
+
+-- | Unwrap 'StarA'.
+runStarA :: StarA f i a b -> a -> f b
+runStarA (StarA _ k) = k
 
 -- | Repack 'Star' to change its index type.
 reStar :: Star f i a b -> Star f j a b
@@ -50,6 +58,7 @@ reFunArrow (FunArrow k) = FunArrow k
 {-# INLINE reFunArrow #-}
 
 ----------------------------------------
+-- Classes and instances
 
 class Profunctor p where
   dimap :: (a -> b) -> (c -> d) -> p i b c -> p i a d
@@ -81,6 +90,17 @@ rcoerce = rcoerce'
 lcoerce :: (Coercible a b, Profunctor p) => p i a c -> p i b c
 lcoerce = lcoerce'
 {-# INLINE lcoerce #-}
+
+instance Functor f => Profunctor (StarA f) where
+  dimap f g (StarA point k) = StarA point (fmap g . k . f)
+  lmap  f   (StarA point k) = StarA point (k . f)
+  rmap    g (StarA point k) = StarA point (fmap g . k)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+  rcoerce' = rmap coerce
+  {-# INLINE rcoerce' #-}
 
 instance Functor f => Profunctor (Star f) where
   dimap f g (Star k) = Star (fmap g . k . f)
@@ -158,6 +178,15 @@ class Profunctor p => Strong p where
     . first'
   {-# INLINE linear #-}
 
+instance Functor f => Strong (StarA f) where
+  first'  (StarA point k) = StarA point $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
+  second' (StarA point k) = StarA point $ \ ~(c, a) -> (,) c <$> k a
+  {-# INLINE first' #-}
+  {-# INLINE second' #-}
+
+  linear f (StarA point k) = StarA point (f k)
+  {-# INLINE linear #-}
+
 instance Functor f => Strong (Star f) where
   first'  (Star k) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
   second' (Star k) = Star $ \ ~(c, a) -> (,) c <$> k a
@@ -233,6 +262,12 @@ class Profunctor p => Choice p where
   left'  :: p i a b -> p i (Either a c) (Either b c)
   right' :: p i a b -> p i (Either c a) (Either c b)
 
+instance Functor f => Choice (StarA f) where
+  left'  (StarA point k) = StarA point $ either (fmap Left . k) (point . Right)
+  right' (StarA point k) = StarA point $ either (point . Left) (fmap Right . k)
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
 instance Applicative f => Choice (Star f) where
   left'  (Star k) = Star $ either (fmap Left . k) (pure . Right)
   right' (Star k) = Star $ either (pure . Left) (fmap Right . k)
@@ -301,7 +336,59 @@ instance Cochoice (IxForget r) where
 
 ----------------------------------------
 
-class (Choice p, Strong p) => Traversing p where
+class (Choice p, Strong p) => Visiting p where
+  visit
+    :: forall i s t a b
+    .  (forall f. Functor f => (forall r. r -> f r) -> (a -> f b) -> s -> f t)
+    -> p i a b -> p i s t
+  visit f =
+    let match :: s -> Either a t
+        match s = f Right Left s
+        update :: s -> b -> t
+        update s b = runIdentity $ f Identity (\_ -> Identity b) s
+    in dimap (\s -> (match s, s))
+             (\(ebt, s) -> either (update s) id ebt)
+       . first'
+       . left'
+  {-# INLINE visit #-}
+
+instance Functor f => Visiting (StarA f) where
+  visit f (StarA point k) = StarA point (f point k)
+  {-# INLINE visit #-}
+
+instance Applicative f => Visiting (Star f) where
+  visit f (Star k) = Star (f pure k)
+  {-# INLINE visit #-}
+
+instance Monoid r => Visiting (Forget r) where
+  visit f (Forget k) = Forget (getConst #. f pure (Const #. k))
+  {-# INLINE visit #-}
+
+instance Visiting (ForgetM r) where
+  visit f (ForgetM k) =
+    ForgetM (getConst #. f (\_ -> Const Nothing) (Const #. k))
+  {-# INLINE visit #-}
+
+instance Visiting FunArrow where
+  visit f (FunArrow k) = FunArrow $ runIdentity #. f pure (Identity #. k)
+  {-# INLINE visit #-}
+
+instance Applicative f => Visiting (IxStar f) where
+  visit f (IxStar k) = IxStar $ \i -> f pure (k i)
+  {-# INLINE visit #-}
+
+instance Monoid r => Visiting (IxForget r) where
+  visit f (IxForget k) = IxForget $ \i -> getConst #. f pure (Const #. k i)
+  {-# INLINE visit #-}
+
+instance Visiting IxFunArrow where
+  visit f (IxFunArrow k) =
+    IxFunArrow $ \i -> runIdentity #. f pure (Identity #. k i)
+  {-# INLINE visit #-}
+
+----------------------------------------
+
+class Visiting p => Traversing p where
   wander
     :: (forall f. Applicative f => (a -> f b) -> s -> f t)
     -> p i a b -> p i s t

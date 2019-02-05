@@ -59,6 +59,8 @@ instance ArrowChoice p => Choice (WrappedArrow p) where
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
+instance ArrowChoice p => Visiting (WrappedArrow p)
+
 class Arrow arr => ArrowOptic k arr where
   -- | Turn an optic into an arrow transformer.
   overA :: Optic k is s t a b -> arr a b -> arr s t

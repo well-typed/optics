@@ -1,6 +1,12 @@
-module Optics.Internal.Concrete where
+module Optics.Internal.Concrete
+  ( Exchange(..)
+  , Store(..)
+  , Market(..)
+  , AffineMarket(..)
+  ) where
 
 import Data.Bifunctor
+import Data.Functor.Identity
 
 import Optics.Internal.Profunctor
 
@@ -102,3 +108,9 @@ instance Strong (AffineMarket a b) where
     (\(c, a) -> bimap (c,) id (seta a))
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+instance Visiting (AffineMarket a b) where
+  visit f (AffineMarket abt seta) = AffineMarket
+    (\s b -> runIdentity $ f Identity (\a -> Identity $ abt a b) s)
+    (\s -> either Right Left $ f Right (either Right Left . seta) s)
+  {-# INLINE visit #-}
