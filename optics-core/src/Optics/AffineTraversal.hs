@@ -26,6 +26,11 @@ type AffineTraversal s t a b = Optic An_AffineTraversal NoIx s t a b
 type AffineTraversal' s a = Optic' An_AffineTraversal NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven affine traversal.
+--
+-- Note: this isn't exactly van Laarhoven representation as there is no
+-- @PointedFunctor@ class, but you can interpret the first argument as a
+-- dictionary of 'Pointed' class that supplies the @point@ function.
+--
 type AffineTraversalVL s t a b =
   forall f. Functor f => (forall r. r -> f r) -> (a -> f b) -> s -> f t
 
@@ -72,6 +77,5 @@ toAtraversalVL
   :: Is k An_AffineTraversal
   => Optic k is s t a b
   -> AffineTraversalVL s t a b
-toAtraversalVL o point =
-  runStarA . getOptic (toAffineTraversal o) . StarA point
+toAtraversalVL o point = runStarA . getOptic (toAffineTraversal o) . StarA point
 {-# INLINE toAtraversalVL #-}
