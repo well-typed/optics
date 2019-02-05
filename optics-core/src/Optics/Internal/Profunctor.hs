@@ -8,7 +8,6 @@ module Optics.Internal.Profunctor where
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
 import Data.Functor.Identity
-import Data.Semigroup
 
 import Optics.Internal.Utils
 
@@ -39,28 +38,31 @@ newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 ----------------------------------------
 -- Utils
 
--- | Unit data type with a strict 'Semigroup' and 'Monoid' instances.
 -- Needed for strict application of (indexed) setters.
 --
--- Credit for this type goes to Eric Mertens, see
+-- Credit for this goes to Eric Mertens, see
 -- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
-data Unit' = Unit'
+data Identity' a = Identity' {-# UNPACK #-} !() a
+  deriving Functor
 
--- | '<>' is strict, 'stimes' is /O(1)/
-instance Semigroup Unit' where
-  (<>)   = seq
-  stimes = stimesIdempotent
+instance Applicative Identity' where
+  pure a = Identity' () a
+  {-# INLINE pure #-}
+  Identity' () f <*> Identity' () x = Identity' () (f x)
+  {-# INLINE (<*>) #-}
 
--- | 'mappend' is strict
-instance Monoid Unit' where
-  mempty  = Unit'
-  mappend = (<>)
+-- | Mark a value for evaluation to whnf.
+--
+-- This allows us to, when applying a setter to a structure, evaluate only the
+-- parts that we modify. If an optic focuses on multiple targets, Applicative
+-- instance of Identity' makes sure that we force evaluation of all of them, but
+-- we leave anything else alone.
+--
+wrapIdentity' :: a -> Identity' a
+wrapIdentity' a = Identity' (a `seq` ()) a
 
-wrapUnit' :: a -> (Unit', a)
-wrapUnit' a = (a `seq` Unit', a)
-
-unwrapUnit' :: (Unit', a) -> a
-unwrapUnit' (Unit', a) = a
+unwrapIdentity' :: Identity' a -> a
+unwrapIdentity' (Identity' () a) = a
 
 ----------------------------------------
 
@@ -508,9 +510,9 @@ class Traversing p => Mapping p where
     -> p       j  a b
     -> p (i -> j) s t
 
-instance Mapping (Star ((,) Unit')) where
-  roam  f (Star k) = Star $ wrapUnit' . f (unwrapUnit' . k)
-  iroam f (Star k) = Star $ wrapUnit' . f (\_ -> unwrapUnit' . k)
+instance Mapping (Star Identity') where
+  roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
+  iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
   {-# INLINE roam #-}
   {-# INLINE iroam #-}
 
@@ -520,9 +522,11 @@ instance Mapping FunArrow where
   {-# INLINE roam #-}
   {-# INLINE iroam #-}
 
-instance Mapping (IxStar ((,) Unit')) where
-  roam  f (IxStar k) = IxStar $ \i  -> wrapUnit' . f (unwrapUnit' . k i)
-  iroam f (IxStar k) = IxStar $ \ij -> wrapUnit' . f (\i -> unwrapUnit' . k (ij i))
+instance Mapping (IxStar Identity') where
+  roam  f (IxStar k) =
+    IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
+  iroam f (IxStar k) =
+    IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
   {-# INLINE roam #-}
   {-# INLINE iroam #-}
 

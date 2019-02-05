@@ -45,9 +45,9 @@ iover'
   :: (Is k A_Setter, CheckIndices "iover'" 1 i is)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
-iover' o f = unwrapUnit' . runIxStar star id
+iover' o f = unwrapIdentity' . runIxStar star id
   where
-    star = getOptic (toIxSetter o) $ IxStar (\i -> wrapUnit' . f i)
+    star = getOptic (toIxSetter o) $ IxStar (\i -> wrapIdentity' . f i)
 {-# INLINE iover' #-}
 
 -- | Apply an indexed setter.

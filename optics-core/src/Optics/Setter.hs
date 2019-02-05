@@ -61,7 +61,9 @@ over'
   :: Is k A_Setter
   => Optic k is s t a b
   -> (a -> b) -> s -> t
-over' o f = unwrapUnit' . runStar (getOptic (toSetter o) $ Star (wrapUnit' . f))
+over' o f = unwrapIdentity' . runStar star
+  where
+    star = getOptic (toSetter o) $ Star (wrapIdentity' . f)
 {-# INLINE over' #-}
 
 -- | Apply a setter.
