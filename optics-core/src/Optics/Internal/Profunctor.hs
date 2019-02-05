@@ -8,6 +8,7 @@ module Optics.Internal.Profunctor where
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
 import Data.Functor.Identity
+import Data.Semigroup
 
 import Optics.Internal.Utils
 
@@ -37,6 +38,31 @@ newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
 ----------------------------------------
 -- Utils
+
+-- | Unit data type with a strict 'Semigroup' and 'Monoid' instances.
+-- Needed for strict application of (indexed) setters.
+--
+-- Credit for this type goes to Eric Mertens, see
+-- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
+data Unit' = Unit'
+
+-- | '<>' is strict, 'stimes' is /O(1)/
+instance Semigroup Unit' where
+  (<>)   = seq
+  stimes = stimesIdempotent
+
+-- | 'mappend' is strict
+instance Monoid Unit' where
+  mempty  = Unit'
+  mappend = (<>)
+
+wrapUnit' :: a -> (Unit', a)
+wrapUnit' a = (a `seq` Unit', a)
+
+unwrapUnit' :: (Unit', a) -> a
+unwrapUnit' (Unit', a) = a
+
+----------------------------------------
 
 -- | Unwrap 'StarA'.
 runStarA :: StarA f i a b -> a -> f b
@@ -472,20 +498,36 @@ instance Traversing IxFunArrow where
 ----------------------------------------
 
 class Traversing p => Mapping p where
-  roam :: ((a -> b) -> s -> t) -> p i a b -> p i s t
-  iroam :: ((i -> a -> b) -> s -> t) -> p j a b -> p (i -> j) s t
+  roam
+    :: ((a -> b) -> s -> t)
+    -> p i a b
+    -> p i s t
+
+  iroam
+    :: ((i -> a -> b) -> s -> t)
+    -> p       j  a b
+    -> p (i -> j) s t
+
+instance Mapping (Star ((,) Unit')) where
+  roam  f (Star k) = Star $ wrapUnit' . f (unwrapUnit' . k)
+  iroam f (Star k) = Star $ wrapUnit' . f (\_ -> unwrapUnit' . k)
+  {-# INLINE roam #-}
+  {-# INLINE iroam #-}
 
 instance Mapping FunArrow where
-  roam f (FunArrow k) = FunArrow (f k)
+  roam  f (FunArrow k) = FunArrow $ f k
+  iroam f (FunArrow k) = FunArrow $ f (const k)
   {-# INLINE roam #-}
+  {-# INLINE iroam #-}
 
-  iroam f (FunArrow k) = FunArrow (f (const k))
+instance Mapping (IxStar ((,) Unit')) where
+  roam  f (IxStar k) = IxStar $ \i  -> wrapUnit' . f (unwrapUnit' . k i)
+  iroam f (IxStar k) = IxStar $ \ij -> wrapUnit' . f (\i -> unwrapUnit' . k (ij i))
+  {-# INLINE roam #-}
   {-# INLINE iroam #-}
 
 instance Mapping IxFunArrow where
-  roam f (IxFunArrow k) = IxFunArrow $ \i -> f (k i)
+  roam  f (IxFunArrow k) = IxFunArrow $ \i -> f (k i)
+  iroam f (IxFunArrow k) = IxFunArrow $ \ij -> f $ \i -> k (ij i)
   {-# INLINE roam #-}
-
-  iroam f (IxFunArrow k) =
-    IxFunArrow $ \ij -> f $ \i -> k (ij i)
   {-# INLINE iroam #-}

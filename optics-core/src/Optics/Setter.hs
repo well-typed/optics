@@ -4,7 +4,9 @@ module Optics.Setter
   , Setter'
   , toSetter
   , over
+  , over'
   , set
+  , set'
   , sets
   , mapped
   , module Optics.Optic
@@ -38,6 +40,30 @@ over
 over o = runFunArrow #. getOptic (toSetter o) .# FunArrow
 {-# INLINE over #-}
 
+-- | Apply a setter as a modifier, strictly.
+--
+-- Example:
+--
+-- @
+--  f :: Int -> (Int, a) -> (Int, a)
+--  f k acc
+--    | k > 0     = f (k - 1) $ over' _1 (+1) acc
+--    | otherwise = acc
+-- @
+--
+-- runs in constant space, but would result in a space leak if used with 'over'.
+--
+-- Note that replacing '$' with '$!' or 'Data.Tuple.Optics._1' with
+-- 'Data.Tuple.Optics._1'' (which amount to the same thing) doesn't help when
+-- 'over' is used, because the first coordinate of a pair is never forced.
+--
+over'
+  :: Is k A_Setter
+  => Optic k is s t a b
+  -> (a -> b) -> s -> t
+over' o f = unwrapUnit' . runStar (getOptic (toSetter o) $ Star (wrapUnit' . f))
+{-# INLINE over' #-}
+
 -- | Apply a setter.
 --
 -- >>> let _1  = lens fst $ \(_,y) x -> (x, y)
@@ -50,6 +76,14 @@ set
   -> b -> s -> t
 set o = over o . const
 {-# INLINE set #-}
+
+-- | Apply a setter, strictly.
+set'
+  :: Is k A_Setter
+  => Optic k is s t a b
+  -> b -> s -> t
+set' o = over' o . const
+{-# INLINE set' #-}
 
 -- | Build a setter from a function to modify the element(s).
 sets

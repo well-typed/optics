@@ -324,6 +324,7 @@ import Data.Either.Optics as P
 --
 -- * Composition operator is '%'
 -- * 'view' is /smart/
+-- * 'set'' is a strict version of 'set', not 'set' for type-preserving optics
 -- * None of operators is exported from main module
 -- * All ordinary optics are index-preserving by default
 -- * Indexed optics interface is different (let's expand in own section, when the implementation is stabilised)
