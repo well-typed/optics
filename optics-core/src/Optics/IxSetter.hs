@@ -6,7 +6,9 @@ module Optics.IxSetter
   , FunctorWithIndex(..)
   , toIxSetter
   , iover
+  , iover'
   , iset
+  , iset'
   , isets
   , conjoinedSets
   , imapped
@@ -38,6 +40,16 @@ iover
 iover o f = runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
 {-# INLINE iover #-}
 
+-- | Apply an indexed setter as a modifier, strictly.
+iover'
+  :: (Is k A_Setter, CheckIndices "iover'" 1 i is)
+  => Optic k is s t a b
+  -> (i -> a -> b) -> s -> t
+iover' o f = unwrapIdentity' . runIxStar star id
+  where
+    star = getOptic (toIxSetter o) $ IxStar (\i -> wrapIdentity' . f i)
+{-# INLINE iover' #-}
+
 -- | Apply an indexed setter.
 iset
   :: (Is k A_Setter, CheckIndices "iset" 1 i is)
@@ -45,6 +57,14 @@ iset
   -> (i -> b) -> s -> t
 iset o f = iover o (\i _ -> f i)
 {-# INLINE iset #-}
+
+-- | Apply an indexed setter, strictly.
+iset'
+  :: (Is k A_Setter, CheckIndices "iset'" 1 i is)
+  => Optic k is s t a b
+  -> (i -> b) -> s -> t
+iset' o f = iover' o (\i _ -> f i)
+{-# INLINE iset' #-}
 
 -- | Build an indexed setter from a function to modify the element(s).
 isets
