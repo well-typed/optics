@@ -60,15 +60,18 @@ instance Applicative Identity' where
 --
 wrapIdentity' :: a -> Identity' a
 wrapIdentity' a = Identity' (a `seq` ()) a
+{-# INLINE wrapIdentity' #-}
 
 unwrapIdentity' :: Identity' a -> a
 unwrapIdentity' (Identity' () a) = a
+{-# INLINE unwrapIdentity' #-}
 
 ----------------------------------------
 
 -- | Unwrap 'StarA'.
 runStarA :: StarA f i a b -> a -> f b
 runStarA (StarA _ k) = k
+{-# INLINE runStarA #-}
 
 -- | Repack 'Star' to change its index type.
 reStar :: Star f i a b -> Star f j a b
