@@ -111,6 +111,9 @@ toLens = castOptic
 -- | Build a lens from a getter and a setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get set = Optic $
+  -- Do not define lens in terms of lensVL, mixing profunctor-style definitions
+  -- with VL style implementation leads to subpar generated code, i.e. updating
+  -- often gets and then sets as opposed to updating in place.
   dimap (\s -> (get s, s))
         (\(b, s) -> set s b)
   . first'
