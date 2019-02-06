@@ -4,9 +4,13 @@
 module Optics.Internal.Indexed where
 
 import Control.Applicative
+import Control.Applicative.Backwards
+import Control.Monad.Trans.Identity
+import Control.Monad.Trans.Reader
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Functor.Product
+import Data.Functor.Reverse
 import Data.Functor.Sum
 import Data.Ix
 import Data.List.NonEmpty
@@ -421,6 +425,55 @@ instance FoldableWithIndex Void Proxy where
 instance TraversableWithIndex Void Proxy where
   itraverse _ _ = pure Proxy
   {-# INLINE itraverse #-}
+
+-- Backwards
+
+instance FunctorWithIndex i f => FunctorWithIndex i (Backwards f) where
+  imap f  = Backwards . imap f . forwards
+  {-# INLINE imap #-}
+
+instance FoldableWithIndex i f => FoldableWithIndex i (Backwards f) where
+  ifoldMap f = ifoldMap f . forwards
+  {-# INLINE ifoldMap #-}
+
+instance TraversableWithIndex i f => TraversableWithIndex i (Backwards f) where
+  itraverse f = fmap Backwards . itraverse f . forwards
+  {-# INLINE itraverse #-}
+
+-- Reverse
+
+instance FunctorWithIndex i f => FunctorWithIndex i (Reverse f) where
+  imap f = Reverse . imap f . getReverse
+  {-# INLINE imap #-}
+
+instance FoldableWithIndex i f => FoldableWithIndex i (Reverse f) where
+  ifoldMap f = getDual . ifoldMap (\i -> Dual #. f i) . getReverse
+  {-# INLINE ifoldMap #-}
+
+instance TraversableWithIndex i f => TraversableWithIndex i (Reverse f) where
+  itraverse f =
+    fmap Reverse . forwards . itraverse (\i -> Backwards . f i) . getReverse
+  {-# INLINE itraverse #-}
+
+-- IdentityT
+
+instance FunctorWithIndex i m => FunctorWithIndex i (IdentityT m) where
+  imap f (IdentityT m) = IdentityT $ imap f m
+  {-# INLINE imap #-}
+
+instance FoldableWithIndex i m => FoldableWithIndex i (IdentityT m) where
+  ifoldMap f (IdentityT m) = ifoldMap f m
+  {-# INLINE ifoldMap #-}
+
+instance TraversableWithIndex i m => TraversableWithIndex i (IdentityT m) where
+  itraverse f (IdentityT m) = IdentityT <$> itraverse f m
+  {-# INLINE itraverse #-}
+
+-- ReaderT
+
+instance FunctorWithIndex i m => FunctorWithIndex (e, i) (ReaderT e m) where
+  imap f (ReaderT m) = ReaderT $ \k -> imap (f . (,) k) (m k)
+  {-# INLINE imap #-}
 
 -- Generics
 
