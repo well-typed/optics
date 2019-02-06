@@ -28,35 +28,37 @@ import Optics.Traversal
 infixr 9 <%>
 (<%>)
   :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b,
-      CheckIndices "(<%>)" 1 i is, CheckIndices "(<%>)" 2 j js)
+      (is `HasSingleIndex` i) "(<%>)" 1, (js `HasSingleIndex` j) "(<%>)" 2)
   => Optic k is              s t u v
   -> Optic l js              u v a b
   -> Optic m (WithIx (i, j)) s t a b
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
 
--- | Compose two optics and preserve indices of the right one.
+-- | Compose two indexed optics and preserve indices of the right one.
 --
 -- >>> itoListOf (ifolded %> ifolded) ["foo", "bar"]
 -- [(0,'f'),(1,'o'),(2,'o'),(0,'b'),(1,'a'),(2,'r')]
 --
 infixr 9 %>
 (%>)
-  :: (m ~ Join k l, Is k m, Is l m, IxOptic k s t u v)
+  :: (m ~ Join k l, Is k m, Is l m, IxOptic k s t u v,
+      NonEmptyIndices is "(%>)" 1, NonEmptyIndices js "(%>)" 2)
   => Optic k is s t u v
   -> Optic l js u v a b
   -> Optic m js s t a b
 o %> o' = noIx o % o'
 {-# INLINE (%>) #-}
 
--- | Compose two optics and preserve indices of the left one.
+-- | Compose two indexed optics and preserve indices of the left one.
 --
 -- >>> itoListOf (ifolded <% ifolded) ["foo", "bar"]
 -- [(0,'f'),(0,'o'),(0,'o'),(1,'b'),(1,'a'),(1,'r')]
 --
 infixr 9 <%
 (<%)
- :: (m ~ Join k l, Is l m, Is k m, IxOptic l u v a b)
+ :: (m ~ Join k l, Is l m, Is k m, IxOptic l u v a b,
+     NonEmptyIndices is "(<%)" 1, NonEmptyIndices js "(<%)" 2)
  => Optic k is s t u v
  -> Optic l js u v a b
  -> Optic m is s t a b
@@ -69,7 +71,7 @@ o <% o' = o % noIx o'
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
 reindex
-  :: (IxOptic k s t a b, CheckIndices "reindex" 2 i is)
+  :: (IxOptic k s t a b, (is `HasSingleIndex` i) "reindex" 2)
   => (i -> j)
   -> Optic k is         s t a b
   -> Optic k (WithIx j) s t a b

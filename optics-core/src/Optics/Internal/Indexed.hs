@@ -24,19 +24,31 @@ import qualified Data.Sequence as Seq
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
+-- | Check whether a list of indices is not empty and generate sensible error
+-- message if it's not.
+class NonEmptyIndices (is :: [*]) (f :: Symbol) (arg :: Nat)
+
+instance
+  ( TypeError
+    ('Text "Indexed optic is expected"
+    ':$$: FunInfo f arg)
+  ) => NonEmptyIndices '[] f arg
+
+instance NonEmptyIndices (x ': xs) f arg
+
 -- | Generate sensible error messages in case a user tries to pass either a
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
 -- with a single index is expected.
-class is ~ '[i] => CheckIndices (f :: Symbol) (arg :: Nat) (i :: *) (is :: [*])
+class is ~ '[i] => HasSingleIndex (is :: [*]) (i :: *) (f :: Symbol) (arg :: Nat)
 
-instance CheckIndices arg f i '[i]
+instance HasSingleIndex '[i] i arg f
 
 instance
   ( TypeError
     ('Text "Indexed optic is expected"
      ':$$: FunInfo f arg)
   , '[] ~ '[i]
-  ) => CheckIndices f arg i '[]
+  ) => HasSingleIndex '[] i f arg
 
 instance
   ( TypeError
@@ -45,7 +57,7 @@ instance
      ':$$: FunInfo f arg)
   , is ~ '[i1, i2]
   , is ~ '[i]
-  ) => CheckIndices f arg i '[i1, i2]
+  ) => HasSingleIndex '[i1, i2] i f arg
 
 instance
   ( TypeError
@@ -54,7 +66,7 @@ instance
      ':$$: FunInfo f arg)
   , is ~ '[i1, i2, i3]
   , is ~ '[i]
-  ) => CheckIndices f arg i [i1, i2, i3]
+  ) => HasSingleIndex [i1, i2, i3] i f arg
 
 instance
   ( TypeError
@@ -63,7 +75,7 @@ instance
      ':$$: FunInfo f arg)
   , is ~ '[i1, i2, i3, i4]
   , is ~ '[i]
-  ) => CheckIndices f arg i '[i1, i2, i3, i4]
+  ) => HasSingleIndex '[i1, i2, i3, i4] i f arg
 
 instance
   ( TypeError
@@ -72,7 +84,7 @@ instance
      ':$$: FunInfo f arg)
   , is ~ '[i1, i2, i3, i4, i5]
   , is ~ '[i]
-  ) => CheckIndices f arg i '[i1, i2, i3, i4, i5]
+  ) => HasSingleIndex '[i1, i2, i3, i4, i5] i f arg
 
 instance
   ( TypeError
@@ -81,10 +93,10 @@ instance
      ':$$: FunInfo f arg)
   , is ~ (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is')
   , is ~ '[i]
-  ) => CheckIndices f arg i (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is')
+  ) => HasSingleIndex (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is') i f arg
 
 ----------------------------------------
--- Helpers for CheckIndices.
+-- Helpers for NonEmptyIndices and HasSingleIndex.
 
 type family FunInfo (f :: Symbol) (arg :: Nat) :: ErrorMessage where
   FunInfo f arg = 'Text "  (in the " ':<>: 'Text (ArgToSymbol arg)

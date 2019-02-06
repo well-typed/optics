@@ -9,7 +9,8 @@ module Optics.Optic
   , (%)
   , (%%)
   , Append
-  , CheckIndices
+  , NonEmptyIndices
+  , HasSingleIndex
   )
   where
 
