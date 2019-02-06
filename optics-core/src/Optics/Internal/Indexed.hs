@@ -214,7 +214,7 @@ instance TraversableWithIndex () Identity where
 -- (,) k
 
 instance FunctorWithIndex k ((,) k) where
-  imap f (k,a) = (k, f k a)
+  imap f (k, a) = (k, f k a)
   {-# INLINE imap #-}
 
 instance FoldableWithIndex k ((,) k) where

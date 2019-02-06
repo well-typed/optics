@@ -127,8 +127,8 @@ unpackedChars = re packedChars
 instance IsByteString Strict.ByteString where
   packedBytes = Strict.packedBytes
   packedChars = Strict.packedChars
-  bytes       = reindex fromIntegral Strict.bytes
-  chars       = reindex fromIntegral Strict.chars
+  bytes       = reindexed fromIntegral Strict.bytes
+  chars       = reindexed fromIntegral Strict.chars
   {-# INLINE packedBytes #-}
   {-# INLINE packedChars #-}
   {-# INLINE bytes #-}

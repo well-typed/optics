@@ -3,7 +3,7 @@ module Optics.Indexed.Core
   ( (<%>)
   , (%>)
   , (<%)
-  , reindex
+  , reindexed
   , icompose
   , icompose3
   , icompose4
@@ -70,13 +70,13 @@ o <% o' = o % noIx o'
 -- >>> itoListOf (reindex succ ifolded) "foo"
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
-reindex
-  :: (IxOptic k s t a b, (is `HasSingleIndex` i) "reindex" 2)
+reindexed
+  :: (IxOptic k s t a b, (is `HasSingleIndex` i) "reindexed" 2)
   => (i -> j)
   -> Optic k is         s t a b
   -> Optic k (WithIx j) s t a b
-reindex = icomposeN
-{-# INLINE reindex #-}
+reindexed = icomposeN
+{-# INLINE reindexed #-}
 
 -- | Flatten indices obtained from two indexed optics.
 icompose

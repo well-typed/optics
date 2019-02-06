@@ -10,7 +10,7 @@ module Optics.Indexed
   , (<%>)
   , (%>)
   , (<%)
-  , reindex
+  , reindexed
   , icompose
   , icompose3
   , icompose4

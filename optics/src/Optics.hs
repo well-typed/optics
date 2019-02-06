@@ -327,6 +327,8 @@ import Data.Either.Optics as P
 -- * 'view' is for getters
 -- * 'preview' is for affine folds
 -- * 'foldOf' is the equivalent of view for folds
+-- * 'firstOf' is now 'headOf'
+-- * There are four variants of 'backwards' for (indexed) folds and traversals
 -- * None of operators is exported from main module
 -- * All ordinary optics are index-preserving by default
 -- * Indexed optics interface is different (let's expand in own section, when the implementation is stabilised)
