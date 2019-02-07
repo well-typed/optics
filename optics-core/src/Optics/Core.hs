@@ -16,7 +16,11 @@ module Optics.Core
 import Optics.AffineFold      as O
 import Optics.AffineTraversal as O
 import Optics.Arrow           as O
+import Optics.At.Core         as O
 import Optics.Coerce          as O
+import Optics.Cons.Core       as O
+import Optics.Each.Core       as O
+import Optics.Empty.Core      as O
 import Optics.Equality        as O
 import Optics.Fold            as O
 import Optics.Getter          as O

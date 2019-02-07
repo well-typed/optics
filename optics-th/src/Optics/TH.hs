@@ -65,7 +65,7 @@ import Data.Set (Set)
 import Language.Haskell.TH.Syntax hiding (lift)
 
 import Language.Haskell.TH
-import Optics.Core
+import Optics.Core hiding (cons)
 import Optics.Operators
 import Optics.TH.Internal.Product
 import Optics.TH.Internal.Sum
