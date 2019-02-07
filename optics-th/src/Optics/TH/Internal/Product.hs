@@ -28,6 +28,7 @@ import qualified Language.Haskell.TH.Datatype as D
 
 import Data.Either.Optics
 import Data.Tuple.Optics
+import Data.Set.Optics
 import Language.Haskell.TH.Optics
 import Optics.Core
 import Optics.TH.Internal.Utils

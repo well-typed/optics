@@ -317,9 +317,9 @@ import Data.Word
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 
+import Data.Set.Optics
 import Data.Tuple.Optics
 import Optics.Core
-import Optics.TH.Internal.Utils
 
 -- | Has a 'Name'
 class HasName t where

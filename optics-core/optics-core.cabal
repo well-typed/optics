@@ -54,6 +54,7 @@ library
     Optics.Traversal
     Data.Either.Optics
     Data.Maybe.Optics
+    Data.Set.Optics
     Data.Tuple.Optics
 
     -- internal modules

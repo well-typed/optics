@@ -13,6 +13,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
 
+import Data.Set.Optics
 import Language.Haskell.TH.Optics
 import Optics.Core
 import Optics.TH.Internal.Utils
