@@ -1,3 +1,4 @@
+-- | EXPERIMENTAL
 module Optics.View where
 
 import Control.Monad.Reader.Class
