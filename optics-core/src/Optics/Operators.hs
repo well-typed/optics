@@ -18,10 +18,11 @@ module Optics.Operators
 
 import Data.Function
 
+import Optics.AffineFold
 import Optics.Fold
+import Optics.Getter
 import Optics.Review
 import Optics.Setter
-import Optics.View
 
 #if MIN_VERSION_base(4,11,0)
 import Data.Functor ((<&>))
@@ -38,11 +39,18 @@ infixl 1 <&>
 #endif
 
 -- | Flipped infix version of 'view'.
-(^.) :: ViewableOptic k a => s -> Optic' k is s a -> ViewResult k a
+(^.) :: Is k A_Getter => s -> Optic' k is s a -> a
 (^.) = flip view
 {-# INLINE (^.) #-}
 
 infixl 8 ^.
+
+-- | Flipped infix version of 'preview'.
+(^?) :: Is k An_AffineFold => s -> Optic' k is s a -> Maybe a
+(^?) = flip preview
+{-# INLINE (^?) #-}
+
+infixl 8 ^?
 
 -- | Flipped infix version of 'toListOf'.
 (^..) :: Is k A_Fold => s -> Optic' k is s a -> [a]
@@ -50,13 +58,6 @@ infixl 8 ^.
 {-# INLINE (^..) #-}
 
 infixl 8 ^..
-
--- | Flipped infix version of 'preview'.
-(^?) :: Is k A_Fold => s -> Optic' k is s a -> Maybe a
-(^?) = flip preview
-{-# INLINE (^?) #-}
-
-infixl 8 ^?
 
 -- | Flipped infix version of 'review'.
 (#) :: Is k A_Review => Optic' k is t b -> b -> t

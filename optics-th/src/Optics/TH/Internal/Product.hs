@@ -430,7 +430,7 @@ makeFieldInstance defType className decs =
     go ty = or <$> traverse go (toListOf typeSelf ty)
 
     -- We want to catch type families, but not *data* families. See #799.
-    hasTypeFamilyD ty = case view01 (_FamilyI % _1) ty of
+    hasTypeFamilyD ty = case preview (_FamilyI % _1) ty of
       Nothing       -> False
       Just instDecs -> has _OpenTypeFamilyD instDecs
                     || has _ClosedTypeFamilyD instDecs

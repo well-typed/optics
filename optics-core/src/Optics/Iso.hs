@@ -62,7 +62,7 @@ mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 
 -- | Data types that are representationally equal are isomorphic.
 --
--- >>> view1 coerced 'x' :: Identity Char
+-- >>> view coerced 'x' :: Identity Char
 -- Identity 'x'
 --
 coerced :: (Coercible s a, Coercible t b) => Iso s t a b
@@ -74,7 +74,7 @@ coerced = iso coerce coerce
 -- 'curried' = 'iso' 'curry' 'uncurry'
 -- @
 --
--- >>> view1 curried fst 3 4
+-- >>> view curried fst 3 4
 -- 3
 --
 curried :: Iso ((a, b) -> c) ((d, e) -> f) (a -> b -> c) (d -> e -> f)
@@ -91,7 +91,7 @@ curried = iso curry uncurry
 -- 'uncurried' = 're' 'curried'
 -- @
 --
--- >>> (view1 uncurried (+)) (1,2)
+-- >>> (view uncurried (+)) (1,2)
 -- 3
 --
 uncurried :: Iso (a -> b -> c) (d -> e -> f) ((a, b) -> c) ((d, e) -> f)
@@ -100,7 +100,7 @@ uncurried = iso uncurry curry
 
 -- | The isomorphism for flipping a function.
 --
--- >>> (view1 flipped (,)) 1 2
+-- >>> (view flipped (,)) 1 2
 -- (2,1)
 --
 flipped :: Iso (a -> b -> c) (a' -> b' -> c') (b -> a -> c) (b' -> a' -> c')
@@ -133,7 +133,7 @@ class Bifunctor p => Swapped p where
   -- 'bimap' f g '.' 'swapped' = 'swapped' '.' 'bimap' g f
   -- @
   --
-  -- >>> view1 swapped (1,2)
+  -- >>> view swapped (1,2)
   -- (2,1)
   --
   swapped :: Iso (p a b) (p c d) (p b a) (p d c)

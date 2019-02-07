@@ -30,6 +30,8 @@ instance Profunctor Tagged where
   lmap  _f   = coerce
   rmap     g = Tagged #. g .# unTagged
   {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
 
 instance Choice Tagged where
   left'  = Tagged #. Left  .# unTagged

@@ -409,7 +409,7 @@ class HasTypeVars t where
 
 instance HasTypeVars TyVarBndr where
   typeVarsEx s = traversalVL $ \f b ->
-    if view1 name b `Set.member` s
+    if view name b `Set.member` s
     then pure b
     else traverseOf name f b
 

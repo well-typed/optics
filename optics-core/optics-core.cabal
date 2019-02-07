@@ -46,14 +46,12 @@ library
     Optics.LensyReview
     Optics.Operators
     Optics.Optic
-    Optics.Passthrough
     Optics.Prism
     Optics.PrismaticGetter
     Optics.Re
     Optics.Review
     Optics.Setter
     Optics.Traversal
-    Optics.View
     Data.Either.Optics
     Data.Maybe.Optics
     Data.Tuple.Optics
