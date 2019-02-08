@@ -41,3 +41,5 @@ import Optics.Traversal       as O
 import Data.Either.Optics     as D
 import Data.Maybe.Optics      as D
 import Data.Tuple.Optics      as D
+
+import Optics.Generic.Labels ()

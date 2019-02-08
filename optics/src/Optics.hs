@@ -264,7 +264,9 @@ import Optics.Each
 import Optics.Empty
 import Optics.Indexed
 import Optics.Re
-import Optics.Labels ()
+
+-- Overloaded labels
+import Optics.Generic.Labels ()
 
 -- Optics for concrete base types
 

@@ -1,4 +1,8 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -dsuppress-idinfo -dsuppress-coercions -dsuppress-type-applications -dsuppress-module-prefixes -dsuppress-type-signatures -dsuppress-uniques #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin #-}
 module Main (main) where
@@ -7,9 +11,11 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Inspection
 import qualified Data.Map as M
+import qualified GHC.Generics as G
 
 import Optics
 import Optics.Tests.Utils
+import Optics.Generic.Sum.Constructors
 
 -- | Composing a lens and a traversal yields a traversal
 _comp1 :: Traversable t => Optic A_Traversal NoIx (t a, y) (t b, y) a b
@@ -286,6 +292,56 @@ mapIx
   => (f (Either a (g (M.Map k v))), b) -> k -> [v]
 mapIx m k = toListOf (_1 % folded % _Right % folded % ix k) m
 
+-- generic lens / overloaded labels
+
+data T1
+  = T11 { tint :: Int, tchar :: Char }
+  | T12 { tint :: Int, tchar :: Char, _tname :: String }
+  deriving (Show, G.Generic)
+
+tintLabel, tintManual :: Lens' T1 Int
+tintLabel = #tint
+tintManual = lens tint (\t n -> t { tint = n })
+
+tcharLabel, tcharManual :: Lens' T1 Char
+tcharLabel = #tchar
+tcharManual = lens tchar (\t c -> t { tchar = c })
+
+data T2 a = T2 { tfield :: a, tstring :: String }
+  deriving (Show, G.Generic)
+
+tfieldLabel, tfieldManual :: Lens (T2 a) (T2 b) a b
+tfieldLabel = #tfield
+tfieldManual = lens tfield (\t v -> t { tfield = v })
+
+tstringLabel, tstringManual :: Lens' (T2 a) String
+tstringLabel = #tstring
+tstringManual = lens tstring (\t v -> t { tstring = v })
+
+data T3 a = T31 Int | T32 a | T33 Int String
+  deriving (Show, G.Generic)
+
+t31Label, t31Manual :: Prism' (T3 a) Int
+t31Label = _Ctor @"T31"
+t31Manual = prism T31 $ \t -> case t of
+  T31 a   -> Right a
+  T32 _   -> Left t
+  T33 _ _ -> Left t
+
+t32Label, t32Manual :: Prism (T3 a) (T3 b) a b
+t32Label = _Ctor @"T32"
+t32Manual = prism T32 $ \t -> case t of
+  T31 a   -> Left (T31 a)
+  T32 a   -> Right a
+  T33 a b -> Left (T33 a b)
+
+t33Label, t3Manual :: Prism' (T3 a) (Int, String)
+t33Label = _Ctor @"T33"
+t3Manual = prism (uncurry T33) $ \t -> case t of
+  T31 _   -> Left t
+  T32 _   -> Left t
+  T33 a b -> Right (a, b)
+
 inspectionTests :: TestTree
 inspectionTests = testGroup "inspection"
     [ testCase "traverseOf traversed = traverse" $
@@ -447,6 +503,24 @@ inspectionTests = testGroup "inspection"
         assertSuccess $(inspectTest $ 'simpleMapIx `hasNoTypeClassesExcept` [''Ord])
     , testCase "optimized mapIx" $
         assertSuccess $(inspectTest $ hasNoProfunctors 'mapIx)
+
+    , testCase "#tint = hand written lens" $
+        -- GHC 8.0.2 leaves Generics in lenses for sum types.
+        ghc80failure $(inspectTest $ 'tintLabel === 'tintManual)
+    , testCase "#tchar = hand written lens" $
+        -- GHC 8.0.2 leaves Generics in lenses for sum types.
+        ghc80failure $(inspectTest $ 'tcharLabel === 'tcharManual)
+    , testCase "#tfield = hand written lens" $
+        assertSuccess $(inspectTest $ 'tfieldLabel ==- 'tfieldManual)
+    , testCase "#tstring = hand written lens" $
+        assertSuccess $(inspectTest $ 'tstringLabel === 'tstringManual)
+    , testCase "#_T31 = hand written prism" $
+        assertSuccess $(inspectTest $ 't31Label === 't31Manual)
+    , testCase "#_T32 = hand written prism" $
+        assertSuccess $(inspectTest $ 't32Label === 't32Manual)
+    , testCase "#_T33 = hand written prism" $
+        -- Earlier versions don't optimize away hlist to tuple conversion.
+        ghc86success $(inspectTest $ 't33Label === 't3Manual)
     ]
 
 -------------------------------------------------------------------------------

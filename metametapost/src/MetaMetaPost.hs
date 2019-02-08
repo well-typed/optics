@@ -32,7 +32,6 @@ import qualified GHC.Generics           as GHC
 import           System.Environment     (getArgs)
 
 import           Optics
-import           Optics.Labels ()
 import           Optics.Operators
 import           Optics.Operators.State
 

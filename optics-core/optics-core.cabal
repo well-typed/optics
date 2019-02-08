@@ -62,6 +62,12 @@ library
     Data.Tuple.Optics
     GHC.Generics.Optics
 
+    -- generic lenses and prisms
+    Optics.Generic.Labels
+    Optics.Generic.Product.Fields
+    Optics.Generic.Product.Positions
+    Optics.Generic.Sum.Constructors
+
     -- internal modules
     Optics.Internal.Bi
     Optics.Internal.Concrete
@@ -70,6 +76,17 @@ library
     Optics.Internal.IxFold
     Optics.Internal.IxSetter
     Optics.Internal.IxTraversal
+    Optics.Internal.Generic.Errors
+    Optics.Internal.Generic.Families
+    Optics.Internal.Generic.Families.Changing
+    Optics.Internal.Generic.Families.Collect
+    Optics.Internal.Generic.Families.Has
+    Optics.Internal.Generic.Product.GLens
+    Optics.Internal.Generic.Product.HList
+    Optics.Internal.Generic.Product.Positions
+    Optics.Internal.Generic.Sum.Constructors
+    Optics.Internal.Generic.Utils
+    Optics.Internal.Generic.Void
     Optics.Internal.Optic
     Optics.Internal.Optic.Subtyping
     Optics.Internal.Optic.TypeLevel
