@@ -16,6 +16,7 @@
 {-# LANGUAGE OverloadedLabels           #-}
 {-# LANGUAGE RankNTypes                 #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
+{-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeOperators              #-}
 {-# LANGUAGE UndecidableInstances       #-}
 module Main where
@@ -32,7 +33,7 @@ import qualified GHC.Generics           as GHC
 import           System.Environment     (getArgs)
 
 import           Optics
-import           Optics.Labels ()
+import           Optics.TH
 import           Optics.Operators
 import           Optics.Operators.State
 
@@ -263,15 +264,14 @@ data Stmt s where
     Expr      :: Expr s ty -> Stmt s
 
 data St s = St
-    { stmts :: [Stmt s] -> [Stmt s]
-    , vars  :: PerTy Int
+    { stStmts :: [Stmt s] -> [Stmt s]
+    , stVars  :: PerTy Int
     }
-  deriving (GHC.Generic)
 
 emptyS :: St s
 emptyS = St
-    { stmts = id
-    , vars  = tabulate (const 0)
+    { stStmts = id
+    , stVars  = tabulate (const 0)
     }
 
 newtype Stmts s a = Stmts (State (St s) a)
@@ -1042,3 +1042,5 @@ main = do
         ("reoptics" : _)      -> printDiagram reOptics
         ("indexedoptics" : _) -> printDiagram indexedOptics
         _                     -> printDiagram hierarchy
+
+makeLabels ''St

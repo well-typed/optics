@@ -123,6 +123,7 @@ test-suite optics-tests
   other-modules: Optics.Tests.Computation
                  Optics.Tests.Core
                  Optics.Tests.Eta
+                 Optics.Tests.Labels
                  Optics.Tests.Misc
                  Optics.Tests.Utils
 

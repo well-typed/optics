@@ -12,6 +12,7 @@ module Optics.TH.Internal.Product
   , makeFieldOptics
   , makeFieldOpticsForDec
   , makeFieldOpticsForDec'
+  , makeLabelsWith
   , HasFieldClasses
   ) where
 
@@ -67,7 +68,6 @@ setIx n x xs = case splitAt n xs of
 -- Field generation entry point
 ------------------------------------------------------------------------
 
-
 -- | Compute the field optics for the type identified by the given type name.
 -- Lenses will be computed when possible, Traversals otherwise.
 makeFieldOptics :: LensRules -> Name -> DecsQ
@@ -109,6 +109,75 @@ makeFieldOpticsForDatatype rules info =
   -- Map a (possibly missing) field's name to zero-to-many optic definitions
   expandName :: [Name] -> Maybe Name -> [DefName]
   expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
+
+makeLabelsWith :: LensRules -> Name -> DecsQ
+makeLabelsWith rules = D.reifyDatatype >=> makeLabelsForDatatype rules
+
+-- | Compute the field optics for a deconstructed datatype Dec
+-- When possible build an Iso otherwise build one optic per field.
+makeLabelsForDatatype :: LensRules -> D.DatatypeInfo -> Q [Dec]
+makeLabelsForDatatype rules info =
+  do perDef <- do
+       fieldCons <- traverse normalizeConstructor cons
+       let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
+       let defCons    = over normFieldLabels (expandName allFields) fieldCons
+           allDefs    = setOf (normFieldLabels % folded) defCons
+       T.sequenceA (M.fromSet (buildScaffold rules s defCons) allDefs)
+
+     let defs = filter isRank1 $ M.toList perDef
+     traverse (makeLabel rules) defs
+
+  where
+    -- LabelOptic doesn't support higher rank fields because of functional
+    -- dependencies (s -> a, t -> b), so just skip them.
+    isRank1 = \case
+      (_, (OpticSa rank1 _ _ _ _, _)) -> rank1
+      _                               -> True
+
+    tyName = D.datatypeName info
+    s      = D.datatypeType info
+    cons   = D.datatypeCons info
+
+    -- Traverse the field labels of a normalized constructor
+    normFieldLabels :: Traversal [(Name,[(a,Type)])] [(Name,[(b,Type)])] a b
+    normFieldLabels = traversed % _2 % traversed % _1
+
+    -- Map a (possibly missing) field's name to zero-to-many optic definitions
+    expandName :: [Name] -> Maybe Name -> [DefName]
+    expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
+
+makeLabel
+  :: LensRules
+  -> (DefName, (OpticStab, [(Name, Int, [Int])]))
+  -> Q Dec
+makeLabel rules (defName, (defType, cons)) =
+  instanceD context instHead (fun 'labelOptic)
+  where
+    (context, instHead) = case defType of
+      OpticSa _ cx otype s a -> do
+        (pure cx, pure $ conAppsT ''LabelOptic
+          [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a, a])
+      OpticStab otype s t a b ->
+        (cxt [], pure $ conAppsT ''LabelOptic
+          [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, t, a, b])
+
+    opticTypeToTag AffineFoldType      = ''An_AffineFold
+    opticTypeToTag AffineTraversalType = ''An_AffineTraversal
+    opticTypeToTag FoldType            = ''A_Fold
+    opticTypeToTag GetterType          = ''A_Getter
+    opticTypeToTag IsoType             = ''An_Iso
+    opticTypeToTag LensType            = ''A_Lens
+    opticTypeToTag TraversalType       = ''A_Traversal
+
+    fieldName = case defName of
+      TopName fname      -> nameBase fname
+      MethodName _ fname -> nameBase fname
+
+    fun :: Name -> [DecQ]
+    fun n = funD n [funDef] : inlinePragma n
+
+    funDef :: ClauseQ
+    funDef = makeFieldClause rules (stabToOpticType defType) cons
 
 -- | Normalized the Con type into a uniform positional representation,
 -- eliminating the variance between records, infix constructors, and normal
@@ -153,18 +222,18 @@ buildScaffold rules s cons defName =
   do (s',t,a,b) <- buildStab s (concatMap snd consForDef)
 
      let defType
-           | Just (_,cx,a') <- preview _ForallT a =
+           | Just (tyvars,cx,a') <- preview _ForallT a =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa cx optic s' a'
+               in OpticSa (null tyvars) cx optic s' a'
 
            -- Getter and Fold are always simple
            | not (_allowUpdates rules) =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa [] optic s' a
+               in OpticSa True [] optic s' a
 
            -- Generate simple Lens and Traversal where possible
            | _simpleLenses rules || s' == t && a == b =
@@ -172,7 +241,7 @@ buildScaffold rules s cons defName =
                          | lensCase                    = LensType
                          | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
-               in OpticSa [] optic s' a
+               in OpticSa True [] optic s' a
 
            -- Generate type-changing Lens and Traversal otherwise
            | otherwise =
@@ -241,34 +310,34 @@ opticTypeName typeChanging  TraversalType       = if typeChanging
                                                   then ''Traversal
                                                   else ''Traversal'
 
-data OpticStab = OpticStab     OpticType Type Type Type Type
-               | OpticSa   Cxt OpticType Type Type
+data OpticStab = OpticStab        OpticType Type Type Type Type
+               | OpticSa Bool Cxt OpticType Type Type
 
 stabToType :: OpticStab -> Type
 stabToType (OpticStab  c s t a b) =
   quantifyType [] (opticTypeName True c `conAppsT` [s,t,a,b])
-stabToType (OpticSa cx c s   a  ) =
+stabToType (OpticSa _ cx c s   a  ) =
   quantifyType cx (opticTypeName False c `conAppsT` [s,a])
 
 stabToContext :: OpticStab -> Cxt
-stabToContext OpticStab{}        = []
-stabToContext (OpticSa cx _ _ _) = cx
+stabToContext OpticStab{}          = []
+stabToContext (OpticSa _ cx _ _ _) = cx
 
 stabToOpticType :: OpticStab -> OpticType
 stabToOpticType (OpticStab c _ _ _ _) = c
-stabToOpticType (OpticSa _ c _ _) = c
+stabToOpticType (OpticSa _ _ c _ _) = c
 
 stabToOptic :: OpticStab -> Name
 stabToOptic (OpticStab c _ _ _ _) = opticTypeName True c
-stabToOptic (OpticSa _ c _ _) = opticTypeName False c
+stabToOptic (OpticSa _ _ c _ _) = opticTypeName False c
 
 stabToS :: OpticStab -> Type
 stabToS (OpticStab _ s _ _ _) = s
-stabToS (OpticSa _ _ s _) = s
+stabToS (OpticSa _ _ _ s _) = s
 
 stabToA :: OpticStab -> Type
 stabToA (OpticStab _ _ _ a _) = a
-stabToA (OpticSa _ _ _ a) = a
+stabToA (OpticSa _ _ _ _ a) = a
 
 -- | Compute the s t a b types given the outer type 's' and the
 -- categorized field types. Left for fixed and Right for visited.

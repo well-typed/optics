@@ -1,7 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -16,40 +17,78 @@ import Optics.TH.Tests.T799 ()
 
 data Bar a b c = Bar { _baz :: (a, b) }
 makeLenses ''Bar
+--makeProductLabels ''Bar
+
+-- TODO: generate proper labels for phantom type parameters
+instance LabelOptic "baz" An_Iso (Bar a b c) (Bar a' b' c) (a, b) (a', b') where
+  labelOptic = baz
 
 checkBaz :: Iso (Bar a b c) (Bar a' b' c') (a, b) (a', b')
 checkBaz = baz
 
+checkBaz_ :: Iso (Bar a b c) (Bar a' b' c) (a, b) (a', b')
+checkBaz_ = #baz
+
 data Quux a b = Quux { _quaffle :: Int, _quartz :: Double }
 makeLenses ''Quux
+--makeProductLabels ''Quux
+
+-- TODO: generate proper labels for phantom type parameters
+instance LabelOptic "quaffle" A_Lens (Quux a b) (Quux a b) Int Int where
+  labelOptic = quaffle
+instance LabelOptic "quartz" A_Lens (Quux a b) (Quux a b) Double Double where
+  labelOptic = quartz
 
 checkQuaffle :: Lens (Quux a b) (Quux a' b') Int Int
 checkQuaffle = quaffle
 
+checkQuaffle_ :: Lens (Quux a b) (Quux a b) Int Int
+checkQuaffle_ = #quaffle
+
 checkQuartz :: Lens (Quux a b) (Quux a' b') Double Double
 checkQuartz = quartz
+
+checkQuartz_ :: Lens (Quux a b) (Quux a b) Double Double
+checkQuartz_ = #quartz
 
 data Quark a = Qualified   { _gaffer :: a }
              | Unqualified { _gaffer :: a, _tape :: a }
 makeLenses ''Quark
+makeLabelsWith lensRules ''Quark
 
 checkGaffer :: Lens' (Quark a) a
 checkGaffer = gaffer
 
+checkGaffer_ :: Lens' (Quark a) a
+checkGaffer_ = #gaffer
+
 checkTape :: AffineTraversal' (Quark a) a
 checkTape = tape
 
+checkTape_ :: AffineTraversal' (Quark a) a
+checkTape_ = #tape
+
 data Hadron a b = Science { _a1 :: a, _a2 :: a, _c :: b }
 makeLenses ''Hadron
+makeLabelsWith lensRules ''Hadron
 
 checkA1 :: Lens' (Hadron a b) a
 checkA1 = a1
 
+checkA1_ :: Lens' (Hadron a b) a
+checkA1_ = #a1
+
 checkA2 :: Lens' (Hadron a b) a
 checkA2 = a2
 
+checkA2_ :: Lens' (Hadron a b) a
+checkA2_ = #a2
+
 checkC :: Lens (Hadron a b) (Hadron a b') b b'
 checkC = c
+
+checkC_ :: Lens (Hadron a b) (Hadron a b') b b'
+checkC_ = #c
 
 data Perambulation a b
   = Mountains { _terrain    :: a
@@ -62,12 +101,19 @@ data Perambulation a b
               , _absurdity1 :: forall x y. x -> y
               }
 makeLenses ''Perambulation
+makeLabelsWith lensRules ''Perambulation
 
 checkTerrain :: Lens' (Perambulation a b) a
 checkTerrain = terrain
 
+checkTerrain_ :: Lens' (Perambulation a b) a
+checkTerrain_ = #terrain
+
 checkAltitude :: AffineTraversal (Perambulation a b) (Perambulation a b') b b'
 checkAltitude = altitude
+
+checkAltitude_ :: AffineTraversal (Perambulation a b) (Perambulation a b') b b'
+checkAltitude_ = #altitude
 
 checkAbsurdity1 :: Getter (Perambulation a b) (x -> y)
 checkAbsurdity1 = absurdity1
@@ -77,6 +123,9 @@ checkAbsurdity2 = absurdity2
 
 checkDunes :: AffineTraversal' (Perambulation a b) a
 checkDunes = dunes
+
+checkDunes_ :: AffineTraversal' (Perambulation a b) a
+checkDunes_ = #dunes
 
 makeLensesFor [ ("_terrain", "allTerrain"), ("_dunes", "allTerrain")
               , ("_absurdity1", "absurdities"), ("_absurdity2", "absurdities")
@@ -92,9 +141,13 @@ checkAbsurdities = absurdities
 data LensCrafted a = Still { _still :: a }
                    | Works { _still :: a }
 makeLenses ''LensCrafted
+makeLabelsWith lensRules ''LensCrafted
 
 checkStill :: Lens (LensCrafted a) (LensCrafted b) a b
 checkStill = still
+
+checkStill_ :: Lens (LensCrafted a) (LensCrafted b) a b
+checkStill_ = #still
 
 data Task a = Task
   { taskOutput :: a -> IO ()
@@ -396,6 +449,7 @@ checkR2nub = r2nub
 
 data PureNoFields = PureNoFieldsA | PureNoFieldsB { _pureNoFields :: Int }
 makeLenses ''PureNoFields
+makeLabels ''PureNoFields
 
 data ReviewTest where ReviewTest :: a -> ReviewTest
 makePrisms ''ReviewTest

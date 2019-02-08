@@ -3,6 +3,7 @@ module Optics.TH
   -- * Constructing Lenses Automatically
   -- ** Lenses for data fields
     makeLenses, makeLensesFor
+  , makeLabels
   , makeClassy, makeClassyFor, makeClassy_
   , makeFields
   , makeFieldsNoPrefix
@@ -20,6 +21,7 @@ module Optics.TH
   -- ** Running LensRules
   , makeLensesWith
   , declareLensesWith
+  , makeLabelsWith
   -- ** LensRules type
   , LensRules
   -- ** Predefined LensRules
@@ -256,6 +258,9 @@ classyRules_
 makeLenses :: Name -> DecsQ
 makeLenses = makeFieldOptics lensRules
 
+makeLabels :: Name -> DecsQ
+makeLabels = makeLabelsWith lensRules { _fieldToDef = camelCaseNamer }
+
 -- | Make lenses and traversals for a type, and create a class when the
 -- type has no arguments.
 --
@@ -328,8 +333,6 @@ makeClassyFor clsName funName fields = makeFieldOptics $
 -- | Build lenses with a custom configuration.
 makeLensesWith :: LensRules -> Name -> DecsQ
 makeLensesWith = makeFieldOptics
-
-
 
 -- | Make lenses for all records in the given declaration quote. All record
 -- syntax in the input will be stripped off.
@@ -460,12 +463,14 @@ underscoreNamer _ _ field = maybeToList $ do
     classNaming = niceLens <&> ("Has_" ++)
 
 -- | Field rules for fields in the form @ prefixFieldname or _prefixFieldname @
--- If you want all fields to be lensed, then there is no reason to use an @_@ before the prefix.
--- If any of the record fields leads with an @_@ then it is assume a field without an @_@ should not have a lens created.
+--
+-- If you want all fields to be lensed, then there is no reason to use an @_@
+-- before the prefix.  If any of the record fields leads with an @_@ then it is
+-- assume a field without an @_@ should not have a lens created.
 --
 -- __Note__: The @prefix@ must be the same as the typename (with the first
--- letter lowercased). This is a change from lens versions before lens 4.5.
--- If you want the old behaviour, use 'makeLensesWith' 'abbreviatedFields'
+-- letter lowercased). This is a change from lens versions before lens 4.5. If
+-- you want the old behaviour, use 'makeLensesWith' 'abbreviatedFields'
 camelCaseFields :: LensRules
 camelCaseFields = defaultFieldRules
 

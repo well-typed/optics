@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | Core optic types and subtyping machinery.
@@ -19,7 +20,8 @@ module Optics.Internal.Optic
   , castOptic
   , (%)
   , (%%)
-  , IsProxy (..)
+  , LabelOptic(..)
+  , IsProxy(..)
   , module Optics.Internal.Optic.Subtyping
   , module Optics.Internal.Optic.Types
   , module Optics.Internal.Optic.TypeLevel
@@ -27,10 +29,12 @@ module Optics.Internal.Optic
 
 import Data.Proxy (Proxy (..))
 import Data.Type.Equality
+import GHC.OverloadedLabels
+import GHC.TypeLits
 
 import Optics.Internal.Optic.Subtyping
+import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Optic.Types
-import Optics.Internal.Optic.TypeLevel (Curry, Append)
 
 -- to make %% simpler
 import Unsafe.Coerce (unsafeCoerce)
@@ -150,3 +154,36 @@ instance
     -> Curry (x ': xs) (Curry ys i) :~: Curry (x ': zs) i
   appendProof i = case appendProof @xs @ys @zs i of
     Refl -> Refl
+
+----------------------------------------
+-- Labels
+
+-- | Support for optics as overloaded labels.
+--
+-- /Note:/ Functional dependencies guarantee good type inference, but also
+-- create limitations. We can split them into two groups:
+--
+-- - @name s -> k a@, @name t -> k b@
+--
+-- - @name s b -> t@, @name t a -> s@
+--
+-- The first group ensures that when we compose two optics, the middle type is
+-- unambiguous. The consequence is that it's not possible to create read-only
+-- label optics focusing on higher rank types.
+--
+-- The second group ensures that when we perform a chain of updates, the middle
+-- type is unambiguous. The consequence is that it's not possible to define
+-- label optics that change phantom type parameters of a type.
+--
+class LabelOptic (name :: Symbol) k s t a b |
+  name s -> k a, name t -> k b, name s b -> t, name t a -> s where
+  labelOptic :: Optic k NoIx s t a b
+
+instance
+  (LabelOptic name k s t a b, is ~ NoIx
+  ) => IsLabel name (Optic k is s t a b) where
+#if __GLASGOW_HASKELL__ >= 802
+  fromLabel = labelOptic @name @k @s @t @a @b
+#else
+  fromLabel _ = labelOptic @name @k @s @t @a @b
+#endif

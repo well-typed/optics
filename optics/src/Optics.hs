@@ -229,9 +229,6 @@ module Optics
   -- * Zoom
   , module Optics.Zoom
 
-  -- ** OverloadedLabels
-  , module Optics.Labels
-
   -- * Generation of optics with Template Haskell
   , module Optics.TH
 
@@ -271,7 +268,6 @@ import Optics.Cons
 import Optics.Each
 import Optics.Empty
 import Optics.Indexed
-import Optics.Labels
 import Optics.Re
 import Optics.View
 import Optics.Zoom
