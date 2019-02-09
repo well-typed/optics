@@ -181,7 +181,7 @@ traversedLazy__
 traversedLazy__ = iwander $ \f lbs ->
   let go c fcs acc =
         let !acc' = acc + fromIntegral (B.length c)
-            rest = reindex (\x -> acc + fromIntegral x) traversedStrictTree
+            rest = reindexed (\x -> acc + fromIntegral x) traversedStrictTree
         in BL.append . BL.fromStrict <$> itraverseOf rest f c <*> fcs acc'
   in BL.foldrChunks go (\_ -> pure BL.empty) lbs 0
 {-# INLINE [1] traversedLazy__ #-}
@@ -227,7 +227,7 @@ traversedLazy8__
 traversedLazy8__ = iwander $ \f lbs ->
   let go c fcs acc =
         let !acc' = acc + fromIntegral (B.length c)
-            rest = reindex (\x -> acc + fromIntegral x) traversedStrictTree8
+            rest = reindexed (\x -> acc + fromIntegral x) traversedStrictTree8
         in BL.append . BL.fromStrict <$> itraverseOf rest f c <*> fcs acc'
   in BL.foldrChunks go (\_ -> pure BL.empty) lbs 0
 {-# INLINE [1] traversedLazy8__ #-}

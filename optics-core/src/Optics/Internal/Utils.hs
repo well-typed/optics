@@ -27,6 +27,8 @@ imapList f = go 0
     go _ []     = []
 {-# INLINE imapList #-}
 
+----------------------------------------
+
 -- | Helper for 'traverseOf_' and the like for better efficiency than the
 -- foldr-based version.
 --
@@ -46,3 +48,21 @@ instance Applicative f => Monoid (Traversed f a) where
   Traversed ma `mappend` Traversed mb = Traversed (ma *> mb)
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
+
+----------------------------------------
+
+-- | Helper for 'failing' family to visit the first traversal only once.
+data OrT f a = OrT !Bool (f a)
+  deriving Functor
+
+instance Applicative f => Applicative (OrT f) where
+  pure = OrT False . pure
+  OrT a f <*> OrT b x = OrT (a || b) (f <*> x)
+  {-# INLINE pure #-}
+  {-# INLINE (<*>) #-}
+
+-- | Wrap the applicative action in 'OrT' so that we know later that it was
+-- executed.
+wrapOrT :: f a -> OrT f a
+wrapOrT = OrT True
+{-# INLINE wrapOrT #-}

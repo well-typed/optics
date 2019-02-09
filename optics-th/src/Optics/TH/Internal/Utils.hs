@@ -3,9 +3,6 @@
 module Optics.TH.Internal.Utils where
 
 import Language.Haskell.TH
-import qualified Data.Set as Set
-
-import Optics.Core
 
 -- | Apply arguments to a type constructor
 appsT :: TypeQ -> [TypeQ] -> TypeQ
@@ -49,13 +46,3 @@ newNames base n = sequence [ newName (base++show i) | i <- [1..n] ]
 
 inlinePragma :: Name -> [DecQ]
 inlinePragma methodName = [pragInlD methodName Inline FunLike AllPhases]
-
-------------------------------------------------------------------------
--- Utility functions
-------------------------------------------------------------------------
-
-both :: Traversal (a, a) (b, b) a b
-both = traversalVL $ \f (a1, a2) -> (,) <$> f a1 <*> f a2
-
-setOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Set.Set a
-setOf l = foldMapOf l Set.singleton
