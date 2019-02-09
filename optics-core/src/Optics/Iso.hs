@@ -5,9 +5,13 @@ module Optics.Iso
   , toIso
   , iso
   , withIso
+  , au
+  , under
   -- * Isomorphisms
   , mapping
   , coerced
+  , coerced'
+  , coerced1
   , curried
   , uncurried
   , flipped
@@ -20,7 +24,7 @@ module Optics.Iso
 
 import Data.Tuple
 import Data.Bifunctor
-import Data.Coerce (Coercible, coerce)
+import Data.Coerce
 
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
@@ -49,6 +53,33 @@ withIso o k = case getOptic (toIso o) (Exchange id id) of
   Exchange sa bt -> k sa bt
 {-# INLINE withIso #-}
 
+-- | Based on @ala@ from Conor McBride's work on Epigram.
+--
+-- This version is generalized to accept any 'Iso', not just a @newtype@.
+--
+-- >>> au (coerced1 @Sum) foldMap [1,2,3,4]
+-- 10
+--
+-- You may want to think of this combinator as having the following, simpler
+-- type:
+--
+-- @
+-- au :: Iso s t a b -> ((b -> t) -> e -> s) -> e -> a
+-- @
+au :: (Is k An_Iso, Functor f) => Optic k is s t a b -> ((b -> t) -> f s) -> f a
+au k = withIso k $ \sa bt f -> sa <$> f bt
+{-# INLINE au #-}
+
+-- | The opposite of working 'Optics.Setter.over' a 'Optics.Setter.Setter' is
+-- working 'under' an isomorphism.
+--
+-- @
+-- 'under' ≡ 'Optics.Setter.over' '.' 'Optics.Re.re'
+-- @
+under :: Is k An_Iso => Optic k is s t a b -> (t -> s) -> b -> a
+under k = withIso k $ \sa bt ts -> sa . ts . bt
+{-# INLINE under #-}
+
 ----------------------------------------
 -- Isomorphisms
 
@@ -66,7 +97,30 @@ mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 -- Identity 'x'
 --
 coerced :: (Coercible s a, Coercible t b) => Iso s t a b
-coerced = iso coerce coerce
+coerced = Optic (lcoerce' . rcoerce')
+{-# INLINE coerced #-}
+
+-- | Type-preserving version of 'coerced'.
+--
+-- >>> newtype MkInt = MkInt Int deriving Show
+--
+-- >>> over (coerced' @MkInt @Int) (*3) (MkInt 2)
+-- MkInt 6
+--
+coerced' :: Coercible s a => Iso' s a
+coerced' = Optic (lcoerce' . rcoerce')
+{-# INLINE coerced' #-}
+
+-- | Special case of 'coerced' for trivial newtype wrappers.
+--
+-- >>> over (coerced1 @Identity) (++ "bar") (Identity "foo")
+-- Identity "foobar"
+--
+coerced1
+  :: forall f s a. (Coercible s (f s), Coercible a (f a))
+  => Iso (f s) (f a) s a
+coerced1 = Optic (lcoerce' . rcoerce')
+{-# INLINE coerced1 #-}
 
 -- | The canonical isomorphism for currying and uncurrying a function.
 --
