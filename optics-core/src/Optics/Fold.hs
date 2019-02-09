@@ -96,7 +96,7 @@ foldMapOf o = runForget #. getOptic (toFold o) .# Forget
 
 -- | Fold right-associatively.
 foldrOf :: Is k A_Fold => Optic' k is s a -> (a -> r -> r) -> r -> s -> r
-foldrOf o arr r = (\e -> appEndo e r) . foldMapOf o (Endo #. arr)
+foldrOf o arr r s = (\e -> appEndo e r) $ foldMapOf o (Endo #. arr) s
 {-# INLINE foldrOf #-}
 
 -- | Fold left-associatively, and strictly.
@@ -127,7 +127,7 @@ traverseOf_
   :: (Is k A_Fold, Applicative f)
   => Optic' k is s a
   -> (a -> f r) -> s -> f ()
-traverseOf_ o f = runTraversed . foldMapOf o (Traversed #. f)
+traverseOf_ o = \f -> runTraversed . foldMapOf o (Traversed #. f)
 {-# INLINE traverseOf_ #-}
 
 -- | A version of 'traverseOf_' with the arguments flipped.

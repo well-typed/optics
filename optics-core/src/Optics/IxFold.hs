@@ -92,7 +92,7 @@ ifoldrOf
   :: (Is k A_Fold, (is `HasSingleIndex` i) "ifoldrOf" 1)
   => Optic' k is s a
   -> (i -> a -> r -> r) -> r -> s -> r
-ifoldrOf o iarr r0 = (\e -> appEndo e r0) . ifoldMapOf o (\i -> Endo #. iarr i)
+ifoldrOf o iarr r0 s = (\e -> appEndo e r0) $ ifoldMapOf o (\i -> Endo #. iarr i) s
 {-# INLINE ifoldrOf #-}
 
 -- | Fold with index left-associatively, and strictly.
@@ -126,10 +126,10 @@ itraverseOf_
   :: (Is k A_Fold, Applicative f, (is `HasSingleIndex` i) "itraverseOf_" 1)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
-itraverseOf_ o f s =
-  -- We want to have the definition fully eta-expanded as it allows GHC to
-  -- generate better code (in particular for folding over a Vector).
-  runTraversed $ ifoldMapOf o (\i -> Traversed #. f i) s
+itraverseOf_ o = \f ->
+  -- Need to have eta-expansion here for GHC 8.2.2 to properly optimize away the
+  -- profunctor stuff when f is not supplied.
+  runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 {-# INLINE itraverseOf_ #-}
 
 -- | A version of 'itraverseOf_' with the arguments flipped.

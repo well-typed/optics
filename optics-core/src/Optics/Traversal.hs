@@ -82,7 +82,7 @@ traverseOf
   :: (Is k A_Traversal, Applicative f)
   => Optic k is s t a b
   -> (a -> f b) -> s -> f t
-traverseOf o = runStar #. getOptic (toTraversal o) .# Star
+traverseOf o = \f -> runStar $ getOptic (toTraversal o) (Star f)
 {-# INLINE traverseOf #-}
 
 -- | A version of 'traverseOf' with the arguments flipped.

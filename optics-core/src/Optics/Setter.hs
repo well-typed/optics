@@ -15,7 +15,6 @@ module Optics.Setter
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Setter
-import Optics.Internal.Utils
 import Optics.Optic
 
 -- | Type synonym for a type-modifying setter.
@@ -37,7 +36,7 @@ over
   :: Is k A_Setter
   => Optic k is s t a b
   -> (a -> b) -> s -> t
-over o = runFunArrow #. getOptic (toSetter o) .# FunArrow
+over o = \f -> runFunArrow $ getOptic (toSetter o) (FunArrow f)
 {-# INLINE over #-}
 
 -- | Apply a setter as a modifier, strictly.
@@ -61,9 +60,9 @@ over'
   :: Is k A_Setter
   => Optic k is s t a b
   -> (a -> b) -> s -> t
-over' o f = unwrapIdentity' . runStar star
-  where
-    star = getOptic (toSetter o) $ Star (wrapIdentity' . f)
+over' o = \f ->
+  let star = getOptic (toSetter o) $ Star (wrapIdentity' . f)
+  in unwrapIdentity' . runStar star
 {-# INLINE over' #-}
 
 -- | Apply a setter.
