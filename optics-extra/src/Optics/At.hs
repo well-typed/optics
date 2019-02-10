@@ -145,7 +145,7 @@ class Ixed m where
 -- | A definition of 'ix' for types with an 'At' instance. This is the default
 -- if you don't specify a definition for 'ix'.
 ixAt :: At m => Index m -> AffineTraversal' m (IxValue m)
-ixAt i = at i % _Just
+ixAt = \i -> at i % _Just
 {-# INLINE ixAt #-}
 
 type instance IxValue (e -> a) = a

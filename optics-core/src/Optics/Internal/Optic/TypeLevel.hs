@@ -27,5 +27,5 @@ instance CurryCompose '[] where
   {-# INLINE composeN #-}
 
 instance CurryCompose xs => CurryCompose (x ': xs) where
-  composeN ij f x = composeN @xs ij (f x)
+  composeN ij f = composeN @xs ij . f
   {-# INLINE composeN #-}

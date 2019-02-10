@@ -70,7 +70,10 @@ library
                     , Optics.View
 
   -- optics-extra
-  reexported-modules: Optics.Each
+  reexported-modules: Optics.At
+                    , Optics.Cons
+                    , Optics.Each
+                    , Optics.Empty
                     , Optics.Operators.State
                     , Data.Set.Optics
                     , GHC.Generics.Optics
@@ -88,12 +91,16 @@ test-suite optics-tests
   default-language: Haskell2010
   hs-source-dirs:   tests
   ghc-options:      -Wall
-  build-depends:
-      base
-    , inspection-testing  >=0.4.1.1 && <0.5
-    , optics
-    , tasty
-    , tasty-hunit
+  build-depends: base
+               , containers
+               , inspection-testing  >=0.4.1.1 && <0.5
+               , optics-core
+               , optics
+               , tasty
+               , tasty-hunit
+               , template-haskell
 
   type:             exitcode-stdio-1.0
   main-is:          Optics/Tests.hs
+
+  other-modules: Optics.Tests.Utils

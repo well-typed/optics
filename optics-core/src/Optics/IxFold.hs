@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 module Optics.IxFold
   ( A_Fold
@@ -126,9 +127,12 @@ itraverseOf_
   :: (Is k A_Fold, Applicative f, (is `HasSingleIndex` i) "itraverseOf_" 1)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
+#if __GLASGOW_HASKELL__ == 802
+-- GHC 8.2.2 needs this to optimize away profunctors when f is not supplied.
 itraverseOf_ o = \f ->
-  -- Need to have eta-expansion here for GHC 8.2.2 to properly optimize away the
-  -- profunctor stuff when f is not supplied.
+#else
+itraverseOf_ o f =
+#endif
   runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 {-# INLINE itraverseOf_ #-}
 
