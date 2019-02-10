@@ -91,7 +91,7 @@ itraverseOf
   :: (Is k A_Traversal, Applicative f, (is `HasSingleIndex` i) "itraverseOf" 1)
   => Optic k is s t a b
   -> (i -> a -> f b) -> s -> f t
-itraverseOf o f = runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
+itraverseOf o = \f -> runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
 {-# INLINE itraverseOf #-}
 
 -- | A version of 'itraverseOf' with the arguments flipped.

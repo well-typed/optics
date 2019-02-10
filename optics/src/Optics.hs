@@ -207,6 +207,12 @@ module Optics
   --
   , module Optics.Indexed
 
+  -- * At
+  , module Optics.At
+
+  -- * Cons
+  , module Optics.Cons
+
   -- ** Each
 
   -- | A 'Traversal' for a (potentially monomorphic) container.
@@ -215,6 +221,9 @@ module Optics
   -- (10,20,30)
   --
   , module Optics.Each
+
+  -- * Empty
+  , module Optics.Empty
 
   -- ** OverloadedLabels 
 
@@ -249,7 +258,10 @@ import Optics.AffineFold      as O
 import Optics.View            as O
 
 -- Optics utilities
+import Optics.At
+import Optics.Cons
 import Optics.Each
+import Optics.Empty
 import Optics.Indexed
 import Optics.Re
 import Optics.Labels ()
