@@ -108,12 +108,7 @@ lhs09, rhs09
   -> t (s a)
   -> t (s b)
 lhs09 = iover (imapped <% imapped)
-#if __GLASGOW_HASKELL__ == 800
--- Proper rhs09 is the same on GHC 8.0.2 modulo names of parameters.
-rhs09 = iover (imapped <% imapped)
-#else
 rhs09 = iover (imapped % mapped)
-#endif
 
 -- Rewrite rule "itraversed__ -> ifolded__"
 lhs10, rhs10
@@ -261,7 +256,8 @@ inspectionTests = testGroup "inspection"
         -- Same code modulo coercions.
         assertSuccess $(inspectTest $ 'lhs08 ==- 'rhs08)
     , testCase "iover (imapped <% imapped) = iover (imapped % mapped)" $
-        assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
+        -- Code is the same on GHC 8.0.2 modulo names of parameters.
+        ghc800failure $(inspectTest $ 'lhs09 === 'rhs09)
     , testCase "itraverseOf_ itraversed = itraverseOf_ ifolded" $
         assertSuccess $(inspectTest $ 'lhs10 === 'rhs10)
     , testCase "iover (itraversed..itraversed) = iover (imapped..imapped)" $
@@ -313,6 +309,13 @@ assertSuccess (Failure err) = assertFailure err
 assertFailure' :: Result -> IO ()
 assertFailure' (Success err) = assertFailure err
 assertFailure' (Failure _)   = return ()
+
+ghc800failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 800
+ghc800failure = assertFailure'
+#else
+ghc800failure = assertSuccess
+#endif
 
 -------------------------------------------------------------------------------
 -- Computation tests
