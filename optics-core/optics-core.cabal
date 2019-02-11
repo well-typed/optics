@@ -60,6 +60,7 @@ library
     Data.Maybe.Optics
     Data.Set.Optics
     Data.Tuple.Optics
+    GHC.Generics.Optics
 
     -- internal modules
     Optics.Internal.Bi

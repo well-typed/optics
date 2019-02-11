@@ -48,7 +48,6 @@ library
                    Data.Text.Strict.Optics
                    Data.Vector.Generic.Optics
                    Data.Vector.Optics
-                   GHC.Generics.Optics
                    Optics.Passthrough
                    Optics.View
 
