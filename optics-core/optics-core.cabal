@@ -33,7 +33,11 @@ library
     Optics.AffineFold
     Optics.AffineTraversal
     Optics.Arrow
+    Optics.At.Core
     Optics.Coerce
+    Optics.Cons.Core
+    Optics.Each.Core
+    Optics.Empty.Core
     Optics.Equality
     Optics.Fold
     Optics.Getter

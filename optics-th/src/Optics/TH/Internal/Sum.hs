@@ -15,7 +15,7 @@ import qualified Language.Haskell.TH.Datatype as D
 
 import Data.Set.Optics
 import Language.Haskell.TH.Optics
-import Optics.Core
+import Optics.Core hiding (cons)
 import Optics.TH.Internal.Utils
 
 -- | Generate a 'Prism' for each constructor of a data type.
