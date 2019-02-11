@@ -39,7 +39,7 @@ import Optics.Prism
 -- >>> view (generic % re generic) "hello" :: String
 -- "hello"
 --
-generic :: Generic a => Iso' a (Rep a b)
+generic :: (Generic a, Generic b) => Iso a b (Rep a c) (Rep b c)
 generic = iso GHC.from GHC.to
 {-# INLINE generic #-}
 
@@ -73,18 +73,18 @@ _M1 :: Iso (M1 i c f p) (M1 j d g q) (f p) (g q)
 _M1 = iso unM1 M1
 {-# INLINE _M1 #-}
 
-_L1 :: Prism' ((f :+: g) a) (f a)
+_L1 :: Prism ((a :+: c) t) ((b :+: c) t) (a t) (b t)
 _L1 = prism L1 reviewer
   where
-  reviewer (L1 l) = Right l
-  reviewer x = Left x
+  reviewer (L1 v) = Right v
+  reviewer (R1 v) = Left (R1 v)
 {-# INLINE _L1 #-}
 
-_R1 :: Prism' ((f :+: g) a) (g a)
+_R1 :: Prism ((c :+: a) t) ((c :+: b) t) (a t) (b t)
 _R1 = prism R1 reviewer
   where
-  reviewer (R1 l) = Right l
-  reviewer x = Left x
+  reviewer (R1 v) = Right v
+  reviewer (L1 v) = Left (L1 v)
 {-# INLINE _R1 #-}
 
 -- $setup
