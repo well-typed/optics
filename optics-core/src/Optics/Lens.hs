@@ -80,10 +80,16 @@ module Optics.Lens
   , toLensVL
   , withLensVL
 
+  -- * Lenses
+  , devoid
+  , united
+
   -- * Re-exports
   , module Optics.Optic
   )
   where
+
+import Data.Void
 
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
@@ -147,6 +153,32 @@ withLensVL
   -> r
 withLensVL o k = k (toLensVL o)
 {-# INLINE withLensVL #-}
+
+----------------------------------------
+-- Lenses
+
+-- | There is a field for every type in the 'Void'.
+--
+-- >>> set (mapped % devoid) 1 []
+-- []
+--
+-- >>> over (_Just % devoid) abs Nothing
+-- Nothing
+--
+devoid :: Lens' Void a
+devoid = lens absurd const
+{-# INLINE devoid #-}
+
+-- | We can always retrieve a @()@ from any type.
+--
+-- >>> view united "hello"
+-- ()
+--
+-- >>> set united () "hello"
+-- "hello"
+united :: Lens' a ()
+united  = lens (const ()) const
+{-# INLINE united #-}
 
 -- $setup
 -- >>> import Optics.Core
