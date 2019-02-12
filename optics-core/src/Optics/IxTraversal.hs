@@ -17,6 +17,7 @@ module Optics.IxTraversal
   , ifailover'
   -- * Traversals
   , itraversed
+  , ignored
   -- * Combinators
   , ibackwards
   , elementsOf
@@ -193,6 +194,13 @@ itraversed
   => IxTraversal i (f a) (f b) a b
 itraversed = Optic itraversed__
 {-# INLINE itraversed #-}
+
+-- | This is the trivial empty 'IxTraversal'.
+--
+-- >>> 6 & ignored %~ absurd
+-- 6
+ignored :: IxTraversal i s s a b
+ignored = ixTraversalVL $ \_ -> pure
 
 ----------------------------------------
 -- Traversal combinators
