@@ -17,6 +17,7 @@ module Optics.AffineTraversal
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
+import Optics.Traversal
 import Optics.Optic
 
 -- | Type synonym for a type-modifying affine traversal.

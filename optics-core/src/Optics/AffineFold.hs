@@ -4,6 +4,7 @@ module Optics.AffineFold
   , AffineFold
   , preview
   , afolding
+  , afailing
   , module Optics.Optic
   ) where
 
@@ -45,6 +46,25 @@ preview o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
 afolding :: (s -> Maybe a) -> AffineFold s a
 afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
 {-# INLINE afolding #-}
+
+-- | Try the first 'AffineFold'. If it returns no entry, try the second one.
+--
+-- >>> preview (ix 1 % re _Left `afailing` ix 2 % re _Right) [0,1,2,3]
+-- Just (Left 1)
+--
+-- >>> preview (ix 42 % re _Left `afailing` ix 2 % re _Right) [0,1,2,3]
+-- Just (Right 2)
+--
+-- /Note:/ There is no 'summing' equivalent, because @asumming = afailing@.
+--
+afailing
+  :: (Is k An_AffineFold, Is l An_AffineFold)
+  => Optic' k is s a
+  -> Optic' l js s a
+  -> AffineFold s a
+afailing a b = afolding $ \s -> maybe (preview b s) Just (preview a s)
+infixl 3 `afailing` -- Same as (<|>)
+{-# INLINE afailing #-}
 
 -- $setup
 -- >>> import Optics.Core
