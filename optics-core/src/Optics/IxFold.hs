@@ -82,7 +82,7 @@ conjoinedFold f g = Optic (conjoinedFold__ f g)
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
-  :: (Is k A_Fold, Monoid m, (is `HasSingleIndex` i) "ifoldMapOf" 1)
+  :: (Is k A_Fold, Monoid m, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> m) -> s -> m
 ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
@@ -90,7 +90,7 @@ ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
 
 -- | Fold with index right-associatively.
 ifoldrOf
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "ifoldrOf" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> r -> r) -> r -> s -> r
 ifoldrOf o iarr r0 s = (\e -> appEndo e r0) $ ifoldMapOf o (\i -> Endo #. iarr i) s
@@ -98,7 +98,7 @@ ifoldrOf o iarr r0 s = (\e -> appEndo e r0) $ ifoldMapOf o (\i -> Endo #. iarr i
 
 -- | Fold with index left-associatively, and strictly.
 ifoldlOf'
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "ifoldlOf'" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> r -> a -> r) -> r -> s -> r
 ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
@@ -115,7 +115,7 @@ ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
 -- "abcdef"
 --
 itoListOf
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "itoListOf" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> s -> [(i, a)]
 itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
@@ -124,7 +124,7 @@ itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
 ----------------------------------------
 
 itraverseOf_
-  :: (Is k A_Fold, Applicative f, (is `HasSingleIndex` i) "itraverseOf_" 1)
+  :: (Is k A_Fold, Applicative f, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
 #if __GLASGOW_HASKELL__ == 802
@@ -138,7 +138,7 @@ itraverseOf_ o f =
 
 -- | A version of 'itraverseOf_' with the arguments flipped.
 iforOf_
-  :: (Is k A_Fold, Applicative f, (is `HasSingleIndex` i) "iforOf_" 1)
+  :: (Is k A_Fold, Applicative f, is `HasSingleIndex` i)
   => Optic' k is s a
   -> s -> (i -> a -> f r) -> f ()
 iforOf_ = flip . itraverseOf_
@@ -176,7 +176,7 @@ ifoldring fr = Optic (ifoldring__ fr)
 
 -- | Filter results of an 'IxFold' that don't satisfy a predicate.
 ifiltered
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "ifiltered" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => (i -> a -> Bool)
   -> Optic' k is s a
   -> IxFold i s a
@@ -187,7 +187,7 @@ ifiltered p o = ixFoldVL $ \f ->
 -- | This allows you to traverse the elements of an 'IxFold' in the opposite
 -- order.
 ibackwards_
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "ibackwards_" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> IxFold i s a
 ibackwards_ o = conjoinedFold
@@ -203,7 +203,7 @@ ibackwards_ o = conjoinedFold
 -- >>> iheadOf ifolded [1..10]
 -- Just (0,1)
 iheadOf
-  ::( Is k A_Fold, (is `HasSingleIndex` i) "ifirstOf" 1)
+  ::( Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> s -> Maybe (i, a)
 iheadOf o = getLeftmost . ifoldMapOf o (\i -> LLeaf . (i, ))
 {-# INLINE iheadOf #-}
@@ -213,7 +213,7 @@ iheadOf o = getLeftmost . ifoldMapOf o (\i -> LLeaf . (i, ))
 -- >>> ilastOf ifolded [1..10]
 -- Just (9,10)
 ilastOf
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "ilastOf" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> s -> Maybe (i, a)
 ilastOf o = getRightmost . ifoldMapOf o (\i -> RLeaf . (i, ))
 {-# INLINE ilastOf #-}
@@ -228,7 +228,7 @@ ilastOf o = getRightmost . ifoldMapOf o (\i -> RLeaf . (i, ))
 -- 'anyOf' o ≡ 'ianyOf' o '.' 'const'
 -- @
 ianyOf
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "ianyOf" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> Bool) -> s -> Bool
 ianyOf o f = getAny #. ifoldMapOf o (\i -> Any #. f i)
 {-# INLINE ianyOf #-}
@@ -243,7 +243,7 @@ ianyOf o f = getAny #. ifoldMapOf o (\i -> Any #. f i)
 -- 'allOf' o ≡ 'iallOf' o '.' 'const'
 -- @
 iallOf
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "iallOf" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> Bool) -> s -> Bool
 iallOf o f = getAll #. ifoldMapOf o (\i -> All #. f i)
 {-# INLINE iallOf #-}
@@ -258,7 +258,7 @@ iallOf o f = getAll #. ifoldMapOf o (\i -> All #. f i)
 -- 'noneOf' o ≡ 'inoneOf' o '.' 'const'
 -- @
 inoneOf
-  :: (Is k A_Fold, (is `HasSingleIndex` i) "inoneOf" 1)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> Bool) -> s -> Bool
 inoneOf o f = not . ianyOf o f
 {-# INLINE inoneOf #-}
@@ -271,7 +271,7 @@ inoneOf o f = not . ianyOf o f
 -- When you don't need access to the index then 'findOf' is more flexible in
 -- what it accepts.
 ifindOf
- :: (Is k A_Fold, (is `HasSingleIndex` i) "ifindOf" 1)
+ :: (Is k A_Fold, is `HasSingleIndex` i)
  => Optic' k is s a -> (i -> a -> Bool) -> s -> Maybe (i, a)
 ifindOf o p = iheadOf (ifiltered p o)
 {-# INLINE ifindOf #-}
@@ -284,7 +284,7 @@ ifindOf o p = iheadOf (ifiltered p o)
 -- When you don't need access to the index then 'findMOf' is more flexible in
 -- what it accepts.
 ifindMOf
-  :: (Is k A_Fold, Monad m, (is `HasSingleIndex` i) "ifindMOf" 1)
+  :: (Is k A_Fold, Monad m, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> m Bool) -> s -> m (Maybe (i, a))
 ifindMOf o f = ifoldrOf o
   (\i a y -> f i a >>= \r -> if r then pure (Just (i, a)) else y)

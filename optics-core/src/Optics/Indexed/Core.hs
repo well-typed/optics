@@ -28,40 +28,38 @@ import Optics.Traversal
 infixr 9 <%>
 (<%>)
   :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b,
-      (is `HasSingleIndex` i) "(<%>)" 1, (js `HasSingleIndex` j) "(<%>)" 2)
+      is `HasSingleIndex` i, js `HasSingleIndex` j)
   => Optic k is              s t u v
   -> Optic l js              u v a b
   -> Optic m (WithIx (i, j)) s t a b
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
 
--- | Compose two indexed optics and preserve indices of the right one.
+-- | Compose two optics and preserve indices of the right one.
 --
 -- >>> itoListOf (ifolded %> ifolded) ["foo", "bar"]
 -- [(0,'f'),(1,'o'),(2,'o'),(0,'b'),(1,'a'),(2,'r')]
 --
 infixr 9 %>
 (%>)
-  :: (m ~ Join k l, Is k m, Is l m, IxOptic k s t u v,
-      NonEmptyIndices is "(%>)" 1, NonEmptyIndices js "(%>)" 2)
+  :: (m ~ Join k l, Is k m, Is l m, IxOptic k s t u v, NonEmptyIndices is)
   => Optic k is s t u v
   -> Optic l js u v a b
   -> Optic m js s t a b
 o %> o' = noIx o % o'
 {-# INLINE (%>) #-}
 
--- | Compose two indexed optics and preserve indices of the left one.
+-- | Compose two optics and preserve indices of the left one.
 --
 -- >>> itoListOf (ifolded <% ifolded) ["foo", "bar"]
 -- [(0,'f'),(0,'o'),(0,'o'),(1,'b'),(1,'a'),(1,'r')]
 --
 infixr 9 <%
 (<%)
- :: (m ~ Join k l, Is l m, Is k m, IxOptic l u v a b,
-     NonEmptyIndices is "(<%)" 1, NonEmptyIndices js "(<%)" 2)
- => Optic k is s t u v
- -> Optic l js u v a b
- -> Optic m is s t a b
+  :: (m ~ Join k l, Is l m, Is k m, IxOptic l u v a b, NonEmptyIndices js)
+  => Optic k is s t u v
+  -> Optic l js u v a b
+  -> Optic m is s t a b
 o <% o' = o % noIx o'
 {-# INLINE (<%) #-}
 
@@ -71,7 +69,7 @@ o <% o' = o % noIx o'
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
 reindexed
-  :: (IxOptic k s t a b, (is `HasSingleIndex` i) "reindexed" 2)
+  :: (IxOptic k s t a b, is `HasSingleIndex` i)
   => (i -> j)
   -> Optic k is         s t a b
   -> Optic k (WithIx j) s t a b
@@ -119,11 +117,14 @@ icompose5 = icomposeN
 
 class IxOptic k s t a b where
   -- | Convert an indexed optic to its unindexed equivalent.
-  noIx :: Optic k is s t a b -> Optic k NoIx s t a b
+  noIx
+    :: NonEmptyIndices is
+    => Optic k is s t a b
+    -> Optic k NoIx s t a b
 
   -- | Flatten indices obtained from arbitrary number of indexed optics.
   icomposeN
-    :: CurryCompose is
+    :: (CurryCompose is, NonEmptyIndices is)
     => Curry is i
     -> Optic k is         s t a b
     -> Optic k (WithIx i) s t a b

@@ -34,7 +34,7 @@ toIxSetter = castOptic
 
 -- | Apply an indexed setter as a modifier.
 iover
-  :: (Is k A_Setter, (is `HasSingleIndex` i) "iover" 1)
+  :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
 iover o = \f -> runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
@@ -42,7 +42,7 @@ iover o = \f -> runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
 
 -- | Apply an indexed setter as a modifier, strictly.
 iover'
-  :: (Is k A_Setter, (is `HasSingleIndex` i) "iover'" 1)
+  :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
 iover' o = \f ->
@@ -53,7 +53,7 @@ iover' o = \f ->
 
 -- | Apply an indexed setter.
 iset
-  :: (Is k A_Setter, (is `HasSingleIndex` i) "iset" 1)
+  :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> b) -> s -> t
 iset o = \f -> iover o (\i _ -> f i)
@@ -61,7 +61,7 @@ iset o = \f -> iover o (\i _ -> f i)
 
 -- | Apply an indexed setter, strictly.
 iset'
-  :: (Is k A_Setter, (is `HasSingleIndex` i) "iset'" 1)
+  :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> b) -> s -> t
 iset' o = \f -> iover' o (\i _ -> f i)

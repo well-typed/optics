@@ -88,7 +88,7 @@ conjoinedTraversal f g = Optic (conjoinedTraversal__ f g)
 ----------------------------------------
 
 itraverseOf
-  :: (Is k A_Traversal, Applicative f, (is `HasSingleIndex` i) "itraverseOf" 1)
+  :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> f b) -> s -> f t
 itraverseOf o = \f -> runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
@@ -96,7 +96,7 @@ itraverseOf o = \f -> runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
 
 -- | A version of 'itraverseOf' with the arguments flipped.
 iforOf
-  :: (Is k A_Traversal, Applicative f, (is `HasSingleIndex` i) "iforOf" 1)
+  :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> s -> (i -> a -> f b) -> f t
 iforOf = flip . itraverseOf
@@ -110,7 +110,7 @@ iforOf = flip . itraverseOf
 -- 'Optics.Traversal.mapAccumLOf' o ≡ 'imapAccumLOf' o '.' 'const'
 -- @
 imapAccumLOf
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "imapAccumLOf" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> acc -> a -> (b, acc)) -> acc -> s -> (t, acc)
 imapAccumLOf o f acc0 s = runState (itraverseOf o g s) acc0 where
@@ -125,7 +125,7 @@ imapAccumLOf o f acc0 s = runState (itraverseOf o g s) acc0 where
 -- 'Optics.Traversal.mapAccumROf' o ≡ 'imapAccumROf' o '.' 'const'
 -- @
 imapAccumROf
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "imapAccumROf" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> acc -> a -> (b, acc)) -> acc -> s -> (t, acc)
 imapAccumROf = imapAccumLOf . ibackwards
@@ -133,7 +133,7 @@ imapAccumROf = imapAccumLOf . ibackwards
 
 -- | This permits the use of 'scanl1' over an arbitrary 'IxTraversal'.
 iscanl1Of
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "iscanl1Of" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
   -> (i -> a -> a -> a) -> s -> t
 iscanl1Of o f = fst . imapAccumLOf o step Nothing
@@ -145,7 +145,7 @@ iscanl1Of o f = fst . imapAccumLOf o step Nothing
 
 -- | This permits the use of 'scanr1' over an arbitrary 'IxTraversal'.
 iscanr1Of
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "iscanr1Of" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
   -> (i -> a -> a -> a) -> s -> t
 iscanr1Of o f = fst . imapAccumROf o step Nothing
@@ -158,7 +158,7 @@ iscanr1Of o f = fst . imapAccumROf o step Nothing
 -- | Try to map a function which uses the index over this 'IxTraversal',
 -- retuning Nothing if the 'IxTraversal' has no targets.
 ifailover
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "ifailover" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
 ifailover o f s =
@@ -170,7 +170,7 @@ ifailover o f s =
 
 -- | Version of 'ifailover' strict in the application of @f@.
 ifailover'
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "ifailover" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
 ifailover' o f s =
@@ -200,7 +200,7 @@ itraversed = Optic itraversed__
 -- | This allows you to 'traverse' the elements of an indexed traversal in the
 -- opposite order.
 ibackwards
-  :: (Is k A_Traversal, (is `HasSingleIndex` i) "ibackwards" 1)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> IxTraversal i s t a b
 ibackwards o = conjoinedTraversal
@@ -252,7 +252,7 @@ element = elementOf traversed
 -- | An indexed version of 'partsOf' that receives the list of values paired
 -- with their indices.
 ipartsOf
-  :: forall k is i s t a. (Is k A_Traversal, (is `HasSingleIndex` i) "ipartsOf" 1)
+  :: forall k is i s t a. (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
   -> Lens s t [(i, a)] [a]
 ipartsOf o = lensVL $ \f s ->

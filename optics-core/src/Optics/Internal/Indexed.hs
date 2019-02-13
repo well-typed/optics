@@ -30,88 +30,70 @@ import Optics.Internal.Utils
 
 -- | Check whether a list of indices is not empty and generate sensible error
 -- message if it's not.
-class NonEmptyIndices (is :: [*]) (f :: Symbol) (arg :: Nat)
+class NonEmptyIndices (is :: [*])
 
 instance
   ( TypeError
-    ('Text "Indexed optic is expected"
-    ':$$: FunInfo f arg)
-  ) => NonEmptyIndices '[] f arg
+    ('Text "Indexed optic is expected")
+  ) => NonEmptyIndices '[]
 
-instance NonEmptyIndices (x ': xs) f arg
+instance NonEmptyIndices (x ': xs)
 
--- | Generate sensible error messages in case a user tries to pass either a
+-- | Generate sensible error messages in case a user tries to pass either an
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
 -- with a single index is expected.
-class is ~ '[i] => HasSingleIndex (is :: [*]) (i :: *) (f :: Symbol) (arg :: Nat)
+class is ~ '[i] => HasSingleIndex (is :: [*]) (i :: *)
 
-instance HasSingleIndex '[i] i arg f
+instance HasSingleIndex '[i] i
 
 instance
   ( TypeError
-    ('Text "Indexed optic is expected"
-     ':$$: FunInfo f arg)
+    ('Text "Indexed optic is expected")
   , '[] ~ '[i]
-  ) => HasSingleIndex '[] i f arg
+  ) => HasSingleIndex '[] i
 
 instance
   ( TypeError
     ('Text "Use (<%>) or icompose to combine indices of type "
-     ':<>: ShowTypes is
-     ':$$: FunInfo f arg)
+     ':<>: ShowTypes is)
   , is ~ '[i1, i2]
   , is ~ '[i]
-  ) => HasSingleIndex '[i1, i2] i f arg
+  ) => HasSingleIndex '[i1, i2] i
 
 instance
   ( TypeError
     ('Text "Use icompose3 to combine indices of type "
-     ':<>: ShowTypes is
-     ':$$: FunInfo f arg)
+     ':<>: ShowTypes is)
   , is ~ '[i1, i2, i3]
   , is ~ '[i]
-  ) => HasSingleIndex [i1, i2, i3] i f arg
+  ) => HasSingleIndex [i1, i2, i3] i
 
 instance
   ( TypeError
     ('Text "Use icompose4 to combine indices of type "
-     ':<>: ShowTypes is
-     ':$$: FunInfo f arg)
+     ':<>: ShowTypes is)
   , is ~ '[i1, i2, i3, i4]
   , is ~ '[i]
-  ) => HasSingleIndex '[i1, i2, i3, i4] i f arg
+  ) => HasSingleIndex '[i1, i2, i3, i4] i
 
 instance
   ( TypeError
     ('Text "Use icompose5 to flatten indices of type "
-     ':<>: ShowTypes is
-     ':$$: FunInfo f arg)
+     ':<>: ShowTypes is)
   , is ~ '[i1, i2, i3, i4, i5]
   , is ~ '[i]
-  ) => HasSingleIndex '[i1, i2, i3, i4, i5] i f arg
+  ) => HasSingleIndex '[i1, i2, i3, i4, i5] i
 
 instance
   ( TypeError
     ('Text "Use icomposeN to flatten indices of type "
-     ':<>: ShowTypes is
-     ':$$: FunInfo f arg)
+     ':<>: ShowTypes is)
   , is ~ (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is')
   , is ~ '[i]
-  ) => HasSingleIndex (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is') i f arg
+  ) => HasSingleIndex (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is') i
 
 ----------------------------------------
--- Helpers for NonEmptyIndices and HasSingleIndex.
-
-type family FunInfo (f :: Symbol) (arg :: Nat) :: ErrorMessage where
-  FunInfo f arg = 'Text "  (in the " ':<>: 'Text (ArgToSymbol arg)
-    ':<>: 'Text " argument of ‘" ':<>: 'Text f ':<>: 'Text "’)"
-
-type family ArgToSymbol (arg :: Nat) :: Symbol where
-  ArgToSymbol 1 = "first"
-  ArgToSymbol 2 = "second"
-  ArgToSymbol 3 = "third"
-  ArgToSymbol 4 = "fourth"
-  ArgToSymbol 5 = "fifth"
+-- Helpers for HasSingleIndex
 
 type family ShowTypes (types :: [*]) :: ErrorMessage where
   ShowTypes '[i]      = QuoteType i
