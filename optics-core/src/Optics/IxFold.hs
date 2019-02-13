@@ -18,6 +18,7 @@ module Optics.IxFold
   , ifoldring
   , ifiltered
   , ibackwards_
+  -- * Semigroup structure
   , isumming
   , ifailing
   -- * Special folds

@@ -4,6 +4,7 @@ module Optics.AffineFold
   , AffineFold
   , preview
   , afolding
+  -- * Semigroup structure
   , afailing
   , module Optics.Optic
   ) where

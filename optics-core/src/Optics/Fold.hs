@@ -18,6 +18,7 @@ module Optics.Fold
   , unfolded
   , filtered
   , backwards_
+  -- * Semigroup structure
   , summing
   , failing
   -- * Special folds
