@@ -162,8 +162,7 @@ ifolded = Optic ifolded__
 -- >>> itoListOf (ifolding words) "how are you"
 -- [(0,"how"),(1,"are"),(2,"you")]
 ifolding :: FoldableWithIndex i f => (s -> f a) -> IxFold i s a
-ifolding f = Optic $ contrabimap f (\_ -> ())
-                   . conjoinedFold__ traverse_ itraverse_
+ifolding f = Optic $ contrafirst f . conjoinedFold__ traverse_ itraverse_
 {-# INLINE ifolding #-}
 
 -- | Obtain an 'IxFold' by lifting 'ifoldr' like function.

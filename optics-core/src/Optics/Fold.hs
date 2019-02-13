@@ -172,7 +172,7 @@ folded = Optic folded__
 -- >>> toListOf (folding tail) [1,2,3,4]
 -- [2,3,4]
 folding :: Foldable f => (s -> f a) -> Fold s a
-folding f = Optic (contrabimap f (\_ -> ()) . wander traverse_)
+folding f = Optic (contrafirst f . foldVL__ traverse_)
 {-# INLINE folding #-}
 
 -- | Obtain a 'Fold' by lifting 'foldr' like function.
