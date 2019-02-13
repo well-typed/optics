@@ -18,6 +18,8 @@ module Optics.Fold
   , unfolded
   , filtered
   , backwards_
+  , summing
+  , failing
   -- * Special folds
   , has
   , hasn't
@@ -214,6 +216,34 @@ backwards_
   -> Fold s a
 backwards_ o = foldVL $ \f -> forwards #. traverseOf_ o (Backwards #. f)
 {-# INLINE backwards_ #-}
+
+-- | Return entries of the first 'Fold', then the second one.
+--
+-- >>> toListOf (_1 % ix 0 `summing` _2 % ix 1) ([1,2], [4,7,1])
+-- [1,7]
+--
+summing
+  :: (Is k A_Fold, Is l A_Fold)
+  => Optic' k is s a
+  -> Optic' l js s a
+  -> Fold s a
+summing a b = foldVL $ \f s -> traverseOf_ a f s *> traverseOf_ b f s
+infixr 6 `summing` -- Same as (<>)
+{-# INLINE summing #-}
+
+-- | Try the first 'Fold'. If it returns no entries, try the second one.
+failing
+  :: (Is k A_Fold, Is l A_Fold)
+  => Optic' k is s a
+  -> Optic' l js s a
+  -> Fold s a
+failing a b = foldVL $ \f s ->
+  let OrT visited fu = traverseOf_ a (wrapOrT . f) s
+  in if visited
+     then fu
+     else traverseOf_ b f s
+infixl 3 `failing` -- Same as (<|>)
+{-# INLINE failing #-}
 
 ----------------------------------------
 -- Special folds

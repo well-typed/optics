@@ -427,14 +427,11 @@ makeFieldInstance defType className decs =
 
   containsTypeFamilies = go <=< D.resolveTypeSynonyms
     where
-    go (ConT nm) = hasTypeFamilyD <$> reify nm
+    go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> reify nm
     go ty = or <$> traverse go (toListOf typeSelf ty)
 
     -- We want to catch type families, but not *data* families. See #799.
-    hasTypeFamilyD ty = case preview (_FamilyI % _1) ty of
-      Nothing       -> False
-      Just instDecs -> has _OpenTypeFamilyD instDecs
-                    || has _ClosedTypeFamilyD instDecs
+    _TypeFamilyD = _OpenTypeFamilyD % united `afailing` _ClosedTypeFamilyD % united
 
   pickInstanceDec hasFamilies
     | hasFamilies = do

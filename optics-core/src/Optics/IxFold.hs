@@ -18,6 +18,8 @@ module Optics.IxFold
   , ifoldring
   , ifiltered
   , ibackwards_
+  , isumming
+  , ifailing
   -- * Special folds
   , iheadOf
   , ilastOf
@@ -194,6 +196,45 @@ ibackwards_ o = conjoinedFold
   (\f -> forwards #. traverseOf_  o (Backwards #. f))
   (\f -> forwards #. itraverseOf_ o (\i -> Backwards #. f i))
 {-# INLINE ibackwards_ #-}
+
+-- | Return entries of the first 'IxFold', then the second one.
+isumming
+  :: (Is k A_Fold, Is l A_Fold,
+      is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
+  => Optic' k is1 s a
+  -> Optic' l is2 s a
+  -> IxFold i s a
+isumming a b = conjoinedFold
+  (\f s ->  traverseOf_ a f s *>  traverseOf_ b f s)
+  (\f s -> itraverseOf_ a f s *> itraverseOf_ b f s)
+infixr 6 `isumming` -- Same as (<>)
+{-# INLINE isumming #-}
+
+-- | Try the first 'IxFold'. If it returns no entries, try the second one.
+ifailing
+  :: forall k l is1 is2 i s a
+  .  (Is k A_Fold, Is l A_Fold,
+      is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
+  => Optic' k is1 s a
+  -> Optic' l is2 s a
+  -> IxFold i s a
+ifailing a b = conjoinedFold noix withix
+  where
+    noix :: Applicative f => (a -> f r) -> s -> f ()
+    noix f s =
+      let OrT visited fu = traverseOf_ a (wrapOrT . f) s
+      in if visited
+         then fu
+         else traverseOf_ b f s
+
+    withix :: Applicative f => (i -> a -> f r) -> s -> f ()
+    withix f s =
+      let OrT visited fu = itraverseOf_ a (\i -> wrapOrT . f i) s
+      in if visited
+         then fu
+         else itraverseOf_ b f s
+infixl 3 `ifailing` -- Same as (<|>)
+{-# INLINE ifailing #-}
 
 ----------------------------------------
 -- Special folds
