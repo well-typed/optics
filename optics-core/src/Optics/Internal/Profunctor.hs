@@ -1,8 +1,3 @@
--- | Copied from the profunctors package.
---
--- We include this here, at least for now, with the goal
--- that we only depend on base.
---
 module Optics.Internal.Profunctor where
 
 import Data.Coerce (Coercible, coerce)
@@ -11,13 +6,13 @@ import Data.Functor.Identity
 
 import Optics.Internal.Utils
 
--- | Needed for conversion of affine traversal back to its VL representation.
-data StarA f i a b = StarA (forall r. r -> f r) (a -> f b)
+----------------------------------------
+-- Concrete profunctors
 
 -- | Needed for traversals.
 newtype Star f i a b = Star { runStar :: a -> f b }
 
--- | Needed for prismatic getters, getters and folds.
+-- | Needed for getters and folds.
 newtype Forget r i a b = Forget { runForget :: a -> r }
 
 -- | Needed for affine folds.
@@ -68,10 +63,15 @@ unwrapIdentity' (Identity' () a) = a
 
 ----------------------------------------
 
+-- | Needed for conversion of affine traversal back to its VL representation.
+data StarA f i a b = StarA (forall r. r -> f r) (a -> f b)
+
 -- | Unwrap 'StarA'.
 runStarA :: StarA f i a b -> a -> f b
 runStarA (StarA _ k) = k
 {-# INLINE runStarA #-}
+
+----------------------------------------
 
 -- | Repack 'Star' to change its index type.
 reStar :: Star f i a b -> Star f j a b
