@@ -162,7 +162,7 @@ ifailover
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
-ifailover o f s =
+ifailover o = \f s ->
   let OrT visited t = itraverseOf o (\i -> wrapOrT . Identity #. f i) s
   in if visited
      then Just (runIdentity t)
@@ -174,7 +174,7 @@ ifailover'
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
-ifailover' o f s =
+ifailover' o = \f s ->
   let OrT visited t = itraverseOf o (\i -> wrapOrT . wrapIdentity' . f i) s
   in if visited
      then Just (unwrapIdentity' t)

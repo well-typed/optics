@@ -247,7 +247,35 @@ eta12lhs, eta12rhs
 eta12lhs   = iset' (imapped <%> imapped)
 eta12rhs f = iset' (imapped <%> imapped) f
 
--- Common use cases
+-- Misc
+
+failoverCheck
+  :: (TraversableWithIndex i s, TraversableWithIndex j t)
+  => (a -> b)
+  -> s (Either c (t a))
+  -> Maybe (s (Either c (t b)))
+failoverCheck = failover (traversed % _Right % traversed)
+
+failover'Check
+  :: (TraversableWithIndex i s, TraversableWithIndex j t)
+  => (a -> b)
+  -> s (Either c (t a))
+  -> Maybe (s (Either c (t b)))
+failover'Check = failover' (traversed % _Right % traversed)
+
+ifailoverCheck
+  :: (TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> b)
+  -> s (Either c (t a))
+  -> Maybe (s (Either c (t b)))
+ifailoverCheck = ifailover (icompose (,) $ itraversed % _Right % itraversed)
+
+ifailover'Check
+  :: (TraversableWithIndex i s, TraversableWithIndex j t)
+  => ((i, j) -> a -> b)
+  -> s (Either c (t a))
+  -> Maybe (s (Either c (t b)))
+ifailover'Check = ifailover' (icompose (,) $ itraversed % _Right % itraversed)
 
 simpleMapIx
   :: Ord k => k -> Either a (M.Map k (b, v)) -> Maybe v
@@ -407,6 +435,14 @@ inspectionTests = testGroup "inspection"
     , testCase "optimized eta12lhs" $
         assertSuccess $(inspectTest $ hasNoProfunctors 'eta12lhs)
 
+    , testCase "optimized failover" $
+        assertSuccess $(inspectTest $ hasNoProfunctors 'failoverCheck)
+    , testCase "optimized failover'" $
+        assertSuccess $(inspectTest $ hasNoProfunctors 'failover'Check)
+    , testCase "optimized ifailover" $
+        assertSuccess $(inspectTest $ hasNoProfunctors 'ifailoverCheck)
+    , testCase "optimized ifailover'" $
+        assertSuccess $(inspectTest $ hasNoProfunctors 'ifailover'Check)
     , testCase "optimized sipleMapIx" $
         assertSuccess $(inspectTest $ 'simpleMapIx `hasNoTypeClassesExcept` [''Ord])
     , testCase "optimized mapIx" $
