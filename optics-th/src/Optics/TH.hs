@@ -204,7 +204,7 @@ classyRulesFor
   [(String, String)] {- ^ [(Field Name, Method Name)] -} ->
   LensRules
 classyRulesFor classFun fields = classyRules
-  & lensClass .~ (over (mapped % both) mkName . classFun . nameBase)
+  & lensClass .~ (over (mapped % each) mkName . classFun . nameBase)
   & lensField .~ lookingupNamer fields
 
 -- | A 'LensRules' used by 'makeClassy_'.

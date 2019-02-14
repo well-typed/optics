@@ -5,7 +5,6 @@ module Optics.Traversal
   , Traversal
   , Traversal'
   -- * Introduction
-  , both
   , traversed
   , toTraversal
   -- * Elimination
@@ -224,13 +223,6 @@ failover' o f s =
 
 ----------------------------------------
 -- Traversals
-
--- | Traverse both coordinates of a pair.
---
--- TODO: Generalize to a Bitraversable when we drop support for GHC 8.0.2.
-both :: Traversal (a, a) (b, b) a b
-both = traversalVL $ \f (a1, a2) -> (,) <$> f a1 <*> f a2
-{-# INLINE both #-}
 
 -- | Traversal via the 'Traversable' class.
 traversed :: Traversable t => Traversal (t a) (t b) a b

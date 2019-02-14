@@ -281,7 +281,7 @@ buildStab s categorizedFields =
 
      -- compute possible type changes
      sub <- T.sequenceA (M.fromSet (newName . nameBase) unfixedTypeVars)
-     let (t,b) = over both (substTypeVars sub) (s',a)
+     let (t,b) = over each (substTypeVars sub) (s',a)
 
      return (s',t,a,b)
 
