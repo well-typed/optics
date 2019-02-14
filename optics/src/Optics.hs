@@ -341,6 +341,7 @@ import Data.Either.Optics as P
 -- * 'foldOf' is the equivalent of view for folds
 -- * 'firstOf' is now 'headOf'
 -- * Position lenses up to _9 instead of _19 are provided
+-- * 'Each' provides indexed traversals
 -- * There are four variants of 'backwards' for (indexed) folds and traversals
 -- * None of operators is exported from main module
 -- * All ordinary optics are index-preserving by default
