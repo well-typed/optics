@@ -12,4 +12,4 @@ import Optics.Optic
 type LensyReview s t a b = Optic A_LensyReview NoIx s t a b
 
 -- | Type synonym for a type-preserving lensy review.
-type LensyReview' b t = Optic' A_LensyReview NoIx t b
+type LensyReview' t b = Optic' A_LensyReview NoIx t b
