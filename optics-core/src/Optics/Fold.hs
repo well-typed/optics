@@ -99,12 +99,12 @@ foldMapOf o = runForget #. getOptic (toFold o) .# Forget
 
 -- | Fold right-associatively.
 foldrOf :: Is k A_Fold => Optic' k is s a -> (a -> r -> r) -> r -> s -> r
-foldrOf o arr r s = (\e -> appEndo e r) $ foldMapOf o (Endo #. arr) s
+foldrOf o = \arr r s -> (\e -> appEndo e r) $ foldMapOf o (Endo #. arr) s
 {-# INLINE foldrOf #-}
 
 -- | Fold left-associatively, and strictly.
 foldlOf' :: Is k A_Fold => Optic' k is s a -> (r -> a -> r) -> r -> s -> r
-foldlOf' o rar r0 s = foldrOf o (\a rr r -> rr $! rar r a) id s r0
+foldlOf' o = \rar r0 s -> foldrOf o (\a rr r -> rr $! rar r a) id s r0
 {-# INLINE foldlOf' #-}
 
 -- | Fold to a list.
