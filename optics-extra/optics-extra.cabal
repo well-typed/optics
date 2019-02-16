@@ -39,6 +39,9 @@ library
                    Optics.Empty
                    Optics.Indexed
                    Optics.Operators.State
+                   Optics.Passthrough
+                   Optics.View
+                   Optics.Zoom
 
   exposed-modules: Data.ByteString.Lazy.Optics
                    Data.ByteString.Optics
@@ -48,12 +51,11 @@ library
                    Data.Text.Strict.Optics
                    Data.Vector.Generic.Optics
                    Data.Vector.Optics
-                   Optics.Passthrough
-                   Optics.View
 
   -- internal modules
   exposed-modules: Optics.Extra.Internal.ByteString
                    Optics.Extra.Internal.Vector
+                   Optics.Extra.Internal.Zoom
 
   default-extensions:
     BangPatterns
