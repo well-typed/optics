@@ -2,15 +2,34 @@ module Optics.Extra.Internal.Zoom
   (
   -- * Zoom
     Focusing(..)
+  , stateZoom
+  , stateZoomMaybe
+  , stateZoomMany
   , FocusingWith(..)
+  , rwsZoom
+  , rwsZoomMaybe
+  , rwsZoomMany
   , May(..)
+  , shuffleMay
   , Err(..)
+  , shuffleErr
   -- * Magnify
   , Effect(..)
   , EffectRWS(..)
+  , rwsMagnify
+  , rwsMagnifyMaybe
+  , rwsMagnifyMany
+  -- * Misc
+  , shuffleS
+  , shuffleW
   ) where
 
+import Data.Coerce
+import Data.Monoid
 import qualified Data.Semigroup as SG
+
+import Optics.Core
+import Optics.Internal.Utils
 
 -- | Used by 'Optics.Zoom.Zoom' to 'Optics.Zoom.zoom' into
 -- 'Control.Monad.State.StateT'.
@@ -30,6 +49,34 @@ instance (Monad m, Monoid s) => Applicative (Focusing m s) where
     pure (c `mappend` c', f s)
   {-# INLINE pure #-}
   {-# INLINE (<*>) #-}
+
+stateZoom
+  :: (Is k A_Lens, Monad m)
+  => Optic' k is t s
+  -> (s -> m (c, s))
+  -> (t -> m (c, t))
+stateZoom o m = unfocusing #. toLensVL o (Focusing #. m)
+{-# INLINE stateZoom #-}
+
+stateZoomMaybe
+  :: (Is k An_AffineTraversal, Monad m)
+  => Optic' k is t s
+  -> (s -> m (c, s))
+  -> (t -> m (Maybe c, t))
+stateZoomMaybe o m =
+     fmap (coerce :: (First c, t) -> (Maybe c, t))
+  .  unfocusing
+  #. traverseOf (toAffineTraversal o)
+                (Focusing #. over (mapped % _1) (First #. Just) . m)
+{-# INLINE stateZoomMaybe #-}
+
+stateZoomMany
+  :: (Is k A_Traversal, Monad m, Monoid c)
+  => Optic' k is t s
+  -> (s -> m (c, s))
+  -> (t -> m (c, t))
+stateZoomMany o m = unfocusing #. traverseOf o (Focusing #. m)
+{-# INLINE stateZoomMany #-}
 
 ----------------------------------------
 
@@ -52,6 +99,34 @@ instance (Monad m, Monoid s, Monoid w) => Applicative (FocusingWith w m s) where
   {-# INLINE pure #-}
   {-# INLINE (<*>) #-}
 
+rwsZoom
+  :: (Is k A_Lens, Monad m)
+  => Optic' k is t s
+  -> (r -> s -> m (c, s, w))
+  -> (r -> t -> m (c, t, w))
+rwsZoom o m r = unfocusingWith #. toLensVL o (FocusingWith #. m r)
+{-# INLINE rwsZoom #-}
+
+rwsZoomMaybe
+  :: (Is k An_AffineTraversal, Monad m, Monoid w)
+  => Optic' k is t s
+  -> (r -> s -> m (c, s, w))
+  -> (r -> t -> m (Maybe c, t, w))
+rwsZoomMaybe o m r =
+     fmap (coerce :: (First c, t, w) -> (Maybe c, t, w))
+  .  unfocusingWith
+  #. traverseOf (toAffineTraversal o)
+                (FocusingWith #. over (mapped % _1) (First #. Just) . m r)
+{-# INLINE rwsZoomMaybe #-}
+
+rwsZoomMany
+  :: (Is k A_Traversal, Monad m, Monoid w, Monoid c)
+  => Optic' k is t s
+  -> (r -> s -> m (c, s, w))
+  -> (r -> t -> m (c, t, w))
+rwsZoomMany o m r = unfocusingWith #. traverseOf o (FocusingWith #. m r)
+{-# INLINE rwsZoomMany #-}
+
 ----------------------------------------
 
 -- | Make a 'Monoid' out of 'Maybe' for error handling.
@@ -68,6 +143,12 @@ instance Monoid a => Monoid (May a) where
   _            `mappend` _            = May Nothing
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
+
+shuffleMay :: Maybe (May c) -> May (Maybe c)
+shuffleMay = \case
+  Nothing      -> May (Just Nothing)
+  Just (May c) -> May (Just <$> c)
+{-# INLINE shuffleMay #-}
 
 ----------------------------------------
 
@@ -87,6 +168,12 @@ instance Monoid a => Monoid (Err e a) where
   _             `mappend` Err (Left e)  = Err $ Left e
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
+
+shuffleErr :: Maybe (Err e c) -> Err e (Maybe c)
+shuffleErr = \case
+  Nothing       -> Err (Right Nothing)
+  Just (Err ec) -> Err (Just <$> ec)
+{-# INLINE shuffleErr #-}
 
 ----------------------------------------
 
@@ -125,3 +212,41 @@ instance (Monoid c, Monoid w, Monad m) => Monoid (EffectRWS w s m c) where
     pure (c `mappend` c', s'', w `mappend` w')
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
+
+rwsMagnify
+  :: Is k A_Getter
+  => Optic' k is a b
+  -> (b -> s -> f (c, s, w))
+  -> (a -> s -> f (c, s, w))
+rwsMagnify o m = getEffectRWS #. views o (EffectRWS #. m)
+{-# INLINE rwsMagnify #-}
+
+rwsMagnifyMaybe
+  :: (Is k An_AffineFold, Applicative m, Monoid w)
+  => Optic' k is a b
+  -> (b -> s -> m (c, s, w))
+  -> (a -> s -> m (Maybe c, s, w))
+rwsMagnifyMaybe o m r s = maybe
+  (pure (Nothing, s, mempty))
+  (\e -> over (mapped % _1) Just $ getEffectRWS e s)
+  (previews o (EffectRWS #. m) r)
+{-# INLINE rwsMagnifyMaybe #-}
+
+rwsMagnifyMany
+  :: (Is k A_Fold, Monad m, Monoid w, Monoid c)
+  => Optic' k is a b
+  -> (b -> s -> m (c, s, w))
+  -> (a -> s -> m (c, s, w))
+rwsMagnifyMany o m = getEffectRWS #. foldMapOf o (EffectRWS #. m)
+{-# INLINE rwsMagnifyMany #-}
+
+----------------------------------------
+-- Misc
+
+shuffleS :: s -> Maybe (c, s) -> (Maybe c, s)
+shuffleS s = maybe (Nothing, s) (over _1 Just)
+{-# INLINE shuffleS #-}
+
+shuffleW :: Monoid w => Maybe (c, w) -> (Maybe c, w)
+shuffleW = maybe (Nothing, mempty) (over _1 Just)
+{-# INLINE shuffleW #-}

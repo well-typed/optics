@@ -1,8 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-warnings-deprecations #-}
 module Optics.Zoom
-  ( Magnify(..)
-  , Zoom(..)
+  (
+    -- * Zoom
+    Zoom(..)
+    -- * Magnify
+  , Magnify(..)
+  , MagnifyMany(..)
   ) where
 
 import Control.Monad.Reader
@@ -18,8 +22,6 @@ import Control.Monad.Trans.State.Lazy as L
 import Control.Monad.Trans.State.Strict as S
 import Control.Monad.Trans.Writer.Lazy as L
 import Control.Monad.Trans.Writer.Strict as S
-import Data.Coerce
-import Data.Monoid
 
 import Optics.Core
 import Optics.Internal.Utils
@@ -201,74 +203,6 @@ instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
   {-# INLINE zoomMaybe #-}
   {-# INLINE zoomMany #-}
 
--- TODO: instance Zoom m m a a => Zoom (ContT r m) (ContT r m) a a where
-
-----------------------------------------
--- Zoom helpers
-
-stateZoom
-  :: (Is k A_Lens, Monad m)
-  => Optic' k is t s
-  -> (s -> m (c, s))
-  -> (t -> m (c, t))
-stateZoom o m = unfocusing #. toLensVL o (Focusing #. m)
-
-stateZoomMaybe
-  :: (Is k An_AffineTraversal, Monad m)
-  => Optic' k is t s
-  -> (s -> m (c, s))
-  -> (t -> m (Maybe c, t))
-stateZoomMaybe o m =
-     fmap (coerce :: (First c, t) -> (Maybe c, t))
-  .  unfocusing
-  #. traverseOf (toAffineTraversal o)
-                (Focusing #. over (mapped % _1) (First #. Just) . m)
-
-stateZoomMany
-  :: (Is k A_Traversal, Monad m, Monoid c)
-  => Optic' k is t s
-  -> (s -> m (c, s))
-  -> (t -> m (c, t))
-stateZoomMany o m = unfocusing #. traverseOf o (Focusing #. m)
-
-rwsZoom
-  :: (Is k A_Lens, Monad m)
-  => Optic' k is t s
-  -> (r -> s -> m (c, s, w))
-  -> (r -> t -> m (c, t, w))
-rwsZoom o m r = unfocusingWith #. toLensVL o (FocusingWith #. m r)
-
-rwsZoomMaybe
-  :: (Is k An_AffineTraversal, Monad m, Monoid w)
-  => Optic' k is t s
-  -> (r -> s -> m (c, s, w))
-  -> (r -> t -> m (Maybe c, t, w))
-rwsZoomMaybe o m r =
-     fmap (coerce :: (First c, t, w) -> (Maybe c, t, w))
-  .  unfocusingWith
-  #. traverseOf (toAffineTraversal o)
-                (FocusingWith #. over (mapped % _1) (First #. Just) . m r)
-
-rwsZoomMany
-  :: (Is k A_Traversal, Monad m, Monoid w, Monoid c)
-  => Optic' k is t s
-  -> (r -> s -> m (c, s, w))
-  -> (r -> t -> m (c, t, w))
-rwsZoomMany o m r = unfocusingWith #. traverseOf o (FocusingWith #. m r)
-
-shuffleW :: Monoid w => Maybe (c, w) -> (Maybe c, w)
-shuffleW = maybe (Nothing, mempty) (over _1 Just)
-
-shuffleMay :: Maybe (May c) -> May (Maybe c)
-shuffleMay = \case
-  Nothing      -> May (Just Nothing)
-  Just (May c) -> May (Just <$> c)
-
-shuffleErr :: Maybe (Err e c) -> Err e (Maybe c)
-shuffleErr = \case
-  Nothing       -> Err (Right Nothing)
-  Just (Err ec) -> Err (Just <$> ec)
-
 ------------------------------------------------------------------------------
 -- Magnify
 ------------------------------------------------------------------------------
@@ -278,16 +212,13 @@ shuffleErr = \case
 -- this can change the environment of a deeply nested 'Monad' transformer.
 --
 -- Its functions can be used to run a monadic action in a larger environment
--- than it was defined in, using a 'Getter'', an 'AffineFold'' or a 'Fold''.
+-- than it was defined in, using a 'Getter'' or an 'AffineFold''.
 --
 -- They act like 'Control.Monad.Reader.Class.local', but can in many cases
 -- change the type of the environment as well.
 --
 -- They're commonly used to lift actions in a simpler 'Reader' 'Monad' into a
 -- 'Monad' with a larger environment type.
---
--- When used with a 'Fold'' over multiple values, the actions for each target
--- are executed sequentially and the results are aggregated.
 --
 -- They can be used to edit pretty much any 'Monad' transformer stack with an
 -- environment in it:
@@ -316,6 +247,14 @@ class
     -> m c
     -> n (Maybe c)
 
+-- | Extends 'Magnify' with an ability to magnify using a 'Fold'' over multiple
+-- targets so that actions for each one are executed sequentially and the
+-- results are aggregated.
+--
+-- There is however no sensible instance of 'MagnifyMany' for 'StateT'.
+class
+  (MonadReader b m, MonadReader a n, Magnify m n b a
+  ) => MagnifyMany m n b a | m -> b, n -> a, m a -> n, n b -> m where
   magnifyMany
     :: (Is k A_Fold, Monoid c)
     => Optic' k is a b
@@ -325,14 +264,18 @@ class
 -- | @
 -- 'magnify'      = 'views'
 -- 'magnifyMaybe' = 'previews'
--- 'magnifyMany'  = 'foldMapOf'
 -- @
 instance Magnify ((->) b) ((->) a) b a where
   magnify      = views
   magnifyMaybe = previews
-  magnifyMany  = foldMapOf
   {-# INLINE magnify #-}
   {-# INLINE magnifyMaybe #-}
+
+-- | @
+-- 'magnifyMany' = 'foldMapOf'
+-- @
+instance MagnifyMany ((->) b) ((->) a) b a where
+  magnifyMany = foldMapOf
   {-# INLINE magnifyMany #-}
 
 instance Monad m => Magnify (ReaderT b m) (ReaderT a m) b a where
@@ -340,59 +283,135 @@ instance Monad m => Magnify (ReaderT b m) (ReaderT a m) b a where
     ReaderT $ \r -> getEffect (views o (Effect #. m) r)
   magnifyMaybe o = \(ReaderT m) ->
     ReaderT $ \r -> traverse getEffect (previews o (Effect #. m) r)
-  magnifyMany o = \(ReaderT m) ->
-    ReaderT $ \r -> getEffect (foldMapOf o (Effect #. m) r)
   {-# INLINE magnify #-}
   {-# INLINE magnifyMaybe #-}
+
+instance Monad m => MagnifyMany (ReaderT b m) (ReaderT a m) b a where
+  magnifyMany o = \(ReaderT m) ->
+    ReaderT $ \r -> getEffect (foldMapOf o (Effect #. m) r)
   {-# INLINE magnifyMany #-}
 
 instance (Monad m, Monoid w) => Magnify (S.RWST b w s m) (S.RWST a w s m) b a where
   magnify      o = \(S.RWST m) -> S.RWST $ rwsMagnify      o m
   magnifyMaybe o = \(S.RWST m) -> S.RWST $ rwsMagnifyMaybe o m
-  magnifyMany  o = \(S.RWST m) -> S.RWST $ rwsMagnifyMany  o m
   {-# INLINE magnify #-}
   {-# INLINE magnifyMaybe #-}
+
+instance
+  (Monad m, Monoid w
+  ) => MagnifyMany (S.RWST b w s m) (S.RWST a w s m) b a where
+  magnifyMany o = \(S.RWST m) -> S.RWST $ rwsMagnifyMany  o m
   {-# INLINE magnifyMany #-}
 
 instance (Monad m, Monoid w) => Magnify (L.RWST b w s m) (L.RWST a w s m) b a where
   magnify      o = \(L.RWST m) -> L.RWST $ rwsMagnify      o m
   magnifyMaybe o = \(L.RWST m) -> L.RWST $ rwsMagnifyMaybe o m
-  magnifyMany  o = \(L.RWST m) -> L.RWST $ rwsMagnifyMany  o m
   {-# INLINE magnify #-}
   {-# INLINE magnifyMaybe #-}
+
+instance
+  (Monad m, Monoid w
+  ) => MagnifyMany (L.RWST b w s m) (L.RWST a w s m) b a where
+  magnifyMany o = \(L.RWST m) -> L.RWST $ rwsMagnifyMany  o m
   {-# INLINE magnifyMany #-}
 
 instance Magnify m n b a => Magnify (IdentityT m) (IdentityT n) b a where
   magnify      o = \(IdentityT m) -> IdentityT (magnify      o m)
   magnifyMaybe o = \(IdentityT m) -> IdentityT (magnifyMaybe o m)
-  magnifyMany  o = \(IdentityT m) -> IdentityT (magnifyMany  o m)
   {-# INLINE magnify #-}
   {-# INLINE magnifyMaybe #-}
+
+instance MagnifyMany m n b a => MagnifyMany (IdentityT m) (IdentityT n) b a where
+  magnifyMany o = \(IdentityT m) -> IdentityT (magnifyMany  o m)
   {-# INLINE magnifyMany #-}
 
-----------------------------------------
--- Magnify helpers
+instance Magnify m n b a => Magnify (S.StateT s m) (S.StateT s n) b a where
+  magnify      o = \(S.StateT m) -> S.StateT $ magnify o . m
+  magnifyMaybe o = \(S.StateT m) -> S.StateT $ \s ->
+    fmap (shuffleS s) $ magnifyMaybe o (m s)
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
 
-rwsMagnify
-  :: Is k A_Getter
-  => Optic' k is a b
-  -> (b -> s -> f (c, s, w))
-  -> (a -> s -> f (c, s, w))
-rwsMagnify o m = getEffectRWS #. views o (EffectRWS #. m)
+-- No instance for MagnifyMany (S.StateT s m) (S.StateT s n) b a
 
-rwsMagnifyMaybe
-  :: (Is k An_AffineFold, Applicative m, Monoid w)
-  => Optic' k is a b
-  -> (b -> s -> m (c, s, w))
-  -> (a -> s -> m (Maybe c, s, w))
-rwsMagnifyMaybe o m r s = maybe
-  (pure (Nothing, s, mempty))
-  (\e -> over (mapped % _1) Just $ getEffectRWS e s)
-  (previews o (EffectRWS #. m) r)
+instance Magnify m n b a => Magnify (L.StateT s m) (L.StateT s n) b a where
+  magnify      o = \(L.StateT m) -> L.StateT $ magnify o . m
+  magnifyMaybe o = \(L.StateT m) -> L.StateT $ \s ->
+    fmap (shuffleS s) $ magnifyMaybe o (m s)
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
 
-rwsMagnifyMany
-  :: (Is k A_Fold, Monad m, Monoid w, Monoid c)
-  => Optic' k is a b
-  -> (b -> s -> m (c, s, w))
-  -> (a -> s -> m (c, s, w))
-rwsMagnifyMany o m = getEffectRWS #. foldMapOf o (EffectRWS #. m)
+-- No instance for MagnifyMany (L.StateT s m) (L.StateT s n) b a
+
+instance
+  (Monoid w, Magnify m n b a
+  ) => Magnify (S.WriterT w m) (S.WriterT w n) b a where
+  magnify      o = S.WriterT #.                 magnify      o .# S.runWriterT
+  magnifyMaybe o = S.WriterT #. fmap shuffleW . magnifyMaybe o .# S.runWriterT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance
+  (Monoid w, MagnifyMany m n b a
+  ) => MagnifyMany (S.WriterT w m) (S.WriterT w n) b a where
+  magnifyMany o = S.WriterT #. magnifyMany o .# S.runWriterT
+  {-# INLINE magnifyMany #-}
+
+instance
+  (Monoid w, Magnify m n b a
+  ) => Magnify (L.WriterT w m) (L.WriterT w n) b a where
+  magnify      o = L.WriterT #.                 magnify      o .# L.runWriterT
+  magnifyMaybe o = L.WriterT #. fmap shuffleW . magnifyMaybe o .# L.runWriterT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance
+  (Monoid w, MagnifyMany m n b a
+  ) => MagnifyMany (L.WriterT w m) (L.WriterT w n) b a where
+  magnifyMany o = L.WriterT #. magnifyMany o .# L.runWriterT
+  {-# INLINE magnifyMany #-}
+
+instance Magnify m n b a => Magnify (ListT m) (ListT n) b a where
+  magnify      o = ListT #.                  magnify      o .# runListT
+  magnifyMaybe o = ListT #. fmap sequenceA . magnifyMaybe o .# runListT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance MagnifyMany m n b a => MagnifyMany (ListT m) (ListT n) b a where
+  magnifyMany o = ListT #. magnifyMany o .# runListT
+  {-# INLINE magnifyMany #-}
+
+instance Magnify m n b a => Magnify (MaybeT m) (MaybeT n) b a where
+  magnify o = MaybeT #. magnify o .# runMaybeT
+  magnifyMaybe o =
+    MaybeT #. fmap (getMay . shuffleMay) . magnifyMaybe o . fmap May .# runMaybeT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance MagnifyMany m n b a => MagnifyMany (MaybeT m) (MaybeT n) b a where
+  magnifyMany o = MaybeT #. fmap getMay . magnifyMany o . fmap May .# runMaybeT
+  {-# INLINE magnifyMany #-}
+
+instance (Error e, Magnify m n b a) => Magnify (ErrorT e m) (ErrorT e n) b a where
+  magnify o = ErrorT #. magnify o .# runErrorT
+  magnifyMaybe o =
+    ErrorT #. fmap (getErr . shuffleErr) . magnifyMaybe o . fmap Err .# runErrorT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance
+  (Error e, MagnifyMany m n b a
+  ) => MagnifyMany (ErrorT e m) (ErrorT e n) b a where
+  magnifyMany o = ErrorT #. fmap getErr . magnifyMany o . fmap Err .# runErrorT
+  {-# INLINE magnifyMany #-}
+
+instance Magnify m n b a => Magnify (ExceptT e m) (ExceptT e n) b a where
+  magnify o = ExceptT #. magnify o .# runExceptT
+  magnifyMaybe o =
+    ExceptT #. fmap (getErr . shuffleErr) . magnifyMaybe o . fmap Err .# runExceptT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a where
+  magnifyMany o = ExceptT #. fmap getErr . magnifyMany o . fmap Err .# runExceptT
+  {-# INLINE magnifyMany #-}
