@@ -1,4 +1,6 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedLabels #-}
@@ -7,10 +9,14 @@
 module Optics.Tests.Labels where
 
 import Data.Ord
+import Control.Monad.Reader
 
 import Optics
 import Optics.Operators
 import Optics.TH
+
+----------------------------------------
+-- Basic data manipulation
 
 data Mammal
   = Dog { mammalName :: String, mammalAge :: Int }
@@ -60,3 +66,42 @@ oldestPet = maximumByOf (#pets % folded) (comparing $ view #age) human
 
 luckyDog :: Human Mammal
 luckyDog = human & set (#pets % mapped % _Dog % _1) "Lucky"
+
+----------------------------------------
+-- Generalization of Has* classes
+
+type HasConfig k s = (LabelOptic' "config" k s Config, Is k A_Getter)
+
+data Config = Config
+instance LabelOptic "config" An_Equality Config Config Config Config where
+  labelOptic = equality
+
+data Env = Env { envConfig :: Config, envRandoms :: [Int] }
+makeLabels ''Env
+
+data Nested = Nested { nestedName :: String, nestedEnv :: Env }
+makeLabels ''Nested
+
+instance LabelOptic "config" A_Lens Nested Nested Config Config where
+  labelOptic = #env % #config
+
+doStuff :: (MonadReader r m, HasConfig k r) => m ()
+doStuff = do
+  _ <- asks (view #config)
+  -- ...
+  pure ()
+
+env :: Env
+env = Env Config [1..]
+
+-- | Do stuff with 'Config' directly.
+doStuffWithConfig :: Monad m => m ()
+doStuffWithConfig = runReaderT doStuff Config
+
+-- | Do stuff with larger environment containing 'Config'.
+doStuffWithEnv :: Monad m => m ()
+doStuffWithEnv = runReaderT doStuff env
+
+-- | Do stuff with even larger environment.
+doStuffWithNested :: Monad m => m ()
+doStuffWithNested = runReaderT doStuff (Nested "weird" env)

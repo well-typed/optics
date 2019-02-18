@@ -111,6 +111,7 @@ test-suite optics-tests
   build-depends: base
                , containers
                , inspection-testing  >=0.4.1.1 && <0.5
+               , mtl
                , optics-core
                , optics
                , tasty

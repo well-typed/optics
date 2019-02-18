@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -20,8 +21,11 @@ module Optics.Internal.Optic
   , castOptic
   , (%)
   , (%%)
-  , LabelOptic(..)
   , IsProxy(..)
+  -- * Labels
+  , LabelOptic(..)
+  , LabelOptic'
+  -- * Re-exports
   , module Optics.Internal.Optic.Subtyping
   , module Optics.Internal.Optic.Types
   , module Optics.Internal.Optic.TypeLevel
@@ -175,9 +179,14 @@ instance
 -- type is unambiguous. The consequence is that it's not possible to define
 -- label optics that change phantom type parameters of a type.
 --
-class LabelOptic (name :: Symbol) k s t a b |
-  name s -> k a, name t -> k b, name s b -> t, name t a -> s where
+class LabelOptic (name :: Symbol) k s t a b | name s -> k a
+                                            , name t -> k b
+                                            , name s b -> t
+                                            , name t a -> s where
   labelOptic :: Optic k NoIx s t a b
+
+-- | Type synonym for a type-preserving optic as overloaded label.
+type LabelOptic' name k s a = LabelOptic name k s s a a
 
 instance
   (LabelOptic name k s t a b, is ~ NoIx

@@ -9,7 +9,10 @@ module Optics.Optic
   , Join
   , (%)
   , (%%)
+  -- * Labels
   , LabelOptic(..)
+  , LabelOptic'
+  -- * Misc
   , Append
   , NonEmptyIndices
   , HasSingleIndex
