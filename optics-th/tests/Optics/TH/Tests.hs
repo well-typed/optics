@@ -17,37 +17,30 @@ import Optics.TH.Tests.T799 ()
 
 data Bar a b c = Bar { _baz :: (a, b) }
 makeLenses ''Bar
---makeProductLabels ''Bar
-
--- TODO: generate proper labels for phantom type parameters
-instance LabelOptic "baz" An_Iso (Bar a b c) (Bar a' b' c) (a, b) (a', b') where
-  labelOptic = baz
+makeLabelsWith lensRules ''Bar
 
 checkBaz :: Iso (Bar a b c) (Bar a' b' c') (a, b) (a', b')
 checkBaz = baz
 
+-- We can't change c because of LabelOptic fundeps.
 checkBaz_ :: Iso (Bar a b c) (Bar a' b' c) (a, b) (a', b')
 checkBaz_ = #baz
 
 data Quux a b = Quux { _quaffle :: Int, _quartz :: Double }
 makeLenses ''Quux
---makeProductLabels ''Quux
-
--- TODO: generate proper labels for phantom type parameters
-instance LabelOptic "quaffle" A_Lens (Quux a b) (Quux a b) Int Int where
-  labelOptic = quaffle
-instance LabelOptic "quartz" A_Lens (Quux a b) (Quux a b) Double Double where
-  labelOptic = quartz
+makeLabelsWith lensRules ''Quux
 
 checkQuaffle :: Lens (Quux a b) (Quux a' b') Int Int
 checkQuaffle = quaffle
 
+-- We can't change a and b because of LabelOptic fundeps.
 checkQuaffle_ :: Lens (Quux a b) (Quux a b) Int Int
 checkQuaffle_ = #quaffle
 
 checkQuartz :: Lens (Quux a b) (Quux a' b') Double Double
 checkQuartz = quartz
 
+-- We can't change a and b because of LabelOptic fundeps.
 checkQuartz_ :: Lens (Quux a b) (Quux a b) Double Double
 checkQuartz_ = #quartz
 

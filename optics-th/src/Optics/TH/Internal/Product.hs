@@ -88,7 +88,7 @@ makeFieldOpticsForDatatype rules info =
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
        let defCons    = over normFieldLabels (expandName allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
-       T.sequenceA (M.fromSet (buildScaffold rules s defCons) allDefs)
+       T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
 
      let defs = M.toList perDef
      case _classyLenses rules tyName of
@@ -122,7 +122,7 @@ makeLabelsForDatatype rules info =
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
        let defCons    = over normFieldLabels (expandName allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
-       T.sequenceA (M.fromSet (buildScaffold rules s defCons) allDefs)
+       T.sequenceA (M.fromSet (buildScaffold False rules s defCons) allDefs)
 
      let defs = filter isRank1 $ M.toList perDef
      traverse (makeLabel rules) defs
@@ -211,15 +211,16 @@ normalizeConstructor con =
 -- type of clauses to generate and the type to annotate the declaration
 -- with.
 buildScaffold ::
+  Bool                       {- ^ allow change of phantom type parameters -} ->
   LensRules                                                                  ->
   Type                              {- ^ outer type                       -} ->
   [(Name, [([DefName], Type)])]     {- ^ normalized constructors          -} ->
   DefName                           {- ^ target definition                -} ->
   Q (OpticStab, [(Name, Int, [Int])])
               {- ^ optic type, definition type, field count, target fields -}
-buildScaffold rules s cons defName =
+buildScaffold allowPhantomsChange rules s cons defName =
 
-  do (s',t,a,b) <- buildStab s (concatMap snd consForDef)
+  do (s',t,a,b) <- buildStab allowPhantomsChange s (concatMap snd consForDef)
 
      let defType
            | Just (tyvars,cx,a') <- preview _ForallT a =
@@ -343,22 +344,27 @@ stabToA (OpticSa _ _ _ _ a) = a
 -- categorized field types. Left for fixed and Right for visited.
 -- These types are "raw" and will be packaged into an 'OpticStab'
 -- shortly after creation.
-buildStab :: Type -> [Either Type Type] -> Q (Type,Type,Type,Type)
-buildStab s categorizedFields =
-  do (subA,a) <- unifyTypes targetFields
-     let s' = applyTypeSubst subA s
+buildStab :: Bool -> Type -> [Either Type Type] -> Q (Type,Type,Type,Type)
+buildStab allowPhantomsChange s categorizedFields = do
+  (subA, a) <- unifyTypes targetFields
+  let s' = applyTypeSubst subA s
 
-     -- compute possible type changes
-     sub <- T.sequenceA (M.fromSet (newName . nameBase) unfixedTypeVars)
-     let (t,b) = over each (substTypeVars sub) (s',a)
+  -- compute possible type changes
+  sub <- T.sequenceA (M.fromSet (newName . nameBase) unfixedTypeVars)
+  let (t, b) = over each (substTypeVars sub) (s', a)
 
-     return (s',t,a,b)
-
+  return (s', t, a, b)
   where
-  (fixedFields, targetFields) = partitionEithers categorizedFields
-  fixedTypeVars               = setOf typeVars fixedFields
-  unfixedTypeVars             = setOf typeVars s S.\\ fixedTypeVars
+    phantomTypeVars =
+      let allTypeVars = folded % summing (_Left % typeVars) (_Right % typeVars)
+      in setOf typeVars s S.\\ setOf allTypeVars categorizedFields
 
+    (fixedFields, targetFields) = partitionEithers categorizedFields
+    unfixedTypeVars =
+      let fixedTypeVars = setOf typeVars fixedFields
+      in if allowPhantomsChange
+         then setOf typeVars s S.\\ fixedTypeVars
+         else setOf typeVars s S.\\ fixedTypeVars S.\\ phantomTypeVars
 
 -- | Build the signature and definition for a single field optic.
 -- In the case of a singleton constructor irrefutable matches are
