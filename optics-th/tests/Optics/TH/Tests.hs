@@ -7,6 +7,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- {-# OPTIONS_GHC -ddump-splices #-}
 module Main where
 
 import Optics.Core
@@ -14,6 +15,93 @@ import Optics.Operators
 import Optics.TH
 
 import Optics.TH.Tests.T799 ()
+
+data Pair a b = Pair a b
+makePrisms ''Pair
+makeLabelPrisms ''Pair
+
+checkPair :: Iso (Pair a b) (Pair a' b') (a, b) (a', b')
+checkPair = _Pair
+
+checkPair_ :: Iso (Pair a b) (Pair a' b') (a, b) (a', b')
+checkPair_ = #_Pair
+
+data Sum a b = SLeft a | SRight b | SWeird Int
+makePrisms ''Sum
+makeLabelPrisms ''Sum
+
+checkSLeft :: Prism (Sum a c) (Sum b c) a b
+checkSLeft = _SLeft
+
+checkSLeft_ :: Prism (Sum a c) (Sum b c) a b
+checkSLeft_ = #_SLeft
+
+checkSRight :: Prism (Sum c a) (Sum c b) a b
+checkSRight = _SRight
+
+checkSRight_ :: Prism (Sum c a) (Sum c b) a b
+checkSRight_ = #_SRight
+
+checkSWeird :: Prism' (Sum a b) Int
+checkSWeird = _SWeird
+
+checkSWeird_ :: Prism' (Sum a b) Int
+checkSWeird_ = #_SWeird
+
+data PairEq a b c where
+  PairEq :: (Eq a, Eq b) => a -> b -> PairEq a b c
+makePrisms ''PairEq
+makeLabelPrisms ''PairEq
+
+checkPairEq
+  :: (Eq a', Eq b')
+  => Iso (PairEq a b c) (PairEq a' b' c') (a, b) (a', b')
+checkPairEq = _PairEq
+
+checkPairEq_
+  :: (Eq a', Eq b')
+  => Iso (PairEq a b c) (PairEq a' b' c) (a, b) (a', b')
+checkPairEq_ = #_PairEq
+
+data Brr a where
+  BrrA :: a -> Brr a
+  BrrInt :: Int -> Brr Int
+makePrisms ''Brr
+makeLabelPrisms ''Brr
+
+checkBrrA :: Prism' (Brr a) a
+checkBrrA = _BrrA
+
+checkBrrA_ :: Prism' (Brr a) a
+checkBrrA_ = #_BrrA
+
+checkBrrInt :: Prism' (Brr Int) Int
+checkBrrInt = _BrrInt
+
+checkBrrInt_ :: Prism' (Brr Int) Int
+checkBrrInt_ = #_BrrInt
+
+data Bzzt a b c where
+  BzztShow :: Show a => a -> Bzzt a b c
+  BzztRead :: Read b => b -> Bzzt a b c
+makePrisms ''Bzzt
+makeLabelPrisms ''Bzzt
+
+checkBzztShow :: Show a => Prism (Bzzt a b c) (Bzzt a b c') a a
+checkBzztShow = _BzztShow
+
+-- We can't change b because of LabelOptic fundeps.
+checkBzztShow_ :: Show a => Prism' (Bzzt a b c) a
+checkBzztShow_ = #_BzztShow
+
+checkBzztRead :: Read b => Prism (Bzzt a b c) (Bzzt a b c') b b
+checkBzztRead = _BzztRead
+
+-- We can't change b because of LabelOptic fundeps.
+checkBzztRead_ :: Read b => Prism' (Bzzt a b c) b
+checkBzztRead_ = #_BzztRead
+
+----------------------------------------
 
 data Bar a b c = Bar { _baz :: (a, b) }
 makeLenses ''Bar
@@ -458,6 +546,7 @@ data Rank2Tests
   | C2 { _r2length :: forall a. [a] -> Int }
 
 makeLenses ''Rank2Tests
+makeLabelsWith lensRules ''Rank2Tests -- doesn't generate anything
 
 checkR2length :: Getter Rank2Tests ([a] -> Int)
 checkR2length = r2length
@@ -471,7 +560,10 @@ makeLabels ''PureNoFields
 
 data ReviewTest where ReviewTest :: a -> ReviewTest
 makePrisms ''ReviewTest
+makeLabelPrisms ''ReviewTest -- doesn't generate anything
 
+checkReviewTest :: Review ReviewTest a
+checkReviewTest = _ReviewTest
 
 -- test FieldNamers
 

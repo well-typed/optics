@@ -172,12 +172,14 @@ instance
 -- - @name s b -> t@, @name t a -> s@
 --
 -- The first group ensures that when we compose two optics, the middle type is
--- unambiguous. The consequence is that it's not possible to create read-only
--- label optics focusing on higher rank types.
+-- unambiguous. The consequence is that it's not possible to create label optics
+-- with @a@ or @b@ referencing type variables not referenced in @s@ or @t@,
+-- i.e. getters for fields of rank 2 type or reviews for constructors with
+-- existentially quantified types inside.
 --
 -- The second group ensures that when we perform a chain of updates, the middle
 -- type is unambiguous. The consequence is that it's not possible to define
--- label optics that change phantom type parameters of a type.
+-- label optics that modify phantom type parameters of type @s@ or @t@.
 --
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b

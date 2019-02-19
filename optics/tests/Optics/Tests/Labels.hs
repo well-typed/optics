@@ -22,12 +22,12 @@ data Mammal
   = Dog { mammalName :: String, mammalAge :: Int }
   | Cat { mammalName :: String, mammalAge :: Int, mammalLazy :: Bool }
   deriving Show
-makePrisms ''Mammal
+makeLabelPrisms ''Mammal
 makeLabels ''Mammal
 
 data Fish = GoldFish | Herring
   deriving Show
-makePrisms ''Fish
+makeLabelPrisms ''Fish
 
 data Human a = Human { humanName :: String, humanAge :: Int, humanPets :: [a] }
   deriving Show
@@ -52,7 +52,7 @@ humanWithFish :: Human Fish
 humanWithFish = set #pets [GoldFish, GoldFish, Herring] human
 
 howManyGoldFish :: Int
-howManyGoldFish = lengthOf (#pets % folded % _GoldFish) humanWithFish
+howManyGoldFish = lengthOf (#pets % folded % #_GoldFish) humanWithFish
 
 hasLazyPets :: Bool
 hasLazyPets = orOf (#pets % folded % #lazy) human
@@ -65,7 +65,7 @@ oldestPet :: Maybe Mammal
 oldestPet = maximumByOf (#pets % folded) (comparing $ view #age) human
 
 luckyDog :: Human Mammal
-luckyDog = human & set (#pets % mapped % _Dog % _1) "Lucky"
+luckyDog = human & set (#pets % mapped % #_Dog % _1) "Lucky"
 
 ----------------------------------------
 -- Generalization of Has* classes

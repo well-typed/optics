@@ -9,6 +9,7 @@ module Optics.TH
   , makeFieldsNoPrefix
   -- ** Prisms
   , makePrisms
+  , makeLabelPrisms
   , makeClassyPrisms
   -- * Constructing Lenses Given a Declaration Quote
   -- ** Lenses for data fields
