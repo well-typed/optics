@@ -120,13 +120,21 @@ checkDunes = dunes
 checkDunes_ :: AffineTraversal' (Perambulation a b) a
 checkDunes_ = #dunes
 
-makeLensesFor [ ("_terrain", "allTerrain"), ("_dunes", "allTerrain")
-              , ("_absurdity1", "absurdities"), ("_absurdity2", "absurdities")
-              ]
-  ''Perambulation
+makeLensesFor [ ("_terrain", "allTerrain")
+              , ("_dunes", "allTerrain")
+              , ("_absurdity1", "absurdities")
+              , ("_absurdity2", "absurdities")
+              ] ''Perambulation
+
+makeLabelsFor [ ("_terrain", "allTerrain")
+              , ("_dunes", "allTerrain")
+              ] ''Perambulation
 
 checkAllTerrain :: Traversal (Perambulation a b) (Perambulation a' b) a a'
 checkAllTerrain = allTerrain
+
+checkAllTerrain_ :: Traversal (Perambulation a b) (Perambulation a' b) a a'
+checkAllTerrain_ = #allTerrain
 
 checkAbsurdities :: Fold (Perambulation a b) (x -> y)
 checkAbsurdities = absurdities
@@ -148,16 +156,33 @@ data Task a = Task
   , taskStop :: IO ()
   }
 
-makeLensesFor [("taskOutput", "outputLens"), ("taskState", "stateLens"), ("taskStop", "stopLens")] ''Task
+makeLensesFor [ ("taskOutput", "outputLens")
+              , ("taskState", "stateLens")
+              , ("taskStop", "stopLens")
+              ] ''Task
+
+makeLabelsFor [ ("taskOutput", "output")
+              , ("taskState", "state")
+              , ("taskStop", "stop")
+              ] ''Task
 
 checkOutputLens :: Lens' (Task a) (a -> IO ())
 checkOutputLens = outputLens
 
+checkOutput_ :: Lens' (Task a) (a -> IO ())
+checkOutput_ = #output
+
 checkStateLens :: Lens' (Task a) a
 checkStateLens = stateLens
 
+checkState_ :: Lens' (Task a) a
+checkState_ = #state
+
 checkStopLens :: Lens' (Task a) (IO ())
 checkStopLens = stopLens
+
+checkStop_ :: Lens' (Task a) (IO ())
+checkStop_ = #stop
 
 data Mono a = Mono { _monoFoo :: a, _monoBar :: Int }
 makeClassy ''Mono

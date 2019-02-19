@@ -3,7 +3,7 @@ module Optics.TH
   -- * Constructing Lenses Automatically
   -- ** Lenses for data fields
     makeLenses, makeLensesFor
-  , makeLabels
+  , makeLabels, makeLabelsFor
   , makeClassy, makeClassyFor, makeClassy_
   , makeFields
   , makeFieldsNoPrefix
@@ -27,6 +27,8 @@ module Optics.TH
   -- ** Predefined LensRules
   , lensRules
   , lensRulesFor
+  , labelRules
+  , labelRulesFor
   , classyRules
   , classyRules_
   , defaultFieldRules
@@ -182,6 +184,27 @@ mappingNamer :: (String -> [String]) -- ^ A function that maps a @fieldName@ to
              -> FieldNamer
 mappingNamer mapper _ _ = fmap (TopName . mkName) . mapper . nameBase
 
+-- | Rules for generation of 'LabelOptic' intances for use with
+-- OverloadedLabels. Same as 'lensRules', but uses 'camelCaseNamer'.
+labelRules :: LensRules
+labelRules = LensRules
+  { _simpleLenses    = False
+  , _generateSigs    = True
+  , _generateClasses = False
+  , _allowIsos       = True
+  , _allowUpdates    = True
+  , _lazyPatterns    = False
+  , _classyLenses    = const Nothing
+  , _fieldToDef      = camelCaseNamer
+  }
+
+-- | Construct a 'LensRules' value for generating 'LabelOptic' instances using
+-- the given map from field names to definition names.
+labelRulesFor
+  :: [(String, String)] {- ^ [(Field Name, Definition Name)] -}
+  -> LensRules
+labelRulesFor fields = labelRules & lensField .~ lookingupNamer fields
+
 -- | Rules for making lenses and traversals that precompose another 'Lens'.
 classyRules :: LensRules
 classyRules = LensRules
@@ -259,7 +282,7 @@ makeLenses :: Name -> DecsQ
 makeLenses = makeFieldOptics lensRules
 
 makeLabels :: Name -> DecsQ
-makeLabels = makeLabelsWith lensRules { _fieldToDef = camelCaseNamer }
+makeLabels = makeLabelsWith labelRules
 
 -- | Make lenses and traversals for a type, and create a class when the
 -- type has no arguments.
@@ -317,6 +340,9 @@ makeClassy_ = makeFieldOptics classyRules_
 -- @
 makeLensesFor :: [(String, String)] -> Name -> DecsQ
 makeLensesFor fields = makeFieldOptics (lensRulesFor fields)
+
+makeLabelsFor :: [(String, String)] -> Name -> DecsQ
+makeLabelsFor fields = makeLabelsWith (labelRulesFor fields)
 
 -- | Derive lenses and traversals, using a named wrapper class, and
 -- specifying explicit pairings of @(fieldName, traversalName)@.
