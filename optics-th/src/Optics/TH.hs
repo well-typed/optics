@@ -3,13 +3,13 @@ module Optics.TH
   -- * Constructing Lenses Automatically
   -- ** Lenses for data fields
     makeLenses, makeLensesFor
-  , makeLabels, makeLabelsFor
+  , makeFieldLabels, makeFieldLabelsFor
   , makeClassy, makeClassyFor, makeClassy_
   , makeFields
   , makeFieldsNoPrefix
   -- ** Prisms
   , makePrisms
-  , makeLabelPrisms
+  , makePrismLabels
   , makeClassyPrisms
   -- * Constructing Lenses Given a Declaration Quote
   -- ** Lenses for data fields
@@ -22,7 +22,7 @@ module Optics.TH
   -- ** Running LensRules
   , makeLensesWith
   , declareLensesWith
-  , makeLabelsWith
+  , makeFieldLabelsWith
   -- ** LensRules type
   , LensRules
   -- ** Predefined LensRules
@@ -282,8 +282,8 @@ classyRules_
 makeLenses :: Name -> DecsQ
 makeLenses = makeFieldOptics lensRules
 
-makeLabels :: Name -> DecsQ
-makeLabels = makeLabelsWith labelRules
+makeFieldLabels :: Name -> DecsQ
+makeFieldLabels = makeFieldLabelsWith labelRules
 
 -- | Make lenses and traversals for a type, and create a class when the
 -- type has no arguments.
@@ -342,8 +342,8 @@ makeClassy_ = makeFieldOptics classyRules_
 makeLensesFor :: [(String, String)] -> Name -> DecsQ
 makeLensesFor fields = makeFieldOptics (lensRulesFor fields)
 
-makeLabelsFor :: [(String, String)] -> Name -> DecsQ
-makeLabelsFor fields = makeLabelsWith (labelRulesFor fields)
+makeFieldLabelsFor :: [(String, String)] -> Name -> DecsQ
+makeFieldLabelsFor fields = makeFieldLabelsWith (labelRulesFor fields)
 
 -- | Derive lenses and traversals, using a named wrapper class, and
 -- specifying explicit pairings of @(fieldName, traversalName)@.

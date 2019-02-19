@@ -22,16 +22,16 @@ data Mammal
   = Dog { mammalName :: String, mammalAge :: Int }
   | Cat { mammalName :: String, mammalAge :: Int, mammalLazy :: Bool }
   deriving Show
-makeLabelPrisms ''Mammal
-makeLabels ''Mammal
+makeFieldLabels ''Mammal
+makePrismLabels ''Mammal
 
 data Fish = GoldFish | Herring
   deriving Show
-makeLabelPrisms ''Fish
+makePrismLabels ''Fish
 
 data Human a = Human { humanName :: String, humanAge :: Int, humanPets :: [a] }
   deriving Show
-makeLabels ''Human
+makeFieldLabels ''Human
 
 human :: Human Mammal
 human = Human
@@ -77,10 +77,10 @@ instance LabelOptic "config" An_Equality Config Config Config Config where
   labelOptic = equality
 
 data Env = Env { envConfig :: Config, envRandoms :: [Int] }
-makeLabels ''Env
+makeFieldLabels ''Env
 
 data Nested = Nested { nestedName :: String, nestedEnv :: Env }
-makeLabels ''Nested
+makeFieldLabels ''Nested
 
 instance LabelOptic "config" A_Lens Nested Nested Config Config where
   labelOptic = #env % #config

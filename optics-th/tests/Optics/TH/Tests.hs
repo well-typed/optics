@@ -18,7 +18,7 @@ import Optics.TH.Tests.T799 ()
 
 data Pair a b = Pair a b
 makePrisms ''Pair
-makeLabelPrisms ''Pair
+makePrismLabels ''Pair
 
 checkPair :: Iso (Pair a b) (Pair a' b') (a, b) (a', b')
 checkPair = _Pair
@@ -28,7 +28,7 @@ checkPair_ = #_Pair
 
 data Sum a b = SLeft a | SRight b | SWeird Int
 makePrisms ''Sum
-makeLabelPrisms ''Sum
+makePrismLabels ''Sum
 
 checkSLeft :: Prism (Sum a c) (Sum b c) a b
 checkSLeft = _SLeft
@@ -51,7 +51,7 @@ checkSWeird_ = #_SWeird
 data PairEq a b c where
   PairEq :: (Eq a, Eq b) => a -> b -> PairEq a b c
 makePrisms ''PairEq
-makeLabelPrisms ''PairEq
+makePrismLabels ''PairEq
 
 checkPairEq
   :: (Eq a', Eq b')
@@ -67,7 +67,7 @@ data Brr a where
   BrrA :: a -> Brr a
   BrrInt :: Int -> Brr Int
 makePrisms ''Brr
-makeLabelPrisms ''Brr
+makePrismLabels ''Brr
 
 checkBrrA :: Prism' (Brr a) a
 checkBrrA = _BrrA
@@ -85,7 +85,7 @@ data Bzzt a b c where
   BzztShow :: Show a => a -> Bzzt a b c
   BzztRead :: Read b => b -> Bzzt a b c
 makePrisms ''Bzzt
-makeLabelPrisms ''Bzzt
+makePrismLabels ''Bzzt
 
 checkBzztShow :: Show a => Prism (Bzzt a b c) (Bzzt a b c') a a
 checkBzztShow = _BzztShow
@@ -105,7 +105,7 @@ checkBzztRead_ = #_BzztRead
 
 data Bar a b c = Bar { _baz :: (a, b) }
 makeLenses ''Bar
-makeLabelsWith lensRules ''Bar
+makeFieldLabelsWith lensRules ''Bar
 
 checkBaz :: Iso (Bar a b c) (Bar a' b' c') (a, b) (a', b')
 checkBaz = baz
@@ -116,7 +116,7 @@ checkBaz_ = #baz
 
 data Quux a b = Quux { _quaffle :: Int, _quartz :: Double }
 makeLenses ''Quux
-makeLabelsWith lensRules ''Quux
+makeFieldLabelsWith lensRules ''Quux
 
 checkQuaffle :: Lens (Quux a b) (Quux a' b') Int Int
 checkQuaffle = quaffle
@@ -135,7 +135,7 @@ checkQuartz_ = #quartz
 data Quark a = Qualified   { _gaffer :: a }
              | Unqualified { _gaffer :: a, _tape :: a }
 makeLenses ''Quark
-makeLabelsWith lensRules ''Quark
+makeFieldLabelsWith lensRules ''Quark
 
 checkGaffer :: Lens' (Quark a) a
 checkGaffer = gaffer
@@ -151,7 +151,7 @@ checkTape_ = #tape
 
 data Hadron a b = Science { _a1 :: a, _a2 :: a, _c :: b }
 makeLenses ''Hadron
-makeLabelsWith lensRules ''Hadron
+makeFieldLabelsWith lensRules ''Hadron
 
 checkA1 :: Lens' (Hadron a b) a
 checkA1 = a1
@@ -182,7 +182,7 @@ data Perambulation a b
               , _absurdity1 :: forall x y. x -> y
               }
 makeLenses ''Perambulation
-makeLabelsWith lensRules ''Perambulation
+makeFieldLabelsWith lensRules ''Perambulation
 
 checkTerrain :: Lens' (Perambulation a b) a
 checkTerrain = terrain
@@ -214,9 +214,9 @@ makeLensesFor [ ("_terrain", "allTerrain")
               , ("_absurdity2", "absurdities")
               ] ''Perambulation
 
-makeLabelsFor [ ("_terrain", "allTerrain")
-              , ("_dunes", "allTerrain")
-              ] ''Perambulation
+makeFieldLabelsFor [ ("_terrain", "allTerrain")
+                   , ("_dunes", "allTerrain")
+                   ] ''Perambulation
 
 checkAllTerrain :: Traversal (Perambulation a b) (Perambulation a' b) a a'
 checkAllTerrain = allTerrain
@@ -230,7 +230,7 @@ checkAbsurdities = absurdities
 data LensCrafted a = Still { _still :: a }
                    | Works { _still :: a }
 makeLenses ''LensCrafted
-makeLabelsWith lensRules ''LensCrafted
+makeFieldLabelsWith lensRules ''LensCrafted
 
 checkStill :: Lens (LensCrafted a) (LensCrafted b) a b
 checkStill = still
@@ -249,10 +249,10 @@ makeLensesFor [ ("taskOutput", "outputLens")
               , ("taskStop", "stopLens")
               ] ''Task
 
-makeLabelsFor [ ("taskOutput", "output")
-              , ("taskState", "state")
-              , ("taskStop", "stop")
-              ] ''Task
+makeFieldLabelsFor [ ("taskOutput", "output")
+                   , ("taskState", "state")
+                   , ("taskStop", "stop")
+                   ] ''Task
 
 checkOutputLens :: Lens' (Task a) (a -> IO ())
 checkOutputLens = outputLens
@@ -546,7 +546,7 @@ data Rank2Tests
   | C2 { _r2length :: forall a. [a] -> Int }
 
 makeLenses ''Rank2Tests
-makeLabelsWith lensRules ''Rank2Tests -- doesn't generate anything
+makeFieldLabelsWith lensRules ''Rank2Tests -- doesn't generate anything
 
 checkR2length :: Getter Rank2Tests ([a] -> Int)
 checkR2length = r2length
@@ -556,11 +556,11 @@ checkR2nub = r2nub
 
 data PureNoFields = PureNoFieldsA | PureNoFieldsB { _pureNoFields :: Int }
 makeLenses ''PureNoFields
-makeLabels ''PureNoFields
+makeFieldLabels ''PureNoFields
 
 data ReviewTest where ReviewTest :: a -> ReviewTest
 makePrisms ''ReviewTest
-makeLabelPrisms ''ReviewTest -- doesn't generate anything
+makePrismLabels ''ReviewTest -- doesn't generate anything
 
 checkReviewTest :: Review ReviewTest a
 checkReviewTest = _ReviewTest

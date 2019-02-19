@@ -1043,4 +1043,4 @@ main = do
         ("indexedoptics" : _) -> printDiagram indexedOptics
         _                     -> printDiagram hierarchy
 
-makeLabels ''St
+makeFieldLabels ''St

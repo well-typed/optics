@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Optics.TH.Internal.Sum
   ( makePrisms
-  , makeLabelPrisms
+  , makePrismLabels
   , makeClassyPrisms
   , makeDecPrisms
   ) where
@@ -82,8 +82,8 @@ makePrisms = makePrisms' True
 makeClassyPrisms :: Name {- ^ Type constructor name -} -> DecsQ
 makeClassyPrisms = makePrisms' False
 
-makeLabelPrisms :: Name -> DecsQ
-makeLabelPrisms typeName = do
+makePrismLabels :: Name -> DecsQ
+makePrismLabels typeName = do
   info <- D.reifyDatatype typeName
   let cons = map normalizeCon $ D.datatypeCons info
   catMaybes <$> traverse (makeLabel (D.datatypeType info) cons) cons

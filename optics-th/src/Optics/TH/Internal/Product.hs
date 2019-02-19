@@ -12,7 +12,7 @@ module Optics.TH.Internal.Product
   , makeFieldOptics
   , makeFieldOpticsForDec
   , makeFieldOpticsForDec'
-  , makeLabelsWith
+  , makeFieldLabelsWith
   , HasFieldClasses
   ) where
 
@@ -110,13 +110,13 @@ makeFieldOpticsForDatatype rules info =
   expandName :: [Name] -> Maybe Name -> [DefName]
   expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
 
-makeLabelsWith :: LensRules -> Name -> DecsQ
-makeLabelsWith rules = D.reifyDatatype >=> makeLabelsForDatatype rules
+makeFieldLabelsWith :: LensRules -> Name -> DecsQ
+makeFieldLabelsWith rules = D.reifyDatatype >=> makeFieldLabelsForDatatype rules
 
 -- | Compute the field optics for a deconstructed datatype Dec
 -- When possible build an Iso otherwise build one optic per field.
-makeLabelsForDatatype :: LensRules -> D.DatatypeInfo -> Q [Dec]
-makeLabelsForDatatype rules info =
+makeFieldLabelsForDatatype :: LensRules -> D.DatatypeInfo -> Q [Dec]
+makeFieldLabelsForDatatype rules info =
   do perDef <- do
        fieldCons <- traverse normalizeConstructor cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
@@ -125,7 +125,7 @@ makeLabelsForDatatype rules info =
        T.sequenceA (M.fromSet (buildScaffold False rules s defCons) allDefs)
 
      let defs = filter isRank1 $ M.toList perDef
-     traverse (makeLabel rules) defs
+     traverse (makeFieldLabel rules) defs
 
   where
     -- LabelOptic doesn't support higher rank fields because of functional
@@ -146,11 +146,11 @@ makeLabelsForDatatype rules info =
     expandName :: [Name] -> Maybe Name -> [DefName]
     expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
 
-makeLabel
+makeFieldLabel
   :: LensRules
   -> (DefName, (OpticStab, [(Name, Int, [Int])]))
   -> Q Dec
-makeLabel rules (defName, (defType, cons)) =
+makeFieldLabel rules (defName, (defType, cons)) =
   instanceD context instHead (fun 'labelOptic)
   where
     (context, instHead) = case defType of
