@@ -2,7 +2,6 @@ module Optics.Equality
   ( An_Equality
   , Equality
   , Equality'
-  , equalityVL
   , equality
   , simple
   , withEq
@@ -21,12 +20,12 @@ type Equality s t a b = Optic An_Equality NoIx s t a b
 -- | Type synonym for a type-preserving equality.
 type Equality' s a = Optic' An_Equality NoIx s a
 
--- | Build an equality from the van Laarhoven representation.
-equalityVL :: (forall p f . p a (f b) -> p s (f t)) -> Equality s t a b
-equalityVL f = case f Identical of Identical -> Optic id
-{-# INLINE equalityVL #-}
-
 -- | Capture type constraints as an equality.
+--
+-- /Note:/ This is the identity optic:
+--
+-- >>> :t view equality
+-- view equality :: a -> a
 equality :: (s ~ a, t ~ b) => Equality s t a b
 equality = Optic id
 {-# INLINE equality #-}
