@@ -101,6 +101,25 @@ checkBzztRead = _BzztRead
 checkBzztRead_ :: Read b => Prism' (Bzzt a b c) b
 checkBzztRead_ = #_BzztRead
 
+data FooX a where
+  FooX1, FooX2 :: { fooX_, fooY_ :: Int } -> FooX a
+makePrisms ''FooX
+makePrismLabels ''FooX
+
+checkFooX1 :: Prism (FooX a) (FooX b) (Int, Int) (Int, Int)
+checkFooX1 = _FooX1
+
+-- We can't change a because of LabelOptic fundeps.
+checkFooX1_ :: Prism' (FooX a) (Int, Int)
+checkFooX1_ = #_FooX1
+
+checkFooX2 :: Prism (FooX a) (FooX b) (Int, Int) (Int, Int)
+checkFooX2 = _FooX2
+
+-- We can't change a because of LabelOptic fundeps.
+checkFooX2_ :: Prism' (FooX a) (Int, Int)
+checkFooX2_ = #_FooX2
+
 ----------------------------------------
 
 data Bar a b c = Bar { _baz :: (a, b) }
