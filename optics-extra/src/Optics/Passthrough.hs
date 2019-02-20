@@ -8,7 +8,7 @@ import Optics.Traversal
 import Optics.View
 
 class (Is k A_Traversal, ViewableOptic k r) => PermeableOptic k r where
-  -- | Modify the target of an 'Optic' returning some extra information of type 'r'.
+  -- | Modify the target of an 'Optic' returning extra information of type 'r'.
   passthrough
     :: Optic k is s t a b
     -> (a -> (r, b))
