@@ -86,10 +86,10 @@ makePrismLabels :: Name -> DecsQ
 makePrismLabels typeName = do
   info <- D.reifyDatatype typeName
   let cons = map normalizeCon $ D.datatypeCons info
-  catMaybes <$> traverse (makeLabel (D.datatypeType info) cons) cons
+  catMaybes <$> traverse (makeLabel info cons) cons
   where
-    makeLabel :: Type -> [NCon] -> NCon -> Q (Maybe Dec)
-    makeLabel ty cons con = do
+    makeLabel :: D.DatatypeInfo -> [NCon] -> NCon -> Q (Maybe Dec)
+    makeLabel info cons con = do
       stab@(Stab cx otype s t a b) <- computeOpticType labelConfig ty cons con
       case otype of
         -- Reviews are for existentially quantified types and these don't fit
@@ -101,6 +101,9 @@ makePrismLabels typeName = do
                 [LitT (StrTyLit label), ConT $ opticTypeToTag otype, s, t, a, b]
           Just <$> instanceD (pure cx) instHead (fun stab 'labelOptic)
       where
+        ty        = D.datatypeType info
+        isNewtype = D.datatypeVariant info == D.Newtype
+
         opticTypeToTag IsoType    = ''An_Iso
         opticTypeToTag PrismType  = ''A_Prism
         opticTypeToTag ReviewType = ''A_Review -- for complete match
@@ -109,7 +112,9 @@ makePrismLabels typeName = do
         fun stab n = valD (varP n) (normalB $ funDef stab) [] : inlinePragma n
 
         funDef :: Stab -> ExpQ
-        funDef stab = makeConOpticExp stab cons con
+        funDef stab
+          | isNewtype = varE 'castOptic `appE` varE 'coerced
+          | otherwise = makeConOpticExp stab cons con
 
 -- | Main entry point into Prism generation for a given type constructor name.
 makePrisms' :: Bool -> Name -> DecsQ
@@ -118,7 +123,7 @@ makePrisms' normal typeName =
      let cls | normal    = Nothing
              | otherwise = Just (D.datatypeName info)
          cons = D.datatypeCons info
-     makeConsPrisms (D.datatypeType info) (map normalizeCon cons) cls
+     makeConsPrisms info (map normalizeCon cons) cls
 
 
 -- | Generate prisms for the given 'Dec'
@@ -128,35 +133,39 @@ makeDecPrisms normal dec =
      let cls | normal    = Nothing
              | otherwise = Just (D.datatypeName info)
          cons = D.datatypeCons info
-     makeConsPrisms (D.datatypeType info) (map normalizeCon cons) cls
-
+     makeConsPrisms info (map normalizeCon cons) cls
 
 -- | Generate prisms for the given type, normalized constructors, and
 -- an optional name to be used for generating a prism class.
 -- This function dispatches between Iso generation, normal top-level
 -- prisms, and classy prisms.
-makeConsPrisms :: Type -> [NCon] -> Maybe Name -> DecsQ
+makeConsPrisms :: D.DatatypeInfo -> [NCon] -> Maybe Name -> DecsQ
 
 -- top-level definitions
-makeConsPrisms t cons Nothing =
-  fmap concat $ for cons $ \con ->
-    do let conName = view nconName con
-       stab <- computeOpticType defaultConfig t cons con
-       let n = prismName conName
-       sequenceA
-         [ sigD n (close (stabToType stab))
-         , valD (varP n) (normalB (makeConOpticExp stab cons con)) []
-         ]
-
--- classy prism class and instance
-makeConsPrisms t cons (Just typeName) =
+makeConsPrisms info cons Nothing = fmap concat . for cons $ \con -> do
+  stab <- computeOpticType defaultConfig ty cons con
+  let n = prismName $ view nconName con
+      body = if isNewtype
+             then varE 'castOptic `appE` varE 'coerced
+             else makeConOpticExp stab cons con
   sequenceA
-    [ makeClassyPrismClass t className methodName cons
-    , makeClassyPrismInstance t className methodName cons
+    [ sigD n (close (stabToType stab))
+    , valD (varP n) (normalB body) []
     ]
   where
-  className = mkName ("As" ++ nameBase typeName)
-  methodName = prismName typeName
+    ty        = D.datatypeType info
+    isNewtype = D.datatypeVariant info == D.Newtype
+
+-- classy prism class and instance
+makeConsPrisms info cons (Just typeName) =
+  sequenceA
+    [ makeClassyPrismClass ty className methodName cons
+    , makeClassyPrismInstance ty className methodName cons
+    ]
+  where
+    ty = D.datatypeType info
+    className = mkName ("As" ++ nameBase typeName)
+    methodName = prismName typeName
 
 ----------------------------------------
 
