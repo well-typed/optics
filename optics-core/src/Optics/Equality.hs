@@ -4,9 +4,9 @@ module Optics.Equality
   , Equality'
   , equality
   , simple
-  , withEq
+  , withEquality
   , Identical(..)
-  , runEq
+  , runEquality
   , module Optics.Optic
   )
   where
@@ -36,9 +36,9 @@ simple = Optic id
 {-# INLINE simple #-}
 
 -- | Substituting types with 'Equality'.
-withEq :: Optic An_Equality is s t a b -> ((s ~ a, t ~ b) => r) -> r
-withEq l = case runEq l of Identical -> \r -> r
-{-# INLINE withEq #-}
+withEquality :: Optic An_Equality is s t a b -> ((s ~ a, t ~ b) => r) -> r
+withEquality l = case runEquality l of Identical -> \r -> r
+{-# INLINE withEquality #-}
 
 ----------------------------------------
 
@@ -51,8 +51,8 @@ newtype IxIdentical s t i a b =
   IxIdentical { unIxIdentical :: Identical s t a b }
 
 -- | Obtain a witness for an equality.
-runEq :: Optic An_Equality is s t a b -> Identical s t a b
-runEq o =
+runEquality :: Optic An_Equality is s t a b -> Identical s t a b
+runEquality o =
   case unIxIdentical $ getOptic o (IxIdentical Identical) of
     Identical -> Identical
-{-# INLINE runEq #-}
+{-# INLINE runEquality #-}
