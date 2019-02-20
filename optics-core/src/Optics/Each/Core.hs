@@ -21,7 +21,7 @@ import Optics.IxTraversal
 -- >>> over each (*10) (1,2,3)
 -- (10,20,30)
 --
-class Each i s t a b | s -> a, t -> b, s b -> t, t a -> s where
+class Each i s t a b | s -> i a, t -> i b, s b -> t, t a -> s where
   each :: IxTraversal i s t a b
 
   default each
