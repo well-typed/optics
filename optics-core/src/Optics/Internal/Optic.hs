@@ -179,7 +179,11 @@ instance
 --
 -- The second group ensures that when we perform a chain of updates, the middle
 -- type is unambiguous. The consequence is that it's not possible to define
--- label optics that modify phantom type parameters of type @s@ or @t@.
+-- label optics that:
+--
+-- - Modify phantom type parameters of type @s@ or @t@.
+--
+-- - Modify type parameters of type @s@ or @t@ if @a@ or @b@ uses type families.
 --
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b

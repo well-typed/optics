@@ -150,16 +150,30 @@ makeFieldLabel
   :: LensRules
   -> (DefName, (OpticStab, [(Name, Int, [Int])]))
   -> Q Dec
-makeFieldLabel rules (defName, (defType, cons)) =
+makeFieldLabel rules (defName, (defType, cons)) = do
+  (context, instHead) <- case defType of
+    OpticSa _ _ otype s a -> do
+      (a', cxtA) <- typeFamilySubst a "a"
+      pure (pure $ maybeToList cxtA, pure $ conAppsT ''LabelOptic
+        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a', a'])
+    OpticStab otype s t a b -> do
+      (a', cxtA) <- typeFamilySubst a "a"
+      let stab =
+            -- If there is a type family in 'a', we can't make a type-changing
+            -- instance because of functional dependencies on LabelOptic.
+            if isJust cxtA then [s, s, a', a'] else [s, t, a,  b]
+      pure (pure $ maybeToList cxtA, pure . conAppsT ''LabelOptic $
+        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype] ++ stab)
   instanceD context instHead (fun 'labelOptic)
   where
-    (context, instHead) = case defType of
-      OpticSa _ cx otype s a -> do
-        (pure cx, pure $ conAppsT ''LabelOptic
-          [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a, a])
-      OpticStab otype s t a b ->
-        (cxt [], pure $ conAppsT ''LabelOptic
-          [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, t, a, b])
+    -- Type synonyms family applications are illegal in instances, but they can
+    -- be moved out and expressed as equality constraints.
+    typeFamilySubst :: Type -> String -> Q (Type, Maybe Pred)
+    typeFamilySubst ty n = containsTypeFamilies ty >>= \case
+      False -> pure (ty, Nothing)
+      True  -> do
+        placeholder <- VarT <$> newName n
+        pure (placeholder, Just $ D.equalPred placeholder ty)
 
     opticTypeToTag AffineFoldType      = ''An_AffineFold
     opticTypeToTag AffineTraversalType = ''An_AffineTraversal
@@ -500,14 +514,6 @@ makeFieldInstance defType className decs =
   s = stabToS defType
   a = stabToA defType
 
-  containsTypeFamilies = go <=< D.resolveTypeSynonyms
-    where
-    go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> reify nm
-    go ty = or <$> traverse go (toListOf typeSelf ty)
-
-    -- We want to catch type families, but not *data* families. See #799.
-    _TypeFamilyD = _OpenTypeFamilyD % united `afailing` _ClosedTypeFamilyD % united
-
   pickInstanceDec hasFamilies
     | hasFamilies = do
         placeholder <- VarT <$> newName "a"
@@ -518,6 +524,15 @@ makeFieldInstance defType className decs =
 
   mkInstanceDec context headTys =
     instanceD (cxt context) (return (className `conAppsT` headTys)) decs
+
+containsTypeFamilies :: Type -> Q Bool
+containsTypeFamilies = go <=< D.resolveTypeSynonyms
+  where
+    go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> reify nm
+    go ty = or <$> traverse go (toListOf typeSelf ty)
+
+    -- We want to catch type families, but not *data* families. See #799.
+    _TypeFamilyD = _OpenTypeFamilyD % united `afailing` _ClosedTypeFamilyD % united
 
 ------------------------------------------------------------------------
 -- Optic clause generators

@@ -331,6 +331,7 @@ instance HasMono Nucleosis Int where
 -- Dodek's example
 data Foo = Foo { _fooX, _fooY :: Int }
 makeClassy ''Foo
+makeFieldLabels ''Foo
 
 checkFoo :: HasFoo t => Lens' t Foo
 checkFoo = foo
@@ -341,8 +342,14 @@ checkFoo' = foo
 checkFooX :: HasFoo t => Lens' t Int
 checkFooX = fooX
 
+checkFooX_ :: Lens' Foo Int
+checkFooX_ = #x
+
 checkFooY :: HasFoo t => Lens' t Int
 checkFooY = fooY
+
+checkFooY_ :: Lens' Foo Int
+checkFooY_ = #y
 
 data Dude a = Dude
     { dudeLevel        :: Int
@@ -351,6 +358,7 @@ data Dude a = Dude
     , dudeThing        :: a
     }
 makeFields ''Dude
+makeFieldLabels ''Dude
 
 checkLevel :: HasLevel t a => Lens' t a
 checkLevel = level
@@ -358,11 +366,17 @@ checkLevel = level
 checkLevel' :: Lens' (Dude a) Int
 checkLevel' = level
 
+checkLevel_ :: Lens' (Dude a) Int
+checkLevel_ = #level
+
 checkAlias :: HasAlias t a => Lens' t a
 checkAlias = alias
 
 checkAlias' :: Lens' (Dude a) String
 checkAlias' = alias
+
+checkAlias_ :: Lens' (Dude a) String
+checkAlias_ = #alias
 
 checkLife :: HasLife t a => Lens' t a
 checkLife = life
@@ -370,11 +384,17 @@ checkLife = life
 checkLife' :: Lens' (Dude a) ()
 checkLife' = life
 
+checkLife_ :: Lens' (Dude a) ()
+checkLife_ = #life
+
 checkThing :: HasThing t a => Lens' t a
 checkThing = thing
 
 checkThing' :: Lens' (Dude a) a
 checkThing' = thing
+
+checkThing_ :: Lens (Dude a) (Dude b) a b
+checkThing_ = #thing
 
 data Lebowski a = Lebowski
     { _lebowskiAlias    :: String
@@ -383,12 +403,19 @@ data Lebowski a = Lebowski
     , _lebowskiThing    :: Maybe a
     }
 makeFields ''Lebowski
+makeFieldLabels ''Lebowski
 
 checkAlias2 :: Lens' (Lebowski a) String
 checkAlias2 = alias
 
+checkAlias2_ :: Lens' (Lebowski a) String
+checkAlias2_ = #alias
+
 checkLife2 :: Lens' (Lebowski a) Int
 checkLife2 = life
+
+checkLife2_ :: Lens' (Lebowski a) Int
+checkLife2_ = #life
 
 checkMansion :: HasMansion t a => Lens' t a
 checkMansion = mansion
@@ -396,8 +423,14 @@ checkMansion = mansion
 checkMansion' :: Lens' (Lebowski a) String
 checkMansion' = mansion
 
+checkMansion_ :: Lens' (Lebowski a) String
+checkMansion_ = #mansion
+
 checkThing2 :: Lens' (Lebowski a) (Maybe a)
 checkThing2 = thing
+
+checkThing2_ :: Lens (Lebowski a) (Lebowski b) (Maybe a) (Maybe b)
+checkThing2_ = #thing
 
 type family Fam a
 type instance Fam Int = String
@@ -407,15 +440,25 @@ data FamRec a = FamRec
   , _famRecUniqueToFamRec :: Fam a
   }
 makeFields ''FamRec
+makeFieldLabels ''FamRec
 
 checkFamRecThing :: Lens' (FamRec a) (Fam a)
 checkFamRecThing = thing
 
+checkFamRecThing_ :: Lens' (FamRec a) (Fam a)
+checkFamRecThing_ = #thing
+
 checkFamRecUniqueToFamRec :: Lens' (FamRec a) (Fam a)
 checkFamRecUniqueToFamRec = uniqueToFamRec
 
+checkFamRecUniqueToFamRec_ :: Lens' (FamRec a) (Fam a)
+checkFamRecUniqueToFamRec_ = #uniqueToFamRec
+
 checkFamRecView :: FamRec Int -> String
 checkFamRecView = view thing
+
+checkFamRecView_ :: FamRec Int -> String
+checkFamRecView_ = view #thing
 
 data AbideConfiguration a = AbideConfiguration
     { _acLocation       :: String
@@ -423,6 +466,7 @@ data AbideConfiguration a = AbideConfiguration
     , _acThing          :: a
     }
 makeLensesWith abbreviatedFields ''AbideConfiguration
+makeFieldLabelsWith abbreviatedLabels ''AbideConfiguration
 
 checkLocation :: HasLocation t a => Lens' t a
 checkLocation = location
@@ -430,14 +474,23 @@ checkLocation = location
 checkLocation' :: Lens' (AbideConfiguration a) String
 checkLocation' = location
 
+checkLocation_ :: Lens' (AbideConfiguration a) String
+checkLocation_ = #location
+
 checkDuration :: HasDuration t a => Lens' t a
 checkDuration = duration
 
 checkDuration' :: Lens' (AbideConfiguration a) Int
 checkDuration' = duration
 
+checkDuration_ :: Lens' (AbideConfiguration a) Int
+checkDuration_ = #duration
+
 checkThing3 :: Lens' (AbideConfiguration a) a
 checkThing3 = thing
+
+checkThing3_ :: Lens (AbideConfiguration a) (AbideConfiguration b) a b
+checkThing3_ = #thing
 
 dudeDrink :: String
 dudeDrink      = (Dude 9 "El Duderino" () "white russian")      ^. thing

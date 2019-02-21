@@ -29,6 +29,7 @@ module Optics.TH
   , lensRules
   , lensRulesFor
   , labelRules
+  , abbreviatedLabels
   , labelRulesFor
   , classyRules
   , classyRules_
@@ -198,6 +199,9 @@ labelRules = LensRules
   , _classyLenses    = const Nothing
   , _fieldToDef      = camelCaseNamer
   }
+
+abbreviatedLabels :: LensRules
+abbreviatedLabels = labelRules { _fieldToDef = abbreviatedNamer }
 
 -- | Construct a 'LensRules' value for generating 'LabelOptic' instances using
 -- the given map from field names to definition names.
