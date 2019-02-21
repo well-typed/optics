@@ -168,7 +168,7 @@ checkTape = tape
 checkTape_ :: AffineTraversal' (Quark a) a
 checkTape_ = #tape
 
-data Hadron a b = Science { _a1 :: a, _a2 :: a, _c :: b }
+data Hadron a b = Science { _a1 :: a, _a2 :: a, _c :: Either b [b] }
 makeLenses ''Hadron
 makeFieldLabelsWith lensRules ''Hadron
 
@@ -184,10 +184,10 @@ checkA2 = a2
 checkA2_ :: Lens' (Hadron a b) a
 checkA2_ = #a2
 
-checkC :: Lens (Hadron a b) (Hadron a b') b b'
+checkC :: Lens (Hadron a b) (Hadron a b') (Either b [b]) (Either b' [b'])
 checkC = c
 
-checkC_ :: Lens (Hadron a b) (Hadron a b') b b'
+checkC_ :: Lens (Hadron a b) (Hadron a b') (Either b [b]) (Either b' [b'])
 checkC_ = #c
 
 data Perambulation a b
