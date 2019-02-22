@@ -183,7 +183,75 @@ instance
 --
 -- - Modify phantom type parameters of type @s@ or @t@.
 --
--- - Modify type parameters of type @s@ or @t@ if @a@ or @b@ uses type families.
+-- - Modify type parameters of type @s@ or @t@ if @a@ or @b@ contain ambiguous
+--   applications of type families to these type parameters.
+--
+-- Overloaded labels are a solution to Haskell's namespace problem for records.
+--
+-- Consider the following:
+--
+-- >>> :set -XDataKinds
+-- >>> :set -XFlexibleContexts
+-- >>> :set -XFlexibleInstances
+-- >>> :set -XMultiParamTypeClasses
+-- >>> :set -XOverloadedLabels
+-- >>> :set -XTypeFamilies
+-- >>> :set -XUndecidableInstances
+-- >>> :{
+-- data Human = Human
+--   { humanName :: String
+--   , humanAge  :: Integer
+--   , humanPets :: [Pet]
+--   } deriving Show
+-- instance (a ~ String, b ~ String) => LabelOptic "name" A_Lens Human Human a b where
+--   labelOptic = lensVL $ \f s -> (\v -> s { humanName = v }) <$> f (humanName s)
+-- instance (a ~ Integer, b ~ Integer) => LabelOptic "age" A_Lens Human Human a b where
+--   labelOptic = lensVL $ \f s -> (\v -> s { humanAge = v }) <$> f (humanAge s)
+-- instance (a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" A_Lens Human Human a b where
+--   labelOptic = lensVL $ \f s -> (\v -> s { humanPets = v }) <$> f (humanPets s)
+-- data Pet
+--   = Cat  { petName :: String, petAge :: Int, petLazy :: Bool }
+--   | Fish { petName :: String, petAge :: Int }
+--   deriving Show
+-- instance (a ~ String, b ~ String) => LabelOptic "name" A_Lens Pet Pet a b where
+--   labelOptic = lensVL $ \f s -> (\v -> s { petName = v }) <$> f (petName s)
+-- instance (a ~ Int, b ~ Int) => LabelOptic "age" A_Lens Pet Pet a b where
+--   labelOptic = lensVL $ \f s -> (\v -> s { petAge = v }) <$> f (petAge s)
+-- instance (a ~ Bool, b ~ Bool) => LabelOptic "lazy" An_AffineTraversal Pet Pet a b where
+--   labelOptic = atraversalVL $ \point f s -> case s of
+--     Cat name age lazy -> (\lazy' -> Cat name age lazy') <$> f lazy
+--     _                 -> point s
+-- peter :: Human
+-- peter = Human "Peter" 13 [ Fish "Goldie" 1
+--                          , Cat  "Loopy"  3 False
+--                          , Cat  "Sparky" 2 True
+--                          ]
+-- :}
+--
+-- Now we can ask for Peter's name:
+--
+-- >>> view #name peter
+-- "Peter"
+--
+-- or for names of his pets:
+--
+-- >>> toListOf (#pets % folded % #name) peter
+-- ["Goldie","Loopy","Sparky"]
+--
+-- We can check whether any of his pets is lazy:
+--
+-- >>> orOf (#pets % folded % #lazy) peter
+-- True
+--
+-- or how things might be be a year from now:
+--
+-- >>> peter & over #age (+1) & over (#pets % mapped % #age) (+1)
+-- Human {humanName = "Peter", humanAge = 14, humanPets = [Fish {petName = "Goldie", petAge = 2},Cat {petName = "Loopy", petAge = 4, petLazy = False},Cat {petName = "Sparky", petAge = 3, petLazy = True}]}
+--
+-- Perhaps Peter is going on vacation and needs to leave his pets at home:
+--
+-- >>> peter & set #pets []
+-- Human {humanName = "Peter", humanAge = 13, humanPets = []}
 --
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b
