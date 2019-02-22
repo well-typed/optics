@@ -158,16 +158,13 @@ makeFieldLabel rules (defName, (defType, cons)) = do
       pure (pure [cxtA, cxtB], pure $ conAppsT ''LabelOptic
         [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a', b'])
     OpticStab otype s t a b -> do
-      hasTypeFamilies <- containsTypeFamilies a
-      -- If 'a' uses type families, generate type-preserving version. This is
-      -- actually way too restrictive check, in theory we have to generate
-      -- type-preserving version only if type family is non-injective and is
-      -- applied to a type variable that doesn't occur outside type family
-      -- context by itself, but that's complicated, so we do this for now.
-      let t' = if hasTypeFamilies then s else t
+      ambiguousTypeFamilies <- containsAmbiguousTypeFamilyApplications s a
+      -- If 'a' contains ambiguous type family applications, generate type
+      -- preserving version as functional dependencies on LabelOptic demand it.
+      let t' = if ambiguousTypeFamilies then s else t
       (a', cxtA) <- eqSubst a "a"
-      (b', cxtB) <- if hasTypeFamilies
-                    then pure (a', cxtA)
+      (b', cxtB) <- if ambiguousTypeFamilies
+                    then eqSubst a "b"
                     else eqSubst b "b"
       pure (pure [cxtA, cxtB], pure $ conAppsT ''LabelOptic
         [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, t', a', b'])
@@ -180,6 +177,18 @@ makeFieldLabel rules (defName, (defType, cons)) = do
     opticTypeToTag IsoType             = ''An_Iso
     opticTypeToTag LensType            = ''A_Lens
     opticTypeToTag TraversalType       = ''A_Traversal
+
+    -- TODO: check for injectivity of encountered type families.
+    containsAmbiguousTypeFamilyApplications s a = do
+      -- We consider type family application ambiguous only if it's applied to a
+      -- type variable not referenced anywhere else.
+      (hasTypeFamilies, bareVars) <- (`runStateT` setOf typeVars s) $
+        go =<< lift (D.resolveTypeSynonyms a)
+      pure $ hasTypeFamilies && not (S.null bareVars)
+      where
+        go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> lift (reify nm)
+        go (VarT n)  = modify' (S.delete n) *> pure False
+        go ty        = or <$> traverse go (toListOf typeSelf ty)
 
     fieldName = case defName of
       TopName fname      -> nameBase fname
@@ -512,6 +521,11 @@ makeFieldInstance defType className decs =
   s = stabToS defType
   a = stabToA defType
 
+  containsTypeFamilies = go <=< D.resolveTypeSynonyms
+    where
+    go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> reify nm
+    go ty = or <$> traverse go (toListOf typeSelf ty)
+
   pickInstanceDec hasFamilies
     | hasFamilies = do
         placeholder <- VarT <$> newName "a"
@@ -522,15 +536,6 @@ makeFieldInstance defType className decs =
 
   mkInstanceDec context headTys =
     instanceD (cxt context) (return (className `conAppsT` headTys)) decs
-
-containsTypeFamilies :: Type -> Q Bool
-containsTypeFamilies = go <=< D.resolveTypeSynonyms
-  where
-    go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> reify nm
-    go ty = or <$> traverse go (toListOf typeSelf ty)
-
-    -- We want to catch type families, but not *data* families. See #799.
-    _TypeFamilyD = _OpenTypeFamilyD % united `afailing` _ClosedTypeFamilyD % united
 
 ------------------------------------------------------------------------
 -- Optic clause generators
@@ -893,6 +898,9 @@ addFieldClassName n = modify $ S.insert n
 -- Miscellaneous utility functions
 ------------------------------------------------------------------------
 
+ -- We want to catch type families, but not *data* families. See #799.
+_TypeFamilyD :: AffineFold Dec ()
+_TypeFamilyD = _OpenTypeFamilyD % united `afailing` _ClosedTypeFamilyD % united
 
 -- | Template Haskell wants type variables declared in a forall, so
 -- we find all free type variables in a given type and declare them.
