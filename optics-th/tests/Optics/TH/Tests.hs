@@ -435,6 +435,13 @@ checkThing2_ = #thing
 type family Fam a
 type instance Fam Int = String
 
+data FamRec1 a = FamRec1 { _famRec1Thing :: a -> Fam a }
+makeFieldLabels ''FamRec1
+
+-- TODO: generate type-modifying version here
+checkFamRec1Thing :: Iso' (FamRec1 a) (a -> Fam a)
+checkFamRec1Thing = #thing
+
 data FamRec a = FamRec
   { _famRecThing :: Fam a
   , _famRecUniqueToFamRec :: Fam a

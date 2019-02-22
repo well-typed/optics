@@ -153,28 +153,26 @@ makeFieldLabel
 makeFieldLabel rules (defName, (defType, cons)) = do
   (context, instHead) <- case defType of
     OpticSa _ _ otype s a -> do
-      (a', cxtA) <- typeFamilySubst a "a"
-      pure (pure $ maybeToList cxtA, pure $ conAppsT ''LabelOptic
-        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a', a'])
+      (a', cxtA) <- eqSubst a "a"
+      (b', cxtB) <- eqSubst a "b"
+      pure (pure [cxtA, cxtB], pure $ conAppsT ''LabelOptic
+        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a', b'])
     OpticStab otype s t a b -> do
-      (a', cxtA) <- typeFamilySubst a "a"
-      let stab =
-            -- If there is a type family in 'a', we can't make a type-changing
-            -- instance because of functional dependencies on LabelOptic.
-            if isJust cxtA then [s, s, a', a'] else [s, t, a,  b]
-      pure (pure $ maybeToList cxtA, pure . conAppsT ''LabelOptic $
-        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype] ++ stab)
+      hasTypeFamilies <- containsTypeFamilies a
+      -- If 'a' uses type families, generate type-preserving version. This is
+      -- actually way too restrictive check, in theory we have to generate
+      -- type-preserving version only if type family is non-injective and is
+      -- applied to a type variable that doesn't occur outside type family
+      -- context by itself, but that's complicated, so we do this for now.
+      let t' = if hasTypeFamilies then s else t
+      (a', cxtA) <- eqSubst a "a"
+      (b', cxtB) <- if hasTypeFamilies
+                    then pure (a', cxtA)
+                    else eqSubst b "b"
+      pure (pure [cxtA, cxtB], pure $ conAppsT ''LabelOptic
+        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, t', a', b'])
   instanceD context instHead (fun 'labelOptic)
   where
-    -- Type synonyms family applications are illegal in instances, but they can
-    -- be moved out and expressed as equality constraints.
-    typeFamilySubst :: Type -> String -> Q (Type, Maybe Pred)
-    typeFamilySubst ty n = containsTypeFamilies ty >>= \case
-      False -> pure (ty, Nothing)
-      True  -> do
-        placeholder <- VarT <$> newName n
-        pure (placeholder, Just $ D.equalPred placeholder ty)
-
     opticTypeToTag AffineFoldType      = ''An_AffineFold
     opticTypeToTag AffineTraversalType = ''An_AffineTraversal
     opticTypeToTag FoldType            = ''A_Fold
