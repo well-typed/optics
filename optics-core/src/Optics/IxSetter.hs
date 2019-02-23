@@ -28,7 +28,10 @@ type IxSetter i s t a b = Optic A_Setter (WithIx i) s t a b
 type IxSetter' i s a = Optic' A_Setter (WithIx i) s a
 
 -- | Explicitly cast an optic to an indexeed setter.
-toIxSetter :: Is k A_Setter => Optic k (WithIx i) s t a b -> IxSetter i s t a b
+toIxSetter
+  :: (Is k A_Setter, is `HasSingleIndex` i)
+  => Optic k is s t a b
+  -> IxSetter i s t a b
 toIxSetter = castOptic
 {-# INLINE toIxSetter #-}
 

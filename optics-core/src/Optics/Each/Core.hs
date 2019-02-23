@@ -84,8 +84,8 @@ instance
             <*> f 5 a5
   {-# INLINE each #-}
 
--- | @'each' :: 'IxTraversal' 'Int' (a, a, a, a, a, a, a) (b, b, b, b, b, b, b) a
--- b@
+-- | @'each' :: 'IxTraversal' 'Int' (a, a, a, a, a, a, a) (b, b, b, b, b, b, b)
+-- a b@
 instance
   (a ~ a1, a ~ a2, a ~ a3, a ~ a4, a ~ a5, a ~ a6,
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6
@@ -96,8 +96,8 @@ instance
              <*> f 5 a5 <*> f 6 a6
   {-# INLINE each #-}
 
--- | @'each' :: 'IxTraversal' 'Int' (a, a, a, a, a, a, a, a) (b, b, b, b, b, b, b,
--- b) a b@
+-- | @'each' :: 'IxTraversal' 'Int' (a, a, a, a, a, a, a, a) (b, b, b, b, b, b,
+-- b, b) a b@
 instance
   (a ~ a1, a ~ a2, a ~ a3, a ~ a4, a ~ a5, a ~ a6, a ~ a7,
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6, b ~ b7
@@ -108,8 +108,8 @@ instance
               <*> f 5 a5 <*> f 6 a6 <*> f 7 a7
   {-# INLINE each #-}
 
--- | @'each' :: 'Traversal' 'Int' (a, a, a, a, a, a, a, a, a) (b, b, b, b, b, b,
--- b, b, b) a b@
+-- | @'each' :: 'IxTraversal' 'Int' (a, a, a, a, a, a, a, a, a) (b, b, b, b, b,
+-- b, b, b, b) a b@
 instance
   (a ~ a1, a ~ a2, a ~ a3, a ~ a4, a ~ a5, a ~ a6, a ~ a7, a ~ a8,
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6, b ~ b7, b ~ b8
@@ -120,8 +120,8 @@ instance
                <*> f 5 a5 <*> f 6 a6 <*> f 7 a7 <*> f 8 a8
   {-# INLINE each #-}
 
--- | @'each' :: 'Traversal' 'Int' (a, a, a, a, a, a, a, a, a, a) (b, b, b, b, b,
--- b, b, b, b, b) a b@
+-- | @'each' :: 'IxTraversal' 'Int' (a, a, a, a, a, a, a, a, a, a) (b, b, b, b,
+-- b, b, b, b, b, b) a b@
 instance
   (a ~ a1, a ~ a2, a ~ a3, a ~ a4, a ~ a5, a ~ a6, a ~ a7, a ~ a8, a ~ a9,
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6, b ~ b7, b ~ b8, b ~ b9

@@ -43,7 +43,7 @@ instance (Prim a, Prim b) => Each Int (VP.Vector a) (VP.Vector b) a b where
   each = vectorTraverse
   {-# INLINE each #-}
 
--- | @'each' :: ('Storable' a, 'Storable' b) => 'Traversal' 'Int' ('VS.Vector'
+-- | @'each' :: ('Storable' a, 'Storable' b) => 'IxTraversal' 'Int' ('VS.Vector'
 -- a) ('VS.Vector' b) a b@
 instance (Storable a, Storable b) => Each Int (VS.Vector a) (VS.Vector b) a b where
   each = vectorTraverse

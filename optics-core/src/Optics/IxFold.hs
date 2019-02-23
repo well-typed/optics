@@ -50,7 +50,10 @@ import Optics.Optic
 type IxFold i s a = Optic' A_Fold (WithIx i) s a
 
 -- | Explicitly cast an optic to an indexed fold.
-toIxFold :: Is k A_Fold => Optic' k (WithIx i) s a -> IxFold i s a
+toIxFold
+  :: (Is k A_Fold, is `HasSingleIndex` i)
+  => Optic' k is s a
+  -> IxFold i s a
 toIxFold = castOptic
 {-# INLINE toIxFold #-}
 

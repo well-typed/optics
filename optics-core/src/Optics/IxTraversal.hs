@@ -51,8 +51,8 @@ type IxTraversal' i s a = Optic' A_Traversal (WithIx i) s a
 
 -- | Explicitly cast an optic to an indexed traversal.
 toIxTraversal
-  :: Is k A_Traversal
-  => Optic k (WithIx i) s t a b
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
+  => Optic k is s t a b
   -> IxTraversal i s t a b
 toIxTraversal = castOptic
 {-# INLINE toIxTraversal #-}
