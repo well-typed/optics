@@ -49,7 +49,12 @@ toAffineTraversal = castOptic
 -- | Build an affine traversal from a matcher and an updater.
 atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal s t a b
 atraversal match update = Optic $
-  visit $ \point f s -> either point (\a -> update s <$> f a) (match s)
+  -- Do not define atraversal in terms of atraversalVL, mixing profunctor-style
+  -- definitions with VL style implementation can lead to subpar generated code.
+  dimap (\s -> (match s, update s))
+        (\(etb, f) -> either id f etb)
+  . first'
+  . right'
 {-# INLINE atraversal #-}
 
 -- | Build a type-preserving affine traversal from a matcher and an updater.
