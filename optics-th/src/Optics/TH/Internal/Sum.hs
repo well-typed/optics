@@ -137,10 +137,10 @@ makeDecPrisms normal dec =
          cons = D.datatypeCons info
      makeConsPrisms info (map normalizeCon cons) cls
 
--- | Generate prisms for the given type, normalized constructors, and
--- an optional name to be used for generating a prism class.
--- This function dispatches between Iso generation, normal top-level
--- prisms, and classy prisms.
+-- | Generate prisms for the given type, normalized constructors, and an
+-- optional name to be used for generating a prism class. This function
+-- dispatches between Iso generation, normal top-level prisms, and classy
+-- prisms.
 makeConsPrisms :: D.DatatypeInfo -> [NCon] -> Maybe Name -> DecsQ
 
 -- top-level definitions
@@ -150,10 +150,10 @@ makeConsPrisms info cons Nothing = fmap concat . for cons $ \con -> do
       body = if isNewtype
              then varE 'coerced
              else makeConOpticExp stab cons con
-  sequenceA
+  sequenceA $
     [ sigD n (close (stabToType stab))
     , valD (varP n) (normalB body) []
-    ]
+    ] ++ inlinePragma n
   where
     ty        = D.datatypeType info
     isNewtype = D.datatypeVariant info == D.Newtype
