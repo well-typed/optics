@@ -115,7 +115,7 @@ makePrismLabels typeName = do
 
         funDef :: Stab -> ExpQ
         funDef stab
-          | isNewtype = varE 'castOptic `appE` varE 'coerced
+          | isNewtype = varE 'coerced
           | otherwise = makeConOpticExp stab cons con
 
 -- | Main entry point into Prism generation for a given type constructor name.
@@ -148,7 +148,7 @@ makeConsPrisms info cons Nothing = fmap concat . for cons $ \con -> do
   stab <- computeOpticType defaultConfig ty cons con
   let n = prismName $ view nconName con
       body = if isNewtype
-             then varE 'castOptic `appE` varE 'coerced
+             then varE 'coerced
              else makeConOpticExp stab cons con
   sequenceA
     [ sigD n (close (stabToType stab))
