@@ -19,6 +19,8 @@ miscTests = testGroup "Miscellaneous"
     assertSuccess $(inspectTest $ hasNoProfunctors 'mapIx)
   , testCase "optimized seqIx" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'seqIx)
+  , testCase "optimized itoList" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkitoListOf)
   ]
 
 simpleMapIx
@@ -32,3 +34,6 @@ mapIx m k = toListOf (_1 % folded % _Right % folded % ix k) m
 
 seqIx :: Int -> [S.Seq a] -> [a]
 seqIx i = toListOf (folded % ix i)
+
+checkitoListOf :: Int -> [S.Seq a] -> [(Int, a)]
+checkitoListOf i = itoListOf (ifolded % ix i)

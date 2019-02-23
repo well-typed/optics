@@ -331,7 +331,7 @@ orOf o = getAny #. foldMapOf o Any
 -- >>> anyOf both (=='x') ('x','y')
 -- True
 anyOf :: Is k A_Fold => Optic' k is s a -> (a -> Bool) -> s -> Bool
-anyOf o f = getAny #. foldMapOf o (Any #. f)
+anyOf o = \f -> getAny #. foldMapOf o (Any #. f)
 {-# INLINE anyOf #-}
 
 -- | Returns 'True' if every target of a 'Fold' satisfies a predicate.
@@ -345,7 +345,7 @@ anyOf o f = getAny #. foldMapOf o (Any #. f)
 -- 'Data.Foldable.all' ≡ 'allOf' 'folded'
 -- @
 allOf :: Is k A_Fold => Optic' k is s a -> (a -> Bool) -> s -> Bool
-allOf o f = getAll #. foldMapOf o (All #. f)
+allOf o = \f -> getAll #. foldMapOf o (All #. f)
 {-# INLINE allOf #-}
 
 -- | Returns 'True' only if no targets of a 'Fold' satisfy a predicate.
@@ -355,7 +355,7 @@ allOf o f = getAll #. foldMapOf o (All #. f)
 -- >>> noneOf (folded % folded) (<10) [[13,99,20],[3,71,42]]
 -- False
 noneOf :: Is k A_Fold => Optic' k is s a -> (a -> Bool) -> s -> Bool
-noneOf o f = not . anyOf o f
+noneOf o = \f -> not . anyOf o f
 {-# INLINE noneOf #-}
 
 -- | Calculate the 'Product' of every number targeted by a 'Fold'.
@@ -540,9 +540,10 @@ minimumOf o = foldlOf' o mf Nothing where
 -- 'Data.Foldable.maximumBy' cmp ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'maximumByOf' 'folded' cmp
 -- @
 maximumByOf :: Is k A_Fold => Optic' k is s a -> (a -> a -> Ordering) -> s -> Maybe a
-maximumByOf o cmp = foldlOf' o mf Nothing where
-  mf Nothing y  = Just $! y
-  mf (Just x) y = Just $! if cmp x y == GT then x else y
+maximumByOf o = \cmp ->
+  let mf Nothing y  = Just $! y
+      mf (Just x) y = Just $! if cmp x y == GT then x else y
+  in foldlOf' o mf Nothing
 {-# INLINE maximumByOf #-}
 
 -- | Obtain the minimum element (if any) targeted by a 'Fold' according to a
@@ -558,9 +559,10 @@ maximumByOf o cmp = foldlOf' o mf Nothing where
 -- 'minimumBy' cmp ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'minimumByOf' 'folded' cmp
 -- @
 minimumByOf :: Is k A_Fold => Optic' k is s a -> (a -> a -> Ordering) -> s -> Maybe a
-minimumByOf o cmp = foldlOf' o mf Nothing where
-  mf Nothing y  = Just $! y
-  mf (Just x) y = Just $! if cmp x y == GT then y else x
+minimumByOf o = \cmp ->
+  let mf Nothing y  = Just $! y
+      mf (Just x) y = Just $! if cmp x y == GT then y else x
+  in foldlOf' o mf Nothing
 {-# INLINE minimumByOf #-}
 
 -- | The 'findOf' function takes a 'Fold', a predicate and a structure and
@@ -577,7 +579,7 @@ minimumByOf o cmp = foldlOf' o mf Nothing where
 -- 'Data.Foldable.find' ≡ 'findOf' 'folded'
 -- @
 findOf :: Is k A_Fold => Optic' k is s a -> (a -> Bool) -> s -> Maybe a
-findOf o f = foldrOf o (\a y -> if f a then Just a else y) Nothing
+findOf o = \f -> foldrOf o (\a y -> if f a then Just a else y) Nothing
 {-# INLINE findOf #-}
 
 -- | The 'findMOf' function takes a 'Fold', a monadic predicate and a structure
@@ -601,7 +603,7 @@ findOf o f = foldrOf o (\a y -> if f a then Just a else y) Nothing
 -- 'findMOf' 'folded' :: (Monad m, Foldable f) => (a -> m Bool) -> f a -> m (Maybe a)
 -- @
 findMOf :: (Is k A_Fold, Monad m) => Optic' k is s a -> (a -> m Bool) -> s -> m (Maybe a)
-findMOf o f = foldrOf o
+findMOf o = \f -> foldrOf o
   (\a y -> f a >>= \r -> if r then pure (Just a) else y)
   (pure Nothing)
 {-# INLINE findMOf #-}
