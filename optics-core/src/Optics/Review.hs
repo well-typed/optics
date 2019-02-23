@@ -23,7 +23,10 @@ toReview :: Is k A_Review => Optic k is s t a b -> Optic A_Review is s t a b
 toReview = castOptic
 {-# INLINE toReview #-}
 
--- | Apply a review.
+-- | Retrieve the value targeted by a 'Review'.
+--
+-- >>> review _Left "hi"
+-- Left "hi"
 review :: Is k A_Review => Optic' k is t b -> b -> t
 review o = unTagged #. getOptic (toReview o) .# Tagged
 {-# INLINE review #-}
