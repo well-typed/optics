@@ -4,7 +4,7 @@ module Optics.IxFold
   ( A_Fold
   , IxFold
   , toIxFold
-  , ixFoldVL
+  , mkIxFold
   , conjoinedFold
   , ifoldMapOf
   , ifoldrOf
@@ -54,17 +54,17 @@ toIxFold :: Is k A_Fold => Optic' k (WithIx i) s a -> IxFold i s a
 toIxFold = castOptic
 {-# INLINE toIxFold #-}
 
--- | Build an indexed fold from the "almost van Laarhoven" representation.
+-- | Obtain an indexed fold by lifting 'itraverse_' like function.
 --
 -- @
--- 'ixFoldVL' '.' 'itraverseOf_' ≡ 'id'
--- 'itraverseOf_' '.' 'ixFoldVL' ≡ 'id'
+-- 'mkIxFold' '.' 'itraverseOf_' ≡ 'id'
+-- 'itraverseOf_' '.' 'mkIxFold' ≡ 'id'
 -- @
-ixFoldVL
-  :: (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+mkIxFold
+  :: (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
   -> IxFold i s a
-ixFoldVL f = Optic (ixFoldVL__ f)
-{-# INLINE ixFoldVL #-}
+mkIxFold f = Optic (mkIxFold__ f)
+{-# INLINE mkIxFold #-}
 
 -- | Build an indexed fold from the van Laarhoven representation of both its
 -- unindexed and indexed version.
@@ -73,12 +73,12 @@ ixFoldVL f = Optic (ixFoldVL__ f)
 -- efficiency depending on whether it is used as indexed or regular one.
 --
 -- @
--- 'traverseOf_'  ('conjoinedFold' f g) ≡ 'traverseOf_'  ('foldVL' f)
--- 'itraverseOf_' ('conjoinedFold' f g) ≡ 'itraverseOf_' ('ixFoldVL' g)
+-- 'traverseOf_'  ('conjoinedFold' f g) ≡ 'traverseOf_'  ('mkFold' f)
+-- 'itraverseOf_' ('conjoinedFold' f g) ≡ 'itraverseOf_' ('mkIxFold' g)
 -- @
 conjoinedFold
-  :: (forall f. Applicative f => (     a -> f r) -> s -> f ())
-  -> (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+  :: (forall f. Applicative f => (     a -> f u) -> s -> f v)
+  -> (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
   -> IxFold i s a
 conjoinedFold f g = Optic (conjoinedFold__ f g)
 {-# INLINE conjoinedFold #-}
@@ -171,7 +171,7 @@ ifolding f = Optic $ contrafirst f . conjoinedFold__ traverse_ itraverse_
 -- >>> itoListOf (ifoldring ifoldr) "hello"
 -- [(0,'h'),(1,'e'),(2,'l'),(3,'l'),(4,'o')]
 ifoldring
-  :: (forall f. Applicative f => (i -> a -> f r -> f r) -> f r -> s -> f r)
+  :: (forall f. Applicative f => (i -> a -> f u -> f u) -> f v -> s -> f w)
   -> IxFold i s a
 ifoldring fr = Optic (ifoldring__ fr)
 {-# INLINE ifoldring #-}
@@ -182,7 +182,7 @@ ifiltered
   => (i -> a -> Bool)
   -> Optic' k is s a
   -> IxFold i s a
-ifiltered p o = ixFoldVL $ \f ->
+ifiltered p o = mkIxFold $ \f ->
   itraverseOf_ o (\i a -> if p i a then f i a else pure ())
 {-# INLINE ifiltered #-}
 
