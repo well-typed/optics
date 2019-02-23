@@ -3,6 +3,7 @@ module Optics.AffineFold
   ( An_AffineFold
   , AffineFold
   , preview
+  , previews
   , afolding
   -- * Semigroup structure
   , afailing
@@ -25,7 +26,7 @@ toAffineFold
 toAffineFold = castOptic
 {-# INLINE toAffineFold #-}
 
--- | View through 'AffineFold'.
+-- | Retrieve the value targeted by an 'AffineFold'.
 --
 -- >>> let _Right = prism Right $ either (Left . Left) Right
 --
@@ -36,8 +37,13 @@ toAffineFold = castOptic
 -- Nothing
 --
 preview :: Is k An_AffineFold => Optic' k is s a -> s -> Maybe a
-preview o = runForgetM (getOptic (toAffineFold o) (ForgetM Just))
+preview o = previews o id
 {-# INLINE preview #-}
+
+-- | Retrieve a function of the value targeted by an 'AffineFold'.
+previews :: Is k An_AffineFold => Optic' k is s a -> (a -> r) -> s -> Maybe r
+previews o = \f -> runForgetM $ getOptic (toAffineFold o) $ ForgetM (Just . f)
+{-# INLINE previews #-}
 
 -- | Create an 'AffineFold' from a partial function.
 --

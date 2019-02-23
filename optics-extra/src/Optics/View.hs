@@ -39,71 +39,71 @@ class ViewableOptic k r where
 
 instance ViewableOptic An_Equality r where
   type ViewResult An_Equality r = r
-  gview      = asks . view
-  gviews o f = f <$> asks (view o)
+  gview    = asks . view
+  gviews o = asks . views o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic An_Iso r where
   type ViewResult An_Iso r = r
-  gview      = asks . view
-  gviews o f = f <$> asks (view o)
+  gview    = asks . view
+  gviews o = asks . views o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic A_Lens r where
   type ViewResult A_Lens r = r
-  gview      = asks . view
-  gviews o f = f <$> asks (view o)
+  gview    = asks . view
+  gviews o = asks . views o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic A_PrismaticGetter r where
   type ViewResult A_PrismaticGetter r = r
-  gview      = asks . view
-  gviews o f = f <$> asks (view o)
+  gview    = asks . view
+  gviews o = asks . views o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic A_Getter r where
   type ViewResult A_Getter r = r
-  gview      = asks . view
-  gviews o f = f <$> asks (view o)
+  gview    = asks . view
+  gviews o = asks . views o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic A_Prism r where
   type ViewResult A_Prism r = Maybe r
-  gview      = asks . preview
-  gviews o f = fmap f <$> asks (preview o)
+  gview    = asks . preview
+  gviews o = asks . previews o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic An_AffineTraversal r where
   type ViewResult An_AffineTraversal r = Maybe r
-  gview      = asks . preview
-  gviews o f = fmap f <$> asks (preview o)
+  gview    = asks . preview
+  gviews o = asks . previews o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance ViewableOptic An_AffineFold r where
   type ViewResult An_AffineFold r = Maybe r
-  gview      = asks . preview
-  gviews o f = fmap f <$> asks (preview o)
+  gview    = asks . preview
+  gviews o = asks . previews o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance Monoid r => ViewableOptic A_Traversal r where
   type ViewResult A_Traversal r = r
-  gview      = asks . foldOf
-  gviews o f = asks (foldMapOf o f)
+  gview    = asks . foldOf
+  gviews o = asks . foldMapOf o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
 instance Monoid r => ViewableOptic A_Fold r where
   type ViewResult A_Fold r = r
-  gview      = asks . foldOf
-  gviews o f = asks (foldMapOf o f)
+  gview    = asks . foldOf
+  gviews o = asks . foldMapOf o
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 

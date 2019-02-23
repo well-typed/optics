@@ -3,6 +3,7 @@ module Optics.Getter
   , Getter
   , toGetter
   , view
+  , views
   , to
   , module Optics.Optic
   )
@@ -21,10 +22,15 @@ toGetter :: Is k A_Getter => Optic' k is s a -> Optic' A_Getter is s a
 toGetter = castOptic
 {-# INLINE toGetter #-}
 
--- | Apply a getter.
+-- | View the value pointed to by a getter.
 view :: Is k A_Getter => Optic' k is s a -> s -> a
-view o = runForget (getOptic (toGetter o) (Forget id))
+view o = views o id
 {-# INLINE view #-}
+
+-- | View the function of the value pointed to by a getter.
+views :: Is k A_Getter => Optic' k is s a -> (a -> r) -> s -> r
+views o = \f -> runForget $ getOptic (toGetter o) (Forget f)
+{-# INLINE views #-}
 
 -- | Build a getter from a function.
 to :: (s -> a) -> Getter s a

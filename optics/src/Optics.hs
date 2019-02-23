@@ -173,7 +173,7 @@ module Optics
   -- noIx (ifolded % simple)
   --   :: FoldableWithIndex i f => Optic A_Fold NoIx (f b) (f b) b b
   --
-  -- 'unIx' can erase all indices
+  -- 'noIx' can erase all indices
   --
   -- >>> :t noIx (ifolded % ifolded)
   -- noIx (ifolded % ifolded)
@@ -225,8 +225,14 @@ module Optics
   -- * Empty
   , module Optics.Empty
 
-  -- ** OverloadedLabels 
+  -- * View
+  , module Optics.View
 
+  -- * Zoom
+  , module Optics.Zoom
+
+  -- ** OverloadedLabels 
+  , module Optics.Labels
 
   -- * Optics for concrete base types
   , module P
@@ -255,7 +261,6 @@ import Optics.Fold            as O
 import Optics.Equality        as O
 import Optics.AffineTraversal as O
 import Optics.AffineFold      as O
-import Optics.View            as O
 
 -- Optics utilities
 import Optics.At
@@ -263,8 +268,10 @@ import Optics.Cons
 import Optics.Each
 import Optics.Empty
 import Optics.Indexed
+import Optics.Labels
 import Optics.Re
-import Optics.Labels ()
+import Optics.View
+import Optics.Zoom
 
 -- Optics for concrete base types
 
