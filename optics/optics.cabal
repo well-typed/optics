@@ -114,6 +114,7 @@ test-suite optics-tests
                , mtl
                , optics-core
                , optics
+               , random
                , tasty
                , tasty-hunit
                , template-haskell

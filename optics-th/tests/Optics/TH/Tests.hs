@@ -10,10 +10,11 @@
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Main where
 
+import Data.Typeable
+
 import Optics.Core
 import Optics.Operators
 import Optics.TH
-
 import Optics.TH.Tests.T799 ()
 
 data Pair a b = Pair a b
@@ -636,11 +637,12 @@ data PureNoFields = PureNoFieldsA | PureNoFieldsB { _pureNoFields :: Int }
 makeLenses ''PureNoFields
 makeFieldLabels ''PureNoFields
 
-data ReviewTest where ReviewTest :: a -> ReviewTest
+data ReviewTest where
+  ReviewTest :: (Typeable a, Typeable b) => a -> b -> ReviewTest
 makePrisms ''ReviewTest
 makePrismLabels ''ReviewTest -- doesn't generate anything
 
-checkReviewTest :: Review ReviewTest a
+checkReviewTest :: (Typeable a, Typeable b) => Review ReviewTest (a, b)
 checkReviewTest = _ReviewTest
 
 -- test FieldNamers

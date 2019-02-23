@@ -5,13 +5,15 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Optics.Tests.Labels where
 
 import Data.Ord
+import Data.Word
 import Control.Monad.Reader
+import Control.Monad.State
+import qualified System.Random as R
 
 import Optics
 import Optics.Operators
@@ -78,7 +80,7 @@ data Config = Config
 instance LabelOptic "config" An_Equality Config Config Config Config where
   labelOptic = equality
 
-data Env = Env { envConfig :: Config, envRandoms :: [Int] }
+data Env = Env { envConfig :: Config, envRng :: R.StdGen }
 makeFieldLabels ''Env
 
 data Nested = Nested { nestedName :: String, nestedEnv :: Env }
@@ -94,7 +96,7 @@ doStuff = do
   pure ()
 
 env :: Env
-env = Env Config [1..]
+env = Env Config (R.mkStdGen 0)
 
 -- | Do stuff with 'Config' directly.
 doStuffWithConfig :: Monad m => m ()
@@ -107,3 +109,25 @@ doStuffWithEnv = runReaderT doStuff env
 -- | Do stuff with even larger environment.
 doStuffWithNested :: Monad m => m ()
 doStuffWithNested = runReaderT doStuff (Nested "weird" env)
+
+----------------------------------------
+-- Composition
+
+randomValue
+  :: (MonadState s m, LabelOptic' "rng" A_Lens s R.StdGen, R.Random r)
+  => m r
+randomValue = do
+  (r, g) <- gets $ view (#rng % to R.random)
+  modify' $ set #rng g
+  pure r
+
+randomWords :: IO [Word8]
+randomWords = do
+  rng <- R.mkStdGen <$> R.randomIO
+  (`evalStateT` Env Config rng) $ do
+    n <- fix $ \loop -> do
+      n <- (`mod` 16) <$> randomValue
+      if n < 5
+        then loop
+        else pure n
+    replicateM n randomValue
