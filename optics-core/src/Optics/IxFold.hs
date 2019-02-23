@@ -88,7 +88,7 @@ ifoldMapOf
   :: (Is k A_Fold, Monoid m, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> m) -> s -> m
-ifoldMapOf o f = runIxForget (getOptic (toIxFold o) (IxForget f)) id
+ifoldMapOf o = \f -> runIxForget (getOptic (toIxFold o) (IxForget f)) id
 {-# INLINE ifoldMapOf #-}
 
 -- | Fold with index right-associatively.
@@ -96,7 +96,7 @@ ifoldrOf
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> r -> r) -> r -> s -> r
-ifoldrOf o iarr r0 s = (\e -> appEndo e r0) $ ifoldMapOf o (\i -> Endo #. iarr i) s
+ifoldrOf o = \iarr r0 s -> (\e -> appEndo e r0) $ ifoldMapOf o (\i -> Endo #. iarr i) s
 {-# INLINE ifoldrOf #-}
 
 -- | Fold with index left-associatively, and strictly.
@@ -104,7 +104,7 @@ ifoldlOf'
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> r -> a -> r) -> r -> s -> r
-ifoldlOf' o irar r0 s = ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
+ifoldlOf' o = \irar r0 s -> ifoldrOf o (\i a rr r -> rr $! irar i r a) id s r0
 {-# INLINE ifoldlOf' #-}
 
 -- | Fold with index to a list.
@@ -271,7 +271,7 @@ ilastOf o = getRightmost . ifoldMapOf o (\i -> RLeaf . (i, ))
 ianyOf
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> Bool) -> s -> Bool
-ianyOf o f = getAny #. ifoldMapOf o (\i -> Any #. f i)
+ianyOf o = \f -> getAny #. ifoldMapOf o (\i -> Any #. f i)
 {-# INLINE ianyOf #-}
 
 -- | Return whether or not all elements viewed through an 'IxFold' satisfy a
@@ -286,7 +286,7 @@ ianyOf o f = getAny #. ifoldMapOf o (\i -> Any #. f i)
 iallOf
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> Bool) -> s -> Bool
-iallOf o f = getAll #. ifoldMapOf o (\i -> All #. f i)
+iallOf o = \f -> getAll #. ifoldMapOf o (\i -> All #. f i)
 {-# INLINE iallOf #-}
 
 -- | Return whether or not none of the elements viewed through an 'IxFold'
@@ -301,7 +301,7 @@ iallOf o f = getAll #. ifoldMapOf o (\i -> All #. f i)
 inoneOf
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> Bool) -> s -> Bool
-inoneOf o f = not . ianyOf o f
+inoneOf o = \f -> not . ianyOf o f
 {-# INLINE inoneOf #-}
 
 -- | The 'ifindOf' function takes an 'IxFold', a predicate that is also supplied
@@ -314,7 +314,7 @@ inoneOf o f = not . ianyOf o f
 ifindOf
  :: (Is k A_Fold, is `HasSingleIndex` i)
  => Optic' k is s a -> (i -> a -> Bool) -> s -> Maybe (i, a)
-ifindOf o p = iheadOf (ifiltered p o)
+ifindOf o = \p -> iheadOf (ifiltered p o)
 {-# INLINE ifindOf #-}
 
 -- | The 'ifindMOf' function takes an 'IxFold', a monadic predicate that is also
@@ -327,7 +327,7 @@ ifindOf o p = iheadOf (ifiltered p o)
 ifindMOf
   :: (Is k A_Fold, Monad m, is `HasSingleIndex` i)
   => Optic' k is s a -> (i -> a -> m Bool) -> s -> m (Maybe (i, a))
-ifindMOf o f = ifoldrOf o
+ifindMOf o = \f -> ifoldrOf o
   (\i a y -> f i a >>= \r -> if r then pure (Just (i, a)) else y)
   (pure Nothing)
 {-# INLINE ifindMOf #-}

@@ -114,8 +114,9 @@ imapAccumLOf
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> acc -> a -> (b, acc)) -> acc -> s -> (t, acc)
-imapAccumLOf o f acc0 s = runState (itraverseOf o g s) acc0 where
-  g i a = state $ \acc -> f i acc a
+imapAccumLOf o = \f acc0 s ->
+  let g i a = state $ \acc -> f i acc a
+  in runState (itraverseOf o g s) acc0
 {-# INLINE imapAccumLOf #-}
 
 -- | Generalizes 'Data.Traversable.mapAccumR' to an arbitrary 'IxTraversal'.
@@ -137,11 +138,11 @@ iscanl1Of
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
   -> (i -> a -> a -> a) -> s -> t
-iscanl1Of o f = fst . imapAccumLOf o step Nothing
-  where
-    step i ms a = case ms of
-      Nothing -> (a, Just a)
-      Just s  -> let r = f i s a in (r, Just r)
+iscanl1Of o = \f ->
+  let step i ms a = case ms of
+        Nothing -> (a, Just a)
+        Just s  -> let r = f i s a in (r, Just r)
+  in fst . imapAccumLOf o step Nothing
 {-# INLINE iscanl1Of #-}
 
 -- | This permits the use of 'scanr1' over an arbitrary 'IxTraversal'.
@@ -223,7 +224,7 @@ elementsOf
   => Optic k is s t a a
   -> (Int -> Bool)
   -> IxTraversal Int s t a a
-elementsOf o p = ixTraversalVL $ \f ->
+elementsOf o = \p -> ixTraversalVL $ \f ->
   indexing (traverseOf o) $ \i a -> if p i then f i a else pure a
 {-# INLINE elementsOf #-}
 
@@ -245,7 +246,7 @@ elementOf
   => Optic k is s t a a
   -> Int
   -> IxTraversal Int s t a a
-elementOf o i = elementsOf o (== i)
+elementOf o = \i -> elementsOf o (== i)
 {-# INLINE elementOf #-}
 
 -- | Traverse the /nth/ element of a 'Traversable' container.

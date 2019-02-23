@@ -137,9 +137,10 @@ mapAccumLOf
   :: Is k A_Traversal
   => Optic k is s t a b
   -> (acc -> a -> (b, acc)) -> acc -> s -> (t, acc)
-mapAccumLOf o f acc0 s = runState (traverseOf o g s) acc0
-  where
-    g a = state $ \acc -> f acc a
+mapAccumLOf o = \f acc0 s ->
+  let g a = state $ \acc -> f acc a
+  in runState (traverseOf o g s) acc0
+
 {-# INLINE mapAccumLOf #-}
 
 -- | This generalizes 'Data.Traversable.mapAccumR' to an arbitrary 'Traversal'.
@@ -165,10 +166,10 @@ scanl1Of
   :: Is k A_Traversal
   => Optic k is s t a a
   -> (a -> a -> a) -> s -> t
-scanl1Of o f = fst . mapAccumLOf o step Nothing
-  where
-    step Nothing a  = (a, Just a)
-    step (Just s) a = let r = f s a in (r, Just r)
+scanl1Of o = \f ->
+  let step Nothing a  = (a, Just a)
+      step (Just s) a = let r = f s a in (r, Just r)
+  in fst . mapAccumLOf o step Nothing
 {-# INLINE scanl1Of #-}
 
 -- | This permits the use of 'scanr1' over an arbitrary 'Traversal'.
@@ -180,10 +181,10 @@ scanr1Of
   :: Is k A_Traversal
   => Optic k is s t a a
   -> (a -> a -> a) -> s -> t
-scanr1Of o f = fst . mapAccumROf o step Nothing
-  where
-    step Nothing a  = (a, Just a)
-    step (Just s) a = let r = f a s in (r, Just r)
+scanr1Of o = \f ->
+  let step Nothing a  = (a, Just a)
+      step (Just s) a = let r = f a s in (r, Just r)
+  in fst . mapAccumROf o step Nothing
 {-# INLINE scanr1Of #-}
 
 -- | Try to map a function over this 'Traversal', returning Nothing if the

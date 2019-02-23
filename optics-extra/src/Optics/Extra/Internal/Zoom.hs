@@ -104,7 +104,7 @@ rwsZoom
   => Optic' k is t s
   -> (r -> s -> m (c, s, w))
   -> (r -> t -> m (c, t, w))
-rwsZoom o m r = unfocusingWith #. toLensVL o (FocusingWith #. m r)
+rwsZoom o m = \r -> unfocusingWith #. toLensVL o (FocusingWith #. m r)
 {-# INLINE rwsZoom #-}
 
 rwsZoomMaybe
@@ -112,7 +112,7 @@ rwsZoomMaybe
   => Optic' k is t s
   -> (r -> s -> m (c, s, w))
   -> (r -> t -> m (Maybe c, t, w))
-rwsZoomMaybe o m r =
+rwsZoomMaybe o m = \r ->
      fmap (coerce :: (First c, t, w) -> (Maybe c, t, w))
   .  unfocusingWith
   #. traverseOf (toAffineTraversal o)
@@ -124,7 +124,7 @@ rwsZoomMany
   => Optic' k is t s
   -> (r -> s -> m (c, s, w))
   -> (r -> t -> m (c, t, w))
-rwsZoomMany o m r = unfocusingWith #. traverseOf o (FocusingWith #. m r)
+rwsZoomMany o m = \r -> unfocusingWith #. traverseOf o (FocusingWith #. m r)
 {-# INLINE rwsZoomMany #-}
 
 ----------------------------------------
@@ -226,7 +226,7 @@ rwsMagnifyMaybe
   => Optic' k is a b
   -> (b -> s -> m (c, s, w))
   -> (a -> s -> m (Maybe c, s, w))
-rwsMagnifyMaybe o m r s = maybe
+rwsMagnifyMaybe o m = \r s -> maybe
   (pure (Nothing, s, mempty))
   (\e -> over (mapped % _1) Just $ getEffectRWS e s)
   (previews o (EffectRWS #. m) r)
