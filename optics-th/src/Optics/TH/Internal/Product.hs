@@ -579,7 +579,7 @@ makeLensClause cons irref = do
     (normalB $ appsE
       [ varE 'lensVL
       , lamE [varP f, varP s] $ caseE (varE s)
-        [ makeLensMatch f conName fieldCount fields
+        [ makeLensMatch irrefP f conName fieldCount fields
         | (conName, fieldCount, fields) <- cons
         ]
       ])
@@ -587,37 +587,37 @@ makeLensClause cons irref = do
   where
     irrefP = if irref then tildeP else id
 
-    makeLensMatch f conName fieldCount = \case
-      [field] -> do
-        xs <- newNames "x" fieldCount
-        y  <- newName "y"
+-- | Make a lens match. Used for both lens and affine traversal generation.
+makeLensMatch :: (PatQ -> PatQ) -> Name -> Name -> Int -> [Int] -> Q Match
+makeLensMatch irrefP f conName fieldCount = \case
+  [field] -> do
+    xs <- newNames "x" fieldCount
+    y  <- newName "y"
 
-        let body = appsE
-              [ varE 'fmap
-              , lamE [varP y] . appsE $
-                conE conName : map varE (setIx field y xs)
-              , appE (varE f) . varE $ xs !! field
-              ]
+    let body = appsE
+          [ varE 'fmap
+          , lamE [varP y] . appsE $
+            conE conName : map varE (setIx field y xs)
+          , appE (varE f) . varE $ xs !! field
+          ]
 
-        -- Con x_1 .. x_n -> fmap (\y_i -> Con x_1 .. y_i .. x_n) (f x_i)
-        match (irrefP . conP conName $ map varP xs)
-              (normalB body)
-              []
-      _       -> error "Lens focuses on exactly one field"
+    -- Con x_1 .. x_n -> fmap (\y_i -> Con x_1 .. y_i .. x_n) (f x_i)
+    match (irrefP . conP conName $ map varP xs)
+          (normalB body)
+          []
+  _       -> error "Lens focuses on exactly one field"
 
 makeAffineTraversalClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
 makeAffineTraversalClause cons irref = do
-  s <- newName "s"
+  point <- newName "point"
+  f     <- newName "f"
+  s     <- newName "s"
   clause
     []
     (normalB $ appsE
-      [ varE 'atraversal
-      , lamE [varP s] $ caseE (varE s)
-        [ makeAffineTraversalMatcherMatch conName fieldCount fields
-        | (conName, fieldCount, fields) <- cons
-        ]
-      , lamE [varP s] $ caseE (varE s)
-        [ makeAffineTraversalUpdaterMatch conName fieldCount fields
+      [ varE 'atraversalVL
+      , lamE [varP point, varP f, varP s] $ caseE (varE s)
+        [ makeAffineTraversalMatch point f conName fieldCount fields
         | (conName, fieldCount, fields) <- cons
         ]
       ])
@@ -625,34 +625,15 @@ makeAffineTraversalClause cons irref = do
   where
     irrefP = if irref then tildeP else id
 
-    makeAffineTraversalMatcherMatch conName fieldCount = \case
+    makeAffineTraversalMatch point f conName fieldCount = \case
       [] -> do
         xs <- newNames "x" fieldCount
-        -- Con x_1 ... x_n -> Left (Con x_1 .. x_n)
+        -- Con x_1 ... x_n -> point (Con x_1 .. x_n)
         match (irrefP . conP conName $ map varP xs)
-              (normalB $ conE 'Left `appE` appsE (conE conName : map varE xs))
+              (normalB $ varE point `appE` appsE (conE conName : map varE xs))
               []
-      [field] -> do
-        x <- newName "x"
-        match (conP conName . setIx field (varP x) $ replicate fieldCount wildP)
-              (normalB $ conE 'Right `appE` varE x)
-              []
+      [field] -> makeLensMatch irrefP f conName fieldCount [field]
       _ -> error "Affine traversal focuses on at most one field"
-
-    makeAffineTraversalUpdaterMatch conName fieldCount fields = do
-      xs <- newNames "x" fieldCount
-      case fields of
-        [] -> do
-          match (irrefP . conP conName $ map varP xs)
-                (normalB . lamE [wildP] . appsE $ conE conName : map varE xs)
-                []
-        [field] -> do
-          y <- newName "y"
-          match (irrefP . conP conName . setIx field wildP $ map varP xs)
-                (normalB . lamE [varP y] . appsE $
-                  conE conName : (setIx field (varE y) $ map varE xs))
-                []
-        _  -> error "Affine traversal focuses on at most one field"
 
 makeTraversalClause :: [(Name, Int, [Int])] -> Bool -> ClauseQ
 makeTraversalClause cons irref = do
