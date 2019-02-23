@@ -51,14 +51,6 @@ typeSelf = traversalVL $ \f -> \case
   ParensT ty                -> ParensT <$> f ty
   ty                        -> pure ty
 
-rewriteOf :: Is k A_Setter => Optic k is a b a b -> (b -> Maybe a) -> a -> b
-rewriteOf l f = go where
-  go = transformOf l (\x -> maybe x go (f x))
-
-transformOf :: Is k A_Setter => Optic k is a b a b -> (b -> b) -> a -> b
-transformOf l f = go where
-  go = f . over l go
-
 setIx :: Int -> a -> [a] -> [a]
 setIx n x xs = case splitAt n xs of
   (xss, [])       -> xss
@@ -367,15 +359,16 @@ stabToA (OpticSa _ _ _ _ a) = a
 -- shortly after creation.
 buildStab :: Bool -> Type -> [Either Type Type] -> Q (Type,Type,Type,Type)
 buildStab allowPhantomsChange s categorizedFields = do
-  (subA, a) <- unifyTypes targetFields
-  let s' = applyTypeSubst subA s
-
   -- compute possible type changes
   sub <- T.sequenceA (M.fromSet (newName . nameBase) unfixedTypeVars)
-  let (t, b) = over each (substTypeVars sub) (s', a)
-
-  return (s', t, a, b)
+  let (t, b) = over each (substTypeVars sub) (s, a)
+  pure (s, t, a, b)
   where
+    -- Just take the type of the first field and let GHC do the unification.
+    a = fromMaybe
+      (error "buildStab: unexpected empty list of fields")
+      (preview _head targetFields)
+
     phantomTypeVars =
       let allTypeVars = folded % summing (_Left % typeVars) (_Right % typeVars)
       in setOf typeVars s S.\\ setOf allTypeVars categorizedFields
@@ -451,16 +444,14 @@ makeClassyClass ::
   [(DefName, (OpticStab, [(Name, Int, [Int])]))] ->
   DecQ
 makeClassyClass className methodName s defs = do
-  let ss   = map (stabToS . view (_2 % _1)) defs
-  (sub,s') <- unifyTypes (s : ss)
   c <- newName "c"
-  let vars = toListOf typeVars s'
+  let vars = toListOf typeVars s
       fd   | null vars = []
            | otherwise = [FunDep [c] vars]
 
 
   classD (cxt[]) className (map PlainTV (c:vars)) fd
-    $ sigD methodName (return (''Lens' `conAppsT` [VarT c, s']))
+    $ sigD methodName (return (''Lens' `conAppsT` [VarT c, s]))
     : concat
       [ [sigD defName (return ty)
         ,valD (varP defName) (normalB body) []
@@ -471,7 +462,7 @@ makeClassyClass className methodName s defs = do
       , let ty   = quantifyType' (S.fromList (c:vars))
                                  (stabToContext stab)
                  $ stabToOptic stab `conAppsT`
-                       [VarT c, applyTypeSubst sub (stabToA stab)]
+                       [VarT c, stabToA stab]
       ]
 
 
@@ -774,77 +765,6 @@ makeTraversalClause cons irref = do
           match (irrefP . conP conName $ map varP xs)
                 (normalB body)
                 []
-
-------------------------------------------------------------------------
--- Unification logic
-------------------------------------------------------------------------
-
--- The field-oriented optic generation supports incorporating fields
--- with distinct but unifiable types into a single definition.
-
-
-
--- | Unify the given list of types, if possible, and return the
--- substitution used to unify the types for unifying the outer
--- type when building a definition's type signature.
-unifyTypes :: [Type] -> Q (M.Map Name Type, Type)
-unifyTypes (x:xs) = foldM (uncurry unify1) (M.empty, x) xs
-unifyTypes []     = fail "unifyTypes: Bug: Unexpected empty list"
-
-
--- | Attempt to unify two given types using a running substitution
-unify1 :: M.Map Name Type -> Type -> Type -> Q (M.Map Name Type, Type)
-unify1 sub (VarT x) y
-  | Just r <- M.lookup x sub = unify1 sub r y
-unify1 sub x (VarT y)
-  | Just r <- M.lookup y sub = unify1 sub x r
-unify1 sub x y
-  | x == y = return (sub, x)
-unify1 sub (AppT f1 x1) (AppT f2 x2) =
-  do (sub1, f) <- unify1 sub  f1 f2
-     (sub2, x) <- unify1 sub1 x1 x2
-     return (sub2, AppT (applyTypeSubst sub2 f) x)
-unify1 sub x (VarT y)
-  | elemOf typeVars y (applyTypeSubst sub x) =
-      fail "Failed to unify types: occurs check"
-  | otherwise = return (M.insert y x sub, x)
-unify1 sub (VarT x) y = unify1 sub y (VarT x)
-
--- TODO: Unify contexts
-unify1 sub (ForallT v1 [] t1) (ForallT v2 [] t2) =
-     -- This approach works out because by the time this code runs
-     -- all of the type variables have been renamed. No risk of shadowing.
-  do (sub1,t) <- unify1 sub t1 t2
-     v <- fmap nub (traverse (limitedSubst sub1) (v1++v2))
-     return (sub1, ForallT v [] t)
-
-unify1 _ x y = fail ("Failed to unify types: " ++ show (x,y))
-
-
--- | Perform a limited substitution on type variables. This is used
--- when unifying rank-2 fields when trying to achieve a Getter or Fold.
-limitedSubst :: M.Map Name Type -> TyVarBndr -> Q TyVarBndr
-limitedSubst sub (PlainTV n)
-  | Just r <- M.lookup n sub =
-       case r of
-         VarT m -> limitedSubst sub (PlainTV m)
-         _ -> fail "Unable to unify exotic higher-rank type"
-limitedSubst sub (KindedTV n k)
-  | Just r <- M.lookup n sub =
-       case r of
-         VarT m -> limitedSubst sub (KindedTV m k)
-         _ -> fail "Unable to unify exotic higher-rank type"
-limitedSubst _ tv = return tv
-
-
--- | Apply a substitution to a type. This is used after unifying
--- the types of the fields in unifyTypes.
-applyTypeSubst :: M.Map Name Type -> Type -> Type
-applyTypeSubst sub = rewriteOf typeSelf aux
-  where
-  aux (VarT n) = M.lookup n sub
-  aux _        = Nothing
-
 
 ------------------------------------------------------------------------
 -- Field generation parameters

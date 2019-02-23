@@ -194,12 +194,14 @@ checkC_ = #c
 data Perambulation a b
   = Mountains { _terrain    :: a
               , _altitude   :: b
-              , _absurdity1 :: forall x y. x -> y
-              , _absurdity2 :: forall x y. x -> y
+              -- Having Eq here doesn't work with old unification logic because
+              -- it was incomplete (and didn't seem to do anything).
+              , _absurdity1 :: forall x y. Eq x => x -> y
+              , _absurdity2 :: forall x y. Eq x => x -> y
               }
   | Beaches   { _terrain    :: a
               , _dunes      :: a
-              , _absurdity1 :: forall x y. x -> y
+              , _absurdity1 :: forall x y. Eq x => x -> y
               }
 makeLenses ''Perambulation
 makeFieldLabelsWith lensRules ''Perambulation
@@ -216,10 +218,10 @@ checkAltitude = altitude
 checkAltitude_ :: AffineTraversal (Perambulation a b) (Perambulation a b') b b'
 checkAltitude_ = #altitude
 
-checkAbsurdity1 :: Getter (Perambulation a b) (x -> y)
+checkAbsurdity1 :: Eq x => Getter (Perambulation a b) (x -> y)
 checkAbsurdity1 = absurdity1
 
-checkAbsurdity2 :: AffineFold (Perambulation a b) (x -> y)
+checkAbsurdity2 :: Eq x => AffineFold (Perambulation a b) (x -> y)
 checkAbsurdity2 = absurdity2
 
 checkDunes :: AffineTraversal' (Perambulation a b) a
@@ -244,7 +246,7 @@ checkAllTerrain = allTerrain
 checkAllTerrain_ :: Traversal (Perambulation a b) (Perambulation a' b) a a'
 checkAllTerrain_ = #allTerrain
 
-checkAbsurdities :: Fold (Perambulation a b) (x -> y)
+checkAbsurdities :: Eq x => Fold (Perambulation a b) (x -> y)
 checkAbsurdities = absurdities
 
 data LensCrafted a = Still { _still :: a }
