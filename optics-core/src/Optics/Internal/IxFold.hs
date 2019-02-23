@@ -8,13 +8,13 @@ import Optics.Internal.Indexed
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 
--- | Internal implementation of 'ixFoldVL'.
-ixFoldVL__
+-- | Internal implementation of 'mkIxFold'.
+mkIxFold__
   :: (Bicontravariant p, Traversing p)
-  => (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+  => (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
   -> Optic__ p j (i -> j) s t a b
-ixFoldVL__ f = rphantom . iwander f . rphantom
-{-# INLINE ixFoldVL__ #-}
+mkIxFold__ f = rphantom . iwander f . rphantom
+{-# INLINE mkIxFold__ #-}
 
 -- | Internal implementation of 'ifolded'.
 ifolded__
@@ -26,9 +26,9 @@ ifolded__ = conjoinedFold__ traverse_ itraverse_
 -- | Internal implementation of 'ifoldring'.
 ifoldring__
   :: (Bicontravariant p, Traversing p)
-  => (forall f. Applicative f => (i -> a -> f r -> f r) -> f r -> s -> f r)
+  => (forall f. Applicative f => (i -> a -> f u -> f u) -> f v -> s -> f w)
   -> Optic__ p j (i -> j) s t a b
-ifoldring__ fr = ixFoldVL__ $ \f -> void . fr (\i a -> (f i a *>)) (pure v)
+ifoldring__ fr = mkIxFold__ $ \f -> void . fr (\i a -> (f i a *>)) (pure v)
   where
     v = error "ifoldring__: value used"
 {-# INLINE ifoldring__ #-}
@@ -36,8 +36,8 @@ ifoldring__ fr = ixFoldVL__ $ \f -> void . fr (\i a -> (f i a *>)) (pure v)
 -- | Internal implementation of 'conjoinedFold'.
 conjoinedFold__
   :: (Bicontravariant p, Traversing p)
-  => (forall f. Applicative f => (     a -> f r) -> s -> f ())
-  -> (forall f. Applicative f => (i -> a -> f r) -> s -> f ())
+  => (forall f. Applicative f => (     a -> f u) -> s -> f v)
+  -> (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
   -> Optic__ p j (i -> j) s t a b
 conjoinedFold__ f g = conjoined (rphantom . wander  f . rphantom)
                                 (rphantom . iwander g . rphantom)

@@ -2,7 +2,7 @@ module Optics.Fold
   ( A_Fold
   , Fold
   , toFold
-  , foldVL
+  , mkFold
   , foldOf
   , foldMapOf
   , foldrOf
@@ -75,17 +75,17 @@ toFold
 toFold = castOptic
 {-# INLINE toFold #-}
 
--- | Build a 'Fold' from the "almost van Laarhoven" representation.
+-- | Obtain a 'Fold' by lifting 'traverse_' like function.
 --
 -- @
--- 'foldVL' '.' 'traverseOf_' ≡ 'id'
--- 'traverseOf_' '.' 'foldVL' ≡ 'id'
+-- 'mkFold' '.' 'traverseOf_' ≡ 'id'
+-- 'traverseOf_' '.' 'mkFold' ≡ 'id'
 -- @
-foldVL
-  :: (forall f. Applicative f => (a -> f r) -> s -> f ())
+mkFold
+  :: (forall f. Applicative f => (a -> f u) -> s -> f v)
   -> Fold s a
-foldVL f = Optic (foldVL__ f)
-{-# INLINE foldVL #-}
+mkFold f = Optic (mkFold__ f)
+{-# INLINE mkFold #-}
 
 -- | Combine the results of a fold using a monoid.
 foldOf :: (Is k A_Fold, Monoid a) => Optic' k is s a -> s -> a
@@ -173,7 +173,7 @@ folded = Optic folded__
 -- >>> toListOf (folding tail) [1,2,3,4]
 -- [2,3,4]
 folding :: Foldable f => (s -> f a) -> Fold s a
-folding f = Optic (contrafirst f . foldVL__ traverse_)
+folding f = Optic (contrafirst f . mkFold__ traverse_)
 {-# INLINE folding #-}
 
 -- | Obtain a 'Fold' by lifting 'foldr' like function.
@@ -181,7 +181,7 @@ folding f = Optic (contrafirst f . foldVL__ traverse_)
 -- >>> toListOf (foldring foldr) [1,2,3,4]
 -- [1,2,3,4]
 foldring
-  :: (forall f. Applicative f => (a -> f r -> f r) -> f r -> s -> f r)
+  :: (forall f. Applicative f => (a -> f u -> f u) -> f v -> s -> f w)
   -> Fold s a
 foldring fr = Optic (foldring__ fr)
 {-# INLINE foldring #-}
@@ -195,7 +195,7 @@ foldring fr = Optic (foldring__ fr)
 -- >>> toListOf (unfolded $ \b -> if b == 0 then Nothing else Just (b, b - 1)) 10
 -- [10,9,8,7,6,5,4,3,2,1]
 unfolded :: (s -> Maybe (a, s)) -> Fold s a
-unfolded step = foldVL $ \f -> fix $ \loop b ->
+unfolded step = mkFold $ \f -> fix $ \loop b ->
   case step b of
     Just (a, b') -> f a *> loop b'
     Nothing      -> pure ()
@@ -207,7 +207,7 @@ filtered
   => (a -> Bool)
   -> Optic' k is s a
   -> Fold s a
-filtered p o = foldVL $ \f -> traverseOf_ o (\a -> if p a then f a else pure ())
+filtered p o = mkFold $ \f -> traverseOf_ o (\a -> if p a then f a else pure ())
 {-# INLINE filtered #-}
 
 -- | This allows you to traverse the elements of a 'Fold' in the opposite order.
@@ -215,7 +215,7 @@ backwards_
   :: Is k A_Fold
   => Optic' k is s a
   -> Fold s a
-backwards_ o = foldVL $ \f -> forwards #. traverseOf_ o (Backwards #. f)
+backwards_ o = mkFold $ \f -> forwards #. traverseOf_ o (Backwards #. f)
 {-# INLINE backwards_ #-}
 
 -- | Return entries of the first 'Fold', then the second one.
@@ -228,7 +228,7 @@ summing
   => Optic' k is s a
   -> Optic' l js s a
   -> Fold s a
-summing a b = foldVL $ \f s -> traverseOf_ a f s *> traverseOf_ b f s
+summing a b = mkFold $ \f s -> traverseOf_ a f s *> traverseOf_ b f s
 infixr 6 `summing` -- Same as (<>)
 {-# INLINE summing #-}
 
@@ -238,7 +238,7 @@ failing
   => Optic' k is s a
   -> Optic' l js s a
   -> Fold s a
-failing a b = foldVL $ \f s ->
+failing a b = mkFold $ \f s ->
   let OrT visited fu = traverseOf_ a (wrapOrT . f) s
   in if visited
      then fu

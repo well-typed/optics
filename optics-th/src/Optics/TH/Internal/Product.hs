@@ -500,7 +500,7 @@ makeFoldClause cons = do
   clause
     []
     (normalB $ appsE
-      [ varE 'foldVL
+      [ varE 'mkFold
       , lamE [varP f, varP s] $ caseE (varE s)
         [ makeFoldMatch f conName fieldCount fields
         | (conName, fieldCount, fields) <- cons
