@@ -134,7 +134,7 @@ instance IxOptic A_Traversal s t a b where
   noIx o = traversalVL (traverseOf o)
   {-# INLINE noIx #-}
 
-  icomposeN = icomposeN__
+  icomposeN f o = Optic (icomposeN__ f o)
   {-# INLINE icomposeN #-}
 
 instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
@@ -142,7 +142,7 @@ instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
   noIx o = mkFold (traverseOf_ o)
   {-# INLINE noIx #-}
 
-  icomposeN = icomposeN__
+  icomposeN f o = Optic (icomposeN__ f o)
   {-# INLINE icomposeN #-}
 
 instance IxOptic A_Setter s t a b where
@@ -150,28 +150,21 @@ instance IxOptic A_Setter s t a b where
   noIx o = sets (over o)
   {-# INLINE noIx #-}
 
-  icomposeN = icomposeN__
+  icomposeN f o = Optic (icomposeN__ f o)
   {-# INLINE icomposeN #-}
 
 ----------------------------------------
 -- Internal
 
--- Implementation of icompose*
+-- | Implementation of 'icomposeN'.
 icomposeN__
-  :: forall k l i is s t a b
-  . (Is A_Traversal l, Is k l, Join A_Traversal k ~ l, CurryCompose is)
+  :: forall k p is i j s t a b
+  . (Constraints k p, Traversing p, CurryCompose is)
   => Curry is i
-  -> Optic k is         s t a b
-  -> Optic l (WithIx i) s t a b
-icomposeN__ f o = Optic $
-    implies' (ixcontramap (\ij -> composeN @is ij f))
-  . getOptic (castOptic @k @l o)
-  where
-    implies'
-      :: forall p ij
-      .  Optic_ A_Traversal p (Curry is ij) (i -> ij) s t s t
-      -> Optic_ l           p (Curry is ij) (i -> ij) s t s t
-    implies' x = implies (IsProxy :: IsProxy A_Traversal l p) x
+  -> Optic k is s t a b
+  -> Optic__ p j (i -> j) s t a b
+icomposeN__ f o =
+  ixcontramap (\ij -> composeN @is ij f) . getOptic o
 {-# INLINE icomposeN__ #-}
 
 -- $setup
