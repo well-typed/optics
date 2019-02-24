@@ -9,6 +9,7 @@ module Optics.IxAffineFold
   , module Optics.Optic
   ) where
 
+import Optics.AffineFold
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Profunctor
@@ -60,6 +61,7 @@ iafailing
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxAffineFold i s a
-iafailing a b = iafolding $ \s -> maybe (ipreview b s) Just (ipreview a s)
+iafailing a b = Optic $ conjoined__ (afailing a b) $ iafolding $ \s ->
+  maybe (ipreview b s) Just (ipreview a s)
 infixl 3 `iafailing` -- Same as (<|>)
 {-# INLINE iafailing #-}

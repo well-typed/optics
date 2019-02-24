@@ -25,10 +25,11 @@ hasNoProfunctors name = mkObligation name $ NoUseOf
   , 'P.unleft
   , 'P.unright
   , 'P.visit
+  , 'P.ivisit
+  , 'P.conjoined'
+  , 'P.ixcontramap
   , 'P.wander
   , 'P.iwander
-  , 'P.conjoined
-  , 'P.ixcontramap
   , 'P.roam
   , 'P.iroam
   ]

@@ -10,7 +10,6 @@ module Optics.IxSetter
   , iset
   , iset'
   , isets
-  , conjoinedSets
   , imapped
   , module Optics.Optic
   ) where
@@ -76,23 +75,6 @@ isets
   -> IxSetter i s t a b
 isets f = Optic (iroam f)
 {-# INLINE isets #-}
-
--- | Build an indexed setter from function to modify the element(s) in both its
--- unindexed and indexed version.
---
--- Appropriate version of the setter will be automatically picked for maximum
--- efficiency depending on whether it is used as indexed or regular one.
---
--- @
--- 'over'  ('conjoinedSets' f g) ≡ 'over'  ('sets' f)
--- 'iover' ('conjoinedFold' f g) ≡ 'iover' ('isets' g)
--- @
-conjoinedSets
-  :: ((     a -> b) -> s -> t)
-  -> ((i -> a -> b) -> s -> t)
-  -> IxSetter i s t a b
-conjoinedSets f g = Optic (conjoinedSets__ f g)
-{-# INLINE conjoinedSets #-}
 
 -- | Indexed setter via the 'FunctorWithIndex' class.
 imapped :: FunctorWithIndex i f => IxSetter i (f a) (f b) a b

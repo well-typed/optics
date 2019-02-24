@@ -16,6 +16,8 @@ import Optics.Internal.Optic
 import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Profunctor
 
+import Optics.AffineFold
+import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Setter
 import Optics.Traversal
@@ -129,29 +131,61 @@ class IxOptic k s t a b where
     -> Optic k is         s t a b
     -> Optic k (WithIx i) s t a b
 
+  -- | Construct a conjoined indexed optic that provides a separate code path
+  -- when used without indices. Useful for defining indexed optics that are as
+  -- efficient as their unindexed equivalents when used without indices.
+  --
+  -- /Note:/ @conjoined f g@ is well-defined if and only if @f ≡ noIx g@.
+  conjoined
+    :: is `HasSingleIndex` i
+    => Optic k NoIx s t a b
+    -> Optic k is   s t a b
+    -> Optic k is   s t a b
+
+instance IxOptic An_AffineTraversal s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = atraversalVL (toAtraversalVL o)
+  {-# INLINE noIx #-}
+  icomposeN f o = Optic (icomposeN__ f o)
+  {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
+
+instance (s ~ t, a ~ b) => IxOptic An_AffineFold s t a b where
+  -- Reinterpret the optic as unindexed one for conjoined to work.
+  noIx o = afolding (preview o)
+  {-# INLINE noIx #-}
+  icomposeN f o = Optic (icomposeN__ f o)
+  {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
+
 instance IxOptic A_Traversal s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = traversalVL (traverseOf o)
   {-# INLINE noIx #-}
-
   icomposeN f o = Optic (icomposeN__ f o)
   {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
 
 instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = mkFold (traverseOf_ o)
   {-# INLINE noIx #-}
-
   icomposeN f o = Optic (icomposeN__ f o)
   {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
 
 instance IxOptic A_Setter s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = sets (over o)
   {-# INLINE noIx #-}
-
   icomposeN f o = Optic (icomposeN__ f o)
   {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
 
 ----------------------------------------
 -- Internal
@@ -159,7 +193,7 @@ instance IxOptic A_Setter s t a b where
 -- | Implementation of 'icomposeN'.
 icomposeN__
   :: forall k p is i j s t a b
-  . (Constraints k p, Traversing p, CurryCompose is)
+  . (Constraints k p, Visiting p, CurryCompose is)
   => Curry is i
   -> Optic k is s t a b
   -> Optic__ p j (i -> j) s t a b

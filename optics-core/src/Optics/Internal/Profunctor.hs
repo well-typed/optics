@@ -466,17 +466,17 @@ class (Choice p, Strong p) => Visiting p where
   {-# INLINE ivisit #-}
 
   -- TODO: move this to 'Profunctor'
-  conjoined
+  conjoined'
     :: (p i a b -> p i s t)
     -> (p i a b -> p j s t)
     -> (p i a b -> p j s t)
-  default conjoined
+  default conjoined'
     :: Coercible (p i s t) (p j s t)
     => (p i a b -> p i s t)
     -> (p i a b -> p j s t)
     -> (p i a b -> p j s t)
-  conjoined f _ = coerce . f
-  {-# INLINE conjoined #-}
+  conjoined' f _ = coerce . f
+  {-# INLINE conjoined' #-}
 
   -- TODO: move this to 'Profunctor'
   ixcontramap :: (i -> j) -> p j a b -> p i a b
@@ -525,9 +525,9 @@ instance Functor f => Visiting (IxStarA f) where
   ivisit f (IxStarA point k) = IxStarA point $ \ij -> f point $ \i -> k (ij i)
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined _ f = f
+  conjoined' _ f = f
   ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
-  {-# INLINE conjoined #-}
+  {-# INLINE conjoined' #-}
   {-# INLINE ixcontramap #-}
 
 instance Applicative f => Visiting (IxStar f) where
@@ -535,9 +535,9 @@ instance Applicative f => Visiting (IxStar f) where
   ivisit f (IxStar k) = IxStar $ \ij -> f pure $ \i -> k (ij i)
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined _ f = f
+  conjoined' _ f = f
   ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
-  {-# INLINE conjoined #-}
+  {-# INLINE conjoined' #-}
   {-# INLINE ixcontramap #-}
 
 instance Monoid r => Visiting (IxForget r) where
@@ -547,9 +547,9 @@ instance Monoid r => Visiting (IxForget r) where
     IxForget $ \ij -> getConst #. f pure (\i -> Const #. k (ij i))
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined _ f = f
+  conjoined' _ f = f
   ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
-  {-# INLINE conjoined #-}
+  {-# INLINE conjoined' #-}
   {-# INLINE ixcontramap #-}
 
 instance Visiting (IxForgetM r) where
@@ -559,9 +559,9 @@ instance Visiting (IxForgetM r) where
     IxForgetM $ \ij -> getConst #. f (\_ -> Const Nothing) (\i -> Const #. k (ij i))
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined _ f = f
+  conjoined' _ f = f
   ixcontramap ij (IxForgetM k) = IxForgetM $ \i -> k (ij i)
-  {-# INLINE conjoined #-}
+  {-# INLINE conjoined' #-}
   {-# INLINE ixcontramap #-}
 
 instance Visiting IxFunArrow where
@@ -571,9 +571,9 @@ instance Visiting IxFunArrow where
     IxFunArrow $ \ij -> runIdentity #. f pure (\i -> Identity #. k (ij i))
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined _ f = f
+  conjoined' _ f = f
   ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
-  {-# INLINE conjoined #-}
+  {-# INLINE conjoined' #-}
   {-# INLINE ixcontramap #-}
 
 ----------------------------------------

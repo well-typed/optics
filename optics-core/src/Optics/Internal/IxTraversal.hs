@@ -12,7 +12,7 @@ import Optics.Internal.Setter
 itraversed__
   :: (Traversing p, TraversableWithIndex i f)
   => Optic__ p j (i -> j) (f a) (f b) a b
-itraversed__ = conjoinedTraversal__ traverse itraverse
+itraversed__ = conjoined' (wander traverse) (iwander itraverse)
 {-# INLINE [0] itraversed__ #-}
 
 -- Because itraversed__ inlines late, GHC needs rewrite rules for all cases in
@@ -46,12 +46,3 @@ itraversed__ = conjoinedTraversal__ traverse itraverse
     :: FunctorWithIndex i f => IxFunArrow (i -> j) (f a) (f b)
 
 #-}
-
--- | Internal implementation of 'conjoinedTraversal'.
-conjoinedTraversal__
-  :: Traversing p
-  => (forall f. Applicative f => (     a -> f b) -> s -> f t)
-  -> (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
-  -> Optic__ p j (i -> j) s t a b
-conjoinedTraversal__ f g = conjoined (wander f) (iwander g)
-{-# INLINE conjoinedTraversal__ #-}
