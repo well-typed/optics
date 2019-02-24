@@ -16,7 +16,6 @@ module Optics.AffineTraversal
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Traversal
 import Optics.Optic
 
 -- | Type synonym for a type-modifying affine traversal.
@@ -62,7 +61,7 @@ withAffineTraversal
   => Optic k is s t a b
   -> ((s -> Either t a) -> (s -> b -> t) -> r)
   -> r
-withAffineTraversal o k =
+withAffineTraversal o = \k ->
   case getOptic (toAffineTraversal o) (AffineMarket (\_ b -> b) Right) of
     AffineMarket update match -> k match update
 {-# INLINE withAffineTraversal #-}

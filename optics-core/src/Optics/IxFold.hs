@@ -247,7 +247,7 @@ infixl 3 `ifailing` -- Same as (<|>)
 -- >>> iheadOf ifolded [1..10]
 -- Just (0,1)
 iheadOf
-  ::( Is k A_Fold, is `HasSingleIndex` i)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> s -> Maybe (i, a)
 iheadOf o = getLeftmost . ifoldMapOf o (\i -> LLeaf . (i, ))
 {-# INLINE iheadOf #-}

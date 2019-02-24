@@ -6,7 +6,6 @@ module Optics.Internal.Concrete
   ) where
 
 import Data.Bifunctor
-import Data.Functor.Identity
 
 import Optics.Internal.Profunctor
 
@@ -109,8 +108,4 @@ instance Strong (AffineMarket a b) where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
-instance Visiting (AffineMarket a b) where
-  visit f (AffineMarket abt seta) = AffineMarket
-    (\s b -> runIdentity $ f Identity (\a -> Identity $ abt a b) s)
-    (\s -> either Right Left $ f Right (either Right Left . seta) s)
-  {-# INLINE visit #-}
+instance Visiting (AffineMarket a b)

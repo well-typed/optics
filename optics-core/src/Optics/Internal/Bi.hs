@@ -15,25 +15,33 @@ class Bicontravariant p where
   contrasecond ::             (c -> b) -> p i a b -> p i a c
 
 instance Bicontravariant (Forget r) where
-  contrabimap  f _g (Forget r) = Forget (r . f)
-  contrafirst  f    (Forget r) = Forget (r . f)
-  contrasecond   _g (Forget r) = Forget r
+  contrabimap  f _g (Forget k) = Forget (k . f)
+  contrafirst  f    (Forget k) = Forget (k . f)
+  contrasecond   _g (Forget k) = Forget k
   {-# INLINE contrabimap #-}
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
 instance Bicontravariant (ForgetM r) where
-  contrabimap  f _g (ForgetM r) = ForgetM (r . f)
-  contrafirst  f    (ForgetM r) = ForgetM (r . f)
-  contrasecond   _g (ForgetM r) = ForgetM r
+  contrabimap  f _g (ForgetM k) = ForgetM (k . f)
+  contrafirst  f    (ForgetM k) = ForgetM (k . f)
+  contrasecond   _g (ForgetM k) = ForgetM k
   {-# INLINE contrabimap #-}
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
 instance Bicontravariant (IxForget r) where
-  contrabimap  f _g (IxForget r) = IxForget (\i -> r i . f)
-  contrafirst  f    (IxForget r) = IxForget (\i -> r i . f)
-  contrasecond   _g (IxForget r) = IxForget r
+  contrabimap  f _g (IxForget k) = IxForget (\i -> k i . f)
+  contrafirst  f    (IxForget k) = IxForget (\i -> k i . f)
+  contrasecond   _g (IxForget k) = IxForget k
+  {-# INLINE contrabimap #-}
+  {-# INLINE contrafirst #-}
+  {-# INLINE contrasecond #-}
+
+instance Bicontravariant (IxForgetM r) where
+  contrabimap  f _g (IxForgetM k) = IxForgetM (\i -> k i . f)
+  contrafirst  f    (IxForgetM k) = IxForgetM (\i -> k i . f)
+  contrasecond   _g (IxForgetM k) = IxForgetM k
   {-# INLINE contrabimap #-}
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}

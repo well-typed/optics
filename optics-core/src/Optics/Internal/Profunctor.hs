@@ -27,6 +27,9 @@ newtype IxStar f i a b = IxStar { runIxStar :: i -> a -> f b }
 -- | Needed for indexed folds.
 newtype IxForget r i a b = IxForget { runIxForget :: i -> a -> r }
 
+-- | Needed for indexed affine folds.
+newtype IxForgetM r i a b = IxForgetM { runIxForgetM :: i -> a -> Maybe r }
+
 -- | Needed for indexed setters.
 newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
@@ -70,6 +73,15 @@ data StarA f i a b = StarA (forall r. r -> f r) (a -> f b)
 runStarA :: StarA f i a b -> a -> f b
 runStarA (StarA _ k) = k
 {-# INLINE runStarA #-}
+
+-- | Needed for conversion of indexed affine traversal back to its VL
+-- representation.
+data IxStarA f i a b = IxStarA (forall r. r -> f r) (i -> a -> f b)
+
+-- | Unwrap 'StarA'.
+runIxStarA :: IxStarA f i a b -> i -> a -> f b
+runIxStarA (IxStarA _ k) = k
+{-# INLINE runIxStarA #-}
 
 ----------------------------------------
 
@@ -168,6 +180,17 @@ instance Profunctor FunArrow where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
+instance Functor f => Profunctor (IxStarA f) where
+  dimap f g (IxStarA point k) = IxStarA point (\i -> fmap g . k i . f)
+  lmap  f   (IxStarA point k) = IxStarA point (\i -> k i . f)
+  rmap    g (IxStarA point k) = IxStarA point (\i -> fmap g . k i)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+  rcoerce' = rmap coerce
+  {-# INLINE rcoerce' #-}
+
 instance Functor f => Profunctor (IxStar f) where
   dimap f g (IxStar k) = IxStar (\i -> fmap g . k i . f)
   lmap  f   (IxStar k) = IxStar (\i -> k i . f)
@@ -183,6 +206,14 @@ instance Profunctor (IxForget r) where
   dimap f _ (IxForget k) = IxForget (\i -> k i . f)
   lmap  f   (IxForget k) = IxForget (\i -> k i . f)
   rmap   _g (IxForget k) = IxForget k
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+instance Profunctor (IxForgetM r) where
+  dimap f _ (IxForgetM k) = IxForgetM (\i -> k i . f)
+  lmap  f   (IxForgetM k) = IxForgetM (\i -> k i . f)
+  rmap   _g (IxForgetM k) = IxForgetM k
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
@@ -254,6 +285,15 @@ instance Strong FunArrow where
   linear f (FunArrow k) = FunArrow $ runIdentity #. f (Identity #. k)
   {-# INLINE linear #-}
 
+instance Functor f => Strong (IxStarA f) where
+  first'  (IxStarA point k) = IxStarA point $ \i ~(a, c) -> (\b' -> (b', c)) <$> k i a
+  second' (IxStarA point k) = IxStarA point $ \i ~(c, a) -> (,) c <$> k i a
+  {-# INLINE first' #-}
+  {-# INLINE second' #-}
+
+  linear f (IxStarA point k) = IxStarA point $ \i -> f (k i)
+  {-# INLINE linear #-}
+
 instance Functor f => Strong (IxStar f) where
   first'  (IxStar k) = IxStar $ \i ~(a, c) -> (\b' -> (b', c)) <$> k i a
   second' (IxStar k) = IxStar $ \i ~(c, a) -> (,) c <$> k i a
@@ -270,6 +310,15 @@ instance Strong (IxForget r) where
   {-# INLINE second' #-}
 
   linear f (IxForget k) = IxForget $ \i -> getConst #. f (Const #. k i)
+  {-# INLINE linear #-}
+
+instance Strong (IxForgetM r) where
+  first'  (IxForgetM k) = IxForgetM $ \i -> k i . fst
+  second' (IxForgetM k) = IxForgetM $ \i -> k i . snd
+  {-# INLINE first' #-}
+  {-# INLINE second' #-}
+
+  linear f (IxForgetM k) = IxForgetM $ \i -> getConst #. f (Const #. k i)
   {-# INLINE linear #-}
 
 instance Strong IxFunArrow where
@@ -323,6 +372,14 @@ instance Choice FunArrow where
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
+instance Functor f => Choice (IxStarA f) where
+  left'  (IxStarA point k) =
+    IxStarA point $ \i -> either (fmap Left . k i) (point . Right)
+  right' (IxStarA point k) =
+    IxStarA point $ \i -> either (point . Left) (fmap Right . k i)
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
 instance Applicative f => Choice (IxStar f) where
   left'  (IxStar k) = IxStar $ \i -> either (fmap Left . k i) (pure . Right)
   right' (IxStar k) = IxStar $ \i -> either (pure . Left) (fmap Right . k i)
@@ -332,6 +389,12 @@ instance Applicative f => Choice (IxStar f) where
 instance Monoid r => Choice (IxForget r) where
   left'  (IxForget k) = IxForget $ \i -> either (k i) (const mempty)
   right' (IxForget k) = IxForget $ \i -> either (const mempty) (k i)
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
+instance Choice (IxForgetM r) where
+  left'  (IxForgetM k) = IxForgetM $ \i -> either (k i) (const Nothing)
+  right' (IxForgetM k) = IxForgetM $ \i -> either (const Nothing) (k i)
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
@@ -365,13 +428,20 @@ instance Cochoice (IxForget r) where
   {-# INLINE unleft #-}
   {-# INLINE unright #-}
 
+instance Cochoice (IxForgetM r) where
+  unleft  (IxForgetM k) = IxForgetM (\i -> k i . Left)
+  unright (IxForgetM k) = IxForgetM (\i -> k i . Right)
+  {-# INLINE unleft #-}
+  {-# INLINE unright #-}
+
 ----------------------------------------
 
 class (Choice p, Strong p) => Visiting p where
   visit
     :: forall i s t a b
-    .  (forall f. Functor f => (forall r. r -> f r) -> (a -> f b) -> s -> f t)
-    -> p i a b -> p i s t
+    . (forall f. Functor f => (forall r. r -> f r) -> (a -> f b) -> s -> f t)
+    -> p i a b
+    -> p i s t
   visit f =
     let match :: s -> Either a t
         match s = f Right Left s
@@ -383,56 +453,29 @@ class (Choice p, Strong p) => Visiting p where
        . left'
   {-# INLINE visit #-}
 
-instance Functor f => Visiting (StarA f) where
-  visit f (StarA point k) = StarA point (f point k)
-  {-# INLINE visit #-}
+  ivisit
+    :: (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+  default ivisit
+    :: Coercible (p j s t) (p (i -> j) s t)
+    => (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+  ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
+  {-# INLINE ivisit #-}
 
-instance Applicative f => Visiting (Star f) where
-  visit f (Star k) = Star (f pure k)
-  {-# INLINE visit #-}
-
-instance Monoid r => Visiting (Forget r) where
-  visit f (Forget k) = Forget (getConst #. f pure (Const #. k))
-  {-# INLINE visit #-}
-
-instance Visiting (ForgetM r) where
-  visit f (ForgetM k) =
-    ForgetM (getConst #. f (\_ -> Const Nothing) (Const #. k))
-  {-# INLINE visit #-}
-
-instance Visiting FunArrow where
-  visit f (FunArrow k) = FunArrow $ runIdentity #. f pure (Identity #. k)
-  {-# INLINE visit #-}
-
-instance Applicative f => Visiting (IxStar f) where
-  visit f (IxStar k) = IxStar $ \i -> f pure (k i)
-  {-# INLINE visit #-}
-
-instance Monoid r => Visiting (IxForget r) where
-  visit f (IxForget k) = IxForget $ \i -> getConst #. f pure (Const #. k i)
-  {-# INLINE visit #-}
-
-instance Visiting IxFunArrow where
-  visit f (IxFunArrow k) =
-    IxFunArrow $ \i -> runIdentity #. f pure (Identity #. k i)
-  {-# INLINE visit #-}
-
-----------------------------------------
-
-class Visiting p => Traversing p where
-  wander
-    :: (forall f. Applicative f => (a -> f b) -> s -> f t)
-    -> p i a b -> p i s t
-  iwander
-    :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
-    -> p j a b -> p (i -> j) s t
-
-  -- TODO: move this to 'Profunctor' along with ixcontramap.
+  -- TODO: move this to 'Profunctor'
   conjoined
-    :: (forall j. p j a b -> p (     j) s t)
-    -> (forall j. p j a b -> p (i -> j) s t)
-    -> (forall j. p j a b -> p (i -> j) s t)
-  conjoined _ f = f
+    :: (p i a b -> p i s t)
+    -> (p i a b -> p j s t)
+    -> (p i a b -> p j s t)
+  default conjoined
+    :: Coercible (p i s t) (p j s t)
+    => (p i a b -> p i s t)
+    -> (p i a b -> p j s t)
+    -> (p i a b -> p j s t)
+  conjoined f _ = coerce . f
   {-# INLINE conjoined #-}
 
   -- TODO: move this to 'Profunctor'
@@ -445,38 +488,129 @@ class Visiting p => Traversing p where
   ixcontramap _ = coerce
   {-# INLINE ixcontramap #-}
 
+instance Functor f => Visiting (StarA f) where
+  visit  f (StarA point k) = StarA point $ f point k
+  ivisit f (StarA point k) = StarA point $ f point (\_ -> k)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+
+instance Applicative f => Visiting (Star f) where
+  visit  f (Star k) = Star $ f pure k
+  ivisit f (Star k) = Star $ f pure (\_ -> k)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+
+instance Monoid r => Visiting (Forget r) where
+  visit  f (Forget k) = Forget $ getConst #. f pure (Const #. k)
+  ivisit f (Forget k) = Forget $ getConst #. f pure (\_ -> Const #. k)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+
+instance Visiting (ForgetM r) where
+  visit  f (ForgetM k) =
+    ForgetM $ getConst #. f (\_ -> Const Nothing) (Const #. k)
+  ivisit f (ForgetM k) =
+    ForgetM $ getConst #. f (\_ -> Const Nothing) (\_ -> Const #. k)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+
+instance Visiting FunArrow where
+  visit  f (FunArrow k) = FunArrow $ runIdentity #. f pure (Identity #. k)
+  ivisit f (FunArrow k) = FunArrow $ runIdentity #. f pure (\_ -> Identity #. k)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+
+instance Functor f => Visiting (IxStarA f) where
+  visit  f (IxStarA point k) = IxStarA point $ \i  -> f point (k i)
+  ivisit f (IxStarA point k) = IxStarA point $ \ij -> f point $ \i -> k (ij i)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+  conjoined _ f = f
+  ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
+  {-# INLINE conjoined #-}
+  {-# INLINE ixcontramap #-}
+
+instance Applicative f => Visiting (IxStar f) where
+  visit  f (IxStar k) = IxStar $ \i  -> f pure (k i)
+  ivisit f (IxStar k) = IxStar $ \ij -> f pure $ \i -> k (ij i)
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+  conjoined _ f = f
+  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
+  {-# INLINE conjoined #-}
+  {-# INLINE ixcontramap #-}
+
+instance Monoid r => Visiting (IxForget r) where
+  visit  f (IxForget k) =
+    IxForget $ \i  -> getConst #. f pure (Const #. k i)
+  ivisit f (IxForget k) =
+    IxForget $ \ij -> getConst #. f pure (\i -> Const #. k (ij i))
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+  conjoined _ f = f
+  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
+  {-# INLINE conjoined #-}
+  {-# INLINE ixcontramap #-}
+
+instance Visiting (IxForgetM r) where
+  visit  f (IxForgetM k) =
+    IxForgetM $ \i  -> getConst #. f (\_ -> Const Nothing) (Const #. k i)
+  ivisit f (IxForgetM k) =
+    IxForgetM $ \ij -> getConst #. f (\_ -> Const Nothing) (\i -> Const #. k (ij i))
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+  conjoined _ f = f
+  ixcontramap ij (IxForgetM k) = IxForgetM $ \i -> k (ij i)
+  {-# INLINE conjoined #-}
+  {-# INLINE ixcontramap #-}
+
+instance Visiting IxFunArrow where
+  visit  f (IxFunArrow k) =
+    IxFunArrow $ \i  -> runIdentity #. f pure (Identity #. k i)
+  ivisit f (IxFunArrow k) =
+    IxFunArrow $ \ij -> runIdentity #. f pure (\i -> Identity #. k (ij i))
+  {-# INLINE visit #-}
+  {-# INLINE ivisit #-}
+  conjoined _ f = f
+  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
+  {-# INLINE conjoined #-}
+  {-# INLINE ixcontramap #-}
+
+----------------------------------------
+
+class Visiting p => Traversing p where
+  wander
+    :: (forall f. Applicative f => (a -> f b) -> s -> f t)
+    -> p i a b
+    -> p i s t
+  iwander
+    :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+
 instance Applicative f => Traversing (Star f) where
   wander  f (Star k) = Star $ f k
   iwander f (Star k) = Star $ f (\_ -> k)
-  conjoined f _ = coerce f
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
-  {-# INLINE conjoined #-}
 
 instance Monoid r => Traversing (Forget r) where
   wander  f (Forget k) = Forget $ getConst #. f (Const #. k)
   iwander f (Forget k) = Forget $ getConst #. f (\_ -> Const #. k)
-  conjoined f _ = coerce f
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
-  {-# INLINE conjoined #-}
 
 instance Traversing FunArrow where
   wander  f (FunArrow k) = FunArrow $ runIdentity #. f (Identity #. k)
   iwander f (FunArrow k) = FunArrow $ runIdentity #. f (\_ -> Identity #. k)
-  conjoined f _ = coerce f
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
-  {-# INLINE conjoined #-}
 
 instance Applicative f => Traversing (IxStar f) where
   wander  f (IxStar k) = IxStar $ \i -> f (k i)
   iwander f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
-
-  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
-  {-# INLINE ixcontramap #-}
 
 instance Monoid r => Traversing (IxForget r) where
   wander  f (IxForget k) =
@@ -486,9 +620,6 @@ instance Monoid r => Traversing (IxForget r) where
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
 
-  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
-  {-# INLINE ixcontramap #-}
-
 instance Traversing IxFunArrow where
   wander  f (IxFunArrow k) =
     IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
@@ -497,9 +628,6 @@ instance Traversing IxFunArrow where
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
 
-  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
-  {-# INLINE ixcontramap #-}
-
 ----------------------------------------
 
 class Traversing p => Mapping p where
@@ -507,7 +635,6 @@ class Traversing p => Mapping p where
     :: ((a -> b) -> s -> t)
     -> p i a b
     -> p i s t
-
   iroam
     :: ((i -> a -> b) -> s -> t)
     -> p       j  a b
