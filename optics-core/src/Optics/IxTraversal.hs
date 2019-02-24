@@ -6,7 +6,6 @@ module Optics.IxTraversal
   , TraversableWithIndex(..)
   , toIxTraversal
   , ixTraversalVL
-  , conjoinedTraversal
   , itraverseOf
   , iforOf
   , imapAccumLOf
@@ -68,23 +67,6 @@ ixTraversalVL
   -> IxTraversal i s t a b
 ixTraversalVL t = Optic (iwander t)
 {-# INLINE ixTraversalVL #-}
-
--- | Build an indexed traversal from the van Laarhoven representation of both
--- its unindexed and indexed version.
---
--- Appropriate version of the traversal will be automatically picked for maximum
--- efficiency depending on whether it is used as indexed or regular one.
---
--- @
--- 'traverseOf'  ('conjoinedTraversal' f g) ≡ 'traverseOf'  ('traversalVL' f)
--- 'itraverseOf' ('conjoinedTraversal' f g) ≡ 'itraverseOf' ('ixTraversalVL' g)
--- @
-conjoinedTraversal
-  :: (forall f. Applicative f => (     a -> f b) -> s -> f t)
-  -> (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
-  -> IxTraversal i s t a b
-conjoinedTraversal f g = Optic (conjoinedTraversal__ f g)
-{-# INLINE conjoinedTraversal #-}
 
 ----------------------------------------
 
@@ -212,9 +194,8 @@ ibackwards
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> IxTraversal i s t a b
-ibackwards o = conjoinedTraversal
-  (\f -> forwards #. traverseOf o (Backwards #. f))
-  (\f -> forwards #. itraverseOf o (\i -> Backwards #. f i))
+ibackwards o = Optic $ conjoined__ (backwards o) $ ixTraversalVL $ \f ->
+  forwards #. itraverseOf o (\i -> Backwards #. f i)
 {-# INLINE ibackwards #-}
 
 -- Traverse selected elements of a 'Traversal' where their ordinal positions

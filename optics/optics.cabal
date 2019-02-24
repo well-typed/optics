@@ -46,6 +46,8 @@ library
                     , Optics.Fold
                     , Optics.Getter
                     , Optics.Iso
+                    , Optics.IxAffineFold
+                    , Optics.IxAffineTraversal
                     , Optics.IxFold
                     , Optics.IxSetter
                     , Optics.IxTraversal

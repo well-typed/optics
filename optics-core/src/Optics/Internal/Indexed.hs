@@ -25,6 +25,7 @@ import qualified Data.IntMap as IntMap
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
+import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
@@ -127,6 +128,17 @@ indexing
 indexing l iafb s =
   snd $ runIndexing (l (\a -> Indexing (\i -> i `seq` (i + 1, iafb i a))) s) 0
 {-# INLINE indexing #-}
+
+----------------------------------------
+
+-- | Internal implementation of 'conjoined'.
+conjoined__
+  :: (Constraints k p, Visiting p, is `HasSingleIndex` i)
+  => Optic k NoIx s t a b
+  -> Optic k is   s t a b
+  -> Optic__ p j (i -> j) s t a b
+conjoined__ (Optic f) (Optic g) = conjoined' f g
+{-# INLINE conjoined__ #-}
 
 ----------------------------------------
 

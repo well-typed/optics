@@ -25,8 +25,8 @@ import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
 import Optics.Core
 import Optics.Extra.Internal.Vector
 import Optics.Internal.Fold
+import Optics.Internal.Indexed
 import Optics.Internal.IxFold
-import Optics.Internal.IxTraversal
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 
@@ -142,15 +142,14 @@ converted = iso convert convert
 -- Internal implementations
 
 vectorTraverse__
-  :: forall p j v w a b. (Traversing p, V.Vector v a, V.Vector w b)
+  :: (Traversing p, V.Vector v a, V.Vector w b)
   => Optic__ p j (Int -> j) (v a) (w b) a b
-vectorTraverse__ = conjoinedTraversal__ noix withix
+vectorTraverse__ = conjoined__ noix withix
   where
-    noix :: Applicative f => (a -> f b) -> v a -> f (w b)
-    noix f v = let !n = V.length v in V.fromListN n <$> traverse f (V.toList v)
-
-    withix :: Applicative f => (Int -> a -> f b) -> (v a) -> f (w b)
-    withix f v = let !n = V.length v in V.fromListN n <$> itraverse f (V.toList v)
+    noix = traversalVL $ \f v ->
+      let !n = V.length v in V.fromListN n <$> traverse f (V.toList v)
+    withix = ixTraversalVL $ \f v ->
+      let !n = V.length v in V.fromListN n <$> itraverse f (V.toList v)
 {-# INLINE [0] vectorTraverse__ #-}
 
 {-# RULES

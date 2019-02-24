@@ -43,6 +43,8 @@ library
     Optics.Getter
     Optics.Indexed.Core
     Optics.Iso
+    Optics.IxAffineTraversal
+    Optics.IxAffineFold
     Optics.IxFold
     Optics.IxSetter
     Optics.IxTraversal

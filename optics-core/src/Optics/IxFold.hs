@@ -5,7 +5,6 @@ module Optics.IxFold
   , IxFold
   , toIxFold
   , mkIxFold
-  , conjoinedFold
   , ifoldMapOf
   , ifoldrOf
   , ifoldlOf'
@@ -33,7 +32,6 @@ module Optics.IxFold
   ) where
 
 import Control.Applicative.Backwards
-import Data.Foldable
 import Data.Monoid
 
 import Optics.Internal.Bi
@@ -68,23 +66,6 @@ mkIxFold
   -> IxFold i s a
 mkIxFold f = Optic (mkIxFold__ f)
 {-# INLINE mkIxFold #-}
-
--- | Build an indexed fold from the van Laarhoven representation of both its
--- unindexed and indexed version.
---
--- Appropriate version of the fold will be automatically picked for maximum
--- efficiency depending on whether it is used as indexed or regular one.
---
--- @
--- 'traverseOf_'  ('conjoinedFold' f g) ≡ 'traverseOf_'  ('mkFold' f)
--- 'itraverseOf_' ('conjoinedFold' f g) ≡ 'itraverseOf_' ('mkIxFold' g)
--- @
-conjoinedFold
-  :: (forall f. Applicative f => (     a -> f u) -> s -> f v)
-  -> (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
-  -> IxFold i s a
-conjoinedFold f g = Optic (conjoinedFold__ f g)
-{-# INLINE conjoinedFold #-}
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
@@ -166,7 +147,7 @@ ifolded = Optic ifolded__
 -- >>> itoListOf (ifolding words) "how are you"
 -- [(0,"how"),(1,"are"),(2,"you")]
 ifolding :: FoldableWithIndex i f => (s -> f a) -> IxFold i s a
-ifolding f = Optic $ contrafirst f . conjoinedFold__ traverse_ itraverse_
+ifolding f = Optic $ contrafirst f . ifolded__
 {-# INLINE ifolding #-}
 
 -- | Obtain an 'IxFold' by lifting 'ifoldr' like function.
@@ -195,9 +176,8 @@ ibackwards_
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> IxFold i s a
-ibackwards_ o = conjoinedFold
-  (\f -> forwards #. traverseOf_  o (Backwards #. f))
-  (\f -> forwards #. itraverseOf_ o (\i -> Backwards #. f i))
+ibackwards_ o = Optic $ conjoined__ (backwards_ o) $ mkIxFold $ \f ->
+  forwards #. itraverseOf_ o (\i -> Backwards #. f i)
 {-# INLINE ibackwards_ #-}
 
 -- | Return entries of the first 'IxFold', then the second one.
@@ -207,35 +187,22 @@ isumming
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-isumming a b = conjoinedFold
-  (\f s ->  traverseOf_ a f s *>  traverseOf_ b f s)
-  (\f s -> itraverseOf_ a f s *> itraverseOf_ b f s)
+isumming a b = Optic $ conjoined__ (summing a b) $ mkIxFold $ \f s ->
+  itraverseOf_ a f s *> itraverseOf_ b f s
 infixr 6 `isumming` -- Same as (<>)
 {-# INLINE isumming #-}
 
 -- | Try the first 'IxFold'. If it returns no entries, try the second one.
 ifailing
-  :: forall k l is1 is2 i s a
-  .  (Is k A_Fold, Is l A_Fold,
-      is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
+  :: (Is k A_Fold, Is l A_Fold, is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-ifailing a b = conjoinedFold noix withix
-  where
-    noix :: Applicative f => (a -> f r) -> s -> f ()
-    noix f s =
-      let OrT visited fu = traverseOf_ a (wrapOrT . f) s
-      in if visited
-         then fu
-         else traverseOf_ b f s
-
-    withix :: Applicative f => (i -> a -> f r) -> s -> f ()
-    withix f s =
-      let OrT visited fu = itraverseOf_ a (\i -> wrapOrT . f i) s
-      in if visited
-         then fu
-         else itraverseOf_ b f s
+ifailing a b = Optic $ conjoined__ (failing a b) $ mkIxFold $ \f s ->
+  let OrT visited fu = itraverseOf_ a (\i -> wrapOrT . f i) s
+  in if visited
+     then fu
+     else itraverseOf_ b f s
 infixl 3 `ifailing` -- Same as (<|>)
 {-# INLINE ifailing #-}
 
@@ -247,7 +214,7 @@ infixl 3 `ifailing` -- Same as (<|>)
 -- >>> iheadOf ifolded [1..10]
 -- Just (0,1)
 iheadOf
-  ::( Is k A_Fold, is `HasSingleIndex` i)
+  :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a -> s -> Maybe (i, a)
 iheadOf o = getLeftmost . ifoldMapOf o (\i -> LLeaf . (i, ))
 {-# INLINE iheadOf #-}
