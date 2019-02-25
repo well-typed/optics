@@ -7,42 +7,102 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Optics.Tests.Labels where
 
 import Data.Ord
 import Data.Word
 import Control.Monad.Reader
 import Control.Monad.State
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Inspection
 import qualified System.Random as R
 
 import Optics
 import Optics.Operators
+import Optics.Tests.Utils
 import Optics.TH
 
+labelsTests :: TestTree
+labelsTests = testGroup "Labels"
+  [
+    testCase "view #name s = humanName s" $
+    assertSuccess $(inspectTest $ 'label1lhs ==- 'label1rhs)
+  , testCase "set #pets s b = s { humanPets = b }" $
+    assertSuccess $(inspectTest $ 'label2lhs ==- 'label2rhs)
+  , testCase "view (#fish % #name) s = fishName (humanFish s)" $
+    assertSuccess $(inspectTest $ 'label3lhs ==- 'label3rhs)
+  , testCase "set (#fish % #name) b s = s { humanFish = ... }" $
+    assertSuccess $(inspectTest $ 'label4lhs ==- 'label4rhs)
+  , testCase "multiple set with labels = multiple set with record syntax" $
+    assertSuccess $(inspectTest $ 'label5lhs ==- 'label5rhs)
+  ]
+
+label1lhs, label1rhs :: Human a -> String
+label1lhs s = view #name s
+label1rhs s = humanName s
+
+label2lhs, label2rhs :: Human a -> [b] -> Human b
+label2lhs s b = set #pets b s
+label2rhs s b = s { humanPets = b }
+
+label3lhs, label3rhs :: Human a -> String
+label3lhs s = view (#fish % #name) s
+label3rhs s = fishName (humanFish s)
+
+label4lhs, label4rhs :: Human a -> String -> Human a
+label4lhs s b = set (#fish % #name) b s
+label4rhs s b = s { humanFish = (humanFish s) { fishName = b } }
+
+label5lhs, label5rhs :: Human a -> String -> Int -> String -> [b] -> Human b
+label5lhs s name_ age_ fishName_ pets_ = s
+  & #name         .~ name_
+  & #age          .~ age_
+  & #fish % #name .~ fishName_
+  & #pets         .~ pets_
+label5rhs s name_ age_ fishName_ pets_ = s
+  { humanName = name_
+  , humanAge  = age_
+  , humanFish = (humanFish s) { fishName = fishName_ }
+  , humanPets = pets_
+  }
+
 ----------------------------------------
--- Basic data manipulation
+-- Data definitions
 
 data Mammal
   = Dog { mammalName :: String, mammalAge :: Int }
   | Cat { mammalName :: String, mammalAge :: Int, mammalLazy :: Bool }
   deriving Show
-makeFieldLabels ''Mammal
-makePrismLabels ''Mammal
 
-data Fish = GoldFish | Herring
+data Fish = GoldFish { fishName :: String } | Herring { fishName :: String }
   deriving Show
-makePrismLabels ''Fish
 
-data Human a = Human { humanName :: String, humanAge :: Int, humanPets :: [a] }
+data Human a = Human
+  { humanName :: String
+  , humanAge :: Int
+  , humanFish :: Fish
+  , humanPets :: [a]
+  }
   deriving Show
-makeFieldLabels ''Human
 
 human :: Human Mammal
 human = Human
   { humanName = "Andrzej"
   , humanAge = 30
-  , humanPets = [Dog "Rocky" 3, Cat "Pickle" 4 True, Cat "Max" 1 False ]
+  , humanFish = GoldFish "Goldie"
+  , humanPets = [Dog "Rocky" 3, Cat "Pickle" 4 True, Cat "Max" 1 False]
   }
+
+makeFieldLabels ''Mammal
+makePrismLabels ''Mammal
+makeFieldLabels ''Fish
+makePrismLabels ''Fish
+makeFieldLabels ''Human
+
+----------------------------------------
+-- Basic data manipulation
 
 petNames :: [String]
 petNames = toListOf (#pets % folded % #name) human
@@ -53,7 +113,7 @@ otherHuman = human & set #name "Peter"
                    & set #age  41
 
 humanWithFish :: Human Fish
-humanWithFish = set #pets [GoldFish, GoldFish, Herring] human
+humanWithFish = set #pets [GoldFish "Goldie", GoldFish "Slick", Herring "See"] human
 
 howManyGoldFish :: Int
 howManyGoldFish = lengthOf (#pets % folded % #_GoldFish) humanWithFish

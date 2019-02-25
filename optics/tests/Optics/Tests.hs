@@ -8,7 +8,7 @@ import Optics
 import Optics.Tests.Computation
 import Optics.Tests.Core
 import Optics.Tests.Eta
-import Optics.Tests.Labels ()
+import Optics.Tests.Labels
 import Optics.Tests.Misc
 
 -- | Composing a lens and a traversal yields a traversal
@@ -44,6 +44,7 @@ main = defaultMain $ testGroup "Tests"
   [ testGroup "Inspection"
     [ coreTests
     , etaTests
+    , labelsTests
     , miscTests
     ]
   , computationTests
