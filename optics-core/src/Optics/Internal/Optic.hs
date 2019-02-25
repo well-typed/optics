@@ -259,6 +259,23 @@ class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t a -> s where
   labelOptic :: Optic k NoIx s t a b
 
+-- | If no instance matches, GHC tends to bury error messages "No instance for
+-- LabelOptic..." within a ton of other error messages about ambiguous type
+-- variables and overlapping instances which are irrelevant and confusing. Use
+-- overlappable instance providing a custom type error to cut its efforts short.
+instance {-# OVERLAPPABLE #-}
+  (LabelOptic name k s t a b,
+   TypeError
+   ('Text "No instance for LabelOptic " ':<>: 'ShowType name
+    ':<>: 'Text " " ':<>: QuoteType k
+    ':<>: 'Text " " ':<>: QuoteType s
+    ':<>: 'Text " " ':<>: QuoteType t
+    ':<>: 'Text " " ':<>: QuoteType a
+    ':<>: 'Text " " ':<>: QuoteType b
+    ':$$: 'Text "  (maybe you forgot to define it or misspelled a name?)")
+  ) => LabelOptic name k s t a b where
+  labelOptic = error "unreachable"
+
 -- | Type synonym for a type-preserving optic as overloaded label.
 type LabelOptic' name k s a = LabelOptic name k s s a a
 

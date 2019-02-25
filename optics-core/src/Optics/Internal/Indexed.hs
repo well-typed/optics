@@ -101,9 +101,6 @@ type family ShowTypes (types :: [*]) :: ErrorMessage where
   ShowTypes '[i, j]   = QuoteType i ':<>: 'Text " and " ':<>: QuoteType j
   ShowTypes (i ': is) = QuoteType i ':<>: 'Text ", " ':<>: ShowTypes is
 
-type family QuoteType (x :: *) :: ErrorMessage where
-  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
-
 ----------------------------------------
 
 newtype Indexing f a = Indexing { runIndexing :: Int -> (Int, f a) }
