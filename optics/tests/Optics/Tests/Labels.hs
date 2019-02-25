@@ -137,7 +137,9 @@ luckyDog = human & set (#pets % mapped % #_Dog % _1) "Lucky"
 type HasConfig k s = (LabelOptic' "config" k s Config, Is k A_Getter)
 
 data Config = Config
-instance LabelOptic "config" An_Equality Config Config Config Config where
+instance
+  (a ~ Config, b ~ Config
+  ) => LabelOptic "config" An_Equality Config Config a b where
   labelOptic = equality
 
 data Env = Env { envConfig :: Config, envRng :: R.StdGen }
@@ -146,7 +148,9 @@ makeFieldLabels ''Env
 data Nested = Nested { nestedName :: String, nestedEnv :: Env }
 makeFieldLabels ''Nested
 
-instance LabelOptic "config" A_Lens Nested Nested Config Config where
+instance
+  (a ~ Config, b ~ Config
+  ) => LabelOptic "config" A_Lens Nested Nested a b where
   labelOptic = #env % #config
 
 doStuff :: (MonadReader r m, HasConfig k r) => m ()
