@@ -29,7 +29,6 @@ import Data.Maybe.Optics
 import Optics.AffineTraversal
 import Optics.Lens
 import Optics.Setter
-import Optics.Operators ((<&>))
 
 type family Index (s :: *) :: *
 type instance Index (e -> a) = e

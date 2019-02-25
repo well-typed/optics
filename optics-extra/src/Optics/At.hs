@@ -29,7 +29,6 @@ import Data.Vector.Unboxed as Unboxed hiding (indexed)
 import Data.Word
 
 import Optics.Core
-import Optics.Operators ((<&>))
 
 type instance Index (HashSet a) = a
 type instance Index (HashMap k a) = k
