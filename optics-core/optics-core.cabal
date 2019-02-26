@@ -77,7 +77,6 @@ library
     Optics.Internal.Optic.TypeLevel
     Optics.Internal.Optic.Types
     Optics.Internal.Profunctor
-    Optics.Internal.Re
     Optics.Internal.Setter
     Optics.Internal.Tagged
     Optics.Internal.Traversal
