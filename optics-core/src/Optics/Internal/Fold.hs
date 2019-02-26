@@ -63,9 +63,14 @@ instance Monoid (Leftmost a) where
 -- | Extract the 'Leftmost' element. This will fairly eagerly determine that it
 -- can return 'Just' the moment it sees any element at all.
 getLeftmost :: Leftmost a -> Maybe a
-getLeftmost LPure = Nothing
+getLeftmost LPure     = Nothing
 getLeftmost (LLeaf a) = Just a
-getLeftmost (LStep x) = getLeftmost x
+getLeftmost (LStep x) = go x
+  where
+    -- Make getLeftmost non-recursive so it might be inlined for LPure/LLeaf.
+    go LPure     = Nothing
+    go (LLeaf a) = Just a
+    go (LStep a) = go a
 
 -- | Used for 'Optics.Fold.lastOf' and 'Optics.IxFold.ilastOf'.
 data Rightmost a = RPure | RLeaf a | RStep (Rightmost a)
@@ -92,6 +97,11 @@ instance Monoid (Rightmost a) where
 -- | Extract the 'Rightmost' element. This will fairly eagerly determine that it
 -- can return 'Just' the moment it sees any element at all.
 getRightmost :: Rightmost a -> Maybe a
-getRightmost RPure = Nothing
+getRightmost RPure     = Nothing
 getRightmost (RLeaf a) = Just a
-getRightmost (RStep x) = getRightmost x
+getRightmost (RStep x) = go x
+  where
+    -- Make getRightmost non-recursive so it might be inlined for RPure/RLeaf.
+    go RPure     = Nothing
+    go (RLeaf a) = Just a
+    go (RStep a) = go a
