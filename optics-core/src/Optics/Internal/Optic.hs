@@ -253,6 +253,82 @@ instance
 -- >>> peter & set #pets []
 -- Human {humanName = "Peter", humanAge = 13, humanPets = []}
 --
+-- /Note:/ You might wonder why instances above are written in form
+--
+-- @
+-- instance (a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" A_Lens Human Human a b where
+-- @
+--
+-- instead of
+--
+-- @
+-- instance LabelOptic "pets" A_Lens Human Human [Pet] [Pet] where
+-- @
+--
+-- The reason is that using the first form ensures that GHC always matches on
+-- the instance if either @s@ or @t@ is known and verifies type equalities
+-- later, which not only makes type inference better, but also allows it to
+-- generate good error messages.
+--
+-- For example, if you try to write @peter & set #pets []@ with the appropriate
+-- LabelOptic instance in the second form, you get the following:
+--
+-- @
+-- <interactive>:16:1: error:
+--    • No instance for LabelOptic "pets" ‘A_Lens’ ‘Human’ ‘()’ ‘[Pet]’ ‘[a0]’
+--        (maybe you forgot to define it or misspelled a name?)
+--    • In the first argument of ‘print’, namely ‘it’
+--      In a stmt of an interactive GHCi command: print it
+-- @
+--
+-- That's because empty list doesn't have type @[Pet]@, it has type @[r]@ and
+-- GHC doesn't have enough information to match on the instance we
+-- provided. We'd need to either annotate the list: @peter & set #pets
+-- ([]::[Pet])@ or the result type: @peter & set #pets [] :: Human@, which is
+-- suboptimal.
+--
+-- Here are more examples of confusing error messages if the instance for
+-- @LabelOptic "age"@ is written without type equalities:
+--
+-- @
+-- >>> view #age peter :: Char
+--
+-- <interactive>:28:6: error:
+--     • No instance for LabelOptic "age" ‘k0’ ‘Human’ ‘Human’ ‘Char’ ‘Char’
+--         (maybe you forgot to define it or misspelled a name?)
+--     • In the first argument of ‘view’, namely ‘#age’
+--       In the expression: view #age peter :: Char
+--       In an equation for ‘it’: it = view #age peter :: Char
+-- >>> peter & set #age "hi"
+--
+-- <interactive>:29:1: error:
+--     • No instance for LabelOptic "age" ‘k’ ‘Human’ ‘b’ ‘a’ ‘[Char]’
+--         (maybe you forgot to define it or misspelled a name?)
+--     • When checking the inferred type
+--         it :: forall k b a. ((TypeError ...), Is k A_Setter) => b
+-- @
+--
+-- If we use the first form, error messages become more accurate:
+--
+-- @
+-- >>> view #age peter :: Char
+--
+-- <interactive>:31:6: error:
+--     • Couldn't match type ‘Char’ with ‘Integer’
+--         arising from the overloaded label ‘#age’
+--     • In the first argument of ‘view’, namely ‘#age’
+--       In the expression: view #age peter :: Char
+--       In an equation for ‘it’: it = view #age peter :: Char
+-- >>> peter & set #age "hi"
+--
+-- <interactive>:32:13: error:
+--     • Couldn't match type ‘[Char]’ with ‘Integer’
+--         arising from the overloaded label ‘#age’
+--     • In the first argument of ‘set’, namely ‘#age’
+--       In the second argument of ‘(&)’, namely ‘set #age "hi"’
+--       In the expression: peter & set #age "hi"
+-- @
+--
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b
                                             , name s b -> t
