@@ -81,6 +81,7 @@ module Optics.Lens
   , withLensVL
 
   -- * Lenses
+  , chosen
   , devoid
   , united
 
@@ -156,6 +157,11 @@ withLensVL o k = k (toLensVL o)
 
 ----------------------------------------
 -- Lenses
+
+-- | Focus on both sides of an 'Either'.
+chosen :: Lens (Either a a) (Either b b) a b
+chosen = lensVL $ \f -> either (fmap Left . f) (fmap Right . f)
+{-# INLINE chosen #-}
 
 -- | There is a field for every type in the 'Void'.
 --
