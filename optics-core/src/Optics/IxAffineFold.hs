@@ -1,6 +1,7 @@
 module Optics.IxAffineFold
   ( An_AffineFold
   , IxAffineFold
+  , toIxAffineFold
   , ipreview
   , ipreviews
   , iafolding

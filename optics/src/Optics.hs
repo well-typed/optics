@@ -59,7 +59,7 @@ module Optics
   --     data A_Lens
   --
   --     -- Type synonym for a type-modifying lens.
-  --     type 'Lens' s t a b = 'Optic' 'A_Lens' i i s t a b
+  --     type 'Lens' s t a b = 'Optic' 'A_Lens' NoIx s t a b
   --     @
   --
   -- * In the __introduction__ sections are described the ways to construct
@@ -67,7 +67,7 @@ module Optics
   --
   --     @
   --     -- Build a lens from a getter and a setter.
-  --     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' i s t a b
+  --     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' s t a b
   --     @
   --
   -- * In the __elimination__ sections are shown how you can destruct the
@@ -76,9 +76,9 @@ module Optics
   --     @
   --     -- 'Lens' is a 'Setter' and a 'Getter', therefore you can
   --
-  --     'view' :: 'Lens' i s t a b -> s -> a
-  --     'set'  :: 'Lens' i s t a b -> b -> s -> t
-  --     'over' :: 'Lens' i s t a b -> (a -> b) -> s -> t
+  --     'view' :: 'Lens' s t a b -> s -> a
+  --     'set'  :: 'Lens' s t a b -> b -> s -> t
+  --     'over' :: 'Lens' s t a b -> (a -> b) -> s -> t
   --     @
   --
   -- * __Computation__ rules tie introduction and
@@ -100,7 +100,7 @@ module Optics
   -- /Note:/ you should also consult the optics hierarchy diagram.
   -- Neither introduction or elimination sections list all ways to construct or use
   -- particular optic kind.
-  -- For example you can construct 'Lens' from 'Iso' using 'sub'.
+  -- For example you can construct 'Lens' from 'Iso' using 'castOptic'.
   -- Also, as a 'Lens' is also a 'Traversal', a 'Fold' etc, so you can use 'traverseOf', 'preview'
   -- and many other combinators.
   --
@@ -111,8 +111,8 @@ module Optics
   -- ** Re
 
   -- | Some optics can be reversed with 're':
-  -- @'Iso' i s t a b@ into @'Iso' i b a t s@,
-  -- @'Getter' s t a b@ into @'Review' i b a t s@ etc.
+  -- @'Iso' s t a b@ into @'Iso' b a t s@,
+  -- @'Getter' s t a b@ into @'Review' b a t s@ etc.
   -- Red arrows illustrate how 're' transforms optics:
   --
   -- <<reoptics.png Reversed Optics>>
@@ -203,8 +203,6 @@ module Optics
   --
   -- /TODO:/ write about 'icompose' and multiple indices.
   --
-  -- There are yet no @IxAffineFold@, @IxAffineTraversal@ etc, but they can be added.
-  --
   , module Optics.Indexed
 
   -- * At
@@ -231,8 +229,11 @@ module Optics
   -- * Zoom
   , module Optics.Zoom
 
-  -- ** OverloadedLabels 
+  -- ** OverloadedLabels
   , module Optics.Labels
+
+  -- * Generation of optics with Template Haskell
+  , module Optics.TH
 
   -- * Optics for concrete base types
   , module P
@@ -274,6 +275,9 @@ import Optics.Labels
 import Optics.Re
 import Optics.View
 import Optics.Zoom
+
+-- Template Haskell support
+import Optics.TH
 
 -- Optics for concrete base types
 
@@ -329,8 +333,7 @@ import Data.Either.Optics                    as P
 --     ...A_Setter cannot be composed with A_Getter
 --     ...
 --
--- * 'Optic' is a @Rank1Type@ (not really before #41), so there are no
---     need for @ALens@ etc.
+-- * 'Optic' is a rank 1 type, so there is no need for @ALens@ etc.
 -- * Types that say what they mean
 -- * More comprehensible type errors
 -- * Less vulnerable to the monomorphism restriction
@@ -349,17 +352,17 @@ import Data.Either.Optics                    as P
 -- * 'preview' is for affine folds
 -- * 'foldOf' is the equivalent of view for folds
 -- * 'firstOf' is now 'headOf'
--- * Position lenses up to _9 instead of _19 are provided
+-- * Position lenses up to '_9' instead of _19 are provided
 -- * 'Each' provides indexed traversals
 -- * There are four variants of 'backwards' for (indexed) folds and traversals
 -- * None of operators is exported from main module
 -- * All ordinary optics are index-preserving by default
 -- * Indexed optics interface is different (let's expand in own section, when the implementation is stabilised)
--- * There are no @Traversal1@
--- * There is 'AffineTraversal'
+-- * There is no @IndexedLens@, @IndexedGetter@, @Traversal1@ nor @Fold1@.
+-- * There is 'AffineTraversal', 'AffineFold', 'IxAffineTraversal' and 'IxAffineFold'
 -- * We can't use 'traverse' as an optic directly, but there is a 'Traversal' called 'traversed'.
 -- * 'gview' is compatible with @lens@, but it uses a type class which chooses between
---   'view', 'preview' and 'foldOf' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'gview' at all, and what '^.' should be)
+--   'view', 'preview' and 'foldOf' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'gview' at all, and what 'Optics.Operators.^.' should be)
 
 -- * There are no 'from', only 're' (Should there be a 'from' restricted to 'Iso' or an alias to 're'? <https://github.com/well-typed/optics/pull/43#discussion_r247121380>)
 --
