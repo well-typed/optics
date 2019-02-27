@@ -31,6 +31,9 @@ import Optics.Extra.Internal.ByteString
 
 -- | @'each' :: 'IxTraversal' k ('HashMap' k a) ('HashMap' k b) a b@
 instance k ~ k' => Each k (HashMap k a) (HashMap k' b) a b where
+  -- traverseWithKey has best performance for all flavours for some reason.
+  each = ixTraversalVL HashMap.traverseWithKey
+  {-# INLINE each #-}
 
 -- | @'each' :: 'IxTraversal' Int ('V.Vector' a) ('V.Vector' b) a b@
 instance Each Int (V.Vector a) (V.Vector b) a b where
@@ -67,7 +70,7 @@ instance (a ~ Char, b ~ Char) => Each Int LT.Text LT.Text a b where
 
 -- | @'each' :: 'IxTraversal' 'Int' 'SB.ByteString' 'SB.ByteString' 'Word8'
 -- 'Word8'@
-instance (a ~ Word8, b ~ Word8) => Each Int SB.ByteString SB.ByteString a b where
+instance (a ~ Word8, b ~ Word8) => Each Int64 SB.ByteString SB.ByteString a b where
   each = traversedStrictTree
   {-# INLINE each #-}
 

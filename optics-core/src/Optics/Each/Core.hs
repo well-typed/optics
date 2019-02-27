@@ -139,10 +139,16 @@ instance Each (Either () ()) (Complex a) (Complex b) a b where
   {-# INLINE each #-}
 
 -- | @'each' :: 'IxTraversal' k ('Map' k a) ('Map' k b) a b@
-instance k ~ k' => Each k (Map k a) (Map k' b) a b
+instance k ~ k' => Each k (Map k a) (Map k' b) a b where
+  -- traverseWithKey has best performance for all flavours for some reason.
+  each = ixTraversalVL Map.traverseWithKey
+  {-# INLINE each #-}
 
 -- | @'each' :: 'IxTraversal' 'Int' ('IntMap' a) ('IntMap' b) a b@
-instance Each Int (IntMap a) (IntMap b) a b
+instance Each Int (IntMap a) (IntMap b) a b where
+  -- traverseWithKey has best performance for all flavours for some reason.
+  each = ixTraversalVL IntMap.traverseWithKey
+  {-# INLINE each #-}
 
 -- | @'each' :: 'IxTraversal' 'Int' [a] [b] a b@
 instance Each Int [a] [b] a b

@@ -39,7 +39,10 @@ library
   -- main module to land with repl
   exposed-modules:    Optics
 
-  -- optics-core optics
+  -- main optic type
+  reexported-modules: Optics.Optic
+
+  -- optic flavours
   reexported-modules: Optics.AffineFold
                     , Optics.AffineTraversal
                     , Optics.Equality
@@ -53,41 +56,52 @@ library
                     , Optics.IxTraversal
                     , Optics.Lens
                     , Optics.LensyReview
-                    , Optics.Optic
                     , Optics.Prism
                     , Optics.PrismaticGetter
-                    , Optics.Re
+
                     , Optics.Review
                     , Optics.Setter
                     , Optics.Traversal
 
-  -- optics-core goodies
-  reexported-modules: Data.Either.Optics
-                    , Data.Maybe.Optics
-                    , Data.Tuple.Optics
-                    , Optics.Indexed
-                    , Optics.Arrow
-                    , Optics.Operators
-                    , Optics.Passthrough
-                    , Optics.View
-
-  -- optics-extra
-  reexported-modules: Optics.At
+  -- optics utilities
+  reexported-modules: Optics.Arrow
+                    , Optics.At
+                    , Optics.Coerce
                     , Optics.Cons
                     , Optics.Each
                     , Optics.Empty
+                    , Optics.Indexed
+                    , Optics.Operators
                     , Optics.Operators.State
+                    , Optics.Passthrough
+                    , Optics.Re
+                    , Optics.View
+                    , Optics.Zoom
+
+  -- template haskell support
+  reexported-modules: Optics.TH
+
+  -- data specific optics
+  reexported-modules: Data.ByteString.Lazy.Optics
+                    , Data.ByteString.Optics
+                    , Data.ByteString.Strict.Optics
+                    , Data.Either.Optics
+                    , Data.Maybe.Optics
                     , Data.Set.Optics
+                    , Data.Text.Lazy.Optics
+                    , Data.Text.Optics
+                    , Data.Text.Strict.Optics
+                    , Data.Tuple.Optics
+                    , Data.Vector.Generic.Optics
+                    , Data.Vector.Optics
                     , GHC.Generics.Optics
+                    , Generics.SOP.Optics
+                    , Language.Haskell.TH.Optics
 
   -- optics-sop
-  reexported-modules: Generics.SOP.Optics
-                    , Optics.SOP.ToTuple
+  reexported-modules: Optics.SOP.ToTuple
                     , Optics.SOP
 
-  -- optics-th
-  reexported-modules: Language.Haskell.TH.Optics
-                    , Optics.TH
 
 test-suite optics-tests
   default-language: Haskell2010
@@ -95,6 +109,7 @@ test-suite optics-tests
   ghc-options:      -Wall
 
   build-depends: base
+               , bytestring
                , containers
                , inspection-testing  >=0.4.1.1 && <0.5
                , optics-core
@@ -111,3 +126,34 @@ test-suite optics-tests
                  Optics.Tests.Eta
                  Optics.Tests.Misc
                  Optics.Tests.Utils
+
+-- Benchmarking folds
+benchmark folds
+  type:             exitcode-stdio-1.0
+  main-is:          folds.hs
+  ghc-options:      -Wall -threaded
+  hs-source-dirs:   benchmarks
+  default-language: Haskell2010
+  build-depends: base
+               , bytestring
+               , containers
+               , criterion
+               , optics
+               , unordered-containers
+               , vector
+
+-- Benchmarking traversals
+benchmark traversals
+  type:             exitcode-stdio-1.0
+  main-is:          traversals.hs
+  ghc-options:      -Wall -threaded
+  hs-source-dirs:   benchmarks
+  default-language: Haskell2010
+  build-depends: base
+               , bytestring
+               , containers
+               , criterion
+               , optics
+               , transformers
+               , unordered-containers
+               , vector

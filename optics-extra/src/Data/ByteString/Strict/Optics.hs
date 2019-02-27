@@ -9,6 +9,7 @@ module Data.ByteString.Strict.Optics
 
 import Data.ByteString       as Words
 import Data.ByteString.Char8 as Char8
+import Data.Int
 import Data.Word
 
 import Optics.Core
@@ -64,7 +65,7 @@ unpackedBytes = re packedBytes
 --
 -- Note that when just using this as a 'Setter', @'sets' 'Data.ByteString.map'@
 -- can be more efficient.
-bytes :: IxTraversal' Int ByteString Word8
+bytes :: IxTraversal' Int64 ByteString Word8
 bytes = traversedStrictTree
 {-# INLINE bytes #-}
 
@@ -120,7 +121,7 @@ unpackedChars = re packedChars
 --
 -- >>> anyOf chars (== 'h') "hello"
 -- True
-chars :: IxTraversal' Int ByteString Char
+chars :: IxTraversal' Int64 ByteString Char
 chars = traversedStrictTree8
 {-# INLINE chars #-}
 

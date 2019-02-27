@@ -35,14 +35,14 @@ import Optics.Internal.Profunctor
 
 -- | Traverse a strict 'B.ByteString' in a relatively balanced fashion, as a
 -- balanced tree with biased runs of elements at the leaves.
-traversedStrictTree :: IxTraversal' Int B.ByteString Word8
+traversedStrictTree :: IxTraversal' Int64 B.ByteString Word8
 traversedStrictTree = Optic traversedStrictTree__
 {-# INLINE traversedStrictTree #-}
 
 -- | Traverse a strict 'B.ByteString' in a relatively balanced fashion, as a
 -- balanced tree with biased runs of elements at the leaves, pretending the
 -- bytes are chars.
-traversedStrictTree8 :: IxTraversal' Int B8.ByteString Char
+traversedStrictTree8 :: IxTraversal' Int64 B8.ByteString Char
 traversedStrictTree8 = Optic traversedStrictTree8__
 {-# INLINE traversedStrictTree8 #-}
 
@@ -60,28 +60,29 @@ traversedLazy8 = Optic traversedLazy8__
 ----------------------------------------
 -- Internal implementations
 
-grain :: Int
+grain :: Int64
 grain = 32
 {-# INLINE grain #-}
 
 -- | Internal version of 'traversedStrictTree'.
 traversedStrictTree__
   :: Traversing p
-  => Optic__ p j (Int -> j) B.ByteString B.ByteString Word8 Word8
+  => Optic__ p j (Int64 -> j) B.ByteString B.ByteString Word8 Word8
 traversedStrictTree__ = iwander $ \f bs ->
   let len = B.length bs
       go !i !j
         | i + grain < j, k <- i + shiftR (j - i) 1 =
             (\l r q -> l q >> r q) <$> go i k <*> go k j
         | otherwise = run i j
-      run !i !j
+      run !(i::Int64) !(j::Int64)
         | i == j    = pure (\_ -> return ())
         | otherwise =
-          let !x = BU.unsafeIndex bs i
-          in (\y ys q -> pokeByteOff q i y >> ys q)
+          let !i' = fromIntegral i
+              !x  = BU.unsafeIndex bs i'
+          in (\y ys q -> pokeByteOff q i' y >> ys q)
                <$> f i x
                <*> run (i + 1) j
-  in unsafeCreate len <$> go 0 len
+  in unsafeCreate len <$> go 0 (fromIntegral len)
 {-# INLINE [0] traversedStrictTree__ #-}
 
 {-# RULES
@@ -89,31 +90,31 @@ traversedStrictTree__ = iwander $ \f bs ->
 "bytes -> map"
   forall (o :: FunArrow j Word8 Word8). traversedStrictTree__ o
                                       = roam B.map (reFunArrow o)
-    :: FunArrow (Int -> j) B.ByteString B.ByteString
+    :: FunArrow (Int64 -> j) B.ByteString B.ByteString
 
 "bytes -> imap"
   forall (o :: IxFunArrow j Word8 Word8). traversedStrictTree__ o = iroam imapB o
-    :: IxFunArrow (Int -> j) B.ByteString B.ByteString
+    :: IxFunArrow (Int64 -> j) B.ByteString B.ByteString
 
 "bytes -> foldr"
   forall (o :: Forget r j Word8 Word8). traversedStrictTree__ o
                                       = foldring__ B.foldr (reForget o)
-    :: Forget r (Int -> j) B.ByteString B.ByteString
+    :: Forget r (Int64 -> j) B.ByteString B.ByteString
 
 "bytes -> ifoldr"
   forall (o :: IxForget r j Word8 Word8). traversedStrictTree__ o
                                         = ifoldring__ ifoldrB o
-    :: IxForget r (Int -> j) B.ByteString B.ByteString
+    :: IxForget r (Int64 -> j) B.ByteString B.ByteString
 
 #-}
 
 -- | Indexed setter for 'traversedStrictTree__'.
-imapB :: (Int -> Word8 -> Word8) -> B.ByteString -> B.ByteString
+imapB :: (Int64 -> Word8 -> Word8) -> B.ByteString -> B.ByteString
 imapB f = snd . B.mapAccumL (\i a -> i `seq` (i + 1, f i a)) 0
 {-# INLINE imapB #-}
 
 -- | Indexed fold for 'traversedStrictTree__'.
-ifoldrB :: (Int -> Word8 -> a -> a) -> a -> B.ByteString -> a
+ifoldrB :: (Int64 -> Word8 -> a -> a) -> a -> B.ByteString -> a
 ifoldrB f z xs = B.foldr (\x g i -> i `seq` f i x (g (i + 1))) (const z) xs 0
 {-# INLINE ifoldrB #-}
 
@@ -122,21 +123,22 @@ ifoldrB f z xs = B.foldr (\x g i -> i `seq` f i x (g (i + 1))) (const z) xs 0
 -- | Internal version of 'traversedStrictTree8'.
 traversedStrictTree8__
   :: Traversing p
-  => Optic__ p j (Int -> j) B8.ByteString B8.ByteString Char Char
+  => Optic__ p j (Int64 -> j) B8.ByteString B8.ByteString Char Char
 traversedStrictTree8__ = iwander $ \f bs ->
   let len = B.length bs
       go !i !j
         | i + grain < j, k <- i + shiftR (j - i) 1 =
             (\l r q -> l q >> r q) <$> go i k <*> go k j
         | otherwise = run i j
-      run !i !j
+      run !(i::Int64) !(j::Int64)
         | i == j    = pure (\_ -> return ())
         | otherwise =
-          let !x = BU.unsafeIndex bs i
-          in (\y ys q -> pokeByteOff q i (c2w y) >> ys q)
+          let !i' = fromIntegral i
+              !x  = BU.unsafeIndex bs i'
+          in (\y ys q -> pokeByteOff q i' (c2w y) >> ys q)
                <$> f i (w2c x)
                <*> run (i + 1) j
-  in unsafeCreate len <$> go 0 len
+  in unsafeCreate len <$> go 0 (fromIntegral len)
 {-# INLINE [0] traversedStrictTree8__ #-}
 
 {-# RULES
@@ -144,31 +146,31 @@ traversedStrictTree8__ = iwander $ \f bs ->
 "chars -> map"
   forall (o :: FunArrow j Char Char). traversedStrictTree8__ o
                                     = roam B8.map (reFunArrow o)
-    :: FunArrow (Int -> j) B8.ByteString B8.ByteString
+    :: FunArrow (Int64 -> j) B8.ByteString B8.ByteString
 
 "chars -> imap"
   forall (o :: IxFunArrow j Char Char). traversedStrictTree8__ o = iroam imapB8 o
-    :: IxFunArrow (Int -> j) B8.ByteString B8.ByteString
+    :: IxFunArrow (Int64 -> j) B8.ByteString B8.ByteString
 
 "chars -> foldr"
   forall (o :: Forget r j Char Char). traversedStrictTree8__ o
                                     = foldring__ B8.foldr (reForget o)
-    :: Forget r (Int -> j) B8.ByteString B8.ByteString
+    :: Forget r (Int64 -> j) B8.ByteString B8.ByteString
 
 "chars -> ifoldr"
   forall (o :: IxForget r j Char Char). traversedStrictTree8__ o
                                       = ifoldring__ ifoldrB8 o
-    :: IxForget r (Int -> j) B8.ByteString B8.ByteString
+    :: IxForget r (Int64 -> j) B8.ByteString B8.ByteString
 
 #-}
 
 -- | Indexed setter for 'traversedStrictTree8__'.
-imapB8 :: (Int -> Char -> Char) -> B.ByteString -> B.ByteString
+imapB8 :: (Int64 -> Char -> Char) -> B.ByteString -> B.ByteString
 imapB8 f = snd . B8.mapAccumL (\i a -> i `seq` (i + 1, f i a)) 0
 {-# INLINE imapB8 #-}
 
 -- | Indexed fold for 'traversedStrictTree8__'.
-ifoldrB8 :: (Int -> Char -> a -> a) -> a -> B.ByteString -> a
+ifoldrB8 :: (Int64 -> Char -> a -> a) -> a -> B.ByteString -> a
 ifoldrB8 f z xs = B8.foldr (\x g i -> i `seq` f i x (g (i + 1))) (const z) xs 0
 {-# INLINE ifoldrB8 #-}
 
@@ -181,7 +183,7 @@ traversedLazy__
 traversedLazy__ = iwander $ \f lbs ->
   let go c fcs acc =
         let !acc' = acc + fromIntegral (B.length c)
-            rest = reindexed (\x -> acc + fromIntegral x) traversedStrictTree
+            rest = reindexed (\x -> acc + x) traversedStrictTree
         in BL.append . BL.fromStrict <$> itraverseOf rest f c <*> fcs acc'
   in BL.foldrChunks go (\_ -> pure BL.empty) lbs 0
 {-# INLINE [1] traversedLazy__ #-}
@@ -227,7 +229,7 @@ traversedLazy8__
 traversedLazy8__ = iwander $ \f lbs ->
   let go c fcs acc =
         let !acc' = acc + fromIntegral (B.length c)
-            rest = reindexed (\x -> acc + fromIntegral x) traversedStrictTree8
+            rest = reindexed (\x -> acc + x) traversedStrictTree8
         in BL.append . BL.fromStrict <$> itraverseOf rest f c <*> fcs acc'
   in BL.foldrChunks go (\_ -> pure BL.empty) lbs 0
 {-# INLINE [1] traversedLazy8__ #-}
