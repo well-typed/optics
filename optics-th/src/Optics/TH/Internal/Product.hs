@@ -13,6 +13,7 @@ module Optics.TH.Internal.Product
   , makeFieldOpticsForDec
   , makeFieldOpticsForDec'
   , makeFieldLabelsWith
+  , makeFieldLabelsForDec
   , HasFieldClasses
   ) where
 
@@ -101,6 +102,9 @@ makeFieldOpticsForDatatype rules info =
   -- Map a (possibly missing) field's name to zero-to-many optic definitions
   expandName :: [Name] -> Maybe Name -> [DefName]
   expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
+
+makeFieldLabelsForDec :: LensRules -> Dec -> DecsQ
+makeFieldLabelsForDec rules = makeFieldLabelsForDatatype rules <=< D.normalizeDec
 
 makeFieldLabelsWith :: LensRules -> Name -> DecsQ
 makeFieldLabelsWith rules = D.reifyDatatype >=> makeFieldLabelsForDatatype rules

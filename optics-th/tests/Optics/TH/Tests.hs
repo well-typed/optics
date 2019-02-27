@@ -475,7 +475,7 @@ data AbideConfiguration a = AbideConfiguration
     , _acThing          :: a
     }
 makeLensesWith abbreviatedFields ''AbideConfiguration
-makeFieldLabelsWith abbreviatedLabels ''AbideConfiguration
+makeFieldLabelsWith abbreviatedFieldLabels ''AbideConfiguration
 
 checkLocation :: HasLocation t a => Lens' t a
 checkLocation = location
@@ -519,6 +519,17 @@ checkGaffer1 = gaffer1
 
 checkTape1 :: AffineTraversal' (Quark1 a) a
 checkTape1 = tape1
+
+declareFieldLabels [d|
+  data Quark2 a = Qualified2   { gaffer2 :: a }
+                | Unqualified2 { gaffer2 :: a, tape2 :: a }
+  |]
+
+checkGaffer2 :: Lens' (Quark2 a) a
+checkGaffer2 = #gaffer2
+
+checkTape2 :: AffineTraversal' (Quark2 a) a
+checkTape2 = #tape2
 
 declarePrisms [d|
   data Exp = Lit Int | Var String | Lambda { bound::String, body::Exp }
@@ -567,6 +578,16 @@ checkFm0 = fm0
 checkFm1 :: Lens' (Family Int (a, b) a) Int
 checkFm1 = fm1
 
+declareFieldLabels [d|
+  data instance Family Char (a, b) a = FamilyChar { fm0 :: (b, a), fm1 :: Char }
+  |]
+
+checkFm0_ :: Lens (Family Char (a, b) a) (Family Char (a', b') a') (b, a) (b', a')
+checkFm0_ = #fm0
+
+checkFm1_ :: Lens' (Family Char (a, b) a) Char
+checkFm1_ = #fm1
+
 class Class a where
   data Associated a
   method :: a -> Int
@@ -583,6 +604,19 @@ declareLenses [d|
 
 checkMochi :: Iso' (Associated Int) Double
 checkMochi = mochi
+
+declareFieldLabels [d|
+  instance Class Double where
+    data Associated Double = AssociatedDouble { coffee :: Double }
+    method = floor
+  |]
+
+-- instance Class Double where
+--   data Associated Double = AssociatedDouble Double
+--   method = floor
+
+checkCoffee :: Iso' (Associated Double) Double
+checkCoffee = #coffee
 
 declareFields [d|
   data DeclaredFields f a

@@ -22,7 +22,6 @@ import qualified System.Random as R
 import Optics
 import Optics.Operators
 import Optics.Tests.Utils
-import Optics.TH
 
 labelsTests :: TestTree
 labelsTests = testGroup "Labels"

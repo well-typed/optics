@@ -33,7 +33,6 @@ import qualified GHC.Generics           as GHC
 import           System.Environment     (getArgs)
 
 import           Optics
-import           Optics.TH
 import           Optics.Operators
 import           Optics.Operators.State
 
