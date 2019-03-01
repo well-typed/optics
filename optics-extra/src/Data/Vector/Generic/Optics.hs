@@ -25,7 +25,6 @@ import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
 import Optics.Core
 import Optics.Extra.Internal.Vector
 import Optics.Internal.Fold
-import Optics.Internal.Indexed
 import Optics.Internal.IxFold
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
@@ -144,30 +143,52 @@ converted = iso convert convert
 vectorTraverse__
   :: (Traversing p, V.Vector v a, V.Vector w b)
   => Optic__ p j (Int -> j) (v a) (w b) a b
-vectorTraverse__ = conjoined__ noix withix
-  where
-    noix = traversalVL $ \f v ->
-      let !n = V.length v in V.fromListN n <$> traverse f (V.toList v)
-    withix = ixTraversalVL $ \f v ->
-      let !n = V.length v in V.fromListN n <$> itraverse f (V.toList v)
+vectorTraverse__ = conjoined' vectorTraverseNoIx__ vectorTraverseIx__
 {-# INLINE [0] vectorTraverse__ #-}
 
+vectorTraverseNoIx__
+  :: (Traversing p, V.Vector v a, V.Vector w b)
+  => Optic__ p j j (v a) (w b) a b
+vectorTraverseNoIx__ = wander $ \f v ->
+  let !n = V.length v in V.fromListN n <$> traverse f (V.toList v)
+{-# INLINE vectorTraverseNoIx__ #-}
+
+vectorTraverseIx__
+  :: (Traversing p, V.Vector v a, V.Vector w b)
+  => Optic__ p j (Int -> j) (v a) (w b) a b
+vectorTraverseIx__ = iwander $ \f v ->
+  let !n = V.length v in V.fromListN n <$> itraverse f (V.toList v)
+{-# INLINE vectorTraverseIx__ #-}
+
+-- Because vectorTraverse__ inlines late, GHC needs rewrite rules for all cases
+-- in order to generate optimal code for each of them. The ones that rewrite
+-- traversal into a traversal correspond to an early inline.
+
 {-# RULES
+
+"vectorTraverse__ -> traversed"
+  forall (o :: Star g j a b). vectorTraverse__ o = vectorTraverseNoIx__ (reStar o)
+    :: (V.Vector v a, V.Vector w b) => Star g (Int -> j) (v a) (w b)
+
+"vectorTraverse__ -> folded"
+  forall (o :: Forget r j a b). vectorTraverse__ o = foldring__ V.foldr (reForget o)
+    :: (V.Vector v a, V.Vector v b) => Forget r (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> mapped"
   forall (o :: FunArrow j a b). vectorTraverse__ o = roam V.map (reFunArrow o)
     :: (V.Vector v a, V.Vector v b) => FunArrow (Int -> j) (v a) (v b)
 
+"vectorTraverse__ -> itraversed"
+  forall (o :: IxStar g j a b). vectorTraverse__ o = vectorTraverseIx__ o
+    :: (V.Vector v a, V.Vector w b) => IxStar g (Int -> j) (v a) (w b)
+
+"vectorTraverse__ -> ifolded"
+  forall (o :: IxForget r j a b). vectorTraverse__ o = ifoldring__ V.ifoldr o
+    :: (V.Vector v a, V.Vector v b) => IxForget r (Int -> j) (v a) (v b)
+
 "vectorTraverse__ -> imapped"
   forall (o :: IxFunArrow j a b). vectorTraverse__ o = iroam V.imap o
     :: (V.Vector v a, V.Vector v b) => IxFunArrow (Int -> j) (v a) (v b)
 
-"vectorTraverse__ -> foldr"
-  forall (o :: Forget r j a b). vectorTraverse__ o = foldring__ V.foldr (reForget o)
-    :: (V.Vector v a, V.Vector v b) => Forget r (Int -> j) (v a) (v b)
-
-"vectorTraverse__ -> ifoldr"
-  forall (o :: IxForget r j a b). vectorTraverse__ o = ifoldring__ V.ifoldr o
-    :: (V.Vector v a, V.Vector v b) => IxForget r (Int -> j) (v a) (v b)
 
 #-}

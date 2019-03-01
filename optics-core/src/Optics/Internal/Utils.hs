@@ -19,14 +19,6 @@ infixl 8 .#
 infixr 9 #.
 {-# INLINE (.#) #-}
 
--- | Efficient indexed setter for lists.
-imapList :: (Int -> a -> b) -> [a] -> [b]
-imapList f = go 0
-  where
-    go i (x:xs) = f i x : go (i+1) xs
-    go _ []     = []
-{-# INLINE imapList #-}
-
 ----------------------------------------
 
 -- | Helper for 'traverseOf_' and the like for better efficiency than the

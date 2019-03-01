@@ -227,12 +227,11 @@ instance FunctorWithIndex r ((->) r) where
 
 -- []
 
-instance FunctorWithIndex Int [] where
-  imap = imapList
-  {-# INLINE imap #-}
+instance FunctorWithIndex Int []
 instance FoldableWithIndex Int []
 instance TraversableWithIndex Int [] where
-  itraverse = indexing traverse
+  -- Faster than @indexing traverse@, also best for folds and setters.
+  itraverse f = traverse (uncurry f) . Prelude.zip [0..]
   {-# INLINE itraverse #-}
 
 -- ZipList
@@ -240,7 +239,7 @@ instance TraversableWithIndex Int [] where
 instance FunctorWithIndex Int ZipList
 instance FoldableWithIndex Int ZipList
 instance TraversableWithIndex Int ZipList where
-  itraverse = indexing traverse
+  itraverse f (ZipList xs) = ZipList <$> itraverse f xs
   {-# INLINE itraverse #-}
 
 -- NonEmpty
@@ -248,7 +247,8 @@ instance TraversableWithIndex Int ZipList where
 instance FunctorWithIndex Int NonEmpty
 instance FoldableWithIndex Int NonEmpty
 instance TraversableWithIndex Int NonEmpty where
-  itraverse = indexing traverse
+  itraverse f ~(a :| as) =
+    (:|) <$> f 0 a <*> traverse (uncurry f) (Prelude.zip [1..] as)
   {-# INLINE itraverse #-}
 
 -- Maybe
