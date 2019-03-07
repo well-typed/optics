@@ -20,10 +20,9 @@ import Language.Haskell.TH.Optics
 import Optics.Core hiding (cons)
 import Optics.TH.Internal.Utils
 
--- | Generate a 'Prism' for each constructor of a data type.
--- Isos generated when possible.
--- Reviews are created for constructors with existentially
--- quantified constructors and GADTs.
+-- | Generate a 'Prism' for each constructor of a data type. Isos generated when
+-- possible. Reviews are created for constructors with existentially quantified
+-- constructors and GADTs.
 --
 -- /e.g./
 --
@@ -45,10 +44,9 @@ import Optics.TH.Internal.Utils
 makePrisms :: Name {- ^ Type constructor name -} -> DecsQ
 makePrisms = makePrisms' True
 
--- | Generate a 'Prism' for each constructor of a data type
--- and combine them into a single class. No Isos are created.
--- Reviews are created for constructors with existentially
--- quantified constructors and GADTs.
+-- | Generate a 'Prism' for each constructor of a data type and combine them
+-- into a single class. No Isos are created. Reviews are created for
+-- constructors with existentially quantified constructors and GADTs.
 --
 -- /e.g./
 --
@@ -69,15 +67,15 @@ makePrisms = makePrisms' True
 --   _Bar :: Prism' s a
 --   _Baz :: Prism' s (Int,Char)
 --
---   _Foo = _FooBarBaz . _Foo
---   _Bar = _FooBarBaz . _Bar
---   _Baz = _FooBarBaz . _Baz
+--   _Foo = _FooBarBaz % _Foo
+--   _Bar = _FooBarBaz % _Bar
+--   _Baz = _FooBarBaz % _Baz
 --
 -- instance AsFooBarBaz (FooBarBaz a) a
 -- @
 --
--- Generate an "As" class of prisms. Names are selected by prefixing the constructor
--- name with an underscore.  Constructors with multiple fields will
+-- Generate an "As" class of prisms. Names are selected by prefixing the
+-- constructor name with an underscore. Constructors with multiple fields will
 -- construct Prisms to tuples of those fields.
 makeClassyPrisms :: Name {- ^ Type constructor name -} -> DecsQ
 makeClassyPrisms = makePrisms' False
@@ -403,7 +401,7 @@ makeClassyPrismClass t className methodName cons =
     do Stab cx o _ _ _ b <- computeOpticType classyConfig t cons con
        let stab' = Stab cx o r r b b
            defName = view nconName con
-           body    = appsE [varE '(.), varE methodName, varE defName]
+           body    = appsE [varE '(%), varE methodName, varE defName]
        sequenceA
          [ sigD defName        (return (stabToType stab'))
          , valD (varP defName) (normalB body) []
@@ -434,7 +432,7 @@ makeClassyPrismInstance s className methodName cons =
 
      instanceD (cxt[]) (return cls)
        (   valD (varP methodName)
-                (normalB (varE 'id)) []
+                (normalB (varE 'castOptic `appE` varE 'equality)) []
        : [ do stab <- computeOpticType classyConfig s cons con
               let stab' = simplifyStab stab
               valD (varP (prismName conName))

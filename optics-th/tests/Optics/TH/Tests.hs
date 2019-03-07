@@ -121,6 +121,21 @@ checkFooX2 = _FooX2
 checkFooX2_ :: Prism' (FooX a) (Int, Int)
 checkFooX2_ = #_FooX2
 
+data ClassyTest = ClassyT1 Int | ClassyT2 String | ClassyT3 Char
+makeClassyPrisms ''ClassyTest
+
+checkClassyTest :: AsClassyTest r => Prism' r ClassyTest
+checkClassyTest = _ClassyTest
+
+checkClassyT1 :: AsClassyTest r => Prism' r Int
+checkClassyT1 = _ClassyT1
+
+checkClassyT2 :: AsClassyTest r => Prism' r String
+checkClassyT2 = _ClassyT2
+
+checkClassyT3 :: AsClassyTest r => Prism' r Char
+checkClassyT3 = _ClassyT3
+
 ----------------------------------------
 
 data Bar a b c = Bar { _baz :: (a, b) }
