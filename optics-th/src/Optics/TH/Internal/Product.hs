@@ -52,11 +52,6 @@ typeSelf = traversalVL $ \f -> \case
   ParensT ty                -> ParensT <$> f ty
   ty                        -> pure ty
 
-setIx :: Int -> a -> [a] -> [a]
-setIx n x xs = case splitAt n xs of
-  (xss, [])       -> xss
-  (xss, _ : rest) -> xss ++ (x : rest)
-
 ------------------------------------------------------------------------
 -- Field generation entry point
 ------------------------------------------------------------------------
@@ -106,6 +101,7 @@ makeFieldOpticsForDatatype rules info =
 makeFieldLabelsForDec :: LensRules -> Dec -> DecsQ
 makeFieldLabelsForDec rules = makeFieldLabelsForDatatype rules <=< D.normalizeDec
 
+-- | Build field optics as labels with a custom configuration.
 makeFieldLabelsWith :: LensRules -> Name -> DecsQ
 makeFieldLabelsWith rules = D.reifyDatatype >=> makeFieldLabelsForDatatype rules
 
@@ -374,7 +370,7 @@ buildStab allowPhantomsChange s categorizedFields = do
       (preview _head targetFields)
 
     phantomTypeVars =
-      let allTypeVars = folded % summing (_Left % typeVars) (_Right % typeVars)
+      let allTypeVars = folded % chosen % typeVars
       in setOf typeVars s S.\\ setOf allTypeVars categorizedFields
 
     (fixedFields, targetFields) = partitionEithers categorizedFields
@@ -566,7 +562,7 @@ makeAffineFoldClause cons = do
     makeAffineFoldMatch conName fieldCount fields = do
       xs <- newNames "x" $ length fields
 
-      let args = foldr (\(i, x) -> setIx i (varP x))
+      let args = foldr (\(i, x) -> set (ix i) (varP x))
                        (replicate fieldCount wildP)
                        (zip fields xs)
 
@@ -599,7 +595,7 @@ makeFoldClause cons = do
     makeFoldMatch f conName fieldCount fields = do
       xs <- newNames "x" $ length fields
 
-      let args = foldr (\(i, x) -> setIx i (varP x))
+      let args = foldr (\(i, x) -> set (ix i) (varP x))
                        (replicate fieldCount wildP)
                        (zip fields xs)
 
@@ -635,7 +631,7 @@ makeGetterClause cons = do
       [field] -> do
         x <- newName "x"
         -- Con _ .. x_i .. _ -> x_i
-        match (conP conName . setIx field (varP x) $ replicate fieldCount wildP)
+        match (conP conName . set (ix field) (varP x) $ replicate fieldCount wildP)
               (normalB $ varE x)
               []
       _       -> error "Getter focuses on exactly one field"
@@ -685,7 +681,7 @@ makeLensMatch irrefP f conName fieldCount = \case
     let body = appsE
           [ varE 'fmap
           , lamE [varP y] . appsE $
-            conE conName : map varE (setIx field y xs)
+            conE conName : map varE (set (ix field) y xs)
           , appE (varE f) . varE $ xs !! field
           ]
 
@@ -750,7 +746,7 @@ makeTraversalClause cons irref = do
         _ -> do
           ys <- newNames "y" $ length fields
 
-          let xs' = foldr (\(i, x) -> setIx i x) xs (zip fields ys)
+          let xs' = foldr (\(i, x) -> set (ix i) x) xs (zip fields ys)
 
               mkFx i = varE f `appE` varE (xs !! i)
 
