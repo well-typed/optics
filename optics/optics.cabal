@@ -28,7 +28,6 @@ library
   build-depends: array           >=0.5.1.1 && <0.6
                , base            >=4.9     && <5
                , containers      >=0.5.7.1 && <0.7
-               , generic-optics  >=0.1     && <1
                , mtl             >=2.2.2   && <2.3
                , optics-core     >=0.1     && <1
                , optics-extra    >=0.1     && <1
