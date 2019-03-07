@@ -1,55 +1,71 @@
 module Optics.TH
   (
-  -- * Constructing Lenses Automatically
-  -- ** Lenses for data fields
-    makeLenses, makeLensesFor
-  , makeClassy, makeClassyFor, makeClassy_
-  , makeFields
-  , makeFieldsNoPrefix
-  -- ** Prisms
-  , makePrisms
-  , makeClassyPrisms
-  -- * Constructing Lenses Given a Declaration Quote
-  -- ** Lenses for data fields
-  , declareLenses, declareLensesFor
-  , declareClassy, declareClassyFor
-  , declareFields
-  -- ** Prisms
-  , declarePrisms
-  -- * Configuring Lenses
-  -- ** Running LensRules
+  -- * Generation of field optics
+  -- ** Labels
+    makeFieldLabels
+  , makeFieldLabelsFor
+  , makeFieldLabelsWith
+  , declareFieldLabels
+  , declareFieldLabelsFor
+  , declareFieldLabelsWith
+  , fieldLabelsRules
+  , fieldLabelsRulesFor
+  -- ** Functions
+  , makeLenses
+  , makeLensesFor
   , makeLensesWith
+  , declareLenses
+  , declareLensesFor
   , declareLensesWith
-  -- ** LensRules type
-  , LensRules
-  -- ** Predefined LensRules
   , lensRules
   , lensRulesFor
+  -- ** Single class per data type
+  , makeClassy
+  , makeClassy_
+  , makeClassyFor
+  , declareClassy
+  , declareClassyFor
   , classyRules
   , classyRules_
+  , classyRulesFor
+  -- ** Multiple classes per data type
+  , makeFields
+  , makeFieldsNoPrefix
+  , declareFields
   , defaultFieldRules
-  , camelCaseFields
-  , classUnderscoreNoPrefixFields
-  , underscoreFields
-  , abbreviatedFields
-  -- ** LensRules configuration accessors
-  , lensField
-  , FieldNamer
-  , DefName(..)
-  , lensClass
-  , ClassyNamer
+  -- * Generation of constructor optics
+  -- ** Labels
+  , makePrismLabels
+  -- ** Functions
+  , makePrisms
+  , declarePrisms
+  -- ** Single class per data type
+  , makeClassyPrisms
+  -- * Generation rules for field optics
+  , LensRules
   , simpleLenses
-  , createClass
   , generateSignatures
   , generateUpdateableOptics
   , generateLazyPatterns
-  -- ** FieldNamers
+  , createClass
+  , lensField
+  , lensClass
+  -- * Common rules
+  , abbreviatedFieldLabels
+  , underscoreFields
+  , camelCaseFields
+  , classUnderscoreNoPrefixFields
+  , abbreviatedFields
+  -- * Field namers
+  , FieldNamer
+  , ClassyNamer
+  , DefName(..)
   , underscoreNoPrefixNamer
   , lookingupNamer
   , mappingNamer
+  , underscoreNamer
   , camelCaseNamer
   , classUnderscoreNoPrefixNamer
-  , underscoreNamer
   , abbreviatedNamer
   ) where
 
@@ -60,88 +76,127 @@ import Data.Char (toLower, toUpper, isUpper)
 import Data.List as List
 import Data.Maybe (maybeToList)
 import Data.Monoid
-import qualified Data.Set as Set
 import Data.Set (Set)
 import Language.Haskell.TH.Syntax hiding (lift)
-
 import Language.Haskell.TH
+import qualified Data.Set as Set
+
 import Optics.Core hiding (cons)
 import Optics.Operators
 import Optics.TH.Internal.Product
 import Optics.TH.Internal.Sum
 
--- | Generate "simple" optics even when type-changing optics are possible.
--- (e.g. 'Lens'' instead of 'Lens')
-simpleLenses :: Lens' LensRules Bool
-simpleLenses = lensVL $ \f r ->
-  fmap (\x -> r { _simpleLenses = x}) (f (_simpleLenses r))
+----------------------------------------
+-- Labels
 
--- | Indicate whether or not to supply the signatures for the generated lenses.
+-- | Build field optics as instances of 'LabelOptic' class for use as overloaded
+-- labels.
 --
--- Disabling this can be useful if you want to provide a more restricted type
--- signature or if you want to supply hand-written haddocks.
-generateSignatures :: Lens' LensRules Bool
-generateSignatures = lensVL $ \f r ->
-  fmap (\x -> r { _generateSigs = x}) (f (_generateSigs r))
-
--- | Generate "updateable" optics when 'True'. When 'False', (affine) folds will
--- be generated instead of (affine) traversals and getters will be generated
--- instead of lenses. This mode is intended to be used for types with invariants
--- which must be maintained by "smart" constructors.
-generateUpdateableOptics :: Lens' LensRules Bool
-generateUpdateableOptics = lensVL $ \f r ->
-  fmap (\x -> r { _allowUpdates = x}) (f (_allowUpdates r))
-
--- | Generate optics using lazy pattern matches. This can
--- allow fields of an undefined value to be initialized with lenses:
+-- /e.g./
 --
 -- @
--- data Foo = Foo {_x :: Int, _y :: Bool}
+-- data Animal
+--   = Cat { animalAge  :: Int
+--         , animalName :: String
+--         }
+--   | Dog { animalAge    :: Int
+--         , animalAbsurd :: forall a b. a -> b
+--         }
+-- makeFieldLabels ''Animmal
+-- @
+--
+-- will create
+--
+-- @
+-- instance
+--   (a ~ Int, b ~ Int
+--   ) => LabelOptic "age" A_Lens Animal Animal a b where
+--   labelOptic = lensVL $ \\f s -> case s of
+--     Cat x1 x2 -> fmap (\\y -> Cat y x2) (f x1)
+--     Dog x1 x2 -> fmap (\\y -> Dog y x2) (f x1)
+--
+-- instance
+--   (a ~ String, b ~ String
+--   ) => LabelOptic "name" An_AffineTraversal Animal Animal a b where
+--   labelOptic = atraversalVL $ \\point f s -> case s of
+--     Cat x1 x2 -> fmap (\\y -> Cat x1 y) (f x2)
+--     Dog x1 x2 -> point (Dog x1 x2)
+-- @
+--
+-- which can be used as @#age@ and @#name@ with language extension
+-- OverloadedLabels.
+--
+-- /Note:/ if you wonder about the form of instances or why there is no label for
+-- @animalAbsurd@, check documentation for 'LabelOptic'.
+--
+-- @
+-- 'makeFieldOptics' = 'makeFieldLabelsWith' 'fieldLabelsRules'
+-- @
+makeFieldLabels :: Name -> DecsQ
+makeFieldLabels = makeFieldLabelsWith fieldLabelsRules
+
+-- | Derive field optics as labels, specifying explicit pairings of @(fieldName,
+-- labelName)@.
+--
+-- If you map multiple fields to the same label and it is present in the same
+-- constructor, 'Traversal' (or 'Fold' for a read only version) will be
+-- generated.
+--
+-- /e.g./
+--
+-- @
+-- 'makeFieldLabelsFor' [(\"_foo\", \"fooLens\"), (\"baz\", \"lbaz\")] ''Foo
+-- 'makeFieldLabelsFor' [(\"_barX\", \"bar\"), (\"_barY\", \"bar\")] ''Bar
+-- @
+makeFieldLabelsFor :: [(String, String)] -> Name -> DecsQ
+makeFieldLabelsFor fields = makeFieldLabelsWith (fieldLabelsRulesFor fields)
+
+-- | Make field optics as labels for all records in the given declaration
+-- quote. All record syntax in the input will be stripped off.
+--
+-- /e.g./
+--
+-- @
+-- declareLenses [d|
+--   data Dog = Dog { name :: String, age :: Int }
+--     deriving Show
+--   |]
+-- @
+--
+-- will create
+--
+-- @
+-- data Dog = Dog String Int
 --   deriving Show
---
--- 'makeLensesWith' ('lensRules' & 'generateLazyPatterns' .~ True) ''Foo
+-- instance LabelOptic "name" A_Lens Dog Dog ...
+-- instance LabelOptic "age" A_Lens Dog Dog ...
 -- @
---
--- @
--- > undefined & x .~ 8 & y .~ True
--- Foo {_x = 8, _y = True}
--- @
---
--- The downside of this flag is that it can lead to space-leaks and
--- code-size/compile-time increases when generated for large records. By default
--- this flag is turned off, and strict optics are generated.
---
--- When using lazy optics the strict optic can be recovered by composing with
--- '$!':
---
--- @
--- strictOptic = ($!) . lazyOptic
--- @
-generateLazyPatterns :: Lens' LensRules Bool
-generateLazyPatterns = lensVL $ \f r ->
-  fmap (\x -> r { _lazyPatterns = x}) (f (_lazyPatterns r))
+declareFieldLabels :: DecsQ -> DecsQ
+declareFieldLabels
+  = declareFieldLabelsWith
+  $ fieldLabelsRules
+  & lensField .~ \_ _ n -> [TopName n]
 
--- | Create the class if the constructor if generated lenses would be
--- type-preserving and the 'lensClass' rule matches.
-createClass :: Lens' LensRules Bool
-createClass = lensVL $ \f r ->
-  fmap (\x -> r { _generateClasses = x}) (f (_generateClasses r))
+-- | Similar to 'makeFieldLabelsFor', but takes a declaration quote.
+declareFieldLabelsFor :: [(String, String)] -> DecsQ -> DecsQ
+declareFieldLabelsFor fields
+  = declareFieldLabelsWith
+  $ fieldLabelsRulesFor fields
+  & lensField .~ \_ _ n -> [TopName n]
 
--- | 'Lens'' to access the convention for naming fields in our 'LensRules'.
-lensField :: Lens' LensRules FieldNamer
-lensField = lensVL $ \f r ->
-  fmap (\x -> r { _fieldToDef = x}) (f (_fieldToDef r))
+-- Similar to 'makeFieldLabelsWith', but takes a declaration quote.
+declareFieldLabelsWith :: LensRules -> DecsQ -> DecsQ
+declareFieldLabelsWith rules = declareWith $ \dec -> do
+  emit =<< liftDeclare (makeFieldLabelsForDec rules dec)
+  return $ stripFields dec
 
--- | 'Lens'' to access the option for naming "classy" lenses.
-lensClass :: Lens' LensRules ClassyNamer
-lensClass = lensVL $ \f r ->
-  fmap (\x -> r { _classyLenses = x }) (f (_classyLenses r))
-
--- | Rules for making fairly simple partial lenses, ignoring the special cases
--- for isomorphisms and traversals, and not making any classes. It uses
--- 'underscoreNoPrefixNamer'.
-lensRules :: LensRules
-lensRules = LensRules
+-- | Rules for generation of 'LabelOptic' intances for use with
+-- OverloadedLabels. Same as 'lensRules', but uses 'camelCaseNamer'.
+--
+-- /Note:/ if you don't want to prefix field names with the full name of the
+-- data type, you can use 'abbreviatedNamer' instead.
+fieldLabelsRules :: LensRules
+fieldLabelsRules = LensRules
   { _simpleLenses    = False
   , _generateSigs    = True
   , _generateClasses = False
@@ -149,70 +204,21 @@ lensRules = LensRules
   , _allowUpdates    = True
   , _lazyPatterns    = False
   , _classyLenses    = const Nothing
-  , _fieldToDef      = underscoreNoPrefixNamer
+  , _fieldToDef      = camelCaseNamer
   }
 
--- | A 'FieldNamer' that strips the _ off of the field name, lowercases the
--- name, and skips the field if it doesn't start with an '_'.
-underscoreNoPrefixNamer :: FieldNamer
-underscoreNoPrefixNamer _ _ n =
-  case nameBase n of
-    '_':x:xs -> [TopName (mkName (toLower x:xs))]
-    _        -> []
-
-
--- | Construct a 'LensRules' value for generating top-level definitions using
+-- | Construct a 'LensRules' value for generating 'LabelOptic' instances using
 -- the given map from field names to definition names.
-lensRulesFor ::
-  [(String, String)] {- ^ [(Field Name, Definition Name)] -} ->
-  LensRules
-lensRulesFor fields = lensRules & lensField .~ lookingupNamer fields
+fieldLabelsRulesFor
+  :: [(String, String)] {- ^ [(Field name, Label name)] -}
+  -> LensRules
+fieldLabelsRulesFor fields = fieldLabelsRules & lensField .~ lookingupNamer fields
 
--- | Create a 'FieldNamer' from explicit pairings of @(fieldName, lensName)@.
-lookingupNamer :: [(String,String)] -> FieldNamer
-lookingupNamer kvs _ _ field =
-  [ TopName (mkName v) | (k,v) <- kvs, k == nameBase field]
+----------------------------------------
+-- Lenses
 
--- | Create a 'FieldNamer' from a mapping function. If the function returns
--- @[]@, it creates no lens for the field.
-mappingNamer :: (String -> [String]) -- ^ A function that maps a @fieldName@ to
-                                     -- @lensName@s.
-             -> FieldNamer
-mappingNamer mapper _ _ = fmap (TopName . mkName) . mapper . nameBase
-
--- | Rules for making lenses and traversals that precompose another 'Lens'.
-classyRules :: LensRules
-classyRules = LensRules
-  { _simpleLenses    = True
-  , _generateSigs    = True
-  , _generateClasses = True
-  , _allowIsos       = False -- generating Isos would hinder "subtyping"
-  , _allowUpdates    = True
-  , _lazyPatterns    = False
-  , _classyLenses    = \n ->
-        case nameBase n of
-          x:xs -> Just (mkName ("Has" ++ x:xs), mkName (toLower x:xs))
-          []   -> Nothing
-  , _fieldToDef      = underscoreNoPrefixNamer
-  }
-
--- | Rules for making lenses and traversals that precompose another 'Lens' using
--- a custom function for naming the class, main class method, and a mapping from
--- field names to definition names.
-classyRulesFor
-  :: (String -> Maybe (String, String)) {- ^ Type Name -> Maybe (Class Name, Method Name) -} ->
-  [(String, String)] {- ^ [(Field Name, Method Name)] -} ->
-  LensRules
-classyRulesFor classFun fields = classyRules
-  & lensClass .~ (over (mapped % each) mkName . classFun . nameBase)
-  & lensField .~ lookingupNamer fields
-
--- | A 'LensRules' used by 'makeClassy_'.
-classyRules_ :: LensRules
-classyRules_
-  = classyRules & lensField .~ \_ _ n -> [TopName (mkName ('_':nameBase n))]
-
--- | Build lenses and (affine) traversals with a sensible default configuration.
+-- | Build field optics as top level functions with a sensible default
+-- configuration.
 --
 -- /e.g./
 --
@@ -241,13 +247,9 @@ classyRules_
 --   Dog x1 x2 -> fmap (\\y -> Dog y x2) (f x1)
 --
 -- name :: AffineTraversal' Animal String
--- name = atraversal
---   (\\s -> case s of
---       Cat _ x   -> Right x
---       Dog x1 x2 -> Left (Dog x1 x2))
---   (\\s -> case s of
---       Cat x1 _  -> \\y -> Cat x1 y
---       Dog x1 x2 -> \\_ -> Dog x1 x2)
+-- name = atraversalVL $ \\point f s -> case s of
+--   Cat x1 x2 -> fmap (\\y -> Cat x1 y) (f x2)
+--   Dog x1 x2 -> point (Dog x1 x2)
 -- @
 --
 -- @
@@ -256,8 +258,89 @@ classyRules_
 makeLenses :: Name -> DecsQ
 makeLenses = makeFieldOptics lensRules
 
--- | Make lenses and traversals for a type, and create a class when the
--- type has no arguments.
+-- | Derive field optics, specifying explicit pairings of @(fieldName,
+-- opticName)@.
+--
+-- If you map multiple fields to the same optic and it is present in the same
+-- constructor, 'Traversal' (or 'Fold' for a read only version) will be
+-- generated.
+--
+-- /e.g./
+--
+-- @
+-- 'makeLensesFor' [(\"_foo\", \"fooLens\"), (\"baz\", \"lbaz\")] ''Foo
+-- 'makeLensesFor' [(\"_barX\", \"bar\"), (\"_barY\", \"bar\")] ''Bar
+-- @
+makeLensesFor :: [(String, String)] -> Name -> DecsQ
+makeLensesFor fields = makeFieldOptics (lensRulesFor fields)
+
+-- | Build field optics with a custom configuration.
+makeLensesWith :: LensRules -> Name -> DecsQ
+makeLensesWith = makeFieldOptics
+
+-- | Make field optics for all records in the given declaration quote. All
+-- record syntax in the input will be stripped off.
+--
+-- /e.g./
+--
+-- @
+-- declareLenses [d|
+--   data Foo = Foo { fooX, fooY :: 'Int' }
+--     deriving 'Show'
+--   |]
+-- @
+--
+-- will create
+--
+-- @
+-- data Foo = Foo 'Int' 'Int' deriving 'Show'
+-- fooX, fooY :: 'Lens'' Foo Int
+-- @
+declareLenses :: DecsQ -> DecsQ
+declareLenses
+  = declareLensesWith
+  $ lensRules
+  & lensField .~ \_ _ n -> [TopName n]
+
+-- | Similar to 'makeLensesFor', but takes a declaration quote.
+declareLensesFor :: [(String, String)] -> DecsQ -> DecsQ
+declareLensesFor fields
+  = declareLensesWith
+  $ lensRulesFor fields
+  & lensField .~ \_ _ n -> [TopName n]
+
+-- | 'declareLenses' with custom 'LensRules'.
+declareLensesWith :: LensRules -> DecsQ -> DecsQ
+declareLensesWith rules = declareWith $ \dec -> do
+  emit =<< lift (makeFieldOpticsForDec' rules dec)
+  return $ stripFields dec
+
+-- | Rules for making read-write field optics as top-level functions. It uses
+-- 'underscoreNoPrefixNamer'.
+lensRules :: LensRules
+lensRules = LensRules
+  { _simpleLenses    = False
+  , _generateSigs    = True
+  , _generateClasses = False
+  , _allowIsos       = True
+  , _allowUpdates    = True
+  , _lazyPatterns    = False
+  , _classyLenses    = const Nothing
+  , _fieldToDef      = underscoreNoPrefixNamer
+  }
+
+-- | Construct a 'LensRules' value for generating top-level functions using the
+-- given map from field names to definition names.
+lensRulesFor
+  :: [(String, String)] {- ^ [(Field name, Optic name)] -}
+  -> LensRules
+lensRulesFor fields = lensRules & lensField .~ lookingupNamer fields
+
+----------------------------------------
+-- Classy
+
+-- | Make lenses and traversals for a type, and create a class when the type has
+-- no arguments.
 --
 -- /e.g./
 --
@@ -290,28 +373,12 @@ makeLenses = makeFieldOptics lensRules
 makeClassy :: Name -> DecsQ
 makeClassy = makeFieldOptics classyRules
 
--- | Make lenses and traversals for a type, and create a class when the type
--- has no arguments.  Works the same as 'makeClassy' except that (a) it
--- expects that record field names do not begin with an underscore, (b) all
--- record fields are made into lenses, and (c) the resulting lens is prefixed
--- with an underscore.
+-- | Make lenses and traversals for a type, and create a class when the type has
+-- no arguments. Works the same as 'makeClassy' except that (a) it expects that
+-- record field names do not begin with an underscore, (b) all record fields are
+-- made into lenses, and (c) the resulting lens is prefixed with an underscore.
 makeClassy_ :: Name -> DecsQ
 makeClassy_ = makeFieldOptics classyRules_
-
--- | Derive lenses and traversals, specifying explicit pairings
--- of @(fieldName, lensName)@.
---
--- If you map multiple names to the same label, and it is present in the same
--- constructor then this will generate a 'Traversal'.
---
--- /e.g./
---
--- @
--- 'makeLensesFor' [(\"_foo\", \"fooLens\"), (\"baz\", \"lbaz\")] ''Foo
--- 'makeLensesFor' [(\"_barX\", \"bar\"), (\"_barY\", \"bar\")] ''Bar
--- @
-makeLensesFor :: [(String, String)] -> Name -> DecsQ
-makeLensesFor fields = makeFieldOptics (lensRulesFor fields)
 
 -- | Derive lenses and traversals, using a named wrapper class, and
 -- specifying explicit pairings of @(fieldName, traversalName)@.
@@ -324,43 +391,6 @@ makeLensesFor fields = makeFieldOptics (lensRulesFor fields)
 makeClassyFor :: String -> String -> [(String, String)] -> Name -> DecsQ
 makeClassyFor clsName funName fields = makeFieldOptics $
   classyRulesFor (const (Just (clsName, funName))) fields
-
--- | Build lenses with a custom configuration.
-makeLensesWith :: LensRules -> Name -> DecsQ
-makeLensesWith = makeFieldOptics
-
-
-
--- | Make lenses for all records in the given declaration quote. All record
--- syntax in the input will be stripped off.
---
--- /e.g./
---
--- @
--- declareLenses [d|
---   data Foo = Foo { fooX, fooY :: 'Int' }
---     deriving 'Show'
---   |]
--- @
---
--- will create
---
--- @
--- data Foo = Foo 'Int' 'Int' deriving 'Show'
--- fooX, fooY :: 'Lens'' Foo Int
--- @
-declareLenses :: DecsQ -> DecsQ
-declareLenses
-  = declareLensesWith
-  $ lensRules
-  & lensField .~ \_ _ n -> [TopName n]
-
--- | Similar to 'makeLensesFor', but takes a declaration quote.
-declareLensesFor :: [(String, String)] -> DecsQ -> DecsQ
-declareLensesFor fields
-  = declareLensesWith
-  $ lensRulesFor fields
-  & lensField .~ \_ _ n -> [TopName n]
 
 -- | For each record in the declaration quote, make lenses and traversals for
 -- it, and create a class when the type has no arguments. All record syntax
@@ -398,143 +428,40 @@ declareClassyFor classes fields
   $ classyRulesFor (`Prelude.lookup`classes) fields
   & lensField .~ \_ _ n -> [TopName n]
 
--- | Generate a 'Control.Lens.Type.Prism' for each constructor of each data type.
---
--- /e.g./
---
--- @
--- declarePrisms [d|
---   data Exp = Lit Int | Var String | Lambda{ bound::String, body::Exp }
---   |]
--- @
---
--- will create
---
--- @
--- data Exp = Lit Int | Var String | Lambda { bound::String, body::Exp }
--- _Lit :: 'Prism'' Exp Int
--- _Var :: 'Prism'' Exp String
--- _Lambda :: 'Prism'' Exp (String, Exp)
--- @
-declarePrisms :: DecsQ -> DecsQ
-declarePrisms = declareWith $ \dec -> do
-  emit =<< liftDeclare (makeDecPrisms True dec)
-  return dec
+-- | Rules for making lenses and traversals that precompose another 'Lens'.
+classyRules :: LensRules
+classyRules = LensRules
+  { _simpleLenses    = True
+  , _generateSigs    = True
+  , _generateClasses = True
+  , _allowIsos       = False -- generating Isos would hinder "subtyping"
+  , _allowUpdates    = True
+  , _lazyPatterns    = False
+  , _classyLenses    = \n ->
+        case nameBase n of
+          x:xs -> Just (mkName ("Has" ++ x:xs), mkName (toLower x:xs))
+          []   -> Nothing
+  , _fieldToDef      = underscoreNoPrefixNamer
+  }
 
--- | @ declareFields = 'declareLensesWith' 'defaultFieldRules' @
-declareFields :: DecsQ -> DecsQ
-declareFields = declareLensesWith defaultFieldRules
+-- | A 'LensRules' used by 'makeClassy_'.
+classyRules_ :: LensRules
+classyRules_
+  = classyRules & lensField .~ \_ _ n -> [TopName (mkName ('_':nameBase n))]
 
--- | Declare lenses for each records in the given declarations, using the
--- specified 'LensRules'. Any record syntax in the input will be stripped
--- off.
-declareLensesWith :: LensRules -> DecsQ -> DecsQ
-declareLensesWith rules = declareWith $ \dec -> do
-  emit =<< lift (makeFieldOpticsForDec' rules dec)
-  return $ stripFields dec
+-- | Rules for making lenses and traversals that precompose another 'Lens' using
+-- a custom function for naming the class, main class method, and a mapping from
+-- field names to definition names.
+classyRulesFor
+  :: (String -> Maybe (String, String)) {- ^ Type Name -> Maybe (Class Name, Method Name) -} ->
+  [(String, String)] {- ^ [(Field Name, Method Name)] -} ->
+  LensRules
+classyRulesFor classFun fields = classyRules
+  & lensClass .~ (over (mapped % each) mkName . classFun . nameBase)
+  & lensField .~ lookingupNamer fields
 
------------------------------------------------------------------------------
--- Internal TH Implementation
------------------------------------------------------------------------------
-
-overHead :: (a -> a) -> [a] -> [a]
-overHead _ []     = []
-overHead f (x:xs) = f x : xs
-
--- | Field rules for fields in the form @ _prefix_fieldname @
-underscoreFields :: LensRules
-underscoreFields = defaultFieldRules & lensField .~ underscoreNamer
-
--- | A 'FieldNamer' for 'underscoreFields'.
-underscoreNamer :: FieldNamer
-underscoreNamer _ _ field = maybeToList $ do
-  _      <- prefix field'
-  method <- niceLens
-  cls    <- classNaming
-  return (MethodName (mkName cls) (mkName method))
-  where
-    field' = nameBase field
-    prefix ('_':xs) | '_' `List.elem` xs = Just (takeWhile (/= '_') xs)
-    prefix _                             = Nothing
-    niceLens    = prefix field' <&> \n -> drop (length n + 2) field'
-    classNaming = niceLens <&> ("Has_" ++)
-
--- | Field rules for fields in the form @ prefixFieldname or _prefixFieldname @
--- If you want all fields to be lensed, then there is no reason to use an @_@ before the prefix.
--- If any of the record fields leads with an @_@ then it is assume a field without an @_@ should not have a lens created.
---
--- __Note__: The @prefix@ must be the same as the typename (with the first
--- letter lowercased). This is a change from lens versions before lens 4.5.
--- If you want the old behaviour, use 'makeLensesWith' 'abbreviatedFields'
-camelCaseFields :: LensRules
-camelCaseFields = defaultFieldRules
-
--- | A 'FieldNamer' for 'camelCaseFields'.
-camelCaseNamer :: FieldNamer
-camelCaseNamer tyName fields field = maybeToList $ do
-
-  fieldPart <- stripPrefix expectedPrefix (nameBase field)
-  method    <- computeMethod fieldPart
-  let cls = "Has" ++ fieldPart
-  return (MethodName (mkName cls) (mkName method))
-
-  where
-  expectedPrefix = optUnderscore ++ overHead toLower (nameBase tyName)
-
-  optUnderscore  = ['_' | any (isPrefixOf "_" . nameBase) fields ]
-
-  computeMethod (x:xs) | isUpper x = Just (toLower x : xs)
-  computeMethod _                  = Nothing
-
--- | Field rules for fields in the form @ _fieldname @ (the leading
--- underscore is mandatory).
---
--- __Note__: The primary difference to 'camelCaseFields' is that for
--- @classUnderscoreNoPrefixFields@ the field names are not expected to
--- be prefixed with the type name. This might be the desired behaviour
--- when the @DuplicateRecordFields@ extension is enabled.
-classUnderscoreNoPrefixFields :: LensRules
-classUnderscoreNoPrefixFields =
-  defaultFieldRules & lensField .~ classUnderscoreNoPrefixNamer
-
--- | A 'FieldNamer' for 'classUnderscoreNoPrefixFields'.
-classUnderscoreNoPrefixNamer :: FieldNamer
-classUnderscoreNoPrefixNamer _ _ field = maybeToList $ do
-  fieldUnprefixed <- stripPrefix "_" (nameBase field)
-  let className  = "Has" ++ overHead toUpper fieldUnprefixed
-      methodName = fieldUnprefixed
-  return (MethodName (mkName className) (mkName methodName))
-
--- | Field rules fields in the form @ prefixFieldname or _prefixFieldname @
--- If you want all fields to be lensed, then there is no reason to use an @_@ before the prefix.
--- If any of the record fields leads with an @_@ then it is assume a field without an @_@ should not have a lens created.
---
--- Note that @prefix@ may be any string of characters that are not uppercase
--- letters. (In particular, it may be arbitrary string of lowercase letters
--- and numbers) This is the behavior that 'defaultFieldRules' had in lens
--- 4.4 and earlier.
-abbreviatedFields :: LensRules
-abbreviatedFields = defaultFieldRules { _fieldToDef = abbreviatedNamer }
-
--- | A 'FieldNamer' for 'abbreviatedFields'.
-abbreviatedNamer :: FieldNamer
-abbreviatedNamer _ fields field = maybeToList $ do
-
-  fieldPart <- stripMaxLc (nameBase field)
-  method    <- computeMethod fieldPart
-  let cls = "Has" ++ fieldPart
-  return (MethodName (mkName cls) (mkName method))
-
-  where
-  stripMaxLc f = do x <- stripPrefix optUnderscore f
-                    case break isUpper x of
-                      (p,s) | List.null p || List.null s -> Nothing
-                            | otherwise                  -> Just s
-  optUnderscore  = ['_' | any (isPrefixOf "_" . nameBase) fields ]
-
-  computeMethod (x:xs) | isUpper x = Just (toLower x : xs)
-  computeMethod _                  = Nothing
-
+----------------------------------------
+-- Fields
 
 -- | Generate overloaded field accessors.
 --
@@ -619,6 +546,10 @@ makeFields = makeFieldOptics camelCaseFields
 makeFieldsNoPrefix :: Name -> DecsQ
 makeFieldsNoPrefix = makeFieldOptics classUnderscoreNoPrefixFields
 
+-- | @ declareFields = 'declareLensesWith' 'defaultFieldRules' @
+declareFields :: DecsQ -> DecsQ
+declareFields = declareLensesWith defaultFieldRules
+
 defaultFieldRules :: LensRules
 defaultFieldRules = LensRules
   { _simpleLenses    = True
@@ -631,6 +562,230 @@ defaultFieldRules = LensRules
   , _fieldToDef      = camelCaseNamer
   }
 
+----------------------------------------
+-- Prisms
+
+-- | Generate a 'Control.Lens.Type.Prism' for each constructor of each data type.
+--
+-- /e.g./
+--
+-- @
+-- declarePrisms [d|
+--   data Exp = Lit Int | Var String | Lambda{ bound::String, body::Exp }
+--   |]
+-- @
+--
+-- will create
+--
+-- @
+-- data Exp = Lit Int | Var String | Lambda { bound::String, body::Exp }
+-- _Lit :: 'Prism'' Exp Int
+-- _Var :: 'Prism'' Exp String
+-- _Lambda :: 'Prism'' Exp (String, Exp)
+-- @
+declarePrisms :: DecsQ -> DecsQ
+declarePrisms = declareWith $ \dec -> do
+  emit =<< liftDeclare (makeDecPrisms True dec)
+  return dec
+
+----------------------------------------
+-- Customization of rules
+
+-- | Generate "simple" optics even when type-changing optics are possible.
+-- (e.g. 'Lens'' instead of 'Lens')
+simpleLenses :: Lens' LensRules Bool
+simpleLenses = lensVL $ \f r ->
+  fmap (\x -> r { _simpleLenses = x}) (f (_simpleLenses r))
+
+-- | Indicate whether or not to supply the signatures for the generated lenses.
+--
+-- Disabling this can be useful if you want to provide a more restricted type
+-- signature or if you want to supply hand-written haddocks.
+generateSignatures :: Lens' LensRules Bool
+generateSignatures = lensVL $ \f r ->
+  fmap (\x -> r { _generateSigs = x}) (f (_generateSigs r))
+
+-- | Generate "updateable" optics when 'True'. When 'False', (affine) folds will
+-- be generated instead of (affine) traversals and getters will be generated
+-- instead of lenses. This mode is intended to be used for types with invariants
+-- which must be maintained by "smart" constructors.
+generateUpdateableOptics :: Lens' LensRules Bool
+generateUpdateableOptics = lensVL $ \f r ->
+  fmap (\x -> r { _allowUpdates = x}) (f (_allowUpdates r))
+
+-- | Generate optics using lazy pattern matches. This can
+-- allow fields of an undefined value to be initialized with lenses:
+--
+-- @
+-- data Foo = Foo {_x :: Int, _y :: Bool}
+--   deriving Show
+--
+-- 'makeLensesWith' ('lensRules' & 'generateLazyPatterns' .~ True) ''Foo
+-- @
+--
+-- @
+-- > undefined & x .~ 8 & y .~ True
+-- Foo {_x = 8, _y = True}
+-- @
+--
+-- The downside of this flag is that it can lead to space-leaks and
+-- code-size/compile-time increases when generated for large records. By default
+-- this flag is turned off, and strict optics are generated.
+--
+-- When using lazy optics the strict optic can be recovered by composing with
+-- '$!':
+--
+-- @
+-- strictOptic = ($!) . lazyOptic
+-- @
+generateLazyPatterns :: Lens' LensRules Bool
+generateLazyPatterns = lensVL $ \f r ->
+  fmap (\x -> r { _lazyPatterns = x}) (f (_lazyPatterns r))
+
+-- | Create the class if the constructor if generated lenses would be
+-- type-preserving and the 'lensClass' rule matches.
+createClass :: Lens' LensRules Bool
+createClass = lensVL $ \f r ->
+  fmap (\x -> r { _generateClasses = x}) (f (_generateClasses r))
+
+-- | 'Lens'' to access the convention for naming fields in our 'LensRules'.
+lensField :: Lens' LensRules FieldNamer
+lensField = lensVL $ \f r ->
+  fmap (\x -> r { _fieldToDef = x}) (f (_fieldToDef r))
+
+-- | 'Lens'' to access the option for naming "classy" lenses.
+lensClass :: Lens' LensRules ClassyNamer
+lensClass = lensVL $ \f r ->
+  fmap (\x -> r { _classyLenses = x }) (f (_classyLenses r))
+
+----------------------------------------
+-- Common sets of rules
+
+abbreviatedFieldLabels :: LensRules
+abbreviatedFieldLabels = fieldLabelsRules { _fieldToDef = abbreviatedNamer }
+
+-- | Field rules for fields in the form @ _prefix_fieldname @
+underscoreFields :: LensRules
+underscoreFields = defaultFieldRules & lensField .~ underscoreNamer
+
+-- | Field rules for fields in the form @ prefixFieldname or _prefixFieldname @
+--
+-- If you want all fields to be lensed, then there is no reason to use an @_@
+-- before the prefix.  If any of the record fields leads with an @_@ then it is
+-- assume a field without an @_@ should not have a lens created.
+--
+-- __Note__: The @prefix@ must be the same as the typename (with the first
+-- letter lowercased). This is a change from lens versions before lens 4.5. If
+-- you want the old behaviour, use 'makeLensesWith' 'abbreviatedFields'
+camelCaseFields :: LensRules
+camelCaseFields = defaultFieldRules
+
+-- | Field rules for fields in the form @ _fieldname @ (the leading
+-- underscore is mandatory).
+--
+-- __Note__: The primary difference to 'camelCaseFields' is that for
+-- @classUnderscoreNoPrefixFields@ the field names are not expected to
+-- be prefixed with the type name. This might be the desired behaviour
+-- when the @DuplicateRecordFields@ extension is enabled.
+classUnderscoreNoPrefixFields :: LensRules
+classUnderscoreNoPrefixFields =
+  defaultFieldRules & lensField .~ classUnderscoreNoPrefixNamer
+
+-- | Field rules fields in the form @ prefixFieldname or _prefixFieldname @
+-- If you want all fields to be lensed, then there is no reason to use an @_@ before the prefix.
+-- If any of the record fields leads with an @_@ then it is assume a field without an @_@ should not have a lens created.
+--
+-- Note that @prefix@ may be any string of characters that are not uppercase
+-- letters. (In particular, it may be arbitrary string of lowercase letters
+-- and numbers) This is the behavior that 'defaultFieldRules' had in lens
+-- 4.4 and earlier.
+abbreviatedFields :: LensRules
+abbreviatedFields = defaultFieldRules { _fieldToDef = abbreviatedNamer }
+
+----------------------------------------
+-- Namers
+
+-- | A 'FieldNamer' that strips the _ off of the field name, lowercases the
+-- name, and skips the field if it doesn't start with an '_'.
+underscoreNoPrefixNamer :: FieldNamer
+underscoreNoPrefixNamer _ _ n =
+  case nameBase n of
+    '_':x:xs -> [TopName (mkName (toLower x:xs))]
+    _        -> []
+
+
+-- | Create a 'FieldNamer' from explicit pairings of @(fieldName, lensName)@.
+lookingupNamer :: [(String,String)] -> FieldNamer
+lookingupNamer kvs _ _ field =
+  [ TopName (mkName v) | (k,v) <- kvs, k == nameBase field]
+
+-- | Create a 'FieldNamer' from a mapping function. If the function returns
+-- @[]@, it creates no lens for the field.
+mappingNamer :: (String -> [String]) -- ^ A function that maps a @fieldName@ to
+                                     -- @lensName@s.
+             -> FieldNamer
+mappingNamer mapper _ _ = fmap (TopName . mkName) . mapper . nameBase
+
+-- | A 'FieldNamer' for 'underscoreFields'.
+underscoreNamer :: FieldNamer
+underscoreNamer _ _ field = maybeToList $ do
+  _      <- prefix field'
+  method <- niceLens
+  cls    <- classNaming
+  return (MethodName (mkName cls) (mkName method))
+  where
+    field' = nameBase field
+    prefix ('_':xs) | '_' `List.elem` xs = Just (takeWhile (/= '_') xs)
+    prefix _                             = Nothing
+    niceLens    = prefix field' <&> \n -> drop (length n + 2) field'
+    classNaming = niceLens <&> ("Has_" ++)
+
+-- | A 'FieldNamer' for 'camelCaseFields'.
+camelCaseNamer :: FieldNamer
+camelCaseNamer tyName fields field = maybeToList $ do
+
+  fieldPart <- stripPrefix expectedPrefix (nameBase field)
+  method    <- computeMethod fieldPart
+  let cls = "Has" ++ fieldPart
+  return (MethodName (mkName cls) (mkName method))
+
+  where
+  expectedPrefix = optUnderscore ++ over _head toLower (nameBase tyName)
+
+  optUnderscore  = ['_' | any (isPrefixOf "_" . nameBase) fields ]
+
+  computeMethod (x:xs) | isUpper x = Just (toLower x : xs)
+  computeMethod _                  = Nothing
+
+-- | A 'FieldNamer' for 'classUnderscoreNoPrefixFields'.
+classUnderscoreNoPrefixNamer :: FieldNamer
+classUnderscoreNoPrefixNamer _ _ field = maybeToList $ do
+  fieldUnprefixed <- stripPrefix "_" (nameBase field)
+  let className  = "Has" ++ over _head toUpper fieldUnprefixed
+      methodName = fieldUnprefixed
+  return (MethodName (mkName className) (mkName methodName))
+
+-- | A 'FieldNamer' for 'abbreviatedFields'.
+abbreviatedNamer :: FieldNamer
+abbreviatedNamer _ fields field = maybeToList $ do
+
+  fieldPart <- stripMaxLc (nameBase field)
+  method    <- computeMethod fieldPart
+  let cls = "Has" ++ fieldPart
+  return (MethodName (mkName cls) (mkName method))
+
+  where
+  stripMaxLc f = do x <- stripPrefix optUnderscore f
+                    case break isUpper x of
+                      (p,s) | List.null p || List.null s -> Nothing
+                            | otherwise                  -> Just s
+  optUnderscore  = ['_' | any (isPrefixOf "_" . nameBase) fields ]
+
+  computeMethod (x:xs) | isUpper x = Just (toLower x : xs)
+  computeMethod _                  = Nothing
+
+----------------------------------------
+-- Internal TH Implementation
 
 -- Declaration quote stuff
 

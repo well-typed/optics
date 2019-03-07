@@ -13,7 +13,6 @@ module Optics.Indexed.Core
 
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
-import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Profunctor
 
 import Optics.AffineFold

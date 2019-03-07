@@ -2,6 +2,11 @@
 {-# LANGUAGE DataKinds #-}
 module Optics.Internal.Optic.TypeLevel where
 
+import GHC.TypeLits
+
+type family QuoteType (x :: *) :: ErrorMessage where
+  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
+
 -- | Curry a type-level list.
 --
 -- In pseudo (dependent-)Haskell:

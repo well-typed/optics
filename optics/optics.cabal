@@ -111,8 +111,10 @@ test-suite optics-tests
   build-depends: base
                , containers
                , inspection-testing  >=0.4.1.1 && <0.5
+               , mtl
                , optics-core
                , optics
+               , random
                , tasty
                , tasty-hunit
                , template-haskell
@@ -123,6 +125,7 @@ test-suite optics-tests
   other-modules: Optics.Tests.Computation
                  Optics.Tests.Core
                  Optics.Tests.Eta
+                 Optics.Tests.Labels
                  Optics.Tests.Misc
                  Optics.Tests.Utils
 
