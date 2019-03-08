@@ -373,6 +373,9 @@ instance At (IntMap a) where
 #endif
   {-# INLINE at #-}
 
+-- | Usage of this instance might lead to space leaks as when @Just v@ is
+-- returned, @v@ is not forced to whnf before being put in the map. To work
+-- around that return @v `seq` Just v@ or use 'Data.Map.Optics.at'' instead.
 instance Ord k => At (Map k a) where
 #if MIN_VERSION_containers(0,5,8)
   at k = lensVL $ \f -> Map.alterF f k
