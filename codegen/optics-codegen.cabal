@@ -4,6 +4,5 @@ version: 0
 
 executable optics-codegen-subtypes
   main-is: Subtypes.hs
-  other-modules: Topograph
   build-depends:
-    base, containers, vector
+    base, containers, vector, topograph ^>= 1

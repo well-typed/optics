@@ -27,10 +27,8 @@ import           Generics.SOP
 import           Generics.SOP.NP        (collapse_NP)
 import           Generics.SOP.Optics    (productRep, rep, sop)
 import qualified GHC.Generics           as GHC
-import           System.Environment     (getArgs)
 
 import           Optics
-import           Optics.Operators
 import           Optics.Operators.State
 
 -------------------------------------------------------------------------------
@@ -263,6 +261,12 @@ data St s = St
     { stStmts :: [Stmt s] -> [Stmt s]
     , stVars  :: PerTy Int
     }
+
+instance (a ~ b, a ~ ([Stmt s] -> [Stmt s])) => LabelOptic "stmts" A_Lens (St s) (St s) a a where
+    labelOptic = lens stStmts $ \s x -> s { stStmts = x }
+
+instance (a ~ b, a ~ PerTy Int) => LabelOptic "vars" A_Lens (St s) (St s) a a where
+    labelOptic = lens stVars $ \s x -> s { stVars = x }
 
 emptyS :: St s
 emptyS = St

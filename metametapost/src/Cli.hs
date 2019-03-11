@@ -15,7 +15,6 @@ import qualified GHC.Generics        as GHC
 import           System.Environment  (getArgs)
 
 import           Optics
-import           Optics.Labels       ()
 import           Optics.Operators
 
 import           MetaMetaPost
@@ -414,5 +413,3 @@ main = do
         ("reoptics" : _)      -> printDiagram reOptics
         ("indexedoptics" : _) -> printDiagram indexedOptics
         _                     -> printDiagram hierarchy
-
-makeFieldLabels ''St
