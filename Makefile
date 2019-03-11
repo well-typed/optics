@@ -40,22 +40,16 @@ codegen-subtypes :
 codegen-join :
 	cabal new-run --builddir=dist-codegen --project-file=cabal.codegen.project optics-codegen-subtypes -- join
 
+DIAGRAMS=optics reoptics indexedoptics
+
 diagrams : optics/optics.png optics/reoptics.png optics/indexedoptics.png
 
-metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp : build metametapost/src/MetaMetaPost.hs
+metametapost/%.mp : metametapost/src/MetaMetaPost.hs metametapost/src/Cli.hs
 	cabal new-build metametapost-optics
-	$$(cabal new-exec which metametapost-optics) hierarchy > metametapost/optics.mp
-	$$(cabal new-exec which metametapost-optics) reoptics > metametapost/reoptics.mp
-	$$(cabal new-exec which metametapost-optics) indexedoptics > metametapost/indexedoptics.mp
+	$$(cabal new-exec which metametapost-optics) $* > $@
 
-metametapost/optics.png metametapost/reoptics.png metametapost/indexedoptics.png : metametapost/optics.mp metametapost/reoptics.mp metametapost/indexedoptics.mp
-	make -C metametapost
+metametapost/%.png : metametapost/%.mp
+	make -C metametapost $*.png
 
-optics/optics.png : metametapost/optics.mp
-	cp metametapost/optics.png optics/optics.png
-
-optics/reoptics.png : metametapost/reoptics.mp
-	cp metametapost/reoptics.png optics/reoptics.png
-
-optics/indexedoptics.png : metametapost/indexedoptics.mp
-	cp metametapost/indexedoptics.png optics/indexedoptics.png
+optics/%.png : metametapost/%.png
+	cp $< $@

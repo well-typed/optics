@@ -4,7 +4,7 @@ version:       0.1
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
-tested-with:   ghc ==8.0.2 ghc ==8.2.2 ghc ==8.4.4 ghc ==8.6.3
+tested-with:   GHC ==8.6.3 || ==8.4.4 || ==8.2.2 || ==8.0.2
 maintainer:    oleg@well-typed.com
 synopsis:      Generate optics documentation diagrams
 category:      Optics, Examples
@@ -15,7 +15,8 @@ description:
 executable metametapost-optics
   default-language: Haskell2010
   ghc-options:      -Wall
-  main-is:          MetaMetaPost.hs
+  main-is:          Cli.hs
+  other-modules:    MetaMetaPost
   hs-source-dirs:   src
   build-depends:
       base            >=4.9 && <5
