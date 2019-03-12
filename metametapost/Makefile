@@ -19,4 +19,4 @@ MPSPARAMS=-s outputformat='"mps"' -s outputtemplate='"%j.mps"'
 	$(MPOST) $(SVGPARAMS) $<
 
 %.png : %.svg
-	inkscape --export-png=$@ --export-dpi=72 --export-background-opacity=0 --without-gui $<
+	inkscape --export-png=$@ --export-dpi=108 --export-background-opacity=0 --without-gui $<

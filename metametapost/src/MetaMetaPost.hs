@@ -262,10 +262,10 @@ data St s = St
     , stVars  :: PerTy Int
     }
 
-instance (a ~ b, a ~ ([Stmt s] -> [Stmt s])) => LabelOptic "stmts" A_Lens (St s) (St s) a a where
+instance (a ~ b, s ~ s', a ~ ([Stmt s] -> [Stmt s])) => LabelOptic "stmts" A_Lens (St s) (St s') a b where
     labelOptic = lens stStmts $ \s x -> s { stStmts = x }
 
-instance (a ~ b, a ~ PerTy Int) => LabelOptic "vars" A_Lens (St s) (St s) a a where
+instance (a ~ b, s ~ s', a ~ PerTy Int) => LabelOptic "vars" A_Lens (St s) (St s') a b where
     labelOptic = lens stVars $ \s x -> s { stVars = x }
 
 emptyS :: St s
@@ -612,6 +612,7 @@ runStmts m = case m of
 printDiagram :: (forall s. Stmts s ()) -> IO ()
 printDiagram d = do
     putStrLn "prologues := 3;"
+    putStrLn "bboxmargin := 4bp;"
 
     -- latex prelude
     traverse_ putStrLn
