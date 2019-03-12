@@ -42,29 +42,14 @@ data OK
     |  Tag_IxTraversal
     |  Tag_IxSetter
     |  Tag_IxFold
+    |  Tag_IxAffineTraversal
+    |  Tag_IxAffineFold
   deriving (Eq, Ord, Read, Show, Enum, Bounded, GHC.Generic)
 
 instance Generic OK
 
--- | Fields should be in the same order as in OK
-data PerOK a = PerOK
-    { perEquality        :: a
-    , perIso             :: a
-    , perLens            :: a
-    , perPrism           :: a
-    , perAffineTraversal :: a
-    , perTraversal       :: a
-    , perIxTraversal     :: a
-    , perSetter          :: a
-    , perIxSetter        :: a
-    , perPrismaticGetter :: a
-    , perGetter          :: a
-    , perAffineFold      :: a
-    , perFold            :: a
-    , perIxFold          :: a
-    , perLensyReview     :: a
-    , perReview          :: a
-    }
+-- | There should be enough @a@
+data PerOK a = PerOK a a a a a a a a a a a a a a a a a a
   deriving (Functor, Foldable, Traversable, GHC.Generic)
 
 instance Generic (PerOK a)
@@ -85,43 +70,49 @@ dimY :: Expr s 'Numeric
 dimY = L 50
 
 okName :: OK -> String
-okName Tag_Equality        = "Equality"
-okName Tag_Iso             = "Iso"
-okName Tag_Lens            = "Lens"
-okName Tag_Prism           = "Prism"
-okName Tag_AffineTraversal = "AffineTraversal"
-okName Tag_Traversal       = "Traversal"
-okName Tag_IxTraversal     = "IxTraversal"
-okName Tag_Setter          = "Setter"
-okName Tag_IxSetter        = "IxSetter"
-okName Tag_PrismaticGetter = "PrismaticGetter"
-okName Tag_Getter          = "Getter"
-okName Tag_AffineFold      = "AffineFold"
-okName Tag_Fold            = "Fold"
-okName Tag_IxFold          = "IxFold"
-okName Tag_LensyReview     = "LensyReview"
-okName Tag_Review          = "Review"
+okName Tag_Equality          = "Equality"
+okName Tag_Iso               = "Iso"
+okName Tag_Lens              = "Lens"
+okName Tag_Prism             = "Prism"
+okName Tag_AffineTraversal   = "AffineTraversal"
+okName Tag_Traversal         = "Traversal"
+okName Tag_IxTraversal       = "IxTraversal"
+okName Tag_Setter            = "Setter"
+okName Tag_IxSetter          = "IxSetter"
+okName Tag_PrismaticGetter   = "PrismaticGetter"
+okName Tag_Getter            = "Getter"
+okName Tag_AffineFold        = "AffineFold"
+okName Tag_Fold              = "Fold"
+okName Tag_IxFold            = "IxFold"
+okName Tag_LensyReview       = "LensyReview"
+okName Tag_Review            = "Review"
+okName Tag_IxAffineFold      = "IxAffineFold"
+okName Tag_IxAffineTraversal = "IxAffineTraversal"
 
-positions :: PerOK (Expr s 'Product)
-positions = tabulate $ \case
-    Tag_Equality        -> pair 2 0
-    Tag_Iso             -> pair 2 1
-    Tag_Lens            -> pair 1 2
-    Tag_Prism           -> pair 3 2
-    Tag_AffineTraversal -> pair 2 3
-    Tag_Traversal       -> pair 3 4
-    Tag_IxTraversal     -> pair 2 5
-    Tag_Setter          -> pair 4 5
-    Tag_IxSetter        -> pair 3 6
-    Tag_PrismaticGetter -> pair 0 2
-    Tag_Getter          -> pair 1 3
-    Tag_AffineFold      -> pair 2 4
-    Tag_Fold            -> pair 3 5
-    Tag_IxFold          -> pair 2 6
-    Tag_LensyReview     -> pair 4 2
-    Tag_Review          -> pair 3 3
+-- | We need an offset to avoid empty space
+-- For some reason metapost doesn't cut it itself :(
+positions :: Int -> PerOK (Expr s 'Product)
+positions offset = tabulate $ \case
+    Tag_Equality          -> pair 2 0
+    Tag_Iso               -> pair 2 1
+    Tag_Lens              -> pair 1 2
+    Tag_Prism             -> pair 3 2
+    Tag_AffineTraversal   -> pair 2 3
+    Tag_IxAffineTraversal -> pair 1 4
+    Tag_Traversal         -> pair 3 4
+    Tag_IxTraversal       -> pair 2 5
+    Tag_Setter            -> pair 4 5
+    Tag_IxSetter          -> pair 3 6
+    Tag_PrismaticGetter   -> pair 0 2
+    Tag_Getter            -> pair 1 3
+    Tag_AffineFold        -> pair 2 4
+    Tag_IxAffineFold      -> pair 1 5
+    Tag_Fold              -> pair 3 5
+    Tag_IxFold            -> pair 2 6
+    Tag_LensyReview       -> pair 4 2
+    Tag_Review            -> pair 3 3
   where
-    pair x y = Pair (L x .* dimX) (L y .* dimY)
+    pair x y = Pair (L x .* dimX) (L (y - fromIntegral offset) .* dimY)
 
 -------------------------------------------------------------------------------
 -- Diagrams: Hierarchy
@@ -134,7 +125,7 @@ hierarchy = do
         t2 <- bindSnd_ $ bbox_ b `IntersectionTimes` reverse_ p
         return $ subpath_ (t1, length_ p .- t2) p
 
-    z <- traverse bind_ positions
+    z <- traverse bind_ $ positions 0
     q <- itraverse (\k -> bind_ . TheLabel ("\\mathit{" ++ okName k ++ "}")) z
 
     ifor_ q $ \k pic -> unless (isIndexed k) $ draw_ pic
@@ -192,7 +183,7 @@ reOptics = do
         t2 <- bindSnd_ $ bbox_ a `IntersectionTimes` reverse_ p
         return $ subpath_ (L 0, length_ p .- t2) p
 
-    z <- traverse bind_ positions
+    z <- traverse bind_ $ positions 0
     q <- itraverse (\k -> bind_ . TheLabel ("\\mathit{" ++ okName k ++ "}")) z
 
     ifor_ q  $ \k pic -> when (isRe k) $ draw_ pic
@@ -314,7 +305,7 @@ indexedOptics = do
         t2 <- bindSnd_ $ bbox_ b `IntersectionTimes` reverse_ p
         return $ subpath_ (t1, length_ p .- t2) p
 
-    z <- traverse bind_ positions
+    z <- traverse bind_ $ positions 2
     q <- itraverse (\k -> bind_ . TheLabel ("\\mathit{" ++ okName k ++ "}")) z
 
     blue <- bind_ $ RGB (L 0) (L 0) (L 0.6)
@@ -366,14 +357,19 @@ indexedOptics = do
 
     orange <- bind_ $ RGB (L 1) (L 0.5) (L 0.2)
 
-    arrowCrossingC orange Tag_Traversal Tag_IxTraversal Tag_AffineFold Tag_Fold
-    arrowC orange Tag_Setter Tag_IxSetter
-    arrowC orange Tag_Fold Tag_IxFold
+    arrowCrossingC orange Tag_Traversal       Tag_IxTraversal Tag_AffineFold Tag_Fold
+    arrowC         orange Tag_Setter          Tag_IxSetter
+    arrowC         orange Tag_Fold            Tag_IxFold
+    arrowC         orange Tag_AffineFold      Tag_IxAffineFold
+    arrowCrossingC orange Tag_AffineTraversal Tag_IxAffineTraversal Tag_Getter Tag_AffineFold
 
     -- Arrows between indexed optics
 
-    arrowC blue Tag_IxTraversal Tag_IxFold
-    arrowCrossingC blue Tag_IxTraversal Tag_IxSetter Tag_Fold Tag_IxFold
+    arrowC         blue Tag_IxAffineFold      Tag_IxFold
+    arrowCrossingC blue Tag_IxAffineTraversal Tag_IxTraversal   Tag_AffineFold Tag_IxAffineFold
+    arrowC         blue Tag_IxTraversal       Tag_IxFold
+    arrowC         blue Tag_IxAffineTraversal Tag_IxAffineFold
+    arrowCrossingC blue Tag_IxTraversal       Tag_IxSetter      Tag_Fold Tag_IxFold
 
     return ()
   where
@@ -386,19 +382,22 @@ indexedOptics = do
     isIxRelated Tag_AffineFold      = True
     isIxRelated Tag_Fold            = True
 
-    isIxRelated Tag_IxTraversal     = True
-    isIxRelated Tag_IxSetter        = True
+    isIxRelated Tag_IxTraversal       = True
+    isIxRelated Tag_IxSetter          = True
+    isIxRelated Tag_IxAffineFold      = True
+    isIxRelated Tag_IxAffineTraversal = True
 
     isIxRelated Tag_IxFold          = True
 
     isIxRelated _                   = False
 
-    isIx Tag_IxTraversal = True
-    isIx Tag_IxSetter    = True
+    isIx Tag_IxTraversal       = True
+    isIx Tag_IxSetter          = True
+    isIx Tag_IxFold            = True
+    isIx Tag_IxAffineTraversal = True
+    isIx Tag_IxAffineFold      = True
 
-    isIx Tag_IxFold      = True
-
-    isIx _               = False
+    isIx _ = False
 
 
 -------------------------------------------------------------------------------
