@@ -98,36 +98,36 @@ genJoin = either (fail . show) id $ runG opticsKind $ \g -> do
     let G {..} = closure g
 
     for_ gVertices $ \a -> do
-        putStrLn ""
+        let k = gFromVertex a
+        putStrLn   ""
+        putStrLn $ "  -- " ++ show k ++ "-----"
 
         for_ gVertices $ \b -> unless (a == b) $ do
-            let k = gFromVertex a
             let l = gFromVertex b
 
-            let ke = gEdges a
-            let le = gEdges b
+            let ke = Set.fromList $ gEdges a
+            let le = Set.fromList $ gEdges b
 
-            -- join, if exists
-
-            -- pick the first element, in topo-order
-            -- in arbitrary graph such "join" might not be unique; it is in ours
-            --
-            -- proper: check that there's path from `x` to all other elements of `xs`
-            let pick xs = listToMaybe (gVertices `intersect` xs)
-
-            let mkl | a `elem` le = Just k
-                    | b `elem` ke = Just l
-                    | otherwise   = fmap gFromVertex $ pick $ le `intersect` ke
+            let mkl | a `elem` le = [a]
+                    | b `elem` ke = [b]
+                    | otherwise = case Set.maxView $ Set.intersection ke le of
+                        Nothing      -> []
+                        Just (j, js) -> foldr f [j] js where
+                            f u vs = u : filter (`notElem` gEdges u) vs
 
             case mkl of
-                Nothing -> putStrLn $ "  -- no Join with " ++ show l
-                Just kl -> putStrLn $ unwords
+                -- alignment is important, thus padding
+                []          -> putStrLn $ "  -- no Join with         " ++ show l
+                kls@(_:_:_) -> putStrLn $ "  -- error: multiple joins: " ++ show (map gFromVertex kls)
+                [kl]        -> do
+                  putStrLn $ unwords
                     [ "  Join"
                     , leftpad (show k)
                     , leftpad (show l)
                     , "="
-                    , show kl
+                    , show (gFromVertex kl)
                     ]
+
 -------------------------------------------------------------------------------
 -- subtypes
 -------------------------------------------------------------------------------
