@@ -20,6 +20,7 @@ executable metametapost-optics
   hs-source-dirs:   src
   build-depends:
       base            >=4.9 && <5
+    , containers
     , generic-optics
     , generics-sop
     , mtl

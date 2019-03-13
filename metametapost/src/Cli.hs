@@ -91,8 +91,8 @@ okName Tag_IxAffineTraversal = "IxAffineTraversal"
 
 -- | We need an offset to avoid empty space
 -- For some reason metapost doesn't cut it itself :(
-positions :: Int -> PerOK (Expr s 'Product)
-positions offset = tabulate $ \case
+positions :: PerOK (Expr s 'Product)
+positions = tabulate $ \case
     Tag_Equality          -> pair 2 0
     Tag_Iso               -> pair 2 1
     Tag_Lens              -> pair 1 2
@@ -112,7 +112,7 @@ positions offset = tabulate $ \case
     Tag_LensyReview       -> pair 4 2
     Tag_Review            -> pair 3 3
   where
-    pair x y = Pair (L x .* dimX) (L (y - fromIntegral offset) .* dimY)
+    pair x y = Pair (L x .* dimX) (L y .* dimY)
 
 -------------------------------------------------------------------------------
 -- Diagrams: Hierarchy
@@ -125,7 +125,7 @@ hierarchy = do
         t2 <- bindSnd_ $ bbox_ b `IntersectionTimes` reverse_ p
         return $ subpath_ (t1, length_ p .- t2) p
 
-    z <- traverse bind_ $ positions 0
+    z <- traverse bind_ positions
     q <- itraverse (\k -> bind_ . TheLabel ("\\mathit{" ++ okName k ++ "}")) z
 
     ifor_ q $ \k pic -> unless (isIndexed k) $ draw_ pic
@@ -183,7 +183,7 @@ reOptics = do
         t2 <- bindSnd_ $ bbox_ a `IntersectionTimes` reverse_ p
         return $ subpath_ (L 0, length_ p .- t2) p
 
-    z <- traverse bind_ $ positions 0
+    z <- traverse bind_ positions
     q <- itraverse (\k -> bind_ . TheLabel ("\\mathit{" ++ okName k ++ "}")) z
 
     ifor_ q  $ \k pic -> when (isRe k) $ draw_ pic
@@ -305,7 +305,7 @@ indexedOptics = do
         t2 <- bindSnd_ $ bbox_ b `IntersectionTimes` reverse_ p
         return $ subpath_ (t1, length_ p .- t2) p
 
-    z <- traverse bind_ $ positions 2
+    z <- traverse bind_ positions
     q <- itraverse (\k -> bind_ . TheLabel ("\\mathit{" ++ okName k ++ "}")) z
 
     blue <- bind_ $ RGB (L 0) (L 0) (L 0.6)

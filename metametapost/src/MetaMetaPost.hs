@@ -31,6 +31,8 @@ import qualified GHC.Generics           as GHC
 import           Optics
 import           Optics.Operators.State
 
+import qualified Data.Set as Set
+
 -------------------------------------------------------------------------------
 -- Representable + generics-sop
 -------------------------------------------------------------------------------
@@ -601,13 +603,66 @@ call3 :: MacroN s '[ty1, ty2, ty3] ty -> Expr s ty1 -> Expr s ty2 -> Expr s ty3 
 call3 m x1 x2 x3 = Call m (x1 :* x2 :* x3 :* Nil)
 
 -------------------------------------------------------------------------------
+-- optimise
+-------------------------------------------------------------------------------
+
+varsExpr :: Expr s ty -> Set.Set String
+varsExpr (V (VarN _ s))          = Set.singleton s
+varsExpr (L _)                   = Set.empty
+varsExpr (P p)                   = varsPath p
+varsExpr (Pair x y)              = varsExpr x <> varsExpr y
+varsExpr (RGB r g b)             = varsExpr r <> varsExpr g <> varsExpr b
+varsExpr (TheLabel _ p)          = varsExpr p
+varsExpr (PlusNumeric x y)       = varsExpr x <> varsExpr y
+varsExpr (MinusNumeric x y)      = varsExpr x <> varsExpr y
+varsExpr (TimesNumeric x y)      = varsExpr x <> varsExpr y
+varsExpr (PlusProduct x y)       = varsExpr x <> varsExpr y
+varsExpr (MinusProduct x y)      = varsExpr x <> varsExpr y
+varsExpr (Subpath x y)           = varsExpr x <> varsExpr y
+varsExpr (IntersectionPoint x y) = varsExpr x <> varsExpr y
+varsExpr (IntersectionTimes x y) = varsExpr x <> varsExpr y
+varsExpr (Call _ xs)             = Set.unions $ collapse_NP $ map_NP (K . varsExpr) xs
+varsExpr (Circle x y)            = varsExpr x <> varsExpr y
+
+varsPath :: Path' s -> Set.Set String
+varsPath (PEnd pp)    = varsPP pp
+varsPath (PCons pp p) = varsPP pp <> varsPath p
+
+varsPP :: PP s -> Set.Set String
+varsPP (PP e)      = varsExpr e
+varsPP (PPDir p d) = varsExpr p <> varsExpr d
+
+varsStmt :: Stmt s -> Set.Set String
+varsStmt (Comment _)     = Set.empty
+varsStmt (Bind _ e)      = varsExpr e
+varsStmt (BindFst _ e)   = varsExpr e
+varsStmt (BindSnd _ e)   = varsExpr e
+varsStmt (VarDef _ _)    = Set.empty
+varsStmt (DrawPic p c)   = varsExpr p <> maybe Set.empty varsExpr c
+varsStmt (DrawPath p c)  = varsExpr p <> maybe Set.empty varsExpr c
+varsStmt (DrawArrow p c) = varsExpr p <> maybe Set.empty varsExpr c
+varsStmt (Expr e)        = varsExpr e
+
+optimise :: [Stmt s] -> [Stmt s]
+optimise = snd . foldr f (Set.empty, []) where
+    f :: Stmt s -> (Set.Set String, [Stmt s]) -> (Set.Set String, [Stmt s])
+    f (Bind (VarN _ v) _) (used, ss)
+        | v `Set.notMember` used = (used, ss)
+    f (BindFst (VarN _ v) _) (used, ss)
+        | v `Set.notMember` used = (used, ss)
+    f (BindSnd (VarN _ v) _) (used, ss)
+        | v `Set.notMember` used = (used, ss)
+    f s (used, ss) = (varsStmt s <> used, s : ss)
+
+
+-------------------------------------------------------------------------------
 -- Run
 -------------------------------------------------------------------------------
 
 runStmts :: (forall s. Stmts s ()) -> [String]
 runStmts m = case m of
     Stmts m' -> case execState m' emptyS of
-        St ss _ -> map output' (ss [])
+        St ss _ -> map output' $ optimise $ ss []
 
 printDiagram :: (forall s. Stmts s ()) -> IO ()
 printDiagram d = do
@@ -635,8 +690,12 @@ printDiagram d = do
     putStrLn "diag := image("
     traverse_ putStrLn (runStmts d)
     putStrLn ");"
-    putStrLn "unfill bbox(diag scaled 2);"
-    putStrLn "draw diag scaled 2;"
+    putStrLn "picture diah;"
+    -- not sure why we have to move image?
+    -- horizonttal offset can be whatever
+    putStrLn "diah = diag shifted (-(llcorner(diag)));"
+    putStrLn "unfill bbox(diah scaled 2);"
+    putStrLn "draw diah scaled 2;"
 
     putStrLn "endfig;"
 
