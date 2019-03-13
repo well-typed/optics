@@ -1,26 +1,27 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+-- | An 'IxFold' is an indexed version of an 'Optics.Fold.Fold'.  See
+-- "Optics.Indexed.Core" for a discussion of indexed optics in
+-- general.
+--
 module Optics.IxFold
-  ( A_Fold
-  , IxFold
-  , toIxFold
+  (
+  -- * Formation
+    IxFold
+
+  -- * Introduction
   , mkIxFold
+  , ifolded
+  , ifolding
+  , ifoldring
+
+  -- * Elimination
   , ifoldMapOf
   , ifoldrOf
   , ifoldlOf'
   , itoListOf
   , itraverseOf_
   , iforOf_
-  -- * Folds
-  , ifolded
-  , ifolding
-  , ifoldring
-  , ifiltered
-  , ibackwards_
-  -- * Semigroup structure
-  , isumming
-  , ifailing
-  -- * Special folds
   , iheadOf
   , ilastOf
   , ianyOf
@@ -28,6 +29,21 @@ module Optics.IxFold
   , inoneOf
   , ifindOf
   , ifindMOf
+
+  -- * Combinators
+  , ifiltered
+  , ibackwards_
+
+  -- * Semigroup structure
+  , isumming
+  , ifailing
+
+  -- * Subtyping
+  , A_Fold
+  , toIxFold
+
+  -- * Re-exports
+  , FoldableWithIndex(..)
   , module Optics.Optic
   ) where
 

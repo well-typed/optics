@@ -1,10 +1,39 @@
+-- | A 'Getter' is simply a function considered as an 'Optic'.
+--
+-- Given a function @f :: S -> A@, we can convert it into a
+-- @'Getter' S A@ using 'to', and convert back to a function using 'view'.
+--
+-- This is typically useful not when you have functions/'Getter's
+-- alone, but when you are composing multiple 'Optic's to produce a
+-- 'Getter'.
+--
 module Optics.Getter
-  ( A_Getter
-  , Getter
-  , toGetter
+  (
+  -- * Formation
+   Getter
+
+  -- * Introduction
+  , to
+
+  -- * Elimination
   , view
   , views
-  , to
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'view' ('to' f) = f
+  -- @
+
+  -- * Well-formedness
+  -- | A 'Getter' is not subject to any laws.
+
+  -- * Subtyping
+  , A_Getter
+  , toGetter
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where

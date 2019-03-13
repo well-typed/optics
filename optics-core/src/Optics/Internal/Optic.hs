@@ -51,13 +51,16 @@ type WithIx i = '[i]
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
 --
--- The first type parameter @k@ identifies the particular flavour
+-- The first parameter @k@ identifies the particular flavour
 -- (e.g. 'A_Lens' or 'A_Traversal').
 --
--- The type parameters @s@ and @t@ represent the "big" structure,
--- whereas @a@ and @b@ represent the "small" structure.
+-- The parameter @is@ is a list of types available as indices.  This
+-- will typically be 'NoIx' for unindexed optics, or 'WithIx' for
+-- optics with a single index. See "Optics.Indexed.Core" for
+-- discussion of indexed optics.
 --
--- TODO: explain indices
+-- The parameters @s@ and @t@ represent the "big" structure,
+-- whereas @a@ and @b@ represent the "small" structure.
 --
 newtype Optic (k :: *) (is :: [*]) s t a b =
   Optic { getOptic :: forall p j. Optic_ k p j (Curry is j) s t a b }

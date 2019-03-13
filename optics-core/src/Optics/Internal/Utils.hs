@@ -21,10 +21,10 @@ infixr 9 #.
 
 ----------------------------------------
 
--- | Helper for 'traverseOf_' and the like for better efficiency than the
--- foldr-based version.
+-- | Helper for 'Optics.Fold.traverseOf_' and the like for better
+-- efficiency than the foldr-based version.
 --
--- Note that the argument 'a' of the result should not be used.
+-- Note that the argument @a@ of the result should not be used.
 newtype Traversed f a = Traversed (f a)
 
 runTraversed :: Functor f => Traversed f a -> f ()
@@ -43,7 +43,7 @@ instance Applicative f => Monoid (Traversed f a) where
 
 ----------------------------------------
 
--- | Helper for 'failing' family to visit the first traversal only once.
+-- | Helper for 'Optics.Fold.failing' family to visit the first fold only once.
 data OrT f a = OrT !Bool (f a)
   deriving Functor
 

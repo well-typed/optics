@@ -5,7 +5,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Fold
 import Optics.Internal.Setter
 
--- | Internal implementation of 'traversed'.
+-- | Internal implementation of 'Optics.Traversal.traversed'.
 traversed__
   :: (Traversing p, Traversable f)
   => Optic__ p i i (f a) (f b) a b

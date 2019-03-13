@@ -1,16 +1,30 @@
 {-# LANGUAGE DataKinds #-}
+-- | An 'IxSetter' is an indexed version of an 'Optics.Setter.Setter'.
+-- See "Optics.Indexed.Core" for a discussion of indexed optics in
+-- general.
+--
 module Optics.IxSetter
-  ( A_Setter
-  , IxSetter
+  (
+  -- * Formation
+    IxSetter
   , IxSetter'
-  , FunctorWithIndex(..)
-  , toIxSetter
-  , iover
-  , iover'
-  , iset
-  , iset'
+
+  -- * Introduction
   , isets
   , imapped
+
+  -- * Elimination
+  , iset
+  , iset'
+  , iover
+  , iover'
+
+  -- * Subtyping
+  , A_Setter
+  , toIxSetter
+
+  -- * Re-exports
+  , FunctorWithIndex(..)
   , module Optics.Optic
   ) where
 

@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_HADDOCK not-home #-}
 module Optics.Internal.Indexed where
 
 import Control.Applicative
@@ -128,7 +129,7 @@ indexing l iafb s =
 
 ----------------------------------------
 
--- | Internal implementation of 'conjoined'.
+-- | Internal implementation of 'Optics.Indexed.Core.conjoined'.
 conjoined__
   :: (Constraints k p, Visiting p, is `HasSingleIndex` i)
   => Optic k NoIx s t a b
@@ -262,7 +263,7 @@ instance TraversableWithIndex () Maybe where
 
 -- Seq
 
--- | The position in the 'Seq' is available as the index.
+-- | The position in the 'Seq.Seq' is available as the index.
 instance FunctorWithIndex Int Seq.Seq where
   imap = Seq.mapWithIndex
   {-# INLINE imap #-}

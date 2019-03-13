@@ -78,7 +78,7 @@ toMapOf
 toMapOf o = ifoldMapOf o M.singleton
 {-# INLINE toMapOf #-}
 
--- | Strict version of 'at' for 'M.Map'.
+-- | Strict version of 'Optics.At.Core.at' for 'M.Map'.
 at' :: Ord k => k -> Lens' (M.Map k a) (Maybe a)
 at' k = lensVL $ \f s ->
 #if MIN_VERSION_containers(0,5,8)

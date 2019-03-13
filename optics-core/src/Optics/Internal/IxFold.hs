@@ -9,7 +9,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 import Optics.Internal.Fold
 
--- | Internal implementation of 'mkIxFold'.
+-- | Internal implementation of 'Optics.IxFold.mkIxFold'.
 mkIxFold__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
@@ -17,14 +17,14 @@ mkIxFold__
 mkIxFold__ f = rphantom . iwander f . rphantom
 {-# INLINE mkIxFold__ #-}
 
--- | Internal implementation of 'ifolded'.
+-- | Internal implementation of 'Optics.IxFold.ifolded'.
 ifolded__
   :: (Bicontravariant p, Traversing p, FoldableWithIndex i f)
   => Optic__ p j (i -> j) (f a) t a b
 ifolded__ = conjoined' (mkFold__ traverse_) (mkIxFold__ itraverse_)
 {-# INLINE ifolded__ #-}
 
--- | Internal implementation of 'ifoldring'.
+-- | Internal implementation of 'Optics.IxFold.ifoldring'.
 ifoldring__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (i -> a -> f u -> f u) -> f v -> s -> f w)

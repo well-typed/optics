@@ -1,12 +1,31 @@
+-- | An 'Iso'(morphism) expresses the fact that two types have the
+-- same structure, and hence can be converted from one to the other in
+-- either direction.
+--
 module Optics.Iso
-  ( An_Iso
-  , Iso
+  (
+  -- * Formation
+    Iso
   , Iso'
+  , An_Iso
+
+  -- * Introduction
   , toIso
   , iso
+
+  -- * Elimination
+  -- | An 'Iso' is a 'Optics.Getter.Getter' and an
+  -- 'Optics.Review.Review', therefore you can specialise types to
+  -- obtain:
+  --
+  -- @
+  -- 'Optics.Getter.view'   :: 'Iso' s t a b -> s -> a
+  -- 'Optics.Review.review' :: 'Iso' s t a b -> b -> t
+  -- @
   , withIso
   , au
   , under
+
   -- * Isomorphisms
   , mapping
   , coerced
@@ -17,6 +36,14 @@ module Optics.Iso
   , flipped
   , involuted
   , Swapped(..)
+
+  -- * Combinators
+  -- | The 'Optics.Re.re' combinator can be used to reverse an 'Iso':
+  --
+  -- @
+  -- 'Optics.Re.re' :: 'Iso' s t a b -> 'Iso' b a t s
+  -- @
+
   -- * Re-exports
   , module Optics.Optic
   )
@@ -142,7 +169,7 @@ curried = iso curry uncurry
 -- @
 --
 -- @
--- 'uncurried' = 're' 'curried'
+-- 'uncurried' = 'Optics.Re.re' 'curried'
 -- @
 --
 -- >>> (view uncurried (+)) (1,2)

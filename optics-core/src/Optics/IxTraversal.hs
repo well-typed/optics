@@ -1,11 +1,24 @@
 {-# LANGUAGE DataKinds #-}
+-- | An 'IxTraversal' is an indexed version of an
+-- 'Optics.Traversal.Traversal'.  See "Optics.Indexed.Core" for a
+-- discussion of indexed optics in general.
+--
 module Optics.IxTraversal
-  ( A_Traversal
-  , IxTraversal
+  (
+  -- * Formation
+    IxTraversal
   , IxTraversal'
-  , TraversableWithIndex(..)
-  , toIxTraversal
+
+  -- * Introduction
   , ixTraversalVL
+  , itraversed
+  , ignored
+  , elementsOf
+  , elements
+  , elementOf
+  , element
+
+  -- * Elimination
   , itraverseOf
   , iforOf
   , imapAccumLOf
@@ -14,16 +27,17 @@ module Optics.IxTraversal
   , iscanr1Of
   , ifailover
   , ifailover'
-  -- * Traversals
-  , itraversed
-  , ignored
+
   -- * Combinators
   , ibackwards
-  , elementsOf
-  , elements
-  , elementOf
-  , element
   , ipartsOf
+
+  -- * Subtyping
+  , A_Traversal
+  , toIxTraversal
+
+  -- * Re-exports
+  , TraversableWithIndex(..)
   , module Optics.Optic
   ) where
 
@@ -85,7 +99,7 @@ iforOf
 iforOf = flip . itraverseOf
 {-# INLINE iforOf #-}
 
--- | Generalizes 'Data.Traversable.mapAccumL' to an arbitrary 'IXTraversal'.
+-- | Generalizes 'Data.Traversable.mapAccumL' to an arbitrary 'IxTraversal'.
 --
 -- 'imapAccumLOf' accumulates state from left to right.
 --

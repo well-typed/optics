@@ -1,14 +1,39 @@
+-- | An 'AffineTraversal' is a 'Optics.Traversal.Traversal' that
+-- applies to at most one element.
+--
+-- These arise most frequently as the composition of a
+-- 'Optics.Lens.Lens' with a 'Optics.Prism.Prism'.
+--
 module Optics.AffineTraversal
-  ( An_AffineTraversal
-  , AffineTraversal
+  (
+  -- * Formation
+    AffineTraversal
   , AffineTraversal'
-  , toAffineTraversal
+
+  -- * Introduction
   , atraversal
+
+  -- * Elimination
   , withAffineTraversal
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'withAffineTraversal' ('atraversal' f g) k = k f g
+  -- @
+
+  -- * Subtyping
+  , An_AffineTraversal
+  , toAffineTraversal
+
+  -- * van Laarhoven encoding
   , AffineTraversalVL
   , AffineTraversalVL'
   , atraversalVL
   , toAtraversalVL
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where
@@ -26,9 +51,18 @@ type AffineTraversal' s a = Optic' An_AffineTraversal NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven affine traversal.
 --
--- Note: this isn't exactly van Laarhoven representation as there is no
--- @PointedFunctor@ class, but you can interpret the first argument as a
--- dictionary of 'Pointed' class that supplies the @point@ function.
+-- Note: this isn't exactly van Laarhoven representation as there is
+-- no @Pointed@ class (which would be a superclass of 'Applicative'
+-- that contains 'pure' but not '<*>'). You can interpret the first
+-- argument as a dictionary of @Pointed@ that supplies the @point@
+-- function (i.e. the implementation of 'pure').
+--
+-- A 'Optics.Traversal.TraversalVL' has 'Applicative' available and
+-- hence can combine the effects arising from multiple elements using
+-- '<*>'. In contrast, an 'AffineTraversalVL' has no way to combine
+-- effects from multiple elements, so it must act on at most one
+-- element.  (It can act on none at all thanks to the availability of
+-- @point@.)
 --
 type AffineTraversalVL s t a b =
   forall f. Functor f => (forall r. r -> f r) -> (a -> f b) -> s -> f t
@@ -55,7 +89,7 @@ atraversal match update = Optic $
   . right'
 {-# INLINE atraversal #-}
 
--- With with an affine traversal as a matcher and an updater.
+-- | Work with an affine traversal as a matcher and an updater.
 withAffineTraversal
   :: Is k An_AffineTraversal
   => Optic k is s t a b

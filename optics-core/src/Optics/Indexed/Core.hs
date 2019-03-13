@@ -1,6 +1,9 @@
 {-# LANGUAGE DataKinds #-}
+-- | TODO: discuss indexed optics in general
 module Optics.Indexed.Core
-  ( (<%>)
+  (
+  -- * Composition of indexed optics
+    (<%>)
   , (%>)
   , (<%)
   , reindexed
@@ -9,6 +12,10 @@ module Optics.Indexed.Core
   , icompose4
   , icompose5
   , IxOptic(..)
+
+  -- * Constraints
+  , HasSingleIndex
+  , NonEmptyIndices
   ) where
 
 import Optics.Internal.Indexed
@@ -134,7 +141,7 @@ class IxOptic k s t a b where
   -- when used without indices. Useful for defining indexed optics that are as
   -- efficient as their unindexed equivalents when used without indices.
   --
-  -- /Note:/ @conjoined f g@ is well-defined if and only if @f ≡ noIx g@.
+  -- /Note:/ @'conjoined' f g@ is well-defined if and only if @f ≡ 'noIx' g@.
   conjoined
     :: is `HasSingleIndex` i
     => Optic k NoIx s t a b

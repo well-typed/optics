@@ -1,12 +1,29 @@
+-- | A 'Traversal' lifts an effectful operation on elements to act on
+-- structures containing those elements.
+--
+-- That is, given a function @op :: A -> F B@ where @F@ is
+-- 'Applicative', a @'Traversal' S T A B@ can produce a function @S ->
+-- F T@ that applies @op@ to all the @A@s contained in the @S@.
+--
+-- This can be seen as a generalisation of 'traverse', where the type
+-- @S@ does not need to be a type constructor with @A@ as the last
+-- parameter.
+--
+-- A 'Lens' is a 'Traversal' that acts on a single value.
+--
+-- A close relative is the 'Optics.AffineTraversal.AffineTraversal',
+-- which is a 'Traversal' that acts on at most one value.
 module Optics.Traversal
   (
   -- * Formation
-    A_Traversal
-  , Traversal
+    Traversal
   , Traversal'
+
   -- * Introduction
+  -- | A 'Traversal' can be constructed by applying 'traversalVL' to
+  -- the van Laarhoven encoding.
   , traversed
-  , toTraversal
+
   -- * Elimination
   , traverseOf
   , forOf
@@ -18,13 +35,32 @@ module Optics.Traversal
   , scanl1Of
   , failover
   , failover'
-  -- * Combinators
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'traverseOf' 'traversed' = 'traverse'
+  -- 'traverseOf' ('traversalVL' f) = f
+  -- @
+
+    -- * Combinators
   , backwards
   , partsOf
+
+  -- * Subtyping
+  , A_Traversal
+  , toTraversal
+
   -- * van Laarhoven encoding
+  -- | The van Laarhoven representation of a 'Traversal' directly
+  -- expresses how it lifts an effectful operation @A -> F B@ on
+  -- elements to act on structures @S -> F T@.  Thus 'traverseOf'
+  -- converts a 'Traversal' to a 'TraversalVL'.
   , TraversalVL
   , TraversalVL'
   , traversalVL
+
   -- * Re-exports
   , module Optics.Optic
   )
@@ -129,7 +165,7 @@ transposeOf o = getZipList #. traverseOf o ZipList
 -- | This generalizes 'Data.Traversable.mapAccumL' to an arbitrary 'Traversal'.
 --
 -- @
--- 'mapAccumL' ≡ 'mapAccumLOf' 'traverse'
+-- 'Data.Traversable.mapAccumL' ≡ 'mapAccumLOf' 'traverse'
 -- @
 --
 -- 'mapAccumLOf' accumulates 'State' from left to right.
@@ -146,7 +182,7 @@ mapAccumLOf o = \f acc0 s ->
 -- | This generalizes 'Data.Traversable.mapAccumR' to an arbitrary 'Traversal'.
 --
 -- @
--- 'mapAccumR' ≡ 'mapAccumROf' 'traversed'
+-- 'Data.Traversable.mapAccumR' ≡ 'mapAccumROf' 'traversed'
 -- @
 --
 -- 'mapAccumROf' accumulates 'State' from right to left.
@@ -225,7 +261,10 @@ failover' o = \f s ->
 ----------------------------------------
 -- Traversals
 
--- | Traversal via the 'Traversable' class.
+-- | Construct a 'Traversal' via the 'Traversable' class.
+--
+-- Observe that @'traverseOf' 'traversed' = 'traverse'@.
+--
 traversed :: Traversable t => Traversal (t a) (t b) a b
 traversed = Optic traversed__
 {-# INLINE traversed #-}

@@ -1,18 +1,46 @@
+-- | A 'Prism' generalises the notion of a constructor (just as a
+-- 'Optics.Lens.Lens' generalises the notion of a field).
+--
 module Optics.Prism
-  ( A_Prism
-  , Prism
+  (
+  -- * Formation
+    Prism
   , Prism'
-  , toPrism
+
+  -- * Introduction
   , prism
   , prism'
+  , only
+  , nearly
+
+  -- * Elimination
+  -- | A 'Prism' is a 'Optics.Review.Review', therefore you can
+  -- specialise types to obtain:
+  --
+  -- @
+  -- 'Optics.Review.review' :: 'Prism' i s t a b -> b -> t
+  -- @
   , withPrism
+  , isn't
+  , matching
+
+  -- * Combinators
   , aside
   , without
   , below
-  , isn't
-  , matching
-  , only
-  , nearly
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'withPrism' ('prism' f g) k = k f g
+  -- @
+
+  -- * Subtyping
+  , A_Prism
+  , toPrism
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where
@@ -47,6 +75,7 @@ prism' :: (b -> s) -> (s -> Maybe a) -> Prism s s a b
 prism' bs sma = prism bs (\s -> maybe (Left s) Right (sma s))
 {-# INLINE prism' #-}
 
+-- | Work with a 'Prism' as a constructor and a matcher.
 withPrism
   :: Is k A_Prism
   => Optic k is s t a b
@@ -83,7 +112,7 @@ without k =
     Right u -> bimap Right Right (uevc u)
 {-# INLINE without #-}
 
--- | 'lift' a 'Prism' through a 'Traversable' functor, giving a Prism that
+-- | Lift a 'Prism' through a 'Traversable' functor, giving a 'Prism' that
 -- matches only if all the elements of the container match the 'Prism'.
 below
   :: (Is k A_Prism, Traversable f)

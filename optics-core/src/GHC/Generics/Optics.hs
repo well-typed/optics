@@ -1,6 +1,6 @@
 {-# LANGUAGE PolyKinds #-}
 -- | Note: "GHC.Generics" exports a number of names that collide with "Optics"
--- (at least 'to').
+-- (at least 'GHC.Generics.to').
 --
 -- You can use hiding or imports to mitigate this to an extent, and the
 -- following imports, represent a fair compromise for user code:

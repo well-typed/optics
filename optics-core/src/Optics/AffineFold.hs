@@ -1,12 +1,33 @@
--- | TODO: what's affine fold.
+-- | An 'AffineFold' is a 'Optics.Fold.Fold' that contains at most one
+-- element, or a 'Optics.Getter.Getter' where the function may be
+-- partial.
+--
 module Optics.AffineFold
-  ( An_AffineFold
-  , AffineFold
+  (
+  -- * Formation
+    AffineFold
+
+  -- * Introduction
+  , afolding
+
+  -- * Elimination
   , preview
   , previews
-  , afolding
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'preview' ('afolding' f) ≡ f
+  -- @
+
   -- * Semigroup structure
   , afailing
+
+  -- * Subtyping
+  , An_AffineFold
+
+  -- * Re-exports
   , module Optics.Optic
   ) where
 
@@ -62,7 +83,7 @@ afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right'
 -- >>> preview (ix 42 % re _Left `afailing` ix 2 % re _Right) [0,1,2,3]
 -- Just (Right 2)
 --
--- /Note:/ There is no 'summing' equivalent, because @asumming = afailing@.
+-- /Note:/ There is no 'Optics.Fold.summing' equivalent, because @asumming = afailing@.
 --
 afailing
   :: (Is k An_AffineFold, Is l An_AffineFold)

@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK not-home #-}
 module Optics.Internal.Optic.Types where
 
 import GHC.Exts (Constraint)

@@ -1,7 +1,16 @@
+-- | A 'PrismaticGetter' is a 'Optics.Getter.Getter' produces by
+-- calling 'Optics.Re.re' on a 'Optics.Prism.Prism'.  It is
+-- essentially equivalent to a 'Optics.Getter.Getter', and is
+-- distinguished merely so that @'Optics.Re.re' . 'Optics.Re.re'@ on a
+-- 'Optics.Prism.Prism' returns a 'Optics.Prism.Prism'.
+--
 module Optics.PrismaticGetter
-  ( A_PrismaticGetter
-  , PrismaticGetter
+  ( -- * Formation
+    PrismaticGetter
   , PrismaticGetter'
+  , A_PrismaticGetter
+
+  -- * Re-exports
   , module Optics.Optic
   ) where
 

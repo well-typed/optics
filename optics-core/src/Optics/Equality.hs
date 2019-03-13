@@ -1,12 +1,22 @@
 module Optics.Equality
-  ( An_Equality
-  , Equality
+  (
+  -- * Formation
+    Equality
   , Equality'
+
+  -- * Introduction
   , equality
   , simple
+
+  -- * Elimination
   , withEquality
   , Identical(..)
   , runEquality
+
+  -- * Subtyping
+  , An_Equality
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where

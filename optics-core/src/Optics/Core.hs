@@ -8,23 +8,26 @@
 -- TODO: motivation behind @optics@
 --
 module Optics.Core
-  ( module O
+  (
+  -- * Kinds of optic
+    module O
+
+  -- * Indexed optics
+  , module I
+
+  -- * Operators
+  , module P
+
+  -- * Optics for basic data types
   , module D
   )
   where
 
 import Optics.AffineFold                       as O
 import Optics.AffineTraversal                  as O
-import Optics.Arrow                            as O
-import Optics.At.Core                          as O
-import Optics.Coerce                           as O
-import Optics.Cons.Core                        as O
-import Optics.Each.Core                        as O
-import Optics.Empty.Core                       as O
 import Optics.Equality                         as O
 import Optics.Fold                             as O
 import Optics.Getter                           as O
-import Optics.Indexed.Core                     as O
 import Optics.Iso                              as O
 import Optics.IxAffineFold                     as O
 import Optics.IxAffineTraversal                as O
@@ -35,10 +38,19 @@ import Optics.Lens                             as O
 import Optics.LensyReview                      as O
 import Optics.Prism                            as O
 import Optics.PrismaticGetter                  as O
-import Optics.Re                               as O
 import Optics.Review                           as O
 import Optics.Setter                           as O
 import Optics.Traversal                        as O
+
+import Optics.Indexed.Core                     as I
+
+import Optics.Arrow                            as P
+import Optics.At.Core                          as P
+import Optics.Coerce                           as P
+import Optics.Cons.Core                        as P
+import Optics.Each.Core                        as P
+import Optics.Empty.Core                       as P
+import Optics.Re                               as P
 
 import Data.Either.Optics                      as D
 import Data.Maybe.Optics                       as D

@@ -197,8 +197,8 @@ instance Ixed IntSet where
 type instance IxValue (Array.Array i e) = e
 -- |
 -- @
--- arr '!' i ≡ arr '^.' 'ix' i
--- arr '//' [(i,e)] ≡ 'ix' i '.~' e '$' arr
+-- arr 'Array.!' i ≡ arr 'Optics.Operators.^.' 'ix' i
+-- arr '//' [(i,e)] ≡ 'ix' i 'Optics.Operators..~' e '$' arr
 -- @
 instance Ix i => Ixed (Array.Array i e) where
   ix i = atraversalVL $ \point f arr ->
@@ -210,8 +210,8 @@ instance Ix i => Ixed (Array.Array i e) where
 type instance IxValue (UArray i e) = e
 -- |
 -- @
--- arr '!' i ≡ arr '^.' 'ix' i
--- arr '//' [(i,e)] ≡ 'ix' i '.~' e '$' arr
+-- arr 'Array.!' i ≡ arr 'Optics.Operators.^.' 'ix' i
+-- arr '//' [(i,e)] ≡ 'ix' i 'Optics.Operators..~' e '$' arr
 -- @
 instance (IArray UArray e, Ix i) => Ixed (UArray i e) where
   ix i = atraversalVL $ \point f arr ->
@@ -351,7 +351,7 @@ class Ixed m => At m where
 -- | Delete the value associated with a key in a 'Map'-like container
 --
 -- @
--- 'sans' k = 'at' k .~ Nothing
+-- 'sans' k = 'at' k 'Optics.Operators..~' Nothing
 -- @
 sans :: At m => Index m -> m -> m
 sans k = set (at k) Nothing

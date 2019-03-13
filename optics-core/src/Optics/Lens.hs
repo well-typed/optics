@@ -1,22 +1,25 @@
--- | 'Lens' is a generalised or first-class *field*.
+-- | A 'Lens' is a generalised or first-class field.
 --
--- If we have a value @s :: S@, and a @l :: 'Lens'' S A@,
--- we can /get/ the "field value" of type @A@ using 'view'.
--- We can also /update/ (or /put/ or /set/) the value using 'over' (or 'set').
+-- If we have a value @s :: S@, and a @l :: 'Lens'' S A@, we can /get/
+-- the "field value" of type @A@ using @'Optics.Getter.view' l s@.  We
+-- can also /update/ (or /put/ or /set/) the value using
+-- 'Optics.Setter.over' (or 'Optics.Setter.set').
+--
+-- For example, given the following definitions:
 --
 -- >>> data Human = Human { _name :: String, _location :: String } deriving Show
 -- >>> let human = Human "Bob" "London"
 --
--- We can make a 'Lens' for @_name@ field:
+-- we can make a 'Lens' for @_name@ field:
 --
 -- >>> let name = lens _name $ \s x -> s { _name = x }
 --
--- Which we can use as a 'Getter'
+-- which we can use as a 'Optics.Getter.Getter':
 --
 -- >>> view name human
 -- "Bob"
 --
--- or a 'Setter'
+-- or a 'Optics.Setter.Setter':
 --
 -- >>> set name "Robert" human
 -- Human {_name = "Robert", _location = "London"}
@@ -24,31 +27,34 @@
 module Optics.Lens
   (
   -- * Formation
-    A_Lens
-  , Lens
+    Lens
   , Lens'
 
   -- * Introduction
   , lens
-  , withLens
-  , toLens
+  , chosen
+  , devoid
+  , united
 
   -- * Elimination
-  -- | 'Lens' is a 'Setter' and a 'Getter', therefore you can
+  -- | A 'Lens' is a 'Optics.Setter.Setter' and a
+  -- 'Optics.Getter.Getter', therefore you can specialise types to
+  -- obtain:
   --
   -- @
-  -- 'view' :: 'Lens' i s t a b -> s -> a
-  -- 'set'  :: 'Lens' i s t a b -> b -> s -> t
-  -- 'over' :: 'Lens' i s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Getter.view' :: 'Lens' i s t a b -> s -> a
+  -- 'Optics.Setter.set'  :: 'Lens' i s t a b -> b -> s -> t
+  -- 'Optics.Setter.over' :: 'Lens' i s t a b -> (a -> b) -> s -> t
   -- @
   --
+  , withLens
 
   -- * Computation
   -- |
   --
   -- @
-  -- 'view' ('lens' f g)   s = f s
-  -- 'set'  ('lens' f g) a s = g s a
+  -- 'Optics.Getter.view' ('lens' f g)   s = f s
+  -- 'Optics.Setter.set'  ('lens' f g) a s = g s a
   -- @
 
   -- * Well-formedness
@@ -57,21 +63,25 @@ module Optics.Lens
   -- * __GetPut__: You get back what you put in:
   --
   --     @
-  --     view l (set l v s) = v
+  --     'Optics.Getter.view' l ('Optics.Setter.set' l v s) = v
   --     @
   --
   -- * __PutGet__: Putting back what you got doesn’t change anything:
   --
   --     @
-  --     set l (view l s) s = s
+  --     'Optics.Setter.set' l ('Optics.Getter.view' l s) s = s
   --     @
   --
   -- * __PutPut__: Setting twice is the same as setting once:
   --
   --     @
-  --     set l v' (set l v s) = set l v' s
+  --     'Optics.Setter.set' l v' ('Optics.Setter.set' l v s) = 'Optics.Setter.set' l v' s
   --     @
   --
+
+  -- * Subtyping
+  , A_Lens
+  , toLens
 
   -- * van Laarhoven encoding
   , LensVL
@@ -79,11 +89,6 @@ module Optics.Lens
   , lensVL
   , toLensVL
   , withLensVL
-
-  -- * Lenses
-  , chosen
-  , devoid
-  , united
 
   -- * Re-exports
   , module Optics.Optic
