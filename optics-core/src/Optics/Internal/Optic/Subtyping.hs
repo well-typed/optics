@@ -107,7 +107,7 @@ instance Is A_Traversal        A_Setter           where implies _ = id
 --
 type family Join (k :: *) (l :: *) where
   -- BEGIN GENERATED CONTENT
-
+  -- An_Equality-----
   Join An_Equality        An_Iso             = An_Iso
   Join An_Equality        A_LensyReview      = A_LensyReview
   Join An_Equality        A_PrismaticGetter  = A_PrismaticGetter
@@ -121,6 +121,7 @@ type family Join (k :: *) (l :: *) where
   Join An_Equality        A_Fold             = A_Fold
   Join An_Equality        A_Setter           = A_Setter
 
+  -- An_Iso-----
   Join An_Iso             An_Equality        = An_Iso
   Join An_Iso             A_LensyReview      = A_LensyReview
   Join An_Iso             A_PrismaticGetter  = A_PrismaticGetter
@@ -134,32 +135,35 @@ type family Join (k :: *) (l :: *) where
   Join An_Iso             A_Fold             = A_Fold
   Join An_Iso             A_Setter           = A_Setter
 
+  -- A_LensyReview-----
   Join A_LensyReview      An_Equality        = A_LensyReview
   Join A_LensyReview      An_Iso             = A_LensyReview
-  -- no Join with A_PrismaticGetter
+  -- no Join with         A_PrismaticGetter
   Join A_LensyReview      A_Prism            = A_Review
   Join A_LensyReview      A_Review           = A_Review
-  -- no Join with A_Lens
-  -- no Join with A_Getter
-  -- no Join with An_AffineTraversal
-  -- no Join with An_AffineFold
-  -- no Join with A_Traversal
-  -- no Join with A_Fold
-  -- no Join with A_Setter
+  -- no Join with         A_Lens
+  -- no Join with         A_Getter
+  -- no Join with         An_AffineTraversal
+  -- no Join with         An_AffineFold
+  -- no Join with         A_Traversal
+  -- no Join with         A_Fold
+  -- no Join with         A_Setter
 
+  -- A_PrismaticGetter-----
   Join A_PrismaticGetter  An_Equality        = A_PrismaticGetter
   Join A_PrismaticGetter  An_Iso             = A_PrismaticGetter
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join A_PrismaticGetter  A_Prism            = An_AffineFold
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join A_PrismaticGetter  A_Lens             = A_Getter
   Join A_PrismaticGetter  A_Getter           = A_Getter
   Join A_PrismaticGetter  An_AffineTraversal = An_AffineFold
   Join A_PrismaticGetter  An_AffineFold      = An_AffineFold
   Join A_PrismaticGetter  A_Traversal        = A_Fold
   Join A_PrismaticGetter  A_Fold             = A_Fold
-  -- no Join with A_Setter
+  -- no Join with         A_Setter
 
+  -- A_Prism-----
   Join A_Prism            An_Equality        = A_Prism
   Join A_Prism            An_Iso             = A_Prism
   Join A_Prism            A_LensyReview      = A_Review
@@ -173,25 +177,27 @@ type family Join (k :: *) (l :: *) where
   Join A_Prism            A_Fold             = A_Fold
   Join A_Prism            A_Setter           = A_Setter
 
+  -- A_Review-----
   Join A_Review           An_Equality        = A_Review
   Join A_Review           An_Iso             = A_Review
   Join A_Review           A_LensyReview      = A_Review
-  -- no Join with A_PrismaticGetter
+  -- no Join with         A_PrismaticGetter
   Join A_Review           A_Prism            = A_Review
-  -- no Join with A_Lens
-  -- no Join with A_Getter
-  -- no Join with An_AffineTraversal
-  -- no Join with An_AffineFold
-  -- no Join with A_Traversal
-  -- no Join with A_Fold
-  -- no Join with A_Setter
+  -- no Join with         A_Lens
+  -- no Join with         A_Getter
+  -- no Join with         An_AffineTraversal
+  -- no Join with         An_AffineFold
+  -- no Join with         A_Traversal
+  -- no Join with         A_Fold
+  -- no Join with         A_Setter
 
+  -- A_Lens-----
   Join A_Lens             An_Equality        = A_Lens
   Join A_Lens             An_Iso             = A_Lens
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join A_Lens             A_PrismaticGetter  = A_Getter
   Join A_Lens             A_Prism            = An_AffineTraversal
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join A_Lens             A_Getter           = A_Getter
   Join A_Lens             An_AffineTraversal = An_AffineTraversal
   Join A_Lens             An_AffineFold      = An_AffineFold
@@ -199,25 +205,27 @@ type family Join (k :: *) (l :: *) where
   Join A_Lens             A_Fold             = A_Fold
   Join A_Lens             A_Setter           = A_Setter
 
+  -- A_Getter-----
   Join A_Getter           An_Equality        = A_Getter
   Join A_Getter           An_Iso             = A_Getter
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join A_Getter           A_PrismaticGetter  = A_Getter
   Join A_Getter           A_Prism            = An_AffineFold
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join A_Getter           A_Lens             = A_Getter
   Join A_Getter           An_AffineTraversal = An_AffineFold
   Join A_Getter           An_AffineFold      = An_AffineFold
   Join A_Getter           A_Traversal        = A_Fold
   Join A_Getter           A_Fold             = A_Fold
-  -- no Join with A_Setter
+  -- no Join with         A_Setter
 
+  -- An_AffineTraversal-----
   Join An_AffineTraversal An_Equality        = An_AffineTraversal
   Join An_AffineTraversal An_Iso             = An_AffineTraversal
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join An_AffineTraversal A_PrismaticGetter  = An_AffineFold
   Join An_AffineTraversal A_Prism            = An_AffineTraversal
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join An_AffineTraversal A_Lens             = An_AffineTraversal
   Join An_AffineTraversal A_Getter           = An_AffineFold
   Join An_AffineTraversal An_AffineFold      = An_AffineFold
@@ -225,25 +233,27 @@ type family Join (k :: *) (l :: *) where
   Join An_AffineTraversal A_Fold             = A_Fold
   Join An_AffineTraversal A_Setter           = A_Setter
 
+  -- An_AffineFold-----
   Join An_AffineFold      An_Equality        = An_AffineFold
   Join An_AffineFold      An_Iso             = An_AffineFold
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join An_AffineFold      A_PrismaticGetter  = An_AffineFold
   Join An_AffineFold      A_Prism            = An_AffineFold
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join An_AffineFold      A_Lens             = An_AffineFold
   Join An_AffineFold      A_Getter           = An_AffineFold
   Join An_AffineFold      An_AffineTraversal = An_AffineFold
   Join An_AffineFold      A_Traversal        = A_Fold
   Join An_AffineFold      A_Fold             = A_Fold
-  -- no Join with A_Setter
+  -- no Join with         A_Setter
 
+  -- A_Traversal-----
   Join A_Traversal        An_Equality        = A_Traversal
   Join A_Traversal        An_Iso             = A_Traversal
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join A_Traversal        A_PrismaticGetter  = A_Fold
   Join A_Traversal        A_Prism            = A_Traversal
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join A_Traversal        A_Lens             = A_Traversal
   Join A_Traversal        A_Getter           = A_Fold
   Join A_Traversal        An_AffineTraversal = A_Traversal
@@ -251,31 +261,33 @@ type family Join (k :: *) (l :: *) where
   Join A_Traversal        A_Fold             = A_Fold
   Join A_Traversal        A_Setter           = A_Setter
 
+  -- A_Fold-----
   Join A_Fold             An_Equality        = A_Fold
   Join A_Fold             An_Iso             = A_Fold
-  -- no Join with A_LensyReview
+  -- no Join with         A_LensyReview
   Join A_Fold             A_PrismaticGetter  = A_Fold
   Join A_Fold             A_Prism            = A_Fold
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join A_Fold             A_Lens             = A_Fold
   Join A_Fold             A_Getter           = A_Fold
   Join A_Fold             An_AffineTraversal = A_Fold
   Join A_Fold             An_AffineFold      = A_Fold
   Join A_Fold             A_Traversal        = A_Fold
-  -- no Join with A_Setter
+  -- no Join with         A_Setter
 
+  -- A_Setter-----
   Join A_Setter           An_Equality        = A_Setter
   Join A_Setter           An_Iso             = A_Setter
-  -- no Join with A_LensyReview
-  -- no Join with A_PrismaticGetter
+  -- no Join with         A_LensyReview
+  -- no Join with         A_PrismaticGetter
   Join A_Setter           A_Prism            = A_Setter
-  -- no Join with A_Review
+  -- no Join with         A_Review
   Join A_Setter           A_Lens             = A_Setter
-  -- no Join with A_Getter
+  -- no Join with         A_Getter
   Join A_Setter           An_AffineTraversal = A_Setter
-  -- no Join with An_AffineFold
+  -- no Join with         An_AffineFold
   Join A_Setter           A_Traversal        = A_Setter
-  -- no Join with A_Fold
+  -- no Join with         A_Fold
 
   -- END GENERATED CONTENT
 
