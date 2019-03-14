@@ -158,10 +158,12 @@ hierarchy = do
     arrow Tag_AffineTraversal Tag_AffineFold
     arrow Tag_Traversal Tag_Fold
   where
-    isIndexed Tag_IxTraversal = True
-    isIndexed Tag_IxFold      = True
-    isIndexed Tag_IxSetter    = True
-    isIndexed _               = False
+    isIndexed Tag_IxAffineFold      = True
+    isIndexed Tag_IxAffineTraversal = True
+    isIndexed Tag_IxFold            = True
+    isIndexed Tag_IxSetter          = True
+    isIndexed Tag_IxTraversal       = True
+    isIndexed _                     = False
 
 -------------------------------------------------------------------------------
 -- Optics.Re
