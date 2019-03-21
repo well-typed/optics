@@ -428,8 +428,7 @@ sumOf :: (Is k A_Fold, Num a) => Optic' k is s a -> s -> a
 sumOf o = foldlOf' o (+) 0
 {-# INLINE sumOf #-}
 
--- | The sum of a collection of actions, generalizing 'concatOf'.
--- TODO: we don't yet have 'concatOf'!
+-- | The sum of a collection of actions.
 --
 -- >>> asumOf both ("hello","world")
 -- "helloworld"
@@ -444,7 +443,7 @@ asumOf :: (Is k A_Fold, Alternative f) => Optic' k is s (f a) -> s -> f a
 asumOf o = foldrOf o (<|>) empty
 {-# INLINE asumOf #-}
 
--- | The sum of a collection of actions, generalizing 'concatOf'.
+-- | The sum of a collection of actions.
 --
 -- >>> msumOf both ("hello","world")
 -- "helloworld"
