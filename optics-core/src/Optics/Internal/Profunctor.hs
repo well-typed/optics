@@ -1,3 +1,9 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
+-- | Definitions of concrete profunctors and profunctor classes.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Profunctor where
 
 import Data.Coerce (Coercible, coerce)

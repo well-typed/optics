@@ -1,7 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_HADDOCK not-home #-}
+
 -- | Instances to implement the subtyping hierarchy between optics.
 --
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Optic.Subtyping where
 
 import GHC.TypeLits (ErrorMessage(..), TypeError)

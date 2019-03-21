@@ -2,6 +2,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
+
+-- | Internal implementation details of indexed optics.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Indexed where
 
 import Control.Applicative

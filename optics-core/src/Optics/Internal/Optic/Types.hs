@@ -1,4 +1,7 @@
 {-# OPTIONS_HADDOCK not-home #-}
+
+-- | This module is intended for internal use only, and may change without
+-- warning in subsequent releases.
 module Optics.Internal.Optic.Types where
 
 import GHC.Exts (Constraint)

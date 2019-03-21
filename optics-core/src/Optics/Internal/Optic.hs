@@ -3,6 +3,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_HADDOCK not-home #-}
+
 -- | Core optic types and subtyping machinery.
 --
 -- This module contains the core 'Optic' types, and the underlying
@@ -10,6 +12,9 @@
 -- various different flavours of optics.
 --
 -- The composition operator for optics is also defined here.
+--
+-- This module is intended for internal use only, and may change without
+-- warning in subsequent releases.
 --
 module Optics.Internal.Optic
   ( Optic(..)

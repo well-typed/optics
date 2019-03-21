@@ -84,6 +84,10 @@ ixTraversalVL t = Optic (iwander t)
 
 ----------------------------------------
 
+-- | Map each element of a structure targeted by a 'IxTraversal' (supplying the
+-- index), evaluate these actions from left to right, and collect the results.
+--
+-- This yields the van Laarhoven representation of an indexed traversal.
 itraverseOf
   :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -212,7 +216,7 @@ ibackwards o = Optic $ conjoined__ (backwards o) $ ixTraversalVL $ \f ->
   forwards #. itraverseOf o (\i -> Backwards #. f i)
 {-# INLINE ibackwards #-}
 
--- Traverse selected elements of a 'Traversal' where their ordinal positions
+-- | Traverse selected elements of a 'Traversal' where their ordinal positions
 -- match a predicate.
 elementsOf
   :: Is k A_Traversal

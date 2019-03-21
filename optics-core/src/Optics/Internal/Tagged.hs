@@ -1,7 +1,12 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
 -- | Taken from the tagged package.
 --
 -- We include this here, at least for now, with the goal
 -- that we only depend on base.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 --
 module Optics.Internal.Tagged where
 

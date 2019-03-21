@@ -1,3 +1,9 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
+-- | Internal implementation details of setters.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Setter where
 
 import Optics.Internal.Profunctor

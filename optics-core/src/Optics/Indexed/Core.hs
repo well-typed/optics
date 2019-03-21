@@ -123,6 +123,7 @@ icompose5 = icomposeN
 ----------------------------------------
 -- IxOptic
 
+-- | Class for optic kinds that can have indices.
 class IxOptic k s t a b where
   -- | Convert an indexed optic to its unindexed equivalent.
   noIx
