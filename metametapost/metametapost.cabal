@@ -16,7 +16,12 @@ executable metametapost-optics
   default-language: Haskell2010
   ghc-options:      -Wall
   main-is:          Cli.hs
-  other-modules:    MetaMetaPost
+  other-modules:   
+     MetaMetaPost
+     MMP.Optics.Common
+     MMP.Optics.Hierarchy
+     MMP.Optics.Indexed
+     MMP.Optics.Re
   hs-source-dirs:   src
   build-depends:
       base            >=4.9 && <5
