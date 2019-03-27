@@ -3,19 +3,49 @@
 -- Module: Optics
 -- Description: The main module, usually you only need to import this one.
 --
--- Introduction...
+-- This library makes it possible to define and use 'Lens'es, 'Traversal's,
+-- 'Prism's and other /optics/, using an abstract interface.  These are
+-- frequently introduced as type synonyms for complex polymorphic types, for
+-- example the @lens@ library defines:
 --
--- TODO: motivation behind @optics@
+-- @
+-- type Lens s t a b = forall f. 'Functor' f => (a -> f b) -> s -> f t
+-- @
+--
+-- In contrast, this library defines a newtype wrapper 'Optic' to capture the
+-- general concept.  This newtype is indexed by the particular optic kind
+-- (e.g. 'A_Lens'), so that while 'Lens' is still a type synonym, its definition
+-- is much simpler:
+--
+-- @
+-- type 'Lens' s t a b = 'Optic' 'A_Lens' 'NoIx' s t a b
+-- @
+--
+-- The details of the internal implementation of 'Optic' are hidden behind an
+-- abstraction boundary, so that the library can be used without needing to
+-- think about the particular implementation choices.  (In fact, @optics@ uses
+-- the \"profunctor\" representation rather than the \"van Laarhoven\"
+-- representation mentioned above.)
 --
 module Optics
   (
+  -- * Introduction
+  -- $introduction
+
+  -- ** Advantages
+  -- $advantages
+
+  -- ** Disadvantages
+  -- $disadvantages
+
+  -- ** Differences from @lens@
+  -- $differences
+
+  -- ** Other resources
+  -- $otherresources
+
   -- * Basic usage
   -- $basicusage
-
-  -- TODO: explain indexed optics
-
-  -- * Differences from @lens@
-  -- $differences
 
   -- * Core definitions
 
@@ -45,11 +75,10 @@ module Optics
 
   -- * Optic variants
 
-  -- |
+  -- | #opticvariants#
   --
-  -- There are 16 (/TODO/: add modules for LensyReview and PrismaticGetter)
-  -- different kinds of optics, each documented in a separate module.
-  -- Each optic module documentation has /formation/, /introduction/,
+  -- There are 16 different kinds of optics, each documented in a separate
+  -- module.  Each optic module documentation has /formation/, /introduction/,
   -- /elimination/, and /well-formedness/ sections.
   --
   -- * The __formation__ sections contain type definitions. For example
@@ -106,33 +135,7 @@ module Optics
   --
   , module O
 
-  -- * Optics utilities
-
-  -- ** Re
-
-  -- | Some optics can be reversed with 're':
-  -- @'Iso' s t a b@ into @'Iso' b a t s@,
-  -- @'Getter' s t a b@ into @'Review' b a t s@ etc.
-  -- Red arrows illustrate how 're' transforms optics:
-  --
-  -- <<reoptics.png Reversed Optics>>
-  --
-  -- 're' is mainly useful to invert 'Iso's:
-  --
-  -- >>> let _Identity = iso runIdentity Identity
-  -- >>> view (_1 % re _Identity) ('x', "yz")
-  -- Identity 'x'
-  --
-  -- Yet we can use a 'Lens' as a 'Review' too:
-  --
-  -- >>> review (re _1) ('x', "yz")
-  -- 'x'
-  --
-  -- /Note:/ there are no @from@ combinator.
-
-  , module Optics.Re
-
-  -- ** Indexed optics
+  -- * Indexed optics
 
   -- |
   --
@@ -205,10 +208,34 @@ module Optics
   --
   , module Optics.Indexed
 
-  -- * At
+  -- * Optics utilities
+
+  -- ** At
+
+  -- | An 'AffineTraversal' to traverse a key in a map or an element of a
+  -- sequence:
+  --
+  -- >>> headOf (ix 1) ['a','b','c']
+  -- ... Just 'b'
+  --
+  -- and a 'Lens' to get, set or delete a key in a map:
+  --
+  -- >>> set (at 0) (Just 'b') (Map.fromList [(0, 'a')])
+  -- ... Map.fromList [(0,'b')]
+  --
   , module Optics.At
 
-  -- * Cons
+  -- ** Cons
+
+  -- | 'Prism's to match on the left or right side of a list, vector or other
+  -- sequential structure:
+  --
+  -- >>> preview _Cons "abc"
+  -- ... Just ('a',"bc")
+  --
+  -- >>> preview _Snoc "abc"
+  -- ... Just ("ab",'c')
+  --
   , module Optics.Cons
 
   -- ** Each
@@ -220,13 +247,37 @@ module Optics
   --
   , module Optics.Each
 
-  -- * Empty
+  -- ** Empty
   , module Optics.Empty
 
-  -- * View
+  -- ** Re
+
+  -- | Some optics can be reversed with 're':
+  -- @'Iso' s t a b@ into @'Iso' b a t s@,
+  -- @'Getter' s t a b@ into @'Review' b a t s@ etc.
+  -- Red arrows illustrate how 're' transforms optics:
+  --
+  -- <<reoptics.png Reversed Optics>>
+  --
+  -- 're' is mainly useful to invert 'Iso's:
+  --
+  -- >>> let _Identity = iso runIdentity Identity
+  -- >>> view (_1 % re _Identity) ('x', "yz")
+  -- Identity 'x'
+  --
+  -- Yet we can use a 'Lens' as a 'Review' too:
+  --
+  -- >>> review (re _1) ('x', "yz")
+  -- 'x'
+  --
+  -- /Note:/ there are no @from@ combinator.
+
+  , module Optics.Re
+
+  -- ** View
   , module Optics.View
 
-  -- * Zoom
+  -- ** Zoom
   , module Optics.Zoom
 
   -- * Generation of optics with Template Haskell
@@ -281,73 +332,111 @@ import Data.Tuple.Optics                     as P
 import Data.Maybe.Optics                     as P
 import Data.Either.Optics                    as P
 
--- $basicusage
+-- $introduction
+--
+-- A key principle behind this library is the belief that optics are useful as
+-- an abstract concept, and that the purpose of types is to capture abstract
+-- concepts and make them useful.  The programmer using optics should be able to
+-- think in terms of the abstract interface, rather than the details of the
+-- implementation, and implementation choices should not dictate the interface.
+--
+-- Each optic variant has a module describing its abstract interface (e.g. see
+-- "Optics.Lens"). See "Optics#opticvariants" below for a discussion of the
+-- standard format in which these interfaces are described.
+--
+-- There is a subtyping relationship between optics, which is implemented using
+-- typeclasses.  In particular, the 'Is' typeclass captures the property that
+-- one optic kind can be used as another, for example the @'Is' 'A_Lens'
+-- 'A_Traversal'@ instance means that lenses can be used as traversals.
+-- Introduction forms (constructors) return a concrete optic kind, while
+-- elimination forms are generally polymorphic in the optic kind they accept.
+-- (TODO: link to further discussion of subtyping.)
+--
+-- For example,
 --
 -- @
--- import "Optics"
+-- 'view' :: 'Is' k 'A_Getter' => 'Optic'' k is s a -> s -> a
 -- @
 --
--- and then...
---
--- Operators (if you prefer them) are in
+-- so 'view' can be used with lenses, traverals or any other optic kind that can
+-- be converted to a 'Getter'.  Note, however, that a 'Fold' cannot be
+-- implicitly converted to a 'Getter'.  Instead there is a separate eliminator
 --
 -- @
--- import "Optics.Operators"
+-- 'foldOf' :: ('Is' k 'A_Fold', 'Monoid' a) => 'Optic'' k is s a -> s -> a
 -- @
 --
+-- which combines the (possibly multiple) results of the 'Fold' using the
+-- 'Monoid' instance.
+--
+-- Since /optics are not functions/, they cannot be composed with the ('.')
+-- operator. Instead there is a separate composition operator ('%'). The
+-- composition operator returns the common supertype of its arguments, or
+-- generates a type error if the composition does not make sense.
 
 
--- $differences
+-- $advantages
 --
--- /This section is work-in-progress/
+-- In general, this leads to better results from type inference (optics kind is
+-- preserved)
 --
--- === From Adam's talk:
+--     >>> :t traversed % to not
+--     traversed % to not
+--       :: Traversable t => Optic A_Fold NoIx (t Bool) (t Bool) Bool Bool
 --
--- See @Talk.pdf@, or watch <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction>
 --
--- * @optics@ has an abstract interface: 'Optic' is an opaque type
--- * Cannot write @optics@ without depending on the package,
---   therefore @optics-core@ doesnt' have non GHC-boot library dependencies.
---   (one cannot write /prisms/ with @lens@ without depending on @profunctors@, indexed optics require depending on @lens@ ...)
--- * abstract interface: @optics@ has better error messages (note: @silica@ is a hybrid approach)
+-- Error messages are domain-specific:
 --
 --     >>> set (to fst)
 --     ...
 --     ...A_Getter cannot be used as A_Setter
 --     ...
 --
--- * abstract interface: better type-inference (optics kind is preserved)
---
---     >>> :t traversed % to not
---     traversed % to not
---       :: Traversable t => Optic A_Fold NoIx (t Bool) (t Bool) Bool Bool
---
--- * abstract interface: not all optics have 'Join'
+-- Composing incompatible optics yields a sensible error:
 --
 --     >>> sets map % to not
 --     ...
 --     ...A_Setter cannot be composed with A_Getter
 --     ...
 --
--- * 'Optic' is a rank 1 type, so there is no need for @ALens@ etc.
--- * Types that say what they mean
--- * More comprehensible type errors
--- * Less vulnerable to the monomorphism restriction
--- * Free choice of lens implementation
--- * Indexed optics have different interface.
+-- Since 'Optic' is a rank-1 type, it is easy to store optics in a
+-- datastructure:
 --
--- === Drawbacks
+-- >>> :t [folded, backwards_ folded]
+-- ... [folded, backwards_ folded] :: Foldable f => [Fold (f a) a]
 --
--- * Can’t insert points into the subtyping order post hoc
+-- TODO: Less vulnerable to the monomorphism restriction
 --
--- === Technical differences
+-- TODO: Free choice of lens implementation
+
+
+-- $disadvantages
+--
+-- Since 'Optic' is a newtype, it is not possible for other libraries to define
+-- optics without depending on the definition of 'Optic'.  Thus the library is
+-- split into a package @optics-core@, which has a minimal dependency footprint,
+-- and the \"batteries-included\" @optics@ package for use in applications.
+-- (Since the van Laarhoven representations of lenses and traversals depend only
+-- on definitions from @base@, it is possible for libraries to define them
+-- without any extra dependencies, although this does not hold for more advanced
+-- optic kinds such as prisms or indexed optics).
+-- TODO: document the package structure somewhere?
+--
+-- TODO: polymorphism has to be \"baked in\" rather than emerging naturally from definitions
+--
+-- TODO: Can’t insert points into the subtyping order post hoc
+
+
+-- $differences
+--
+-- TODO: tidy up this section
 --
 -- * Composition operator is '%'
 -- * 'set'' is a strict version of 'set', not 'set' for type-preserving optics
 -- * 'view' is for getters
 -- * 'preview' is for affine folds
 -- * 'foldOf' is the equivalent of view for folds
--- * 'firstOf' is now 'headOf'
+-- * @firstOf@ is now 'headOf'
 -- * Position lenses up to '_9' instead of _19 are provided
 -- * 'Each' provides indexed traversals
 -- * There are four variants of 'backwards' for (indexed) folds and traversals
@@ -361,6 +450,29 @@ import Data.Either.Optics                    as P
 --   'view', 'preview' and 'foldOf' (See discussion in <https://github.com/well-typed/optics/issues/57 GitHub #57>: Do we need 'gview' at all, and what 'Optics.Operators.^.' should be)
 
 -- * There are no 'from', only 're' (Should there be a 'from' restricted to 'Iso' or an alias to 're'? <https://github.com/well-typed/optics/pull/43#discussion_r247121380>)
+--
+
+-- $otherresources
+--
+-- * <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry
+-- * <https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/poptics.pdf Profunctor Optics: Modular Data Accessors> a paper by Matthew Pickering, Jeremy Gibbons and Nicolas Wu
+-- * <http://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics> a blog post by Oleg Grenrus
+--
+-- TODO: any other resources to mention here?
+
+-- $basicusage
+--
+-- @
+-- import "Optics"
+-- @
+--
+-- and then...
+--
+-- Operators (if you prefer them) are in
+--
+-- @
+-- import "Optics.Operators"
+-- @
 --
 
 -- $setup
