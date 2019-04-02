@@ -1,4 +1,8 @@
--- | An 'AffineTraversal' is a 'Optics.Traversal.Traversal' that
+-- |
+-- Module: Optics.AffineTraversal
+-- Description: A 'Optics.Traversal.Traversal' that applies to at most one element.
+--
+-- An 'AffineTraversal' is a 'Optics.Traversal.Traversal' that
 -- applies to at most one element.
 --
 -- These arise most frequently as the composition of a

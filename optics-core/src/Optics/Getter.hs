@@ -1,4 +1,8 @@
--- | A 'Getter' is simply a function considered as an 'Optic'.
+-- |
+-- Module: Optics.Getter
+-- Description: A 'Getter' is simply a function considered as an 'Optic'.
+--
+-- A 'Getter' is simply a function considered as an 'Optic'.
 --
 -- Given a function @f :: S -> A@, we can convert it into a
 -- @'Getter' S A@ using 'to', and convert back to a function using 'view'.
@@ -23,7 +27,7 @@ module Optics.Getter
   -- |
   --
   -- @
-  -- 'view' ('to' f) = f
+  -- 'view' ('to' f) ≡ f
   -- @
 
   -- * Well-formedness

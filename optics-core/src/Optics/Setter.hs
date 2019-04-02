@@ -1,4 +1,8 @@
--- | A @'Setter' S T A B@ has the ability to lift a function of type
+-- |
+-- Module: Optics.Setter
+-- Description: A 'Setter' applies an update to all contained values.
+--
+-- A @'Setter' S T A B@ has the ability to lift a function of type
 -- @A -> B@ 'over' a function of type @S -> T@, applying the function
 -- to update all the @A@s contained in @S@.  This can be used to 'set'
 -- all the @A@s to a single value (by lifting a constant function).
@@ -15,25 +19,39 @@ module Optics.Setter
 
   -- * Introduction
   , sets
-  , mapped
 
   -- * Elimination
   , set
-  , set'
   , over
-  , over'
-
-  -- * Subtyping
-  , A_Setter
-  , toSetter
 
   -- * Computation
   -- |
   --
   -- @
-  -- 'over' ('sets' f) g s = f g s
-  -- 'set' ('sets' f) v s = f ('const' v) s
+  -- 'set'  ('sets' f) v s ≡ f ('const' v) s
+  -- 'over' ('sets' f) g s ≡ f g s
   -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- * __Functoriality__: 'Setter's must preserve identities and composition:
+  --
+  --    @
+  --    'over' s 'id' ≡ 'id'
+  --    'over' s f '.' 'over' s g ≡ 'over' s (f '.' g)
+  --    @
+
+  -- * Additional introduction forms
+  , mapped
+
+  -- * Additional elimination forms
+  , set'
+  , over'
+
+  -- * Subtyping
+  , A_Setter
+  , toSetter
 
   -- * Re-exports
   , module Optics.Optic
@@ -118,7 +136,8 @@ set'
 set' o = over' o . const
 {-# INLINE set' #-}
 
--- | Build a setter from a function to modify the element(s).
+-- | Build a setter from a function to modify the element(s), which must respect
+-- the well-formedness laws.
 sets
   :: ((a -> b) -> s -> t)
   -> Setter s t a b

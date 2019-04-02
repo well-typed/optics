@@ -1,4 +1,8 @@
--- | An 'AffineFold' is a 'Optics.Fold.Fold' that contains at most one
+-- |
+-- Module: Optics.AffineFold
+-- Description: A 'Optics.Fold.Fold' that contains at most one element.
+--
+-- An 'AffineFold' is a 'Optics.Fold.Fold' that contains at most one
 -- element, or a 'Optics.Getter.Getter' where the function may be
 -- partial.
 --

@@ -1,3 +1,9 @@
+-- |
+-- Module: Optics.Equality
+-- Description: A proof of type equality.
+--
+-- An @'Equality' S T A B@ is a proof that @S@ is equal to @A@ and @T@ is equal
+-- to @B@.
 module Optics.Equality
   (
   -- * Formation
@@ -9,9 +15,20 @@ module Optics.Equality
   , simple
 
   -- * Elimination
-  , withEquality
+  -- | There are no optic kinds below 'Equality' in the subtyping poset, so the
+  -- elimination forms are not polymorphic in the optic kind.
   , Identical(..)
   , runEquality
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'runEquality' 'equality' ≡ 'Identical'
+  -- @
+
+  -- * Additional elimination forms
+  , withEquality
 
   -- * Subtyping
   , An_Equality
