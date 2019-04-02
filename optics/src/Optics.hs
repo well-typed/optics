@@ -329,6 +329,9 @@ import Data.Either.Optics                    as P
 
 -- $differences
 --
+-- The sections above set out the major conceptual differences from the @lens@
+-- package. Some more specific design differences:
+--
 -- * The composition operator is ('%') rather than ('.').
 --
 -- * Fewer operators are provided, and none of operators are exported from the
@@ -351,6 +354,8 @@ import Data.Either.Optics                    as P
 --
 -- * @firstOf@ from @lens@ is replaced by 'headOf'.
 --
+-- * @concatOf@ from @lens@ is omitted in favour of the more general 'foldOf'.
+--
 -- * 'set'' is a strict version of 'set', not 'set' for type-preserving optics.
 --
 -- * Numbered lenses for accessing fields of tuples positionally are provided
@@ -370,8 +375,11 @@ import Data.Either.Optics                    as P
 -- * We can't use 'traverse' as an optic directly.  Instead there is a
 --   'Traversal' called 'traversed'.  Similarly 'traverseOf' must be used to
 --   apply a 'Traversal', rather than simply using it as a function.
-
--- * There are no 'from', only 're'.
+--
+-- * The 're' combinator produces a different optic kind depending on the kind
+--   of the input 'Iso', for example 'Prism' reverses to 'Getter' while a
+--   reversed 'Iso' is still an 'Iso'.  Thus there is no separate @from@
+--   combinator for reversing 'Iso's.
 
 
 -- $otherresources
