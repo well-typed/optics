@@ -409,8 +409,8 @@ import Data.Either.Optics                    as P
 -- * the subtyping relation 'Is' with an accompanying 'castOptic' function to
 --   convert an optic kind;
 --
--- * the 'Join' semilattice structure used to find the optic kind resulting from
---   a composition.
+-- * the 'Join' operation used to find the optic kind resulting from a
+--   composition.
 --
 -- Each optic kind is identified by a "tag type" (such as 'A_Lens'), which is an
 -- empty data type.  The type of the actual optics (such as 'Lens') is obtained
@@ -422,14 +422,27 @@ import Data.Either.Optics                    as P
 --
 -- <<optics.png Optics hierarchy>>
 --
--- The hierachy is a join-semilattice, where the optic kind resulting from a
--- composition is the least upper bound of the optic kinds being composed.  The
--- 'Join' type family computes the least upper bound given two optic kind tags.
--- For example the 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
+-- The optic kind resulting from a composition is the least upper bound (join)
+-- of the optic kinds being composed, if it exists.  The 'Join' type family
+-- computes the least upper bound given two optic kind tags.  For example the
+-- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
 --
 -- >>> :kind! Join A_Lens A_Prism
 -- Join A_Lens A_Prism :: *
 -- = An_AffineTraversal
+--
+-- The join does not exist for some pairs of optic kinds, which means that they
+-- cannot be composed.  For example there is no optic kind above both 'Setter'
+-- and 'Fold':
+--
+-- >>> :kind! Join A_Setter A_Fold
+-- Join A_Setter A_Fold :: *
+-- = (TypeError ...)
+--
+-- >>> :t mapped % folded
+-- ...
+-- ...A_Setter cannot be composed with A_Fold
+-- ...
 --
 -- In addition to the optic kinds described above, there are also indexed
 -- variants, namely 'IxAffineTraversal', 'IxTraversal', 'IxAffineFold', 'IxFold'
