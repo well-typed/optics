@@ -1,4 +1,8 @@
--- | A 'LensyReview' is a 'Optics.Review.Review' produced by calling
+-- |
+-- Module: Optics.LensyReview
+-- Description: A 'Optics.Review.Review' produced by 'Optics.Re.re' on a 'Optics.Lens.Lens'.
+--
+-- A 'LensyReview' is a 'Optics.Review.Review' produced by calling
 -- 'Optics.Re.re' on a 'Optics.Lens.Lens'.  It is essentially
 -- equivalent to a 'Optics.Review.Review', and is distinguished merely
 -- so that @'Optics.Re.re' . 'Optics.Re.re'@ on a 'Optics.Lens.Lens'

@@ -1,6 +1,6 @@
 -- |
 -- Module: Optics.Getter
--- Description: A 'Getter' is simply a function considered as an 'Optic'.
+-- Description: A function considered as an 'Optic'.
 --
 -- A 'Getter' is simply a function considered as an 'Optic'.
 --

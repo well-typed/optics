@@ -1,6 +1,6 @@
 -- |
 -- Module: Optics.Lens
--- Description: A 'Lens' is a generalised or first-class field.
+-- Description: A generalised or first-class field.
 --
 -- A 'Lens' is a generalised or first-class field.
 --

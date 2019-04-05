@@ -12,11 +12,11 @@ import GHC.TypeLits (ErrorMessage(..), TypeError)
 
 import Optics.Internal.Optic.Types
 
--- | Subtyping relationship between flavours of optics.
+-- | Subtyping relationship between kinds of optics.
 --
--- An instance of @Is k l@ represents that any @Optic k@ can be used as an
--- @Optic l@. For example, we have an @Is A_Lens A_Traversal@ instance, but not
--- @Is A_Traversal A_Lens@.
+-- An instance of @'Is' k l@ means that any @'Optics.Optic.Optic' k@ can be used
+-- as an @'Optics.Optic.Optic' l@. For example, we have an @'Is' 'A_Lens'
+-- 'A_Traversal'@ instance, but not @'Is' 'A_Traversal' 'A_Lens'@.
 --
 -- This class needs instances for all possible combinations of tags.
 --
@@ -32,7 +32,7 @@ instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
                                         ) => Is k l where
   implies = error "unreachable"
 
--- | Every flavour of optic can be used as itself.
+-- | Every kind of optic can be used as itself.
 instance Is k k where
   implies _ = id
 
@@ -103,7 +103,7 @@ instance Is A_Traversal        A_Setter           where implies _ = id
 
 ----------------------------------------
 
--- | Computes the least upper bound of two optics flavours.
+-- | Computes the least upper bound of two optics kinds.
 --
 -- @Join k l@ represents the least upper bound of an @Optic k@ and an @Optic
 -- l@. This means in particular that composition of an @Optic k@ and an @Optic
@@ -283,7 +283,7 @@ type family Join (k :: *) (l :: *) where
 
   -- END GENERATED CONTENT
 
-  -- Every optics flavour can be joined with itself.
+  -- Every optic kinds can be joined with itself.
   Join k k = k
 
   -- Everything else is a type error.

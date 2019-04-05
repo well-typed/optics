@@ -1,9 +1,19 @@
 {-# LANGUAGE DataKinds #-}
--- | TODO: discuss indexed optics in general
+-- |
+-- Module: Optics.Indexed.Core
+-- Description: Core definitions for indexed optics.
+--
+-- This module defines basic functionality for indexed optics.  See the "Indexed
+-- optics" section of the overview documentation in the @Optics@ module of the
+-- main @optics@ package for more details.
+--
 module Optics.Indexed.Core
   (
+  -- * Class for optic kinds that can be indexed
+    IxOptic(..)
+
   -- * Composition of indexed optics
-    (<%>)
+  , (<%>)
   , (%>)
   , (<%)
   , reindexed
@@ -11,7 +21,6 @@ module Optics.Indexed.Core
   , icompose3
   , icompose4
   , icompose5
-  , IxOptic(..)
 
   -- * Constraints
   , HasSingleIndex

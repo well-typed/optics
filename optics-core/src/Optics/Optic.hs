@@ -1,21 +1,38 @@
 {-# LANGUAGE CPP #-}
+-- |
+-- Module: Optics.Optic
+-- Description: Common abstraction for all kinds of optics.
+--
+-- This module defines the common 'Optic' type, the subtyping relationships
+-- between different kinds of optics, and composition of optics.
+--
+-- See the @Optics@ module in the main @optics@ package for overview
+-- documentation.
+--
 module Optics.Optic
   ( Optic
   , Optic'
-  , NoIx
-  , WithIx
-  , Is
+
+  -- * Subtyping
   , castOptic
+  , Is
   , Join
+
+  -- * Composition
   , (%)
   , (%%)
+
   -- * Labels
   , LabelOptic(..)
   , LabelOptic'
-  -- * Misc
+
+  -- * Indexed optics
+  , NoIx
+  , WithIx
   , Append
   , NonEmptyIndices
   , HasSingleIndex
+
     -- * Base re-exports
   , (&)
   , (<&>)

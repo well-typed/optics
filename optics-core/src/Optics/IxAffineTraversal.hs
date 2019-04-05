@@ -1,7 +1,10 @@
--- | An 'IxAffineTraversal' is an indexed version of an
--- 'Optics.AffineTraversal.AffineTraversal'.  See
--- "Optics.Indexed.Core" for a discussion of indexed optics in
--- general.
+-- |
+-- Module: Optics.IxAffineTraversal
+-- Description: An indexed version of an 'Optics.AffineTraversal.AffineTraversal'.
+--
+-- An 'IxAffineTraversal' is an indexed version of an
+-- 'Optics.AffineTraversal.AffineTraversal'.  See "Optics.Indexed.Core" for a
+-- discussion of indexed optics in general.
 --
 module Optics.IxAffineTraversal
   (

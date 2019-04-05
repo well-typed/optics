@@ -1,4 +1,8 @@
--- | A 'PrismaticGetter' is a 'Optics.Getter.Getter' produces by
+-- |
+-- Module: Optics.PrismaticGetter
+-- Description: A 'Optics.Getter.Getter' produced by 'Optics.Re.re' on a 'Optics.Prism.Prism'.
+--
+-- A 'PrismaticGetter' is a 'Optics.Getter.Getter' produced by
 -- calling 'Optics.Re.re' on a 'Optics.Prism.Prism'.  It is
 -- essentially equivalent to a 'Optics.Getter.Getter', and is
 -- distinguished merely so that @'Optics.Re.re' . 'Optics.Re.re'@ on a

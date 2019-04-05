@@ -1,7 +1,10 @@
 {-# LANGUAGE DataKinds #-}
--- | An 'IxTraversal' is an indexed version of an
--- 'Optics.Traversal.Traversal'.  See "Optics.Indexed.Core" for a
--- discussion of indexed optics in general.
+-- |
+-- Module: Optics.IxTraversal
+-- Description: An indexed version of an 'Optics.Traversal.Traversal'.
+--
+-- An 'IxTraversal' is an indexed version of an 'Optics.Traversal.Traversal'.
+-- See "Optics.Indexed.Core" for a discussion of indexed optics in general.
 --
 module Optics.IxTraversal
   (
@@ -11,6 +14,27 @@ module Optics.IxTraversal
 
   -- * Introduction
   , ixTraversalVL
+
+  -- * Elimination
+  , itraverseOf
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'itraverseOf' ('ixTraversalVL' f) ≡ f
+  -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- @
+  -- 'itraverseOf' o ('const' 'pure') ≡ 'pure'
+  -- 'fmap' ('itraverseOf' o f) . 'itraverseOf' o g ≡ 'Data.Functor.Compose.getCompose' . 'itraverseOf' o (\\ i -> 'Data.Functor.Compose.Compose' . 'fmap' (f i) . g i)
+  -- @
+  --
+
+  -- * Additional introduction forms
   , itraversed
   , ignored
   , elementsOf
@@ -18,8 +42,7 @@ module Optics.IxTraversal
   , elementOf
   , element
 
-  -- * Elimination
-  , itraverseOf
+  -- * Additional elimination forms
   , iforOf
   , imapAccumLOf
   , imapAccumROf
@@ -158,7 +181,7 @@ iscanr1Of o f = fst . imapAccumROf o step Nothing
 {-# INLINE iscanr1Of #-}
 
 -- | Try to map a function which uses the index over this 'IxTraversal',
--- retuning Nothing if the 'IxTraversal' has no targets.
+-- returning 'Nothing' if the 'IxTraversal' has no targets.
 ifailover
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -170,7 +193,7 @@ ifailover o = \f s ->
      else Nothing
 {-# INLINE ifailover #-}
 
--- | Version of 'ifailover' strict in the application of @f@.
+-- | Version of 'ifailover' strict in the application of the function.
 ifailover'
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -186,6 +209,10 @@ ifailover' o = \f s ->
 -- Traversals
 
 -- | Indexed traversal via the 'TraversableWithIndex' class.
+--
+-- @
+-- 'itraverseOf' 'itraversed' ≡ 'itraverse'
+-- @
 --
 -- >>> iover (itraversed <%> itraversed) (,) ["ab", "cd"]
 -- [[((0,0),'a'),((0,1),'b')],[((1,0),'c'),((1,1),'d')]]

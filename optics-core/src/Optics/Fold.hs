@@ -1,4 +1,8 @@
--- | A @'Fold' S A@ has the ability to extract some number of elements
+-- |
+-- Module: Optics.Fold
+-- Description: Extracts elements from a container.
+--
+-- A @'Fold' S A@ has the ability to extract some number of elements
 -- of type @A@ from a container of type @S@.  For example, 'toListOf'
 -- can be used to obtain the contained elements as a list. Unlike a
 -- 'Optics.Traversal.Traversal', there is no way to set or update
@@ -33,21 +37,13 @@ module Optics.Fold
   -- 'traverseOf_' ('mkFold' f) ≡ f
   -- @
 
-  -- * Folds
+  -- * Additional introduction forms
   , folded
   , folding
   , foldring
   , unfolded
 
-  -- * Combinators
-  , filtered
-  , backwards_
-
-  -- * Semigroup structure
-  , summing
-  , failing
-
-  -- * Using folds
+  -- * Additional elimination forms
   , has
   , hasn't
   , headOf
@@ -71,6 +67,14 @@ module Optics.Fold
   , findOf
   , findMOf
   , lookupOf
+
+  -- * Combinators
+  , filtered
+  , backwards_
+
+  -- * Semigroup structure
+  , summing
+  , failing
 
   -- * Subtyping
   , A_Fold
@@ -146,7 +150,7 @@ toListOf o = foldrOf o (:) []
 
 ----------------------------------------
 
--- | Traverse over all of the targets of a 'Fold, computing an
+-- | Traverse over all of the targets of a 'Fold', computing an
 -- 'Applicative'-based answer, but unlike 'Optics.Traversal.traverseOf' do not
 -- construct a new structure. 'traverseOf_' generalizes
 -- 'Data.Foldable.traverse_' to work over any 'Fold'.

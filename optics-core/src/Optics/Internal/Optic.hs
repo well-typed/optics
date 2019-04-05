@@ -96,8 +96,6 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
 --
 -- This is the identity function, modulo some constraint jiggery-pokery.
 --
--- TODO: add a graph
---
 castOptic
   :: forall k l is s t a b
   .  Is k l
@@ -125,6 +123,10 @@ o % o' = castOptic o %% castOptic o'
 {-# INLINE (%) #-}
 
 -- | Compose two optics of the same flavour.
+--
+-- Normally you can simply use ('%') instead, but this may be useful to help
+-- type inference if the type of one of the optics is otherwise
+-- under-constrained.
 infixr 9 %%
 (%%) :: forall k is js ks s t u v a b. ks ~ Append is js
      => Optic k is s t u v

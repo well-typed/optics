@@ -1,5 +1,9 @@
--- | A 'Traversal' lifts an effectful operation on elements to act on
--- structures containing those elements.
+-- |
+-- Module: Optics.Traversal
+-- Description: Lifts an effectful operation on elements to act on structures.
+--
+-- A 'Traversal' lifts an effectful operation on elements to act on structures
+-- containing those elements.
 --
 -- That is, given a function @op :: A -> F B@ where @F@ is
 -- 'Applicative', a @'Traversal' S T A B@ can produce a function @S ->
@@ -13,6 +17,7 @@
 --
 -- A close relative is the 'Optics.AffineTraversal.AffineTraversal',
 -- which is a 'Traversal' that acts on at most one value.
+--
 module Optics.Traversal
   (
   -- * Formation
@@ -20,12 +25,30 @@ module Optics.Traversal
   , Traversal'
 
   -- * Introduction
-  -- | A 'Traversal' can be constructed by applying 'traversalVL' to
-  -- the van Laarhoven encoding.
-  , traversed
+  , traversalVL
 
   -- * Elimination
   , traverseOf
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'traverseOf' ('traversalVL' f) ≡ f
+  -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- @
+  -- 'traverseOf' o 'pure' ≡ 'pure'
+  -- 'fmap' ('traverseOf' o f) . 'traverseOf' o g ≡ 'Data.Functor.Compose.getCompose' . 'traverseOf' o ('Data.Functor.Compose.Compose' . 'fmap' f . g)
+  -- @
+
+  -- * Additional introduction forms
+  , traversed
+
+  -- * Additional elimination forms
   , forOf
   , sequenceOf
   , transposeOf
@@ -35,14 +58,6 @@ module Optics.Traversal
   , scanl1Of
   , failover
   , failover'
-
-  -- * Computation
-  -- |
-  --
-  -- @
-  -- 'traverseOf' 'traversed' = 'traverse'
-  -- 'traverseOf' ('traversalVL' f) = f
-  -- @
 
     -- * Combinators
   , backwards
@@ -59,7 +74,6 @@ module Optics.Traversal
   -- converts a 'Traversal' to a 'TraversalVL'.
   , TraversalVL
   , TraversalVL'
-  , traversalVL
 
   -- * Re-exports
   , module Optics.Optic
@@ -263,7 +277,9 @@ failover' o = \f s ->
 
 -- | Construct a 'Traversal' via the 'Traversable' class.
 --
--- Observe that @'traverseOf' 'traversed' = 'traverse'@.
+-- @
+-- 'traverseOf' 'traversed' = 'traverse'
+-- @
 --
 traversed :: Traversable t => Traversal (t a) (t b) a b
 traversed = Optic traversed__

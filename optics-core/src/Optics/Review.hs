@@ -1,4 +1,8 @@
--- | A 'Review' is a backwards 'Optics.Getter.Getter', i.e. a
+-- |
+-- Module: Optics.Review
+-- Description: A backwards 'Optics.Getter.Getter', i.e. a function.
+--
+-- A 'Review' is a backwards 'Optics.Getter.Getter', i.e. a
 -- @'Review' T B@ is just a function @B -> T@.
 --
 module Optics.Review

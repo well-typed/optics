@@ -1,11 +1,10 @@
 -- |
 --
 -- Module: Optics.Core
--- Description: The core @optics@ functionality re-exported.
+-- Description: The core optics functionality re-exported.
 --
--- Introduction...
---
--- TODO: motivation behind @optics@
+-- See the @Optics@ module in the main @optics@ package for overview
+-- documentation.
 --
 module Optics.Core
   (
@@ -15,7 +14,7 @@ module Optics.Core
   -- * Indexed optics
   , module I
 
-  -- * Operators
+  -- * Combinators
   , module P
 
   -- * Optics for basic data types

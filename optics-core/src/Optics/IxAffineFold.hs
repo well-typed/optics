@@ -1,6 +1,9 @@
--- | An 'IxAffineFold' is an indexed version of an
--- 'Optics.AffineFold.AffineFold'.  See "Optics.Indexed.Core" for a
--- discussion of indexed optics in general.
+-- |
+-- Module: Optics.IxAffineFold
+-- Description: An indexed version of an 'Optics.AffineFold.AffineFold'.
+--
+-- An 'IxAffineFold' is an indexed version of an 'Optics.AffineFold.AffineFold'.
+-- See "Optics.Indexed.Core" for a discussion of indexed optics in general.
 --
 module Optics.IxAffineFold
   (
@@ -13,6 +16,13 @@ module Optics.IxAffineFold
   -- * Elimination
   , ipreview
   , ipreviews
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'ipreview' ('iafolding' f) ≡ f
+  -- @
 
   -- * Semigroup structure
   , iafailing

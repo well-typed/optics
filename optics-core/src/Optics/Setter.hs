@@ -1,6 +1,6 @@
 -- |
 -- Module: Optics.Setter
--- Description: A 'Setter' applies an update to all contained values.
+-- Description: Applies an update to all contained values.
 --
 -- A @'Setter' S T A B@ has the ability to lift a function of type
 -- @A -> B@ 'over' a function of type @S -> T@, applying the function
@@ -21,31 +21,36 @@ module Optics.Setter
   , sets
 
   -- * Elimination
-  , set
   , over
 
   -- * Computation
   -- |
   --
   -- @
-  -- 'set'  ('sets' f) v s ≡ f ('const' v) s
-  -- 'over' ('sets' f) g s ≡ f g s
+  -- 'over' ('sets' f) ≡ f
   -- @
 
   -- * Well-formedness
   -- |
   --
+  -- * __PutPut__: Setting twice is the same as setting once:
+  --
+  --     @
+  --     'Optics.Setter.set' l v' ('Optics.Setter.set' l v s) ≡ 'Optics.Setter.set' l v' s
+  --     @
+  --
   -- * __Functoriality__: 'Setter's must preserve identities and composition:
   --
-  --    @
-  --    'over' s 'id' ≡ 'id'
-  --    'over' s f '.' 'over' s g ≡ 'over' s (f '.' g)
-  --    @
+  --     @
+  --     'over' s 'id' ≡ 'id'
+  --     'over' s f '.' 'over' s g ≡ 'over' s (f '.' g)
+  --     @
 
   -- * Additional introduction forms
   , mapped
 
   -- * Additional elimination forms
+  , set
   , set'
   , over'
 
@@ -114,6 +119,10 @@ over' o = \f ->
 
 -- | Apply a setter.
 --
+-- @
+-- 'set' o v ≡ 'over' o ('const' v)
+-- @
+--
 -- >>> let _1  = lens fst $ \(_,y) x -> (x, y)
 -- >>> set _1 'x' ('y', 'z')
 -- ('x','z')
@@ -144,8 +153,12 @@ sets
 sets f = Optic (roam f)
 {-# INLINE sets #-}
 
--- | Create a 'Setter' for a 'Functor'.  Observe that @'over'
--- 'mapped'@ is just 'fmap'.
+-- | Create a 'Setter' for a 'Functor'.
+--
+-- @
+-- 'over' 'mapped' ≡ 'fmap'
+-- @
+--
 mapped :: Functor f => Setter (f a) (f b) a b
 mapped = Optic mapped__
 {-# INLINE mapped #-}
