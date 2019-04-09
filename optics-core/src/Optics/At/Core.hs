@@ -1,14 +1,41 @@
 {-# LANGUAGE CPP #-}
+-- |
+-- Module: Optics.At.Core
+-- Description: Optics for 'Map' and 'Set'-like containers.
+--
+-- This module provides optics for 'Map' and 'Set'-like containers, including an
+-- 'AffineTraversal' to traverse a key in a map or an element of a sequence:
+--
+-- >>> preview (ix 1) ['a','b','c']
+-- Just 'b'
+--
+-- a 'Lens' to get, set or delete a key in a map:
+--
+-- >>> set (at 0) (Just 'b') (Map.fromList [(0, 'a')])
+-- fromList [(0,'b')]
+--
+-- and a 'Lens' to insert or remove an element of a set:
+--
+-- >>> IntSet.fromList [1,2,3,4] & contains 3 .~ False
+-- fromList [1,2,4]
+--
+-- The @Optics.At@ module from @optics-extra@ provides additional instances of
+-- the classes defined here.
+--
 module Optics.At.Core
   (
-  -- * At
-    At(..)
-  , sans
-  -- * Ixed
-  , Index
+    -- * Type families
+    Index
   , IxValue
+
+    -- * Ixed
   , Ixed(ix)
   , ixAt
+
+    -- * At
+  , At(..)
+  , sans
+
   -- * Contains
   , Contains(..)
   ) where
@@ -30,6 +57,9 @@ import Optics.AffineTraversal
 import Optics.Lens
 import Optics.Setter
 
+-- | Type family that takes a key-value container type and returns the type of
+-- keys (indices) into the container, for example @'Index' ('Map' k a) ~ k@.
+-- This is shared by 'Ixed', 'At' and 'Contains'.
 type family Index (s :: *) :: *
 type instance Index (e -> a) = e
 type instance Index IntSet = Int
@@ -66,6 +96,7 @@ type instance Index (Tree a) = [Int]
 
 -- | This class provides a simple 'Lens' that lets you view (and modify)
 -- information about whether or not a container contains a given 'Index'.
+-- Instances are provided for 'Set'-like containers only.
 class Contains m where
   -- |
   -- >>> IntSet.fromList [1,2,3,4] ^. contains 3
@@ -88,8 +119,9 @@ instance Ord a => Contains (Set a) where
     if b then Set.insert k s else Set.delete k s
   {-# INLINE contains #-}
 
--- | This provides a common notion of a value at an index that is shared by both
--- 'Ixed' and 'At'.
+-- | Type family that takes a key-value container type and returns the type of
+-- values stored in the container, for example @'IxValue' ('Map' k a) ~ a@. This
+-- is shared by both 'Ixed' and 'At'.
 type family IxValue (m :: *) :: *
 
 -- | Provides a simple 'AffineTraversal' lets you traverse the value at a given

@@ -69,10 +69,15 @@ module Optics
   -- >>> preview (ix 1) ['a','b','c']
   -- Just 'b'
   --
-  -- and a 'Lens' to get, set or delete a key in a map:
+  -- a 'Lens' to get, set or delete a key in a map:
   --
   -- >>> set (at 0) (Just 'b') (Map.fromList [(0, 'a')])
   -- fromList [(0,'b')]
+  --
+  -- and a 'Lens' to insert or remove an element of a set:
+  --
+  -- >>> IntSet.fromList [1,2,3,4] & contains 3 .~ False
+  -- fromList [1,2,4]
   --
   , module Optics.At
 
