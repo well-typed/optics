@@ -1,5 +1,16 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
+-- |
+-- Module: Data.Text.Lazy.Optics
+-- Description: Optics for working with lazy 'Text.Text'.
+--
+-- This module provides 'Iso's for converting lazy 'Text.Text' to or from a
+-- 'String' or 'Builder', and an 'IxTraversal' for traversing the individual
+-- characters of a 'Text.Text'.
+--
+-- If you need to work with both strict and lazy text, "Data.Text.Optics"
+-- provides combinators that support both varieties using a typeclass.
+--
 module Data.Text.Lazy.Optics
   ( packed
   , unpacked
@@ -10,7 +21,7 @@ module Data.Text.Lazy.Optics
   , pattern Text
   ) where
 
-import Data.ByteString.Lazy as ByteString
+import Data.ByteString.Lazy (ByteString)
 import Data.Text.Lazy as Text
 import Data.Text.Lazy.Builder
 import Data.Text.Lazy.Encoding
@@ -26,28 +37,28 @@ import Optics.Internal.Profunctor
 -- >>> :set -XOverloadedStrings
 -- >>> import Optics.Core
 
--- | This isomorphism can be used to 'pack' (or 'unpack') lazy 'Text'.
+-- | This isomorphism can be used to 'pack' (or 'unpack') lazy 'Text.Text'.
 --
 -- >>> "hello"^.packed -- :: Text
 -- "hello"
 --
 -- @
--- 'pack' x ≡ x '^.' 'packed'
--- 'unpack' x ≡ x '^.' 're' 'packed'
+-- 'pack' x ≡ x 'Optics.Operators.^.' 'packed'
+-- 'unpack' x ≡ x 'Optics.Operators.^.' 're' 'packed'
 -- 'packed' ≡ 're' 'unpacked'
 -- @
 packed :: Iso' String Text
 packed = iso Text.pack Text.unpack
 {-# INLINE packed #-}
 
--- | This isomorphism can be used to 'unpack' (or 'pack') lazy 'Text'.
+-- | This isomorphism can be used to 'unpack' (or 'pack') lazy 'Text.Text'.
 --
 -- >>> "hello"^.unpacked -- :: String
 -- "hello"
 --
 -- @
--- 'pack' x ≡ x '^.' 're' 'unpacked'
--- 'unpack' x ≡ x '^.' 'packed'
+-- 'pack' x ≡ x 'Optics.Operators.^.' 're' 'unpacked'
+-- 'unpack' x ≡ x 'Optics.Operators.^.' 'packed'
 -- @
 --
 -- This 'Iso' is provided for notational convenience rather than out of great
@@ -61,7 +72,7 @@ unpacked = Optic unpacked__
 {-# INLINE unpacked #-}
 
 -- | This is an alias for 'unpacked' that makes it clearer how to use it with
--- @('#')@.
+-- @('Optics.Operators.#')@.
 --
 -- @
 -- '_Text' = 're' 'packed'
@@ -73,17 +84,17 @@ _Text :: Iso' Text String
 _Text = re packed
 {-# INLINE _Text #-}
 
--- | Convert between lazy 'Text' and 'Builder' .
+-- | Convert between lazy 'Text.Text' and 'Builder' .
 --
 -- @
--- 'fromLazyText' x ≡ x '^.' 'builder'
--- 'toLazyText' x ≡ x '^.' 're' 'builder'
+-- 'fromLazyText' x ≡ x 'Optics.Operators.^.' 'builder'
+-- 'toLazyText' x ≡ x 'Optics.Operators.^.' 're' 'builder'
 -- @
 builder :: Iso' Text Builder
 builder = iso fromLazyText toLazyText
 {-# INLINE builder #-}
 
--- | Traverse the individual characters in a 'Text'.
+-- | Traverse the individual characters in a 'Text.Text'.
 --
 -- >>> anyOf text (=='c') "chello"
 -- True
@@ -104,7 +115,7 @@ text :: IxTraversal' Int Text Char
 text = Optic text__
 {-# INLINE text #-}
 
--- | Encode\/Decode a lazy 'Text' to\/from lazy 'ByteString', via UTF-8.
+-- | Encode\/Decode a lazy 'Text.Text' to\/from lazy 'ByteString', via UTF-8.
 --
 -- Note: This function does not decode lazily, as it must consume the entire
 -- input before deciding whether or not it fails.

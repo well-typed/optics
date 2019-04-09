@@ -1,5 +1,16 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE PatternSynonyms #-}
+-- |
+-- Module: Data.Text.Strict.Optics
+-- Description: Optics for working with strict 'Strict.Text'.
+--
+-- This module provides 'Iso's for converting strict 'Strict.Text' to or from a
+-- 'String' or 'Builder', and an 'IxTraversal' for traversing the individual
+-- characters of a 'Strict.Text'.
+--
+-- If you need to work with both strict and lazy text, "Data.Text.Optics"
+-- provides combinators that support both varieties using a typeclass.
+--
 module Data.Text.Strict.Optics
   ( packed
   , unpacked
@@ -27,15 +38,15 @@ import Optics.Internal.Profunctor
 -- >>> :set -XOverloadedStrings
 -- >>> import Optics.Core
 
--- | This isomorphism can be used to 'pack' (or 'unpack') strict 'Text'.
+-- | This isomorphism can be used to 'pack' (or 'unpack') strict 'Strict.Text'.
 --
 --
 -- >>> "hello"^.packed -- :: Text
 -- "hello"
 --
 -- @
--- 'pack' x ≡ x '^.' 'packed'
--- 'unpack' x ≡ x '^.' 're' 'packed'
+-- 'pack' x ≡ x 'Optics.Operators.^.' 'packed'
+-- 'unpack' x ≡ x 'Optics.Operators.^.' 're' 'packed'
 -- 'packed' ≡ 're' 'unpacked'
 -- 'packed' ≡ 'iso' 'pack' 'unpack'
 -- @
@@ -43,7 +54,7 @@ packed :: Iso' String Text
 packed = iso pack unpack
 {-# INLINE packed #-}
 
--- | This isomorphism can be used to 'unpack' (or 'pack') lazy 'Text'.
+-- | This isomorphism can be used to 'unpack' (or 'pack') strict 'Strict.Text'.
 --
 -- >>> "hello"^.unpacked -- :: String
 -- "hello"
@@ -56,8 +67,8 @@ packed = iso pack unpack
 -- @
 --
 -- @
--- 'pack' x ≡ x '^.' 're' 'unpacked'
--- 'unpack' x ≡ x '^.' 'packed'
+-- 'pack' x ≡ x 'Optics.Operators.^.' 're' 'unpacked'
+-- 'unpack' x ≡ x 'Optics.Operators.^.' 'packed'
 -- 'unpacked' ≡ 'iso' 'unpack' 'pack'
 -- @
 unpacked :: Iso' Text String
@@ -65,7 +76,7 @@ unpacked = Optic unpacked__
 {-# INLINE unpacked #-}
 
 -- | This is an alias for 'unpacked' that makes it more obvious how to use it
--- with '#'
+-- with 'Optics.Operators.#'
 --
 -- >> _Text # "hello" -- :: Text
 -- "hello"
@@ -73,17 +84,17 @@ _Text :: Iso' Text String
 _Text = unpacked
 {-# INLINE _Text #-}
 
--- | Convert between strict 'Text' and 'Builder' .
+-- | Convert between strict 'Strict.Text' and 'Builder' .
 --
 -- @
--- 'fromText' x ≡ x '^.' 'builder'
--- 'toStrict' ('toLazyText' x) ≡ x '^.' 're' 'builder'
+-- 'fromText' x ≡ x 'Optics.Operators.^.' 'builder'
+-- 'toStrict' ('toLazyText' x) ≡ x 'Optics.Operators.^.' 're' 'builder'
 -- @
 builder :: Iso' Text Builder
 builder = iso fromText (toStrict . toLazyText)
 {-# INLINE builder #-}
 
--- | Traverse the individual characters in strict 'Text'.
+-- | Traverse the individual characters in strict 'Strict.Text'.
 --
 -- >>> anyOf text (=='o') "hello"
 -- True
@@ -101,7 +112,7 @@ text :: IxTraversal' Int Text Char
 text = Optic text__
 {-# INLINE text #-}
 
--- | Encode\/Decode a strict 'Text' to\/from strict 'ByteString', via UTF-8.
+-- | Encode\/Decode a strict 'Strict.Text' to\/from strict 'ByteString', via UTF-8.
 --
 -- >>> utf8 # "☃"
 -- "\226\152\131"

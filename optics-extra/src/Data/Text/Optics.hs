@@ -1,5 +1,17 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE PatternSynonyms #-}
+-- |
+-- Module: Data.Text.Optics
+-- Description: Optics for working with strict or lazy 'Text'.
+--
+-- This module provides 'Iso's for converting strict or lazy 'Text' to or from a
+-- 'String' or 'Builder', and an 'IxTraversal' for traversing the individual
+-- characters of a 'Text'.
+--
+-- The same combinators support both strict and lazy text using the 'IsText'
+-- typeclass.  You can import "Data.Text.Strict.Optics" or
+-- "Data.Text.Lazy.Optics" instead if you prefer monomorphic versions.
+--
 module Data.Text.Optics
   ( IsText(..)
   , unpacked
@@ -24,8 +36,8 @@ class IsText t where
   -- 'Text'.
   --
   -- @
-  -- 'pack' x ≡ x '^.' 'packed'
-  -- 'unpack' x ≡ x '^.' 're' 'packed'
+  -- 'pack' x ≡ x 'Optics.Operators.^.' 'packed'
+  -- 'unpack' x ≡ x 'Optics.Operators.^.' 're' 'packed'
   -- 'packed' ≡ 're' 'unpacked'
   -- @
   packed :: Iso' String t
@@ -33,7 +45,7 @@ class IsText t where
   -- | Convert between strict or lazy 'Text' and a 'Builder'.
   --
   -- @
-  -- 'fromText' x ≡ x '^.' 'builder'
+  -- 'fromText' x ≡ x 'Optics.Operators.^.' 'builder'
   -- @
   builder :: Iso' t Builder
 
@@ -58,8 +70,8 @@ instance IsText String where
 -- 'Text'.
 --
 -- @
--- 'unpack' x ≡ x '^.' 'unpacked'
--- 'pack' x ≡ x '^.' 're' 'unpacked'
+-- 'unpack' x ≡ x 'Optics.Operators.^.' 'unpacked'
+-- 'pack' x ≡ x 'Optics.Operators.^.' 're' 'unpacked'
 -- @
 --
 -- This 'Iso' is provided for notational convenience rather than out of great
@@ -74,7 +86,7 @@ unpacked = re packed
 {-# INLINE unpacked #-}
 
 -- | This is an alias for 'unpacked' that makes it clearer how to use it with
--- @('#')@.
+-- @('Optics.Operators.#')@.
 --
 -- @
 -- '_Text' = 're' 'packed'
