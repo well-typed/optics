@@ -4,8 +4,9 @@
 -- Module: Optics.IxFold
 -- Description: An indexed version of an 'Optics.Fold.Fold'.
 --
--- An 'IxFold' is an indexed version of an 'Optics.Fold.Fold'.  See
--- "Optics.Indexed.Core" for a discussion of indexed optics in general.
+-- An 'IxFold' is an indexed version of an 'Optics.Fold.Fold'. See the "Indexed
+-- optics" section of the overview documentation in the @Optics@ module of the
+-- main @optics@ package for more details on indexed optics.
 --
 module Optics.IxFold
   (
