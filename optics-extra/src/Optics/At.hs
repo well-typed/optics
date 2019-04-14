@@ -134,7 +134,7 @@ instance Ixed LazyB.ByteString where
 -- At
 
 instance (Eq k, Hashable k) => At (HashMap k a) where
-#if MIN_VERSION_unordered_containers(0,2,9)
+#if MIN_VERSION_unordered_containers(0,2,10)
   at k = lensVL $ \f -> HashMap.alterF f k
 #else
   at k = lensVL $ \f m ->
