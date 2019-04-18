@@ -3,6 +3,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_HADDOCK not-home #-}
+
 -- | Core optic types and subtyping machinery.
 --
 -- This module contains the core 'Optic' types, and the underlying
@@ -10,6 +12,9 @@
 -- various different flavours of optics.
 --
 -- The composition operator for optics is also defined here.
+--
+-- This module is intended for internal use only, and may change without
+-- warning in subsequent releases.
 --
 module Optics.Internal.Optic
   ( Optic(..)
@@ -51,13 +56,16 @@ type WithIx i = '[i]
 
 -- | Wrapper newtype for the whole family of vaguely lens-like things.
 --
--- The first type parameter @k@ identifies the particular flavour
--- (e.g. 'A_Lens' or 'A_Traversal').
+-- The first parameter @k@ identifies the particular optic kind (e.g. 'A_Lens'
+-- or 'A_Traversal').
 --
--- The type parameters @s@ and @t@ represent the "big" structure,
+-- The parameter @is@ is a list of types available as indices.  This will
+-- typically be 'NoIx' for unindexed optics, or 'WithIx' for optics with a
+-- single index. See the "Indexed optics" section of the overview documentation
+-- in the @Optics@ module of the main @optics@ package for more details.
+--
+-- The parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
---
--- TODO: explain indices
 --
 newtype Optic (k :: *) (is :: [*]) s t a b =
   Optic { getOptic :: forall p j. Optic_ k p j (Curry is j) s t a b }
@@ -88,8 +96,6 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
 --
 -- This is the identity function, modulo some constraint jiggery-pokery.
 --
--- TODO: add a graph
---
 castOptic
   :: forall k l is s t a b
   .  Is k l
@@ -117,6 +123,10 @@ o % o' = castOptic o %% castOptic o'
 {-# INLINE (%) #-}
 
 -- | Compose two optics of the same flavour.
+--
+-- Normally you can simply use ('%') instead, but this may be useful to help
+-- type inference if the type of one of the optics is otherwise
+-- under-constrained.
 infixr 9 %%
 (%%) :: forall k is js ks s t u v a b. ks ~ Append is js
      => Optic k is s t u v

@@ -1,3 +1,9 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
+-- | Internal implementation details of indexed traversals.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.IxTraversal where
 
 import Optics.Internal.Fold
@@ -8,7 +14,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Setter
 
--- | Internal implementation of 'itraversed'.
+-- | Internal implementation of 'Optics.IxTraversal.itraversed'.
 itraversed__
   :: (Traversing p, TraversableWithIndex i f)
   => Optic__ p j (i -> j) (f a) (f b) a b

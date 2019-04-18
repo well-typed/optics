@@ -1,3 +1,9 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
+-- | Internal implementation details of traversals.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Traversal where
 
 import Optics.Internal.Optic
@@ -5,7 +11,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Fold
 import Optics.Internal.Setter
 
--- | Internal implementation of 'traversed'.
+-- | Internal implementation of 'Optics.Traversal.traversed'.
 traversed__
   :: (Traversing p, Traversable f)
   => Optic__ p i i (f a) (f b) a b

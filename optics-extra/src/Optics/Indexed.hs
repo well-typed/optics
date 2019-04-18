@@ -1,12 +1,23 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+-- |
+-- Module: Optics.Indexed
+-- Description: Definitions of indexed optics.
+--
+-- This module defines general functionality for indexed optics.  See the
+-- "Indexed optics" section of the overview documentation in the @Optics@ module
+-- of the main @optics@ package for more details.
+--
+-- Unlike "Optics.Indexed.Core", this includes the definitions from modules for
+-- specific indexed optic flavours such as "Optics.IxTraversal", and includes
+-- additional instances for 'FunctorWithIndex' and similar classes.
+--
 module Optics.Indexed
-  ( -- * Indexed optics
-    module Optics.IxTraversal
-  , module Optics.IxFold
-  , module Optics.IxSetter
+  (
+    -- * Class for optic kinds that can be indexed
+    IxOptic(..)
 
-  -- * Index composition and modification
+    -- * Composition of indexed optics
   , (<%>)
   , (%>)
   , (<%)
@@ -15,7 +26,13 @@ module Optics.Indexed
   , icompose3
   , icompose4
   , icompose5
-  , IxOptic(..)
+
+    -- * Indexed optic flavours
+  , module Optics.IxAffineFold
+  , module Optics.IxAffineTraversal
+  , module Optics.IxFold
+  , module Optics.IxSetter
+  , module Optics.IxTraversal
 
   -- * Functors with index
   , FunctorWithIndex (..)
@@ -33,6 +50,8 @@ import qualified Data.Vector as V
 
 import Optics.Indexed.Core
 import Optics.Internal.Indexed
+import Optics.IxAffineFold
+import Optics.IxAffineTraversal
 import Optics.IxFold
 import Optics.IxSetter
 import Optics.IxTraversal

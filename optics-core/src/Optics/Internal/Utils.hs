@@ -1,3 +1,7 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
+-- | This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Utils where
 
 import Data.Coerce
@@ -9,11 +13,17 @@ data Context a b t = Context (b -> t) a
 data IxContext i a b t = IxContext (i -> b -> t) a
   deriving Functor
 
+-- | Composition operator where the first argument must be an identity
+-- function up to representational equivalence (e.g. a newtype wrapper
+-- or unwrapper), and will be ignored at runtime.
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
 (#.) _f = coerce
 infixl 8 .#
 {-# INLINE (#.) #-}
 
+-- | Composition operator where the second argument must be an
+-- identity function up to representational equivalence (e.g. a
+-- newtype wrapper or unwrapper), and will be ignored at runtime.
 (.#) :: Coercible a b => (b -> c) -> (a -> b) -> (a -> c)
 (.#) f _g = coerce f
 infixr 9 #.
@@ -21,10 +31,10 @@ infixr 9 #.
 
 ----------------------------------------
 
--- | Helper for 'traverseOf_' and the like for better efficiency than the
--- foldr-based version.
+-- | Helper for 'Optics.Fold.traverseOf_' and the like for better
+-- efficiency than the foldr-based version.
 --
--- Note that the argument 'a' of the result should not be used.
+-- Note that the argument @a@ of the result should not be used.
 newtype Traversed f a = Traversed (f a)
 
 runTraversed :: Functor f => Traversed f a -> f ()
@@ -43,7 +53,7 @@ instance Applicative f => Monoid (Traversed f a) where
 
 ----------------------------------------
 
--- | Helper for 'failing' family to visit the first traversal only once.
+-- | Helper for 'Optics.Fold.failing' family to visit the first fold only once.
 data OrT f a = OrT !Bool (f a)
   deriving Functor
 

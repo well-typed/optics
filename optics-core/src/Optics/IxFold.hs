@@ -1,26 +1,35 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+-- |
+-- Module: Optics.IxFold
+-- Description: An indexed version of an 'Optics.Fold.Fold'.
+--
+-- An 'IxFold' is an indexed version of an 'Optics.Fold.Fold'. See the "Indexed
+-- optics" section of the overview documentation in the @Optics@ module of the
+-- main @optics@ package for more details on indexed optics.
+--
 module Optics.IxFold
-  ( A_Fold
-  , IxFold
-  , toIxFold
+  (
+  -- * Formation
+    IxFold
+
+  -- * Introduction
   , mkIxFold
+
+  -- * Elimination
   , ifoldMapOf
   , ifoldrOf
   , ifoldlOf'
   , itoListOf
   , itraverseOf_
   , iforOf_
-  -- * Folds
+
+  -- * Additional introduction forms
   , ifolded
   , ifolding
   , ifoldring
-  , ifiltered
-  , ibackwards_
-  -- * Semigroup structure
-  , isumming
-  , ifailing
-  -- * Special folds
+
+  -- * Additional elimination forms
   , iheadOf
   , ilastOf
   , ianyOf
@@ -28,6 +37,21 @@ module Optics.IxFold
   , inoneOf
   , ifindOf
   , ifindMOf
+
+  -- * Combinators
+  , ifiltered
+  , ibackwards_
+
+  -- * Semigroup structure
+  , isumming
+  , ifailing
+
+  -- * Subtyping
+  , A_Fold
+  , toIxFold
+
+  -- * Re-exports
+  , FoldableWithIndex(..)
   , module Optics.Optic
   ) where
 
@@ -110,6 +134,14 @@ itoListOf o = ifoldrOf o (\i -> (:) . (i, )) []
 
 ----------------------------------------
 
+-- | Traverse over all of the targets of an 'IxFold', computing an
+-- 'Applicative'-based answer, but unlike 'Optics.IxTraversal.itraverseOf' do
+-- not construct a new structure.
+--
+-- >>> itraverseOf_ each (curry print) ("hello","world")
+-- (0,"hello")
+-- (1,"world")
+--
 itraverseOf_
   :: (Is k A_Fold, Applicative f, is `HasSingleIndex` i)
   => Optic' k is s a

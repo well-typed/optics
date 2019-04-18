@@ -1,12 +1,39 @@
+-- |
+-- Module: Optics.IxAffineFold
+-- Description: An indexed version of an 'Optics.AffineFold.AffineFold'.
+--
+-- An 'IxAffineFold' is an indexed version of an 'Optics.AffineFold.AffineFold'.
+-- See the "Indexed optics" section of the overview documentation in the
+-- @Optics@ module of the main @optics@ package for more details on indexed
+-- optics.
+--
 module Optics.IxAffineFold
-  ( An_AffineFold
-  , IxAffineFold
-  , toIxAffineFold
+  (
+  -- * Formation
+    IxAffineFold
+
+  -- * Introduction
+  , iafolding
+
+  -- * Elimination
   , ipreview
   , ipreviews
-  , iafolding
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'ipreview' ('iafolding' f) ≡ f
+  -- @
+
   -- * Semigroup structure
   , iafailing
+
+  -- * Subtyping
+  , An_AffineFold
+  , toIxAffineFold
+
+  -- * Re-exports
   , module Optics.Optic
   ) where
 
@@ -55,7 +82,7 @@ iafolding g = Optic
 
 -- | Try the first 'IxAffineFold'. If it returns no entry, try the second one.
 --
--- /Note:/ There is no 'isumming' equivalent, because @iasumming = iafailing@.
+-- /Note:/ There is no 'Optics.IxFold.isumming' equivalent, because @iasumming = iafailing@.
 iafailing
   :: (Is k An_AffineFold, Is l An_AffineFold,
       is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)

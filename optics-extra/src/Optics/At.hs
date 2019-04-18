@@ -1,15 +1,43 @@
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+-- |
+-- Module: Optics.At
+-- Description: Optics for 'Data.Map.Map' and 'Data.Set.Set'-like containers.
+--
+-- This module provides optics for 'Data.Map.Map' and 'Data.Set.Set'-like
+-- containers, including an 'AffineTraversal' to traverse a key in a map or an
+-- element of a sequence:
+--
+-- >>> preview (ix 1) ['a','b','c']
+-- Just 'b'
+--
+-- a 'Lens' to get, set or delete a key in a map:
+--
+-- >>> set (at 0) (Just 'b') (Map.fromList [(0, 'a')])
+-- fromList [(0,'b')]
+--
+-- and a 'Lens' to insert or remove an element of a set:
+--
+-- >>> IntSet.fromList [1,2,3,4] & contains 3 .~ False
+-- fromList [1,2,4]
+--
+-- This module includes the core definitions from "Optics.At.Core" along with
+-- extra (orphan) instances.
+--
 module Optics.At
   (
-  -- * At
-    At(..)
-  , sans
-  -- * Ixed
-  , Index
+    -- * Type families
+    Index
   , IxValue
+
+    -- * Ixed
   , Ixed(ix)
   , ixAt
+
+    -- * At
+  , At(..)
+  , sans
+
   -- * Contains
   , Contains(..)
   ) where

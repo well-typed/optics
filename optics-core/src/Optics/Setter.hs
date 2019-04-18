@@ -1,14 +1,64 @@
+-- |
+-- Module: Optics.Setter
+-- Description: Applies an update to all contained values.
+--
+-- A @'Setter' S T A B@ has the ability to lift a function of type
+-- @A -> B@ 'over' a function of type @S -> T@, applying the function
+-- to update all the @A@s contained in @S@.  This can be used to 'set'
+-- all the @A@s to a single value (by lifting a constant function).
+--
+-- This can be seen as a generalisation of 'fmap', where the type @S@
+-- does not need to be a type constructor with @A@ as its last
+-- parameter.
+--
 module Optics.Setter
-  ( A_Setter
-  , Setter
+  (
+  -- * Formation
+    Setter
   , Setter'
-  , toSetter
+
+  -- * Introduction
+  , sets
+
+  -- * Elimination
   , over
-  , over'
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'over' ('sets' f) ≡ f
+  -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- * __PutPut__: Setting twice is the same as setting once:
+  --
+  --     @
+  --     'Optics.Setter.set' l v' ('Optics.Setter.set' l v s) ≡ 'Optics.Setter.set' l v' s
+  --     @
+  --
+  -- * __Functoriality__: 'Setter's must preserve identities and composition:
+  --
+  --     @
+  --     'over' s 'id' ≡ 'id'
+  --     'over' s f '.' 'over' s g ≡ 'over' s (f '.' g)
+  --     @
+
+  -- * Additional introduction forms
+  , mapped
+
+  -- * Additional elimination forms
   , set
   , set'
-  , sets
-  , mapped
+  , over'
+
+  -- * Subtyping
+  , A_Setter
+  , toSetter
+
+  -- * Re-exports
   , module Optics.Optic
   ) where
 
@@ -41,12 +91,14 @@ over o = \f -> runFunArrow $ getOptic (toSetter o) (FunArrow f)
 
 -- | Apply a setter as a modifier, strictly.
 --
+-- TODO DOC: what exactly is the strictness property?
+--
 -- Example:
 --
 -- @
 --  f :: Int -> (Int, a) -> (Int, a)
 --  f k acc
---    | k > 0     = f (k - 1) $ over' _1 (+1) acc
+--    | k > 0     = f (k - 1) $ 'over'' 'Data.Tuple.Optics._1' (+1) acc
 --    | otherwise = acc
 -- @
 --
@@ -67,6 +119,10 @@ over' o = \f ->
 
 -- | Apply a setter.
 --
+-- @
+-- 'set' o v ≡ 'over' o ('const' v)
+-- @
+--
 -- >>> let _1  = lens fst $ \(_,y) x -> (x, y)
 -- >>> set _1 'x' ('y', 'z')
 -- ('x','z')
@@ -79,6 +135,9 @@ set o = over o . const
 {-# INLINE set #-}
 
 -- | Apply a setter, strictly.
+--
+-- TODO DOC: what exactly is the strictness property?
+--
 set'
   :: Is k A_Setter
   => Optic k is s t a b
@@ -86,14 +145,20 @@ set'
 set' o = over' o . const
 {-# INLINE set' #-}
 
--- | Build a setter from a function to modify the element(s).
+-- | Build a setter from a function to modify the element(s), which must respect
+-- the well-formedness laws.
 sets
   :: ((a -> b) -> s -> t)
   -> Setter s t a b
 sets f = Optic (roam f)
 {-# INLINE sets #-}
 
--- | Setter via the 'Functor' class.
+-- | Create a 'Setter' for a 'Functor'.
+--
+-- @
+-- 'over' 'mapped' ≡ 'fmap'
+-- @
+--
 mapped :: Functor f => Setter (f a) (f b) a b
 mapped = Optic mapped__
 {-# INLINE mapped #-}

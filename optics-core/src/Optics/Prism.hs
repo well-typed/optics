@@ -1,18 +1,65 @@
+-- |
+-- Module: Optics.Prism
+-- Description: A generalised or first-class constructor.
+--
+-- A 'Prism' generalises the notion of a constructor (just as a
+-- 'Optics.Lens.Lens' generalises the notion of a field).
+--
 module Optics.Prism
-  ( A_Prism
-  , Prism
+  (
+  -- * Formation
+    Prism
   , Prism'
-  , toPrism
+
+  -- * Introduction
   , prism
+
+  -- * Elimination
+  -- | A 'Prism' is an 'Optics.Review.Review' and an
+  -- 'Optics.AffineFold.AffineFold', therefore you can specialise types to
+  -- obtain:
+  --
+  -- @
+  -- 'Optics.Review.review'  :: 'Prism' s t a b -> b -> t
+  -- 'Optics.AffineFold.preview' :: 'Prism'' s a -> s -> 'Maybe' a
+  -- @
+  , matching
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'Optics.Review.review'   ('prism' f g) ≡ f
+  -- 'matching' ('prism' f g) ≡ g
+  -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- @
+  -- 'Optics.AffineFold.preview' o ('Optics.Review.review' o b) ≡ 'Just' b
+  -- 'Optics.AffineFold.preview' o s ≡ 'Just' a  =>  'Optics.Review.review' o a ≡ s
+  -- @
+
+  -- * Additional introduction forms
   , prism'
+  , only
+  , nearly
+
+  -- * Additional elimination forms
   , withPrism
+  , isn't
+
+  -- * Combinators
   , aside
   , without
   , below
-  , isn't
-  , matching
-  , only
-  , nearly
+
+  -- * Subtyping
+  , A_Prism
+  , toPrism
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where
@@ -36,7 +83,8 @@ toPrism :: Is k A_Prism => Optic k is s t a b -> Optic A_Prism is s t a b
 toPrism = castOptic
 {-# INLINE toPrism #-}
 
--- | Build a prism from a constructor and a matcher.
+-- | Build a prism from a constructor and a matcher, which must respect the
+-- well-formedness laws.
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism construct match = Optic $ dimap match (either id construct) . right'
 {-# INLINE prism #-}
@@ -47,6 +95,7 @@ prism' :: (b -> s) -> (s -> Maybe a) -> Prism s s a b
 prism' bs sma = prism bs (\s -> maybe (Left s) Right (sma s))
 {-# INLINE prism' #-}
 
+-- | Work with a 'Prism' as a constructor and a matcher.
 withPrism
   :: Is k A_Prism
   => Optic k is s t a b
@@ -83,7 +132,7 @@ without k =
     Right u -> bimap Right Right (uevc u)
 {-# INLINE without #-}
 
--- | 'lift' a 'Prism' through a 'Traversable' functor, giving a Prism that
+-- | Lift a 'Prism' through a 'Traversable' functor, giving a 'Prism' that
 -- matches only if all the elements of the container match the 'Prism'.
 below
   :: (Is k A_Prism, Traversable f)
@@ -107,6 +156,10 @@ isn't k s =
 
 -- | Retrieve the value targeted by a 'Prism' or return the original value while
 -- allowing the type to change if it does not match.
+--
+-- @
+-- 'Optics.AffineFold.preview' o ≡ 'either' ('const' 'Nothing') 'id' . 'matching' o
+-- @
 matching :: Is k A_Prism => Optic k is s t a b -> s -> Either t a
 matching o = withPrism o $ \_ match -> match
 {-# INLINE matching #-}

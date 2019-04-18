@@ -1,6 +1,19 @@
 {-# LANGUAGE DataKinds #-}
+-- |
+-- Module: Optics.Indexed.Core
+-- Description: Core definitions for indexed optics.
+--
+-- This module defines basic functionality for indexed optics.  See the "Indexed
+-- optics" section of the overview documentation in the @Optics@ module of the
+-- main @optics@ package for more details.
+--
 module Optics.Indexed.Core
-  ( (<%>)
+  (
+  -- * Class for optic kinds that can be indexed
+    IxOptic(..)
+
+  -- * Composition of indexed optics
+  , (<%>)
   , (%>)
   , (<%)
   , reindexed
@@ -8,7 +21,10 @@ module Optics.Indexed.Core
   , icompose3
   , icompose4
   , icompose5
-  , IxOptic(..)
+
+  -- * Constraints
+  , HasSingleIndex
+  , NonEmptyIndices
   ) where
 
 import Optics.Internal.Indexed
@@ -116,6 +132,7 @@ icompose5 = icomposeN
 ----------------------------------------
 -- IxOptic
 
+-- | Class for optic kinds that can have indices.
 class IxOptic k s t a b where
   -- | Convert an indexed optic to its unindexed equivalent.
   noIx
@@ -134,7 +151,7 @@ class IxOptic k s t a b where
   -- when used without indices. Useful for defining indexed optics that are as
   -- efficient as their unindexed equivalents when used without indices.
   --
-  -- /Note:/ @conjoined f g@ is well-defined if and only if @f ≡ noIx g@.
+  -- /Note:/ @'conjoined' f g@ is well-defined if and only if @f ≡ 'noIx' g@.
   conjoined
     :: is `HasSingleIndex` i
     => Optic k NoIx s t a b

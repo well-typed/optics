@@ -1,14 +1,47 @@
+-- |
+-- Module: Optics.Iso
+-- Description: Translates between types with the same structure.
+--
+-- An 'Iso'morphism expresses the fact that two types have the
+-- same structure, and hence can be converted from one to the other in
+-- either direction.
+--
 module Optics.Iso
-  ( An_Iso
-  , Iso
+  (
+  -- * Formation
+    Iso
   , Iso'
-  , toIso
+
+  -- * Introduction
   , iso
-  , withIso
-  , au
-  , under
-  -- * Isomorphisms
-  , mapping
+
+  -- * Elimination
+  -- | An 'Iso' is a 'Optics.Getter.Getter' and an
+  -- 'Optics.Review.Review', therefore you can specialise types to
+  -- obtain:
+  --
+  -- @
+  -- 'Optics.Getter.view'   :: 'Iso' s t a b -> s -> a
+  -- 'Optics.Review.review' :: 'Iso' s t a b -> b -> t
+  -- @
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'Optics.Getter.view'   ('iso' f g) ≡ f
+  -- 'Optics.Review.review' ('iso' f g) ≡ g
+  -- @
+
+  -- * Well-formedness
+  -- | The functions translating back and forth must be mutually inverse:
+  --
+  -- @
+  -- 'Optics.Getter.view' i . 'Optics.Getter.review' i ≡ 'id'
+  -- 'Optics.Getter.review' i . 'Optics.Getter.view' i ≡ 'id'
+  -- @
+
+  -- * Additional introduction forms
   , coerced
   , coerced'
   , coerced1
@@ -17,6 +50,24 @@ module Optics.Iso
   , flipped
   , involuted
   , Swapped(..)
+
+  -- * Additional elimination forms
+  , withIso
+  , au
+  , under
+
+  -- * Combinators
+  -- | The 'Optics.Re.re' combinator can be used to reverse an 'Iso':
+  --
+  -- @
+  -- 'Optics.Re.re' :: 'Iso' s t a b -> 'Iso' b a t s
+  -- @
+  , mapping
+
+  -- * Subtyping
+  , An_Iso
+  , toIso
+
   -- * Re-exports
   , module Optics.Optic
   )
@@ -64,7 +115,7 @@ withIso o k = case getOptic (toIso o) (Exchange id id) of
 -- type:
 --
 -- @
--- au :: Iso s t a b -> ((b -> t) -> e -> s) -> e -> a
+-- au :: 'Iso' s t a b -> ((b -> t) -> e -> s) -> e -> a
 -- @
 au :: (Is k An_Iso, Functor f) => Optic k is s t a b -> ((b -> t) -> f s) -> f a
 au k = withIso k $ \sa bt f -> sa <$> f bt
@@ -142,7 +193,7 @@ curried = iso curry uncurry
 -- @
 --
 -- @
--- 'uncurried' = 're' 'curried'
+-- 'uncurried' = 'Optics.Re.re' 'curried'
 -- @
 --
 -- >>> (view uncurried (+)) (1,2)

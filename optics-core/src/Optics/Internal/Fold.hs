@@ -1,3 +1,9 @@
+{-# OPTIONS_HADDOCK not-home #-}
+
+-- | Internal implementation details of folds.
+--
+-- This module is intended for internal use only, and may change without warning
+-- in subsequent releases.
 module Optics.Internal.Fold where
 
 import Data.Functor
@@ -9,7 +15,7 @@ import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
--- | Internal implementation of 'mkFold'.
+-- | Internal implementation of 'Optics.Fold.mkFold'.
 mkFold__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (a -> f u) -> s -> f v)
@@ -17,14 +23,14 @@ mkFold__
 mkFold__ f = rphantom . wander f . rphantom
 {-# INLINE mkFold__ #-}
 
--- | Internal implementation of 'folded'.
+-- | Internal implementation of 'Optics.Fold.folded'.
 folded__
   :: (Bicontravariant p, Traversing p, Foldable f)
   => Optic__ p i i (f a) (f b) a b
 folded__ = mkFold__ traverse_
 {-# INLINE folded__ #-}
 
--- | Internal implementation of 'foldring'.
+-- | Internal implementation of 'Optics.Fold.foldring'.
 foldring__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (a -> f u -> f u) -> f v -> s -> f w)

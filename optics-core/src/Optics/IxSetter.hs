@@ -1,16 +1,61 @@
 {-# LANGUAGE DataKinds #-}
+-- |
+-- Module: Optics.IxSetter
+-- Description: An indexed version of an 'Optics.Setter.Setter'.
+--
+-- An 'IxSetter' is an indexed version of an 'Optics.Setter.Setter'. See the
+-- "Indexed optics" section of the overview documentation in the @Optics@ module
+-- of the main @optics@ package for more details on indexed optics.
+--
 module Optics.IxSetter
-  ( A_Setter
-  , IxSetter
+  (
+  -- * Formation
+    IxSetter
   , IxSetter'
-  , FunctorWithIndex(..)
-  , toIxSetter
+
+  -- * Introduction
+  , isets
+
+  -- * Elimination
   , iover
-  , iover'
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'iover' ('isets' f) ≡ f
+  -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- * __PutPut__: Setting twice is the same as setting once:
+  --
+  --     @
+  --     'Optics.Setter.iset' l v' ('Optics.Setter.iset' l v s) ≡ 'Optics.Setter.iset' l v' s
+  --     @
+  --
+  -- * __Functoriality__: 'IxSetter's must preserve identities and composition:
+  --
+  --     @
+  --     'iover' s ('const' 'id') ≡ 'id'
+  --     'iover' s f '.' 'iover' s g ≡ 'iover' s (\i -> f i '.' g i)
+  --     @
+
+  -- * Additional introduction forms
+  , imapped
+
+  -- * Additional elimination forms
   , iset
   , iset'
-  , isets
-  , imapped
+  , iover'
+
+  -- * Subtyping
+  , A_Setter
+  , toIxSetter
+
+  -- * Re-exports
+  , FunctorWithIndex(..)
   , module Optics.Optic
   ) where
 
@@ -54,6 +99,11 @@ iover' o = \f ->
 {-# INLINE iover' #-}
 
 -- | Apply an indexed setter.
+--
+-- @
+-- 'iset' o f ≡ 'iover' o (\i _ -> f i)
+-- @
+--
 iset
   :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -77,6 +127,10 @@ isets f = Optic (iroam f)
 {-# INLINE isets #-}
 
 -- | Indexed setter via the 'FunctorWithIndex' class.
+--
+-- @
+-- 'iover' 'imapped' ≡ 'imap'
+-- @
 imapped :: FunctorWithIndex i f => IxSetter i (f a) (f b) a b
 imapped = Optic imapped__
 {-# INLINE imapped #-}

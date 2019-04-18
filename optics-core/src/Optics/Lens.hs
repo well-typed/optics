@@ -1,22 +1,29 @@
--- | 'Lens' is a generalised or first-class *field*.
+-- |
+-- Module: Optics.Lens
+-- Description: A generalised or first-class field.
 --
--- If we have a value @s :: S@, and a @l :: 'Lens'' S A@,
--- we can /get/ the "field value" of type @A@ using 'view'.
--- We can also /update/ (or /put/ or /set/) the value using 'over' (or 'set').
+-- A 'Lens' is a generalised or first-class field.
+--
+-- If we have a value @s :: S@, and a @l :: 'Lens'' S A@, we can /get/
+-- the "field value" of type @A@ using @'Optics.Getter.view' l s@.  We
+-- can also /update/ (or /put/ or /set/) the value using
+-- 'Optics.Setter.over' (or 'Optics.Setter.set').
+--
+-- For example, given the following definitions:
 --
 -- >>> data Human = Human { _name :: String, _location :: String } deriving Show
 -- >>> let human = Human "Bob" "London"
 --
--- We can make a 'Lens' for @_name@ field:
+-- we can make a 'Lens' for @_name@ field:
 --
 -- >>> let name = lens _name $ \s x -> s { _name = x }
 --
--- Which we can use as a 'Getter'
+-- which we can use as a 'Optics.Getter.Getter':
 --
 -- >>> view name human
 -- "Bob"
 --
--- or a 'Setter'
+-- or a 'Optics.Setter.Setter':
 --
 -- >>> set name "Robert" human
 -- Human {_name = "Robert", _location = "London"}
@@ -24,22 +31,20 @@
 module Optics.Lens
   (
   -- * Formation
-    A_Lens
-  , Lens
+    Lens
   , Lens'
 
   -- * Introduction
   , lens
-  , withLens
-  , toLens
 
   -- * Elimination
-  -- | 'Lens' is a 'Setter' and a 'Getter', therefore you can
+  -- | A 'Lens' is a 'Optics.Setter.Setter' and a
+  -- 'Optics.Getter.Getter', therefore you can specialise types to
+  -- obtain:
   --
   -- @
-  -- 'view' :: 'Lens' i s t a b -> s -> a
-  -- 'set'  :: 'Lens' i s t a b -> b -> s -> t
-  -- 'over' :: 'Lens' i s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Getter.view' :: 'Lens' i s t a b -> s -> a
+  -- 'Optics.Setter.set'  :: 'Lens' i s t a b -> b -> s -> t
   -- @
   --
 
@@ -47,8 +52,8 @@ module Optics.Lens
   -- |
   --
   -- @
-  -- 'view' ('lens' f g)   s = f s
-  -- 'set'  ('lens' f g) a s = g s a
+  -- 'Optics.Getter.view' ('lens' f g)   s ≡ f s
+  -- 'Optics.Setter.set'  ('lens' f g) a s ≡ g s a
   -- @
 
   -- * Well-formedness
@@ -57,33 +62,43 @@ module Optics.Lens
   -- * __GetPut__: You get back what you put in:
   --
   --     @
-  --     view l (set l v s) = v
+  --     'Optics.Getter.view' l ('Optics.Setter.set' l v s) ≡ v
   --     @
   --
   -- * __PutGet__: Putting back what you got doesn’t change anything:
   --
   --     @
-  --     set l (view l s) s = s
+  --     'Optics.Setter.set' l ('Optics.Getter.view' l s) s ≡ s
   --     @
   --
   -- * __PutPut__: Setting twice is the same as setting once:
   --
   --     @
-  --     set l v' (set l v s) = set l v' s
+  --     'Optics.Setter.set' l v' ('Optics.Setter.set' l v s) ≡ 'Optics.Setter.set' l v' s
   --     @
   --
 
+  -- * Additional introduction forms
+  , chosen
+  , devoid
+  , united
+
+  -- * Additional elimination forms
+  , withLens
+
+  -- * Subtyping
+  , A_Lens
+  , toLens
+
   -- * van Laarhoven encoding
+  -- | The van Laarhoven encoding of lenses is isomorphic to the profunctor
+  -- encoding used internally by @optics@, but converting back and forth may
+  -- have a performance penalty.
   , LensVL
   , LensVL'
   , lensVL
   , toLensVL
   , withLensVL
-
-  -- * Lenses
-  , chosen
-  , devoid
-  , united
 
   -- * Re-exports
   , module Optics.Optic
@@ -115,7 +130,8 @@ toLens :: Is k A_Lens => Optic k is s t a b -> Optic A_Lens is s t a b
 toLens = castOptic
 {-# INLINE toLens #-}
 
--- | Build a lens from a getter and a setter.
+-- | Build a lens from a getter and a setter, which must respect the
+-- well-formedness laws.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get set = Optic $
   -- Do not define lens in terms of lensVL, mixing profunctor-style definitions
@@ -127,6 +143,10 @@ lens get set = Optic $
 {-# INLINE lens #-}
 
 -- | Work with a lens as a getter and a setter.
+--
+-- @
+-- 'withLens' ('lens' f g) k ≡ k f g
+-- @
 withLens
   :: Is k A_Lens
   => Optic k is s t a b

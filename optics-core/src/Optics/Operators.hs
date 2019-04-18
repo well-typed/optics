@@ -1,6 +1,10 @@
--- | Defines some infix operators for optics operations.
+-- |
+-- Module: Optics.Operators
+-- Description: Definitions of infix operators for optics.
 --
--- These are not exported by default from 'Optics'.
+-- Defines some infix operators for optics operations.
+--
+-- These are not exported by default from "Optics.Core".
 -- They have to be imported separately.
 --
 module Optics.Operators

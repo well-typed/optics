@@ -1,12 +1,50 @@
 {-# LANGUAGE DataKinds #-}
+-- |
+-- Module: Optics.IxTraversal
+-- Description: An indexed version of an 'Optics.Traversal.Traversal'.
+--
+-- An 'IxTraversal' is an indexed version of an 'Optics.Traversal.Traversal'.
+-- See the "Indexed optics" section of the overview documentation in the
+-- @Optics@ module of the main @optics@ package for more details on indexed
+-- optics.
+--
 module Optics.IxTraversal
-  ( A_Traversal
-  , IxTraversal
+  (
+  -- * Formation
+    IxTraversal
   , IxTraversal'
-  , TraversableWithIndex(..)
-  , toIxTraversal
+
+  -- * Introduction
   , ixTraversalVL
+
+  -- * Elimination
   , itraverseOf
+
+  -- * Computation
+  -- |
+  --
+  -- @
+  -- 'itraverseOf' ('ixTraversalVL' f) ≡ f
+  -- @
+
+  -- * Well-formedness
+  -- |
+  --
+  -- @
+  -- 'itraverseOf' o ('const' 'pure') ≡ 'pure'
+  -- 'fmap' ('itraverseOf' o f) . 'itraverseOf' o g ≡ 'Data.Functor.Compose.getCompose' . 'itraverseOf' o (\\ i -> 'Data.Functor.Compose.Compose' . 'fmap' (f i) . g i)
+  -- @
+  --
+
+  -- * Additional introduction forms
+  , itraversed
+  , ignored
+  , elementsOf
+  , elements
+  , elementOf
+  , element
+
+  -- * Additional elimination forms
   , iforOf
   , imapAccumLOf
   , imapAccumROf
@@ -14,16 +52,17 @@ module Optics.IxTraversal
   , iscanr1Of
   , ifailover
   , ifailover'
-  -- * Traversals
-  , itraversed
-  , ignored
+
   -- * Combinators
   , ibackwards
-  , elementsOf
-  , elements
-  , elementOf
-  , element
   , ipartsOf
+
+  -- * Subtyping
+  , A_Traversal
+  , toIxTraversal
+
+  -- * Re-exports
+  , TraversableWithIndex(..)
   , module Optics.Optic
   ) where
 
@@ -70,6 +109,10 @@ ixTraversalVL t = Optic (iwander t)
 
 ----------------------------------------
 
+-- | Map each element of a structure targeted by a 'IxTraversal' (supplying the
+-- index), evaluate these actions from left to right, and collect the results.
+--
+-- This yields the van Laarhoven representation of an indexed traversal.
 itraverseOf
   :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -85,7 +128,7 @@ iforOf
 iforOf = flip . itraverseOf
 {-# INLINE iforOf #-}
 
--- | Generalizes 'Data.Traversable.mapAccumL' to an arbitrary 'IXTraversal'.
+-- | Generalizes 'Data.Traversable.mapAccumL' to an arbitrary 'IxTraversal'.
 --
 -- 'imapAccumLOf' accumulates state from left to right.
 --
@@ -140,7 +183,7 @@ iscanr1Of o f = fst . imapAccumROf o step Nothing
 {-# INLINE iscanr1Of #-}
 
 -- | Try to map a function which uses the index over this 'IxTraversal',
--- retuning Nothing if the 'IxTraversal' has no targets.
+-- returning 'Nothing' if the 'IxTraversal' has no targets.
 ifailover
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -152,7 +195,7 @@ ifailover o = \f s ->
      else Nothing
 {-# INLINE ifailover #-}
 
--- | Version of 'ifailover' strict in the application of @f@.
+-- | Version of 'ifailover' strict in the application of the function.
 ifailover'
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -168,6 +211,10 @@ ifailover' o = \f s ->
 -- Traversals
 
 -- | Indexed traversal via the 'TraversableWithIndex' class.
+--
+-- @
+-- 'itraverseOf' 'itraversed' ≡ 'itraverse'
+-- @
 --
 -- >>> iover (itraversed <%> itraversed) (,) ["ab", "cd"]
 -- [[((0,0),'a'),((0,1),'b')],[((1,0),'c'),((1,1),'d')]]
@@ -198,7 +245,7 @@ ibackwards o = Optic $ conjoined__ (backwards o) $ ixTraversalVL $ \f ->
   forwards #. itraverseOf o (\i -> Backwards #. f i)
 {-# INLINE ibackwards #-}
 
--- Traverse selected elements of a 'Traversal' where their ordinal positions
+-- | Traverse selected elements of a 'Traversal' where their ordinal positions
 -- match a predicate.
 elementsOf
   :: Is k A_Traversal

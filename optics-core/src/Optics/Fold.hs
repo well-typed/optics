@@ -1,8 +1,25 @@
+-- |
+-- Module: Optics.Fold
+-- Description: Extracts elements from a container.
+--
+-- A @'Fold' S A@ has the ability to extract some number of elements
+-- of type @A@ from a container of type @S@.  For example, 'toListOf'
+-- can be used to obtain the contained elements as a list. Unlike a
+-- 'Optics.Traversal.Traversal', there is no way to set or update
+-- elements.
+--
+-- A close relative is the 'Optics.AffineFold.AffineFold', which is a
+-- 'Fold' that contains at most one element.
+--
 module Optics.Fold
-  ( A_Fold
-  , Fold
-  , toFold
+  (
+  -- * Formation
+    Fold
+
+  -- * Introduction
   , mkFold
+
+  -- * Elimination
   , foldOf
   , foldMapOf
   , foldrOf
@@ -11,17 +28,22 @@ module Optics.Fold
   , sequenceOf_
   , traverseOf_
   , forOf_
-  -- * Folds
+
+  -- * Computation
+  --
+  -- |
+  --
+  -- @
+  -- 'traverseOf_' ('mkFold' f) ≡ f
+  -- @
+
+  -- * Additional introduction forms
   , folded
   , folding
   , foldring
   , unfolded
-  , filtered
-  , backwards_
-  -- * Semigroup structure
-  , summing
-  , failing
-  -- * Special folds
+
+  -- * Additional elimination forms
   , has
   , hasn't
   , headOf
@@ -45,6 +67,20 @@ module Optics.Fold
   , findOf
   , findMOf
   , lookupOf
+
+  -- * Combinators
+  , filtered
+  , backwards_
+
+  -- * Semigroup structure
+  , summing
+  , failing
+
+  -- * Subtyping
+  , A_Fold
+  , toFold
+
+  -- * Re-exports
   , module Optics.Optic
   )
   where
@@ -114,7 +150,7 @@ toListOf o = foldrOf o (:) []
 
 ----------------------------------------
 
--- | Traverse over all of the targets of a 'Fold, computing an
+-- | Traverse over all of the targets of a 'Fold', computing an
 -- 'Applicative'-based answer, but unlike 'Optics.Traversal.traverseOf' do not
 -- construct a new structure. 'traverseOf_' generalizes
 -- 'Data.Foldable.traverse_' to work over any 'Fold'.
@@ -257,7 +293,8 @@ infixl 3 `failing` -- Same as (<|>)
 -- >>> has _Right (Left 12)
 -- False
 --
--- This will always return 'True' for a 'Lens' or 'Getter'.
+-- This will always return 'True' for a 'Optics.Lens.Lens' or
+-- 'Optics.Getter.Getter'.
 --
 -- >>> has _1 ("hello","world")
 -- True
@@ -265,7 +302,8 @@ has :: Is k A_Fold => Optic' k is s a -> s -> Bool
 has o = getAny #. foldMapOf o (\_ -> Any True)
 {-# INLINE has #-}
 
--- | Check to see if this 'Fold' or 'Traversal' has no matches.
+-- | Check to see if this 'Fold' or 'Optics.Traversal.Traversal' has
+-- no matches.
 --
 -- >>> hasn't _Left (Right 12)
 -- True
@@ -394,7 +432,7 @@ sumOf :: (Is k A_Fold, Num a) => Optic' k is s a -> s -> a
 sumOf o = foldlOf' o (+) 0
 {-# INLINE sumOf #-}
 
--- | The sum of a collection of actions, generalizing 'concatOf'.
+-- | The sum of a collection of actions.
 --
 -- >>> asumOf both ("hello","world")
 -- "helloworld"
@@ -409,7 +447,7 @@ asumOf :: (Is k A_Fold, Alternative f) => Optic' k is s (f a) -> s -> f a
 asumOf o = foldrOf o (<|>) empty
 {-# INLINE asumOf #-}
 
--- | The sum of a collection of actions, generalizing 'concatOf'.
+-- | The sum of a collection of actions.
 --
 -- >>> msumOf both ("hello","world")
 -- "helloworld"
@@ -475,8 +513,8 @@ lengthOf o = foldlOf' o (\ n _ -> 1 + n) 0
 
 -- | Obtain the maximum element (if any) targeted by a 'Fold' safely.
 --
--- Note: 'maximumOf' on a valid 'Iso', 'Lens' or 'Getter' will always return
--- 'Just' a value.
+-- Note: 'maximumOf' on a valid 'Optics.Iso.Iso', 'Optics.Lens.Lens'
+-- or 'Getter' will always return 'Just' a value.
 --
 -- >>> maximumOf folded [1..10]
 -- Just 10
@@ -488,11 +526,11 @@ lengthOf o = foldlOf' o (\ n _ -> 1 + n) 0
 -- Just 6
 --
 -- @
--- 'maximum' ≡ 'fromMaybe' ('error' \"empty\") '.' 'maximumOf' 'folded'
+-- 'maximum' ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'maximumOf' 'folded'
 -- @
 --
 -- In the interest of efficiency, This operation has semantics more strict than
--- strictly necessary.  @\\o -> 'getMax' . 'foldMapOf' o 'Max'@ has lazier
+-- strictly necessary.  @\\o -> 'Data.Semigroup.getMax' . 'foldMapOf' o 'Data.Semigroup.Max'@ has lazier
 -- semantics but could leak memory.
 maximumOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Maybe a
 maximumOf o = foldlOf' o mf Nothing where
@@ -502,8 +540,8 @@ maximumOf o = foldlOf' o mf Nothing where
 
 -- | Obtain the minimum element (if any) targeted by a 'Fold' safely.
 --
--- Note: 'minimumOf' on a valid 'Iso', 'Lens' or 'Getter' will always return
--- 'Just' a value.
+-- Note: 'minimumOf' on a valid 'Optics.Iso.Iso', 'Optics.Lens.Lens'
+-- or 'Getter' will always return 'Just' a value.
 --
 -- >>> minimumOf folded [1..10]
 -- Just 1
@@ -519,7 +557,7 @@ maximumOf o = foldlOf' o mf Nothing where
 -- @
 --
 -- In the interest of efficiency, This operation has semantics more strict than
--- strictly necessary.  @\\o -> 'getMin' . 'foldMapOf' o 'Min'@ has lazier
+-- strictly necessary.  @\\o -> 'Data.Semigroup.getMin' . 'foldMapOf' o 'Data.Semigroup.Min'@ has lazier
 -- semantics but could leak memory.
 minimumOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Maybe a
 minimumOf o = foldlOf' o mf Nothing where

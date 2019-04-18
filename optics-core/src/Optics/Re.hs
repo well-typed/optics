@@ -10,9 +10,13 @@ import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
   type ReversedOptic k :: *
-  -- | Reverses optics, turning around 'Equality' into 'Equality', 'Iso' into
-  -- 'Iso', 'Prism' into 'PrismaticGetter' (and back), 'Lens' into 'LensyReview'
-  -- (and back) and 'Getter' into 'Review' (and back).
+  -- | Reverses optics, turning around 'Optics.Equality.Equality' into
+  -- 'Optics.Equality.Equality', 'Optics.Iso.Iso' into
+  -- 'Optics.Iso.Iso', 'Optics.Prism.Prism' into
+  -- 'Optics.PrismaticGetter.PrismaticGetter' (and back),
+  -- 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and
+  -- back) and 'Optics.Getter.Getter' into 'Optics.Review.Review' (and
+  -- back).
   re :: Optic k NoIx s t a b -> Optic (ReversedOptic k) NoIx b a t s
 
 instance ReversibleOptic An_Equality where
