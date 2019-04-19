@@ -10,19 +10,11 @@ import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
   type ReversedOptic k :: *
-  -- | Reverses optics, turning around 'Optics.Equality.Equality' into
-  -- 'Optics.Equality.Equality', 'Optics.Iso.Iso' into
-  -- 'Optics.Iso.Iso', 'Optics.Prism.Prism' into
-  -- 'Optics.PrismaticGetter.PrismaticGetter' (and back),
-  -- 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and
-  -- back) and 'Optics.Getter.Getter' into 'Optics.Review.Review' (and
-  -- back).
+  -- | Reverses optics, turning around 'Optics.Iso.Iso' into 'Optics.Iso.Iso',
+  -- 'Optics.Prism.Prism' into 'Optics.PrismaticGetter.PrismaticGetter' (and
+  -- back), 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and back)
+  -- and 'Optics.Getter.Getter' into 'Optics.Review.Review' (and back).
   re :: Optic k NoIx s t a b -> Optic (ReversedOptic k) NoIx b a t s
-
-instance ReversibleOptic An_Equality where
-  type ReversedOptic An_Equality = An_Equality
-  re o = Optic (re__ o)
-  {-# INLINE re #-}
 
 instance ReversibleOptic An_Iso where
   type ReversedOptic An_Iso = An_Iso
@@ -61,7 +53,7 @@ instance ReversibleOptic A_Review where
 
 -- | Internal implementation of re.
 re__
-  :: Constraints k (Re p a b)
+  :: (Profunctor p, Constraints k (Re p a b))
   => Optic k   NoIx s t a b
   -> Optic__ p i i b a t s
 re__ o = unRe (getOptic o (Re id))

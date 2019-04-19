@@ -18,8 +18,7 @@ import           MetaMetaPost
 -------------------------------------------------------------------------------
 
 data OK
-    =  Tag_Equality
-    |  Tag_Iso
+    =  Tag_Iso
     |  Tag_Lens
     |  Tag_Prism
     |  Tag_AffineTraversal
@@ -43,7 +42,7 @@ data OK
 instance Generic OK
 
 -- | There should be enough @a@
-data PerOK a = PerOK a a a a a a a a a a a a a a a a a a
+data PerOK a = PerOK a a a a a a a a a a a a a a a a a
   deriving (Functor, Foldable, Traversable, GHC.Generic)
 
 instance Generic (PerOK a)
@@ -64,7 +63,6 @@ dimY :: Expr s 'Numeric
 dimY = L 50
 
 okName :: OK -> String
-okName Tag_Equality          = "Equality"
 okName Tag_Iso               = "Iso"
 okName Tag_Lens              = "Lens"
 okName Tag_Prism             = "Prism"
@@ -87,7 +85,6 @@ okName Tag_IxAffineTraversal = "IxAffineTraversal"
 -- For some reason metapost doesn't cut it itself :(
 positions :: PerOK (Expr s 'Product)
 positions = tabulate $ \case
-    Tag_Equality          -> pair 2 0
     Tag_Iso               -> pair 2 1
     Tag_Lens              -> pair 1 2
     Tag_Prism             -> pair 3 2

@@ -9,8 +9,6 @@ import GHC.Exts (Constraint)
 import Optics.Internal.Bi
 import Optics.Internal.Profunctor
 
--- | Tag for an equality.
-data An_Equality
 -- | Tag for an iso.
 data An_Iso
 -- | Tag for a lens.
@@ -42,7 +40,6 @@ data A_Review
 -- optics have to fulfill.
 --
 type family Constraints (k :: *) (p :: * -> * -> * -> *) :: Constraint where
-  Constraints An_Equality        p = ()
   Constraints An_Iso             p = Profunctor p
   Constraints A_Lens             p = Strong p
   Constraints A_LensyReview      p = Costrong p

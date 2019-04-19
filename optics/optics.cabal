@@ -47,7 +47,6 @@ library
   -- optic flavours
   reexported-modules: Optics.AffineFold
                     , Optics.AffineTraversal
-                    , Optics.Equality
                     , Optics.Fold
                     , Optics.Getter
                     , Optics.Iso

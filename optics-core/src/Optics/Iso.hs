@@ -42,6 +42,8 @@ module Optics.Iso
   -- @
 
   -- * Additional introduction forms
+  , equality
+  , simple
   , coerced
   , coerced'
   , coerced1
@@ -141,6 +143,21 @@ mapping
   -> Iso (f s) (g t) (f a) (g b)
 mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 {-# INLINE mapping #-}
+
+-- | Capture type constraints as an isomorphism.
+--
+-- /Note:/ This is the identity optic:
+--
+-- >>> :t view equality
+-- view equality :: a -> a
+equality :: (s ~ a, t ~ b) => Iso s t a b
+equality = Optic id
+{-# INLINE equality #-}
+
+-- | Proof of reflexivity.
+simple :: Iso' a a
+simple = Optic id
+{-# INLINE simple #-}
 
 -- | Data types that are representationally equal are isomorphic.
 --

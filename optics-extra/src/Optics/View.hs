@@ -13,8 +13,8 @@ import Optics.Core
 --
 -- The type of the result depends on the optic. You get:
 --
---   * Exactly one result @a@ with 'Equality', 'Iso', 'Lens', 'PrismaticGetter'
---   and 'Getter'.
+--   * Exactly one result @a@ with 'Iso', 'Lens', 'PrismaticGetter' and
+--   'Getter'.
 --
 --   * At most one result @Maybe a@ with 'Prism', 'AffineTraversal' and
 --   'AffineFold'.
@@ -36,13 +36,6 @@ class ViewableOptic k r where
     => Optic' k is s a
     -> (a -> r)
     -> m (ViewResult k r)
-
-instance ViewableOptic An_Equality r where
-  type ViewResult An_Equality r = r
-  gview    = asks . view
-  gviews o = asks . views o
-  {-# INLINE gview #-}
-  {-# INLINE gviews #-}
 
 instance ViewableOptic An_Iso r where
   type ViewResult An_Iso r = r

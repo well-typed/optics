@@ -65,10 +65,6 @@ class Arrow arr => ArrowOptic k arr where
   -- | Turn an optic into an arrow transformer.
   overA :: Optic k is s t a b -> arr a b -> arr s t
 
-instance Arrow arr => ArrowOptic An_Equality arr where
-  overA = overA__
-  {-# INLINE overA #-}
-
 instance Arrow arr => ArrowOptic An_Iso arr where
   overA = overA__
   {-# INLINE overA #-}
@@ -113,7 +109,7 @@ assignA o p = arr (flip $ set o) &&& p >>> arr (uncurry id)
 
 -- | Internal implementation of overA.
 overA__
-  :: Constraints k (WrappedArrow arr)
+  :: (p ~ WrappedArrow arr, Profunctor p, Constraints k p)
   => Optic k is s t a b
   -> arr a b -> arr s t
 overA__ o = unwrapArrow #. getOptic o .# WrapArrow
