@@ -51,4 +51,6 @@ hierarchy = do
     isIndexed Tag_IxFold            = True
     isIndexed Tag_IxSetter          = True
     isIndexed Tag_IxTraversal       = True
+    isIndexed Tag_IxLens            = True
+    isIndexed Tag_IxGetter          = True
     isIndexed _                     = False

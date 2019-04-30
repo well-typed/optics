@@ -67,7 +67,7 @@ grain = 32
 -- | Internal version of 'traversedStrictTree'.
 traversedStrictTree__
   :: Traversing p
-  => Optic__ p j (Int64 -> j) B.ByteString B.ByteString Word8 Word8
+  => Optic__ p l j l (Int64 -> j) B.ByteString B.ByteString Word8 Word8
 traversedStrictTree__ = iwander $ \f bs ->
   let len = B.length bs
       go !i !j
@@ -88,23 +88,23 @@ traversedStrictTree__ = iwander $ \f bs ->
 {-# RULES
 
 "bytes -> map"
-  forall (o :: FunArrow j Word8 Word8). traversedStrictTree__ o
+  forall (o :: FunArrow l j Word8 Word8). traversedStrictTree__ o
                                       = roam B.map (reFunArrow o)
-    :: FunArrow (Int64 -> j) B.ByteString B.ByteString
+    :: FunArrow l (Int64 -> j) B.ByteString B.ByteString
 
 "bytes -> imap"
-  forall (o :: IxFunArrow j Word8 Word8). traversedStrictTree__ o = iroam imapB o
-    :: IxFunArrow (Int64 -> j) B.ByteString B.ByteString
+  forall (o :: IxFunArrow l j Word8 Word8). traversedStrictTree__ o = iroam imapB o
+    :: IxFunArrow l (Int64 -> j) B.ByteString B.ByteString
 
 "bytes -> foldr"
-  forall (o :: Forget r j Word8 Word8). traversedStrictTree__ o
+  forall (o :: Forget r l j Word8 Word8). traversedStrictTree__ o
                                       = foldring__ B.foldr (reForget o)
-    :: Forget r (Int64 -> j) B.ByteString B.ByteString
+    :: Forget r l (Int64 -> j) B.ByteString B.ByteString
 
 "bytes -> ifoldr"
-  forall (o :: IxForget r j Word8 Word8). traversedStrictTree__ o
+  forall (o :: IxForget r l j Word8 Word8). traversedStrictTree__ o
                                         = ifoldring__ ifoldrB o
-    :: IxForget r (Int64 -> j) B.ByteString B.ByteString
+    :: IxForget r l (Int64 -> j) B.ByteString B.ByteString
 
 #-}
 
@@ -123,7 +123,7 @@ ifoldrB f z xs = B.foldr (\x g i -> i `seq` f i x (g (i + 1))) (const z) xs 0
 -- | Internal version of 'traversedStrictTree8'.
 traversedStrictTree8__
   :: Traversing p
-  => Optic__ p j (Int64 -> j) B8.ByteString B8.ByteString Char Char
+  => Optic__ p l j l (Int64 -> j) B8.ByteString B8.ByteString Char Char
 traversedStrictTree8__ = iwander $ \f bs ->
   let len = B.length bs
       go !i !j
@@ -144,23 +144,23 @@ traversedStrictTree8__ = iwander $ \f bs ->
 {-# RULES
 
 "chars -> map"
-  forall (o :: FunArrow j Char Char). traversedStrictTree8__ o
+  forall (o :: FunArrow l j Char Char). traversedStrictTree8__ o
                                     = roam B8.map (reFunArrow o)
-    :: FunArrow (Int64 -> j) B8.ByteString B8.ByteString
+    :: FunArrow l (Int64 -> j) B8.ByteString B8.ByteString
 
 "chars -> imap"
-  forall (o :: IxFunArrow j Char Char). traversedStrictTree8__ o = iroam imapB8 o
-    :: IxFunArrow (Int64 -> j) B8.ByteString B8.ByteString
+  forall (o :: IxFunArrow l j Char Char). traversedStrictTree8__ o = iroam imapB8 o
+    :: IxFunArrow l (Int64 -> j) B8.ByteString B8.ByteString
 
 "chars -> foldr"
-  forall (o :: Forget r j Char Char). traversedStrictTree8__ o
+  forall (o :: Forget r l j Char Char). traversedStrictTree8__ o
                                     = foldring__ B8.foldr (reForget o)
-    :: Forget r (Int64 -> j) B8.ByteString B8.ByteString
+    :: Forget r l (Int64 -> j) B8.ByteString B8.ByteString
 
 "chars -> ifoldr"
-  forall (o :: IxForget r j Char Char). traversedStrictTree8__ o
+  forall (o :: IxForget r l j Char Char). traversedStrictTree8__ o
                                       = ifoldring__ ifoldrB8 o
-    :: IxForget r (Int64 -> j) B8.ByteString B8.ByteString
+    :: IxForget r l (Int64 -> j) B8.ByteString B8.ByteString
 
 #-}
 
@@ -179,7 +179,7 @@ ifoldrB8 f z xs = B8.foldr (\x g i -> i `seq` f i x (g (i + 1))) (const z) xs 0
 -- | Internal version of 'traversedLazy'.
 traversedLazy__
   :: Traversing p
-  => Optic__ p j (Int64 -> j) BL.ByteString BL.ByteString Word8 Word8
+  => Optic__ p l j l (Int64 -> j) BL.ByteString BL.ByteString Word8 Word8
 traversedLazy__ = iwander $ \f lbs ->
   let go c fcs acc =
         let !acc' = acc + fromIntegral (B.length c)
@@ -191,22 +191,22 @@ traversedLazy__ = iwander $ \f lbs ->
 {-# RULES
 
 "sets lazy bytestring"
-  forall (o :: FunArrow j Word8 Word8). traversedLazy__ o
+  forall (o :: FunArrow l j Word8 Word8). traversedLazy__ o
                                       = roam BL.map (reFunArrow o)
-    :: FunArrow (Int64 -> j) BL.ByteString BL.ByteString
+    :: FunArrow l (Int64 -> j) BL.ByteString BL.ByteString
 
 "isets lazy bytestring"
-  forall (o :: IxFunArrow j Word8 Word8). traversedLazy__ o = iroam imapBL o
-    :: IxFunArrow (Int64 -> j) BL.ByteString BL.ByteString
+  forall (o :: IxFunArrow l j Word8 Word8). traversedLazy__ o = iroam imapBL o
+    :: IxFunArrow l (Int64 -> j) BL.ByteString BL.ByteString
 
 "gets lazy bytestring"
-  forall (o :: Forget r j Word8 Word8). traversedLazy__ o
+  forall (o :: Forget r l j Word8 Word8). traversedLazy__ o
                                       = foldring__ BL.foldr (reForget o)
-    :: Forget r (Int64 -> j) BL.ByteString BL.ByteString
+    :: Forget r l (Int64 -> j) BL.ByteString BL.ByteString
 
 "igets lazy bytestring"
-  forall (o :: IxForget r j Word8 Word8). traversedLazy__ o = ifoldring__ ifoldrBL o
-    :: IxForget r (Int64 -> j) BL.ByteString BL.ByteString
+  forall (o :: IxForget r l j Word8 Word8). traversedLazy__ o = ifoldring__ ifoldrBL o
+    :: IxForget r l (Int64 -> j) BL.ByteString BL.ByteString
 
 #-}
 
@@ -225,7 +225,7 @@ ifoldrBL f z xs = BL.foldr (\x g i -> i `seq` f i x (g (i + 1))) (const z) xs 0
 -- | Internal version of 'traversedLazy8'.
 traversedLazy8__
   :: Traversing p
-  => Optic__ p j (Int64 -> j) BL.ByteString BL.ByteString Char Char
+  => Optic__ p l j l (Int64 -> j) BL.ByteString BL.ByteString Char Char
 traversedLazy8__ = iwander $ \f lbs ->
   let go c fcs acc =
         let !acc' = acc + fromIntegral (B.length c)
@@ -237,22 +237,22 @@ traversedLazy8__ = iwander $ \f lbs ->
 {-# RULES
 
 "sets lazy char bytestring"
-  forall (o :: FunArrow j Char Char). traversedLazy8__ o
+  forall (o :: FunArrow l j Char Char). traversedLazy8__ o
                                     = roam BL8.map (reFunArrow o)
-    :: FunArrow (Int64 -> j) BL8.ByteString BL8.ByteString
+    :: FunArrow l (Int64 -> j) BL8.ByteString BL8.ByteString
 
 "isets lazy char bytestring"
-  forall (o :: IxFunArrow j Char Char). traversedLazy8__ o = iroam imapBL8 o
-    :: IxFunArrow (Int64 -> j) BL8.ByteString BL8.ByteString
+  forall (o :: IxFunArrow l j Char Char). traversedLazy8__ o = iroam imapBL8 o
+    :: IxFunArrow l (Int64 -> j) BL8.ByteString BL8.ByteString
 
 "gets lazy char bytestring"
-  forall (o :: Forget r j Char Char). traversedLazy8__ o
+  forall (o :: Forget r l j Char Char). traversedLazy8__ o
                                     = foldring__ BL8.foldr (reForget o)
-    :: Forget r (Int64 -> j) BL8.ByteString BL8.ByteString
+    :: Forget r l (Int64 -> j) BL8.ByteString BL8.ByteString
 
 "igets lazy char bytestring"
-  forall (o :: IxForget r j Char Char). traversedLazy8__ o = ifoldring__ ifoldrBL8 o
-    :: IxForget r (Int64 -> j) BL.ByteString BL.ByteString
+  forall (o :: IxForget r l j Char Char). traversedLazy8__ o = ifoldring__ ifoldrBL8 o
+    :: IxForget r l (Int64 -> j) BL.ByteString BL.ByteString
 
 #-}
 

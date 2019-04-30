@@ -136,10 +136,10 @@ indexing l iafb s =
 
 -- | Internal implementation of 'Optics.Indexed.Core.conjoined'.
 conjoined__
-  :: (Constraints k p, Visiting p, is `HasSingleIndex` i)
+  :: (Constraints k p, Profunctor p, is `HasSingleIndex` i)
   => Optic k NoIx s t a b
   -> Optic k is   s t a b
-  -> Optic__ p j (i -> j) s t a b
+  -> Optic__ p l j l (i -> j) s t a b
 conjoined__ (Optic f) (Optic g) = conjoined' f g
 {-# INLINE conjoined__ #-}
 

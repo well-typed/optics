@@ -17,7 +17,7 @@ import Optics.Internal.Setter
 -- | Internal implementation of 'Optics.IxTraversal.itraversed'.
 itraversed__
   :: (Traversing p, TraversableWithIndex i f)
-  => Optic__ p j (i -> j) (f a) (f b) a b
+  => Optic__ p l j l (i -> j) (f a) (f b) a b
 itraversed__ = conjoined' (wander traverse) (iwander itraverse)
 {-# INLINE [0] itraversed__ #-}
 
@@ -28,27 +28,27 @@ itraversed__ = conjoined' (wander traverse) (iwander itraverse)
 {-# RULES
 
 "itraversed__ -> wander traverse"
-  forall (o :: Star g j a b). itraversed__ o = wander traverse (reStar o)
-    :: TraversableWithIndex i f => Star g (i -> j) (f a) (f b)
+  forall (o :: Star g l j a b). itraversed__ o = wander traverse (reStar o)
+    :: TraversableWithIndex i f => Star g l (i -> j) (f a) (f b)
 
 "itraversed__ -> folded__"
-  forall (o :: Forget r j a b). itraversed__ o = folded__ (reForget o)
-    :: FoldableWithIndex i f => Forget r (i -> j) (f a) (f b)
+  forall (o :: Forget r l j a b). itraversed__ o = folded__ (reForget o)
+    :: FoldableWithIndex i f => Forget r l (i -> j) (f a) (f b)
 
 "itraversed__ -> mapped__"
-  forall (o :: FunArrow j a b). itraversed__ o = mapped__ (reFunArrow o)
-    :: FunctorWithIndex i f => FunArrow (i -> j) (f a) (f b)
+  forall (o :: FunArrow l j a b). itraversed__ o = mapped__ (reFunArrow o)
+    :: FunctorWithIndex i f => FunArrow l (i -> j) (f a) (f b)
 
 "itraversed__ -> itraverse"
-  forall (o :: IxStar g j a b). itraversed__ o = iwander itraverse o
-    :: TraversableWithIndex i f => IxStar g (i -> j) (f a) (f b)
+  forall (o :: IxStar g l j a b). itraversed__ o = iwander itraverse o
+    :: TraversableWithIndex i f => IxStar g l (i -> j) (f a) (f b)
 
 "itraversed__ -> ifolded__"
-  forall (o :: IxForget r j a b). itraversed__ o = ifolded__ o
-    :: FoldableWithIndex i f => IxForget r (i -> j) (f a) (f b)
+  forall (o :: IxForget r l j a b). itraversed__ o = ifolded__ o
+    :: FoldableWithIndex i f => IxForget r l (i -> j) (f a) (f b)
 
 "itraversed__ -> imapped__"
-  forall (o :: IxFunArrow j a b). itraversed__ o = imapped__ o
-    :: FunctorWithIndex i f => IxFunArrow (i -> j) (f a) (f b)
+  forall (o :: IxFunArrow l j a b). itraversed__ o = imapped__ o
+    :: FunctorWithIndex i f => IxFunArrow l (i -> j) (f a) (f b)
 
 #-}

@@ -632,4 +632,11 @@ import Data.Either.Optics                    as P
 
 
 -- $setup
+-- >>> import Control.Monad.Trans.Reader
+-- >>> import Control.Monad.Trans.State
 -- >>> import Data.Functor.Identity
+-- >>> import Optics.Operators
+-- >>> import Optics.Operators.State
+-- >>> import qualified Data.IntSet as IntSet
+-- >>> import qualified Data.Map as Map
+--

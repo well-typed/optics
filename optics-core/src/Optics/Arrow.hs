@@ -14,15 +14,15 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
-newtype WrappedArrow p i a b = WrapArrow { unwrapArrow :: p a b }
+newtype WrappedArrow p l i a b = WrapArrow { unwrapArrow :: p a b }
 
-instance C.Category p => C.Category (WrappedArrow p i) where
+instance C.Category p => C.Category (WrappedArrow p l i) where
   WrapArrow f . WrapArrow g = WrapArrow (f C.. g)
   id                        = WrapArrow C.id
   {-# INLINE (.) #-}
   {-# INLINE id #-}
 
-instance Arrow p => Arrow (WrappedArrow p i) where
+instance Arrow p => Arrow (WrappedArrow p l i) where
   arr                         = WrapArrow #. arr
   first                       = WrapArrow #. first  .# unwrapArrow
   second                      = WrapArrow #. second .# unwrapArrow

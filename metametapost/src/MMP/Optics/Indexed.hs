@@ -80,6 +80,9 @@ indexedOptics = do
     arrowC         orange Tag_AffineFold      Tag_IxAffineFold
     arrowCrossingC orange Tag_AffineTraversal Tag_IxAffineTraversal Tag_Getter Tag_AffineFold
 
+    arrowC         orange Tag_Lens            Tag_IxLens
+    arrowC         orange Tag_Getter          Tag_IxGetter
+
     -- Arrows between indexed optics
 
     arrowC         blue Tag_IxAffineFold      Tag_IxFold
@@ -87,6 +90,10 @@ indexedOptics = do
     arrowC         blue Tag_IxTraversal       Tag_IxFold
     arrowC         blue Tag_IxAffineTraversal Tag_IxAffineFold
     arrowCrossingC blue Tag_IxTraversal       Tag_IxSetter      Tag_Fold Tag_IxFold
+
+    arrowCrossingC blue Tag_IxLens            Tag_IxAffineTraversal Tag_Getter Tag_IxGetter
+    arrowC         blue Tag_IxLens            Tag_IxGetter
+    arrowC         blue Tag_IxGetter          Tag_IxAffineFold
 
     return ()
   where
@@ -106,6 +113,9 @@ indexedOptics = do
 
     isIxRelated Tag_IxFold            = True
 
+    isIxRelated Tag_IxLens            = True
+    isIxRelated Tag_IxGetter          = True
+
     isIxRelated _                     = False
 
     isIx Tag_IxTraversal       = True
@@ -113,6 +123,8 @@ indexedOptics = do
     isIx Tag_IxFold            = True
     isIx Tag_IxAffineTraversal = True
     isIx Tag_IxAffineFold      = True
+    isIx Tag_IxLens            = True
+    isIx Tag_IxGetter          = True
 
     isIx _                     = False
 

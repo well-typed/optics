@@ -142,20 +142,20 @@ converted = iso convert convert
 
 vectorTraverse__
   :: (Traversing p, V.Vector v a, V.Vector w b)
-  => Optic__ p j (Int -> j) (v a) (w b) a b
+  => Optic__ p l j l (Int -> j) (v a) (w b) a b
 vectorTraverse__ = conjoined' vectorTraverseNoIx__ vectorTraverseIx__
 {-# INLINE [0] vectorTraverse__ #-}
 
 vectorTraverseNoIx__
   :: (Traversing p, V.Vector v a, V.Vector w b)
-  => Optic__ p j j (v a) (w b) a b
+  => Optic__ p l j l j (v a) (w b) a b
 vectorTraverseNoIx__ = wander $ \f v ->
   let !n = V.length v in V.fromListN n <$> traverse f (V.toList v)
 {-# INLINE vectorTraverseNoIx__ #-}
 
 vectorTraverseIx__
   :: (Traversing p, V.Vector v a, V.Vector w b)
-  => Optic__ p j (Int -> j) (v a) (w b) a b
+  => Optic__ p l j l (Int -> j) (v a) (w b) a b
 vectorTraverseIx__ = iwander $ \f v ->
   let !n = V.length v in V.fromListN n <$> itraverse f (V.toList v)
 {-# INLINE vectorTraverseIx__ #-}
@@ -167,28 +167,28 @@ vectorTraverseIx__ = iwander $ \f v ->
 {-# RULES
 
 "vectorTraverse__ -> traversed"
-  forall (o :: Star g j a b). vectorTraverse__ o = vectorTraverseNoIx__ (reStar o)
-    :: (V.Vector v a, V.Vector w b) => Star g (Int -> j) (v a) (w b)
+  forall (o :: Star g l j a b). vectorTraverse__ o = vectorTraverseNoIx__ (reStar o)
+    :: (V.Vector v a, V.Vector w b) => Star g l (Int -> j) (v a) (w b)
 
 "vectorTraverse__ -> folded"
-  forall (o :: Forget r j a b). vectorTraverse__ o = foldring__ V.foldr (reForget o)
-    :: (V.Vector v a, V.Vector v b) => Forget r (Int -> j) (v a) (v b)
+  forall (o :: Forget r l j a b). vectorTraverse__ o = foldring__ V.foldr (reForget o)
+    :: (V.Vector v a, V.Vector v b) => Forget r l (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> mapped"
-  forall (o :: FunArrow j a b). vectorTraverse__ o = roam V.map (reFunArrow o)
-    :: (V.Vector v a, V.Vector v b) => FunArrow (Int -> j) (v a) (v b)
+  forall (o :: FunArrow l j a b). vectorTraverse__ o = roam V.map (reFunArrow o)
+    :: (V.Vector v a, V.Vector v b) => FunArrow l (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> itraversed"
-  forall (o :: IxStar g j a b). vectorTraverse__ o = vectorTraverseIx__ o
-    :: (V.Vector v a, V.Vector w b) => IxStar g (Int -> j) (v a) (w b)
+  forall (o :: IxStar g l j a b). vectorTraverse__ o = vectorTraverseIx__ o
+    :: (V.Vector v a, V.Vector w b) => IxStar g l (Int -> j) (v a) (w b)
 
 "vectorTraverse__ -> ifolded"
-  forall (o :: IxForget r j a b). vectorTraverse__ o = ifoldring__ V.ifoldr o
-    :: (V.Vector v a, V.Vector v b) => IxForget r (Int -> j) (v a) (v b)
+  forall (o :: IxForget r l j a b). vectorTraverse__ o = ifoldring__ V.ifoldr o
+    :: (V.Vector v a, V.Vector v b) => IxForget r l (Int -> j) (v a) (v b)
 
 "vectorTraverse__ -> imapped"
-  forall (o :: IxFunArrow j a b). vectorTraverse__ o = iroam V.imap o
-    :: (V.Vector v a, V.Vector v b) => IxFunArrow (Int -> j) (v a) (v b)
+  forall (o :: IxFunArrow l j a b). vectorTraverse__ o = iroam V.imap o
+    :: (V.Vector v a, V.Vector v b) => IxFunArrow l (Int -> j) (v a) (v b)
 
 
 #-}

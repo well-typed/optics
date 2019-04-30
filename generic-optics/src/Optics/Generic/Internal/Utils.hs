@@ -12,10 +12,10 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 import Optics.Prism
 
-newtype  WrappedProfunctor p i a b =
-  WrapProfunctor { unwrapProfunctor :: p i a b }
+newtype  WrappedProfunctor p l i a b =
+  WrapProfunctor { unwrapProfunctor :: p l i a b }
 
-instance Profunctor p => P.Profunctor (WrappedProfunctor p i) where
+instance Profunctor p => P.Profunctor (WrappedProfunctor p l i) where
   dimap f g (WrapProfunctor pab) = WrapProfunctor (dimap f g pab)
   lmap  f   (WrapProfunctor pab) = WrapProfunctor (lmap  f   pab)
   rmap    g (WrapProfunctor pab) = WrapProfunctor (rmap    g pab)
@@ -23,7 +23,7 @@ instance Profunctor p => P.Profunctor (WrappedProfunctor p i) where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
-instance Choice p => P.Choice (WrappedProfunctor p i) where
+instance Choice p => P.Choice (WrappedProfunctor p l i) where
   left'  (WrapProfunctor pab) = WrapProfunctor (left'  pab)
   right' (WrapProfunctor pab) = WrapProfunctor (right' pab)
   {-# INLINE left' #-}

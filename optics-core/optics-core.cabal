@@ -42,9 +42,11 @@ library
     Optics.Getter
     Optics.Indexed.Core
     Optics.Iso
-    Optics.IxAffineTraversal
     Optics.IxAffineFold
+    Optics.IxAffineTraversal
     Optics.IxFold
+    Optics.IxGetter
+    Optics.IxLens
     Optics.IxSetter
     Optics.IxTraversal
     Optics.Lens

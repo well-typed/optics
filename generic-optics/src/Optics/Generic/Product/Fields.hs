@@ -24,6 +24,7 @@ import           Optics.Core
 -- >>> :set -XGADTs
 -- >>> :set -XFlexibleContexts
 -- >>> import GHC.Generics
+-- >>> import Optics.Core
 -- >>> :{
 -- data Human a
 --   = Human

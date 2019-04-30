@@ -32,6 +32,8 @@ data OK
     |  Tag_Review
 
     -- indexed
+    |  Tag_IxGetter
+    |  Tag_IxLens
     |  Tag_IxTraversal
     |  Tag_IxSetter
     |  Tag_IxFold
@@ -42,7 +44,7 @@ data OK
 instance Generic OK
 
 -- | There should be enough @a@
-data PerOK a = PerOK a a a a a a a a a a a a a a a a a
+data PerOK a = PerOK a a a a a a a a a a a a a a a a a a a
   deriving (Functor, Foldable, Traversable, GHC.Generic)
 
 instance Generic (PerOK a)
@@ -73,11 +75,13 @@ okName Tag_Setter            = "Setter"
 okName Tag_IxSetter          = "IxSetter"
 okName Tag_PrismaticGetter   = "PrismaticGetter"
 okName Tag_Getter            = "Getter"
+okName Tag_IxGetter          = "IxGetter"
 okName Tag_AffineFold        = "AffineFold"
 okName Tag_Fold              = "Fold"
 okName Tag_IxFold            = "IxFold"
 okName Tag_LensyReview       = "LensyReview"
 okName Tag_Review            = "Review"
+okName Tag_IxLens            = "IxLens"
 okName Tag_IxAffineFold      = "IxAffineFold"
 okName Tag_IxAffineTraversal = "IxAffineTraversal"
 
@@ -87,6 +91,7 @@ positions :: PerOK (Expr s 'Product)
 positions = tabulate $ \case
     Tag_Iso               -> pair 2 1
     Tag_Lens              -> pair 1 2
+    Tag_IxLens            -> pair 0 3
     Tag_Prism             -> pair 3 2
     Tag_AffineTraversal   -> pair 2 3
     Tag_IxAffineTraversal -> pair 1 4
@@ -96,6 +101,7 @@ positions = tabulate $ \case
     Tag_IxSetter          -> pair 3 6
     Tag_PrismaticGetter   -> pair 0 2
     Tag_Getter            -> pair 1 3
+    Tag_IxGetter          -> pair 0 4
     Tag_AffineFold        -> pair 2 4
     Tag_IxAffineFold      -> pair 1 5
     Tag_Fold              -> pair 3 5

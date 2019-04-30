@@ -29,7 +29,7 @@ validate : build doctest
 doctest : build
 	doctest --no-interpret --fast $$(find optics/src -name '*.hs')
 	doctest --no-interpret --fast $$(find generic-optics/src -name '*.hs')
-	doctest --no-interpret --fast $$(find optics-core/src -name '*.hs') -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds
+	doctest --no-interpret --fast $$(find optics-core/src -name '*.hs') -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs
 
 ghcid-optics-core :
 	ghcid -c 'cabal new-repl optics-core'

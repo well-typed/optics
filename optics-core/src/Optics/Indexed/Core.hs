@@ -34,6 +34,8 @@ import Optics.Internal.Profunctor
 import Optics.AffineFold
 import Optics.AffineTraversal
 import Optics.Fold
+import Optics.Getter
+import Optics.Lens
 import Optics.Setter
 import Optics.Traversal
 
@@ -158,6 +160,22 @@ class IxOptic k s t a b where
     -> Optic k is   s t a b
     -> Optic k is   s t a b
 
+instance (s ~ t, a ~ b) => IxOptic A_Getter s t a b where
+  noIx o = to (view o)
+  {-# INLINE noIx #-}
+  icomposeN f o = Optic (icomposeN__ f o)
+  {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
+
+instance IxOptic A_Lens s t a b where
+  noIx o = lensVL (toLensVL o)
+  {-# INLINE noIx #-}
+  icomposeN f o = Optic (icomposeN__ f o)
+  {-# INLINE icomposeN #-}
+  conjoined f g = Optic (conjoined__ f g)
+  {-# INLINE conjoined #-}
+
 instance IxOptic An_AffineTraversal s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = atraversalVL (toAtraversalVL o)
@@ -208,11 +226,11 @@ instance IxOptic A_Setter s t a b where
 
 -- | Implementation of 'icomposeN'.
 icomposeN__
-  :: forall k p is i j s t a b
-  . (Constraints k p, Visiting p, CurryCompose is)
+  :: forall k p is i j l s t a b
+  . (Constraints k p, Profunctor p, CurryCompose is)
   => Curry is i
   -> Optic k is s t a b
-  -> Optic__ p j (i -> j) s t a b
+  -> Optic__ p l j l (i -> j) s t a b
 icomposeN__ f o =
   ixcontramap (\ij -> composeN @is ij f) . getOptic o
 {-# INLINE icomposeN__ #-}

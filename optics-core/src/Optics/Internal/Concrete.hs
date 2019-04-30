@@ -16,7 +16,7 @@ import Data.Bifunctor
 import Optics.Internal.Profunctor
 
 -- | Type to represent the components of an isomorphism.
-data Exchange a b i s t =
+data Exchange a b l i s t =
   Exchange (s -> a) (b -> t)
 
 instance Profunctor (Exchange a b) where
@@ -28,7 +28,7 @@ instance Profunctor (Exchange a b) where
   {-# INLINE rmap #-}
 
 -- | Type to represent the components of a lens.
-data Store a b i s t = Store (s -> a) (s -> b -> t)
+data Store a b l i s t = Store (s -> a) (s -> b -> t)
 
 instance Profunctor (Store a b) where
   dimap f g (Store get set) = Store (get . f) (\s -> g . set (f s))
@@ -45,9 +45,9 @@ instance Strong (Store a b) where
   {-# INLINE second' #-}
 
 -- | Type to represent the components of a prism.
-data Market a b i s t = Market (b -> t) (s -> Either t a)
+data Market a b l i s t = Market (b -> t) (s -> Either t a)
 
-instance Functor (Market a b i s) where
+instance Functor (Market a b l i s) where
   fmap f (Market bt seta) = Market (f . bt) (either (Left . f) Right . seta)
   {-# INLINE fmap #-}
 
@@ -74,7 +74,7 @@ instance Choice (Market a b) where
   {-# INLINE right' #-}
 
 -- | Type to represent the components of an affine traversal.
-data AffineMarket a b is s t = AffineMarket (s -> b -> t) (s -> Either t a)
+data AffineMarket a b l i s t = AffineMarket (s -> b -> t) (s -> Either t a)
 
 instance Profunctor (AffineMarket a b) where
   dimap f g (AffineMarket sbt seta) = AffineMarket

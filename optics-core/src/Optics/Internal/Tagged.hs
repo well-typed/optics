@@ -11,14 +11,15 @@
 module Optics.Internal.Tagged where
 
 import Data.Coerce
+import Data.Functor.Const
 
 import Optics.Internal.Bi
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
-newtype Tagged i a b = Tagged { unTagged :: b }
+newtype Tagged l i a b = Tagged { unTagged :: b }
 
-instance Functor (Tagged i a) where
+instance Functor (Tagged l i a) where
   fmap f = Tagged #. f .# unTagged
   {-# INLINE fmap #-}
 
@@ -49,3 +50,6 @@ instance Costrong Tagged where
   unsecond (Tagged db) = Tagged (snd db)
   {-# INLINE unfirst #-}
   {-# INLINE unsecond #-}
+
+  colinear f (Tagged k) = Tagged $ getConst (f Const k)
+  icolinear f (Tagged k) = Tagged $ getConst (f (\_ -> Const) k)

@@ -69,7 +69,7 @@ type WithIx i = '[i]
 -- whereas @a@ and @b@ represent the "small" structure.
 --
 newtype Optic (k :: *) (is :: [*]) s t a b =
-  Optic { getOptic :: forall p j. Profunctor p => Optic_ k p j (Curry is j) s t a b }
+  Optic { getOptic :: forall p i j. Profunctor p => Optic_ k p j i j (Curry is i) s t a b }
 
 -- | Common special case of 'Optic' where source and target types are equal.
 --
@@ -83,14 +83,14 @@ type Optic' k is s a = Optic k is s s a a
 -- The tag parameter @k@ is translated into constraints on @p@
 -- via the type family 'Constraints'.
 --
-type Optic_ k p i o s t a b = Constraints k p => Optic__ p i o s t a b
+type Optic_ k p j i j' i' s t a b = Constraints k p => Optic__ p j i j' i' s t a b
 
 -- | Optic internally as a profunctor transformation.
-type Optic__ p i o s t a b = p i a b -> p o s t
+type Optic__ p j i j' i' s t a b = p j i a b -> p j' i' s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
-data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
+data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> * -> *) =
   IsProxy
 
 -- | Explicit cast from one optic flavour to another.
@@ -114,9 +114,9 @@ castOptic
 castOptic (Optic o) = Optic (implies' o)
   where
     implies'
-      :: forall p j
-      .  Optic_ srcKind  p j (Curry is j) s t a b
-      -> Optic_ destKind p j (Curry is j) s t a b
+      :: forall p w j
+      .  Optic_ srcKind  p w j w (Curry is j) s t a b
+      -> Optic_ destKind p w j w (Curry is j) s t a b
     implies' x = implies (IsProxy :: IsProxy srcKind destKind p) x
 {-# INLINE castOptic #-}
 
@@ -145,10 +145,10 @@ infixl 9 %%
 Optic o %% Optic o' = Optic oo
   where
     -- unsafeCoerce to the rescue, for a proof see below.
-    oo :: forall p j. Profunctor p => Optic_ k p j (Curry ks j) s t a b
+    oo :: forall p w j. Profunctor p => Optic_ k p w j w (Curry ks j) s t a b
     oo = (unsafeCoerce
-           :: Optic_ k p j (Curry is (Curry js j)) s t a b
-           -> Optic_ k p i (Curry ks j           ) s t a b)
+           :: Optic_ k p w j w (Curry is (Curry js j)) s t a b
+           -> Optic_ k p w i w (Curry ks j           ) s t a b)
       (o . o')
 {-# INLINE (%%) #-}
 
