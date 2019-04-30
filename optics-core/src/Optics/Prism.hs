@@ -15,30 +15,29 @@ module Optics.Prism
   , prism
 
   -- * Elimination
-  -- | A 'Prism' is an 'Optics.Review.Review' and an
-  -- 'Optics.AffineFold.AffineFold', therefore you can specialise types to
-  -- obtain:
+  -- | A 'Prism' is a 'Optics.Review.Review' and
+  -- 'Optics.AffineTraversal.AffineTraversal', therefore you can specialise
+  -- types to obtain:
   --
   -- @
-  -- 'Optics.Review.review'  :: 'Prism' s t a b -> b -> t
-  -- 'Optics.AffineFold.preview' :: 'Prism'' s a -> s -> 'Maybe' a
+  -- 'Optics.Review.review'   :: 'Prism' s t a b -> b -> t
+  -- 'Optics.AffineTraversal.matching' :: 'Prism' s t a b -> s -> 'Either' t a
   -- @
-  , matching
 
   -- * Computation
   -- |
   --
   -- @
   -- 'Optics.Review.review'   ('prism' f g) ≡ f
-  -- 'matching' ('prism' f g) ≡ g
+  -- 'Optics.AffineTraversal.matching' ('prism' f g) ≡ g
   -- @
 
   -- * Well-formedness
   -- |
   --
   -- @
-  -- 'Optics.AffineFold.preview' o ('Optics.Review.review' o b) ≡ 'Just' b
-  -- 'Optics.AffineFold.preview' o s ≡ 'Just' a  =>  'Optics.Review.review' o a ≡ s
+  -- 'Optics.AffineTraversal.matching' o ('Optics.Review.review' o b) ≡ 'Left' b
+  -- 'Optics.AffineTraversal.matching' o s ≡ 'Left' a  =>  'Optics.Review.review' o a ≡ s
   -- @
 
   -- * Additional introduction forms
@@ -48,7 +47,6 @@ module Optics.Prism
 
   -- * Additional elimination forms
   , withPrism
-  , isn't
 
   -- * Combinators
   , aside
@@ -145,24 +143,6 @@ below k =
     Left _  -> Left s
     Right t -> Right t
 {-# INLINE below #-}
-
--- | Check to see if this 'Prism' doesn't match.
-isn't :: Is k A_Prism => Optic k is s t a b -> s -> Bool
-isn't k s =
-  case matching k s of
-    Left  _ -> True
-    Right _ -> False
-{-# INLINE isn't #-}
-
--- | Retrieve the value targeted by a 'Prism' or return the original value while
--- allowing the type to change if it does not match.
---
--- @
--- 'Optics.AffineFold.preview' o ≡ 'either' ('const' 'Nothing') 'id' . 'matching' o
--- @
-matching :: Is k A_Prism => Optic k is s t a b -> s -> Either t a
-matching o = withPrism o $ \_ match -> match
-{-# INLINE matching #-}
 
 -- | This 'Prism' compares for exact equality with a given value.
 --
