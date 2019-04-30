@@ -6,10 +6,6 @@ packages:
   optics-th/*.cabal
   generic-optics/*.cabal
 
--- Code generation for optic kinds
-packages:
-  codegen/*.cabal
-
 -- An example, using optics to generate optics diagrams
 packages:
   metametapost/*.cabal
