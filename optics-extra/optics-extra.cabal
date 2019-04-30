@@ -4,7 +4,7 @@ license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
 cabal-version: 1.24
-maintainer:    oleg@well-typed.com
+maintainer:    optics@well-typed.com
 author:        Edward Kmett, Andrzej Rybczak
 tested-with:   ghc ==8.0.2 ghc ==8.2.2 ghc ==8.4.4 ghc ==8.6.3
 synopsis:      Extra utilities and instances for optics-core

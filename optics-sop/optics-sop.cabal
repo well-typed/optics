@@ -3,7 +3,7 @@ version:       0.1
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
-maintainer:    oleg@well-typed.com
+maintainer:    optics@well-typed.com
 author:        Adam Gundry, Andres Löh, Andrzej Rybczak
 cabal-version: >=1.10
 tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
