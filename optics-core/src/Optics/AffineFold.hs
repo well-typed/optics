@@ -14,6 +14,9 @@ module Optics.AffineFold
   -- * Introduction
   , afolding
 
+  -- ** Additional
+  , filtered'
+
   -- * Elimination
   , preview
   , previews
@@ -97,6 +100,23 @@ afailing
 afailing a b = afolding $ \s -> maybe (preview b s) Just (preview a s)
 infixl 3 `afailing` -- Same as (<|>)
 {-# INLINE afailing #-}
+
+-- | Filter results of a 'Fold' that don't satisfy a predicate.
+--
+-- TODO: remove filteted from Optics.Fold
+-- TODO: add unsafeFiltered which is AffineTraversal
+--
+-- /Note:/ unfortunately we cannot make `ifiltered` variant as nicely.
+-- We'd need to make a notion of "index preserving optic",
+-- so @ifolded %? ifiltered@ would work.
+-- Do we have more such "Optic-transformators". It would be nice if they
+-- could be pre/post composed rather then acting as combinators.
+--
+filtered'
+  :: (a -> Bool)
+  -> AffineFold a a
+filtered' p = afolding $ \a -> if p a then Just a else Nothing
+{-# INLINE filtered' #-}
 
 -- $setup
 -- >>> import Optics.Core
