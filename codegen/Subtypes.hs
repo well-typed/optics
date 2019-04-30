@@ -22,10 +22,8 @@ import Data.Maybe (listToMaybe)
 
 -- | Optic kinds.
 data OpticKind
-      -- | Tag for an equality.
-  =  An_Equality
   -- | Tag for an iso.
-  |  An_Iso
+  =  An_Iso
   -- | Tag for a lens.
   |  A_Lens
   -- | Tag for a prism.
@@ -53,8 +51,7 @@ data OpticKind
 -- | Adjancency map
 opticsKind :: Map OpticKind (Set OpticKind)
 opticsKind = mkProper $ Map.fromListWith (<>)
-    [ An_Equality        ~> An_Iso
-    , An_Iso             ~> A_Lens
+    [ An_Iso             ~> A_Lens
     , An_Iso             ~> A_Prism
     , An_Iso             ~> A_LensyReview
     , An_Iso             ~> A_PrismaticGetter
@@ -84,7 +81,7 @@ opticsKind = mkProper $ Map.fromListWith (<>)
 -------------------------------------------------------------------------------
 
 maxLength :: Int
-maxLength = maximum [ length (show k) | k <- [ An_Equality .. maxBound ] ]
+maxLength = maximum [ length (show k) | k <- [ An_Iso .. maxBound ] ]
 
 leftpad :: String -> String
 leftpad s = s ++ replicate (maxLength - length s) ' '

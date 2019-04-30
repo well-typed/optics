@@ -200,7 +200,6 @@ import Optics.IxAffineFold                   as O
 import Optics.Iso                            as O
 import Optics.Getter                         as O
 import Optics.Fold                           as O
-import Optics.Equality                       as O
 import Optics.AffineTraversal                as O
 import Optics.AffineFold                     as O
 

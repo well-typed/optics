@@ -33,7 +33,6 @@ reOptics = do
     let path a b = P $ z ^. rix a .... z ^. rix b
     let arrow a b = drawarrow_ $ clippath (path a b) (q ^. rix a) (q ^. rix b)
 
-    arrow Tag_Equality Tag_Iso
     arrow Tag_Iso Tag_Lens
     arrow Tag_Iso Tag_Prism
     arrow Tag_Iso Tag_LensyReview
@@ -113,14 +112,7 @@ reOptics = do
         (z ^. rix Tag_Iso .+ Pair 20 0, L 270) ....
         (z ^. rix Tag_Iso .+ Pair 5 (-5), L 100)
 
-    -- Equality
-    drawarrowC_ red $ P $
-        (z ^. rix Tag_Equality .+ Pair 15 5, L 80) ...
-        (z ^. rix Tag_Equality .+ Pair 30 0, L 270) ....
-        (z ^. rix Tag_Equality .+ Pair 15 (-5), L 100)
-
   where
-    isRe Tag_Equality        = True
     isRe Tag_Iso             = True
     isRe Tag_Lens            = True
     isRe Tag_Prism           = True

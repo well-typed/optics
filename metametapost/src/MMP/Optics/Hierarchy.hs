@@ -25,7 +25,6 @@ hierarchy = do
             (q ^. rix a)
             (q ^. rix b)
 
-    arrow Tag_Equality Tag_Iso
     arrow Tag_Iso Tag_Lens
     arrow Tag_Iso Tag_Prism
     arrow Tag_Iso Tag_LensyReview

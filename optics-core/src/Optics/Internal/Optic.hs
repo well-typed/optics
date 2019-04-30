@@ -44,6 +44,7 @@ import GHC.TypeLits
 import Optics.Internal.Optic.Subtyping
 import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Optic.Types
+import Optics.Internal.Profunctor
 
 -- to make %% simpler
 import Unsafe.Coerce (unsafeCoerce)
@@ -68,7 +69,7 @@ type WithIx i = '[i]
 -- whereas @a@ and @b@ represent the "small" structure.
 --
 newtype Optic (k :: *) (is :: [*]) s t a b =
-  Optic { getOptic :: forall p j. Optic_ k p j (Curry is j) s t a b }
+  Optic { getOptic :: forall p j. Profunctor p => Optic_ k p j (Curry is j) s t a b }
 
 -- | Common special case of 'Optic' where source and target types are equal.
 --
@@ -135,7 +136,7 @@ infixr 9 %%
 Optic o %% Optic o' = Optic oo
   where
     -- unsafeCoerce to the rescue, for a proof see below.
-    oo :: forall p j. Optic_ k p j (Curry ks j) s t a b
+    oo :: forall p j. Profunctor p => Optic_ k p j (Curry ks j) s t a b
     oo = (unsafeCoerce
            :: Optic_ k p j (Curry is (Curry js j)) s t a b
            -> Optic_ k p i (Curry ks j           ) s t a b)

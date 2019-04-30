@@ -138,7 +138,7 @@ type HasConfig k s = (LabelOptic' "config" k s Config, Is k A_Getter)
 data Config = Config
 instance
   (a ~ Config, b ~ Config
-  ) => LabelOptic "config" An_Equality Config Config a b where
+  ) => LabelOptic "config" An_Iso Config Config a b where
   labelOptic = equality
 
 data Env = Env { envConfig :: Config, envRng :: R.StdGen }

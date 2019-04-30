@@ -42,6 +42,8 @@ module Optics.Iso
   -- @
 
   -- * Additional introduction forms
+  , equality
+  , simple
   , coerced
   , coerced'
   , coerced1
@@ -66,7 +68,6 @@ module Optics.Iso
 
   -- * Subtyping
   , An_Iso
-  , toIso
 
   -- * Re-exports
   , module Optics.Optic
@@ -88,19 +89,14 @@ type Iso s t a b = Optic An_Iso NoIx s t a b
 -- | Type synonym for a type-preserving iso.
 type Iso' s a = Optic' An_Iso NoIx s a
 
--- | Explicitly cast an optic to an iso.
-toIso :: Is k An_Iso => Optic k is s t a b -> Optic An_Iso is s t a b
-toIso = castOptic
-{-# INLINE toIso #-}
-
 -- | Build an iso from a pair of inverse functions.
 iso :: (s -> a) -> (b -> t) -> Iso s t a b
 iso f g = Optic (dimap f g)
 {-# INLINE iso #-}
 
 -- | Extract the two components of an isomorphism.
-withIso :: Is k An_Iso => Optic k is s t a b -> ((s -> a) -> (b -> t) -> r) -> r
-withIso o k = case getOptic (toIso o) (Exchange id id) of
+withIso :: Iso s t a b -> ((s -> a) -> (b -> t) -> r) -> r
+withIso o k = case getOptic o (Exchange id id) of
   Exchange sa bt -> k sa bt
 {-# INLINE withIso #-}
 
@@ -117,7 +113,7 @@ withIso o k = case getOptic (toIso o) (Exchange id id) of
 -- @
 -- au :: 'Iso' s t a b -> ((b -> t) -> e -> s) -> e -> a
 -- @
-au :: (Is k An_Iso, Functor f) => Optic k is s t a b -> ((b -> t) -> f s) -> f a
+au :: Functor f => Iso s t a b -> ((b -> t) -> f s) -> f a
 au k = withIso k $ \sa bt f -> sa <$> f bt
 {-# INLINE au #-}
 
@@ -127,7 +123,7 @@ au k = withIso k $ \sa bt f -> sa <$> f bt
 -- @
 -- 'under' ≡ 'Optics.Setter.over' '.' 'Optics.Re.re'
 -- @
-under :: Is k An_Iso => Optic k is s t a b -> (t -> s) -> b -> a
+under :: Iso s t a b -> (t -> s) -> b -> a
 under k = withIso k $ \sa bt ts -> sa . ts . bt
 {-# INLINE under #-}
 
@@ -136,11 +132,26 @@ under k = withIso k $ \sa bt ts -> sa . ts . bt
 
 -- | This can be used to lift any 'Iso' into an arbitrary 'Functor'.
 mapping
-  :: (Is k An_Iso, Functor f, Functor g)
-  => Optic k is s t a b
+  :: (Functor f, Functor g)
+  => Iso    s     t     a     b
   -> Iso (f s) (g t) (f a) (g b)
 mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
 {-# INLINE mapping #-}
+
+-- | Capture type constraints as an isomorphism.
+--
+-- /Note:/ This is the identity optic:
+--
+-- >>> :t view equality
+-- view equality :: a -> a
+equality :: (s ~ a, t ~ b) => Iso s t a b
+equality = Optic id
+{-# INLINE equality #-}
+
+-- | Proof of reflexivity.
+simple :: Iso' a a
+simple = Optic id
+{-# INLINE simple #-}
 
 -- | Data types that are representationally equal are isomorphic.
 --
