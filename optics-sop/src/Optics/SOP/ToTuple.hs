@@ -2,6 +2,9 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
+-- | Conversions between lists of types (of length up to 16) and the
+-- corresponding tuple types.
+--
 module Optics.SOP.ToTuple where
 
 import Generics.SOP hiding (from, to)
@@ -9,6 +12,7 @@ import Optics.Core
 
 import Generics.SOP.Optics
 
+-- | Convert a list of types into a tuple of those types.
 type family ToTuple (xs :: [*]) :: * where
   ToTuple '[]                                                                      = ()
   ToTuple '[x1]                                                                    = x1
@@ -28,7 +32,11 @@ type family ToTuple (xs :: [*]) :: * where
   ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15]      = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15)
   ToTuple '[x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16] = (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16)
 
+-- | A list of types is 'TupleLike' if it is isomorphic to the tuple given by
+-- 'ToTuple',
 class TupleLike xs where
+  -- | Value-level isomorphsim between a heterogeneous list and the
+  -- corresponding tuple type.
   tuple :: Iso' (NP I xs) (ToTuple xs)
   default tuple :: (IsProductType a xs, ToTuple xs ~ a) => Iso' (NP I xs) (ToTuple xs)
   tuple = re productRep
