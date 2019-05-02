@@ -115,7 +115,7 @@ castOptic (Optic o) = Optic (implies' o)
 --
 -- Returns an optic of the appropriate supertype.
 --
-infixr 9 %
+infixl 9 %
 (%) :: (Is k m, Is l m, m ~ Join k l, ks ~ Append is js)
     => Optic k is s t u v
     -> Optic l js u v a b
@@ -128,7 +128,7 @@ o % o' = castOptic o %% castOptic o'
 -- Normally you can simply use ('%') instead, but this may be useful to help
 -- type inference if the type of one of the optics is otherwise
 -- under-constrained.
-infixr 9 %%
+infixl 9 %%
 (%%) :: forall k is js ks s t u v a b. ks ~ Append is js
      => Optic k is s t u v
      -> Optic k js u v a b
