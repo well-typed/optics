@@ -35,7 +35,7 @@ class TupleLike xs where
 
 instance TupleLike '[]
 instance TupleLike '[x1] where
-  tuple = npSingleton % i
+  tuple = npSingleton % _I
 instance TupleLike '[x1, x2]
 instance TupleLike '[x1, x2, x3]
 instance TupleLike '[x1, x2, x3, x4]

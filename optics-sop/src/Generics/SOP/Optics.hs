@@ -5,9 +5,9 @@
 module Generics.SOP.Optics
   ( rep
   , sop
-  , z
-  , i
-  , k
+  , nsSingleton
+  , _I
+  , _K
   , productRep
   , npHead
   , npTail
@@ -29,20 +29,20 @@ sop :: Iso (SOP f xss) (SOP g yss) (NS (NP f) xss) (NS (NP g) yss)
 sop = iso unSOP SOP
 
 -- | Iso between a one-element sum and its contents.
-z :: Iso (NS f '[ x ]) (NS g '[ y ]) (f x) (g y)
-z = iso unZ Z
+nsSingleton :: Iso (NS f '[ x ]) (NS g '[ y ]) (f x) (g y)
+nsSingleton = iso unZ Z
 
 -- | Iso induced by the 'I' newtype.
-i :: Iso (I x) (I y) x y
-i = iso unI I
+_I :: Iso (I x) (I y) x y
+_I = iso unI I
 
 -- | Iso induced by the 'K' newtype.
-k :: Iso (K a b) (K c d) a c
-k = iso unK K
+_K :: Iso (K a b) (K c d) a c
+_K = iso unK K
 
 -- | Iso between a generic product type and its product representation.
 productRep :: (IsProductType a xs, IsProductType b ys) => Iso a b (NP I xs) (NP I ys)
-productRep = rep % sop % z
+productRep = rep % sop % nsSingleton
 
 -- | Lens accessing the head of an 'NP'.
 npHead :: Lens (NP f (x ': xs)) (NP f (y ': xs)) (f x) (f y)
