@@ -43,7 +43,7 @@ lenses = hmap (coerce (productRep %)) (go sList)
   where
     go :: forall ys . SList ys -> NP (WrappedLens (NP I ys)) ys
     go SNil  = Nil
-    go SCons = coerce (npHead % i) :* hmap (coerce (npTail %)) (go sList)
+    go SCons = coerce (npHead % _I) :* hmap (coerce (npTail %)) (go sList)
 
 -- | Produce an 'NP' of wrapped prisms for a generic product type.
 --
