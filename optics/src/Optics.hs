@@ -336,7 +336,8 @@ import Data.Either.Optics                    as P
 -- The sections above set out the major conceptual differences from the @lens@
 -- package. Some more specific design differences:
 --
--- * The composition operator is ('%') rather than ('.').
+-- * The composition operator is ('%') rather than ('.') and is defined as
+-- * @infixl 9@ instead of @infixr 9@.
 --
 -- * Fewer operators are provided, and none of operators are exported from the
 --   main "Optics" module. Import "Optics.Operators" or "Optics.Operators.State"

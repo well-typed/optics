@@ -40,7 +40,8 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs05" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs05)
   , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = traverseOf_ ..." $
-    assertSuccess $(inspectTest $ 'lhs06 === 'rhs06)
+    -- GHC 8.6 gives different order of let bindings
+    ghc86failure $(inspectTest $ 'lhs06 === 'rhs06)
   , testCase "optimized lhs06" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs06)
   , testCase "optimized rhs06" $
@@ -102,7 +103,9 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs15" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs15)
   , testCase "iset (itraversed..) = iset (imapped..)" $
-    assertSuccess $(inspectTest $ 'lhs16 === 'rhs16)
+    -- GHC >= 8.2 has additional let in generated core, but the difference is
+    -- trivial.
+    ghc80success $(inspectTest $ 'lhs16 === 'rhs16)
   , testCase "optimized lhs16" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs16)
   , testCase "optimized rhs16" $

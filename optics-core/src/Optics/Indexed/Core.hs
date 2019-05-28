@@ -42,7 +42,7 @@ import Optics.Traversal
 -- >>> itoListOf (ifolded <%> ifolded) ["foo", "bar"]
 -- [((0,0),'f'),((0,1),'o'),((0,2),'o'),((1,0),'b'),((1,1),'a'),((1,2),'r')]
 --
-infixr 9 <%>
+infixl 9 <%>
 (<%>)
   :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b,
       is `HasSingleIndex` i, js `HasSingleIndex` j)
@@ -57,7 +57,7 @@ o <%> o' = icompose (,) (o % o')
 -- >>> itoListOf (ifolded %> ifolded) ["foo", "bar"]
 -- [(0,'f'),(1,'o'),(2,'o'),(0,'b'),(1,'a'),(2,'r')]
 --
-infixr 9 %>
+infixl 9 %>
 (%>)
   :: (m ~ Join k l, Is k m, Is l m, IxOptic k s t u v, NonEmptyIndices is)
   => Optic k is s t u v
@@ -71,7 +71,7 @@ o %> o' = noIx o % o'
 -- >>> itoListOf (ifolded <% ifolded) ["foo", "bar"]
 -- [(0,'f'),(0,'o'),(0,'o'),(1,'b'),(1,'a'),(1,'r')]
 --
-infixr 9 <%
+infixl 9 <%
 (<%)
   :: (m ~ Join k l, Is l m, Is k m, IxOptic l u v a b, NonEmptyIndices js)
   => Optic k is s t u v
