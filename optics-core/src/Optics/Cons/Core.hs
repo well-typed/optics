@@ -26,6 +26,7 @@ import qualified Data.Sequence as Seq
 import Data.Tuple.Optics
 import Optics.AffineFold
 import Optics.AffineTraversal
+import Optics.Coerce
 import Optics.Prism
 import Optics.Review
 
@@ -77,11 +78,10 @@ instance Cons [a] [b] a b where
   {-# INLINE _Cons #-}
 
 instance Cons (ZipList a) (ZipList b) a b where
-  _Cons = withPrism listCons $ \listReview listPreview ->
-    prism (coerce listReview) (coerce listPreview) where
-
-    listCons :: Prism [a] [b] (a, [a]) (b, [b])
-    listCons = _Cons
+  _Cons = coerceS . coerceT . coerceA . coerceB $ listCons
+    where
+      listCons :: Prism [a] [b] (a, [a]) (b, [b])
+      listCons = _Cons
 
   {-# INLINE _Cons #-}
 
