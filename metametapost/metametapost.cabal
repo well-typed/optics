@@ -30,3 +30,4 @@ executable metametapost-optics
     , generics-sop
     , mtl
     , optics
+    , optics-sop
