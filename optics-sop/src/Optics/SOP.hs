@@ -5,6 +5,25 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+-- | This module provides machinery to construct lenses and prisms using
+-- @generics-sop@.
+--
+-- If you have a datatype @T@ with a 'Generics.SOP.Generic' instance, you can
+-- use @'mkLenses' :: 'LensesFor' T@ to obtain a tuple of lenses, or similarly
+-- use @'mkPrisms' :: 'PrismsFor' T@ to obtain a tuple of prisms. For example:
+--
+-- >>> :set -XDeriveGeneric -XDeriveAnyClass
+-- >>> import qualified GHC.Generics as GHC
+-- >>> import qualified Generics.SOP as SOP
+-- >>> data T = MkT { _foo :: Int, _bar :: Bool } deriving (GHC.Generic, SOP.Generic)
+-- >>> Lenses (foo, bar) = mkLenses :: LensesFor T
+-- >>> view foo (MkT 42 True)
+-- 42
+--
+-- >>> Prisms (_Nothing, _Just) = mkPrisms :: PrismsFor (Maybe a)
+-- >>> isn't _Just Nothing
+-- True
+--
 module Optics.SOP
   ( WrappedLens(..)
   , WrappedNPPrism(..)
