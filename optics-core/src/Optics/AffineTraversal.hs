@@ -29,7 +29,6 @@ module Optics.AffineTraversal
 
   -- * Subtyping
   , An_AffineTraversal
-  , toAffineTraversal
 
   -- * van Laarhoven encoding
   , AffineTraversalVL
@@ -74,14 +73,6 @@ type AffineTraversalVL s t a b =
 -- | Type synonym for a type-preserving van Laarhoven affine traversal.
 type AffineTraversalVL' s a = AffineTraversalVL s s a a
 
--- | Explicitly cast an optic to an affine traversal.
-toAffineTraversal
-  :: Is k An_AffineTraversal
-  => Optic k                  is s t a b
-  -> Optic An_AffineTraversal is s t a b
-toAffineTraversal = castOptic
-{-# INLINE toAffineTraversal #-}
-
 -- | Build an affine traversal from a matcher and an updater.
 atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal s t a b
 atraversal match update = Optic $
@@ -100,7 +91,7 @@ withAffineTraversal
   -> ((s -> Either t a) -> (s -> b -> t) -> r)
   -> r
 withAffineTraversal o = \k ->
-  case getOptic (toAffineTraversal o) (AffineMarket (\_ b -> b) Right) of
+  case getOptic (castOptic @An_AffineTraversal o) (AffineMarket (\_ b -> b) Right) of
     AffineMarket update match -> k match update
 {-# INLINE withAffineTraversal #-}
 
@@ -114,5 +105,6 @@ toAtraversalVL
   :: Is k An_AffineTraversal
   => Optic k is s t a b
   -> AffineTraversalVL s t a b
-toAtraversalVL o point = runStarA . getOptic (toAffineTraversal o) . StarA point
+toAtraversalVL o point =
+  runStarA . getOptic (castOptic @An_AffineTraversal o) . StarA point
 {-# INLINE toAtraversalVL #-}

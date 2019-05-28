@@ -65,7 +65,6 @@ module Optics.Traversal
 
   -- * Subtyping
   , A_Traversal
-  , toTraversal
 
   -- * van Laarhoven encoding
   -- | The van Laarhoven representation of a 'Traversal' directly
@@ -107,14 +106,6 @@ type TraversalVL s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
 -- | Type synonym for a type-preserving van Laarhoven traversal.
 type TraversalVL' s a = TraversalVL s s a a
 
--- | Explicitly cast an optic to a traversal.
-toTraversal
-  :: Is k A_Traversal
-  => Optic k is s t a b
-  -> Optic A_Traversal is s t a b
-toTraversal = castOptic
-{-# INLINE toTraversal #-}
-
 -- | Build a traversal from the van Laarhoven representation.
 --
 -- @
@@ -131,7 +122,7 @@ traverseOf
   :: (Is k A_Traversal, Applicative f)
   => Optic k is s t a b
   -> (a -> f b) -> s -> f t
-traverseOf o = \f -> runStar $ getOptic (toTraversal o) (Star f)
+traverseOf o = \f -> runStar $ getOptic (castOptic @A_Traversal o) (Star f)
 {-# INLINE traverseOf #-}
 
 -- | A version of 'traverseOf' with the arguments flipped.
@@ -327,7 +318,7 @@ partsOf o = lensVL $ \f s ->
   evalState (traverseOf o update s) <$> f (toListOf fo s)
   where
     fo :: Fold s a
-    fo = Optic $ rphantom . getOptic (toTraversal o)
+    fo = Optic $ rphantom . getOptic (castOptic @A_Traversal o)
 
     update a = get >>= \case
       a' : as' -> put as' >> pure a'

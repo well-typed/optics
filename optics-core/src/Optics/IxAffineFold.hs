@@ -31,7 +31,6 @@ module Optics.IxAffineFold
 
   -- * Subtyping
   , An_AffineFold
-  , toIxAffineFold
 
   -- * Re-exports
   , module Optics.Optic
@@ -47,14 +46,6 @@ import Optics.Optic
 -- | Type synonym for an indexed affine fold.
 type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
 
--- | Explicitly cast an optic to an indexed affine fold.
-toIxAffineFold
-  :: (Is k An_AffineFold, is `HasSingleIndex` i)
-  => Optic' k is s a
-  -> IxAffineFold i s a
-toIxAffineFold = castOptic
-{-# INLINE toIxAffineFold #-}
-
 -- | Retrieve the value along with its index targeted by an 'IxAffineFold'.
 ipreview
   :: (Is k An_AffineFold, is `HasSingleIndex` i)
@@ -69,8 +60,9 @@ ipreviews
   :: (Is k An_AffineFold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> r) -> s -> Maybe r
-ipreviews o = \f ->
-  runIxForgetM (getOptic (toIxAffineFold o) . IxForgetM $ \i -> Just . f i) id
+ipreviews o = \f -> runIxForgetM
+  (getOptic (castOptic @An_AffineFold o) . IxForgetM $ \i -> Just . f i)
+  id
 {-# INLINE ipreviews #-}
 
 -- | Create an 'IxAffineFold' from a partial function.

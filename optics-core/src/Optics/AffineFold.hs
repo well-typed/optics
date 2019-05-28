@@ -43,14 +43,6 @@ import Optics.Optic
 -- | Type synonym for an affine fold.
 type AffineFold s a = Optic' An_AffineFold NoIx s a
 
--- | Explicitly cast an optic to an affine fold.
-toAffineFold
-  :: Is k An_AffineFold
-  => Optic' k             is s a
-  -> Optic' An_AffineFold is s a
-toAffineFold = castOptic
-{-# INLINE toAffineFold #-}
-
 -- | Retrieve the value targeted by an 'AffineFold'.
 --
 -- >>> let _Right = prism Right $ either (Left . Left) Right
@@ -67,7 +59,8 @@ preview o = previews o id
 
 -- | Retrieve a function of the value targeted by an 'AffineFold'.
 previews :: Is k An_AffineFold => Optic' k is s a -> (a -> r) -> s -> Maybe r
-previews o = \f -> runForgetM $ getOptic (toAffineFold o) $ ForgetM (Just . f)
+previews o = \f -> runForgetM $
+  getOptic (castOptic @An_AffineFold o) $ ForgetM (Just . f)
 {-# INLINE previews #-}
 
 -- | Create an 'AffineFold' from a partial function.

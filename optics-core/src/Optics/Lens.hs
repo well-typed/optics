@@ -88,7 +88,6 @@ module Optics.Lens
 
   -- * Subtyping
   , A_Lens
-  , toLens
 
   -- * van Laarhoven encoding
   -- | The van Laarhoven encoding of lenses is isomorphic to the profunctor
@@ -125,11 +124,6 @@ type LensVL s t a b = forall f. Functor f => (a -> f b) -> s -> f t
 -- | Type synonym for a type-preserving van Laarhoven lens.
 type LensVL' s a = LensVL s s a a
 
--- | Explicitly cast an optic to a lens.
-toLens :: Is k A_Lens => Optic k is s t a b -> Optic A_Lens is s t a b
-toLens = castOptic
-{-# INLINE toLens #-}
-
 -- | Build a lens from a getter and a setter, which must respect the
 -- well-formedness laws.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
@@ -152,7 +146,7 @@ withLens
   => Optic k is s t a b
   -> ((s -> a) -> (s -> b -> t) -> r)
   -> r
-withLens o k = case getOptic (toLens o) $ Store id (\_ -> id) of
+withLens o k = case getOptic (castOptic @A_Lens o) $ Store id (\_ -> id) of
   Store get set -> k get set
 {-# INLINE withLens #-}
 
@@ -163,7 +157,7 @@ lensVL l = Optic (linear l)
 
 -- | Convert a lens to the van Laarhoven representation.
 toLensVL :: Is k A_Lens => Optic k is s t a b -> LensVL s t a b
-toLensVL o = runStar #. getOptic (toLens o) .# Star
+toLensVL o = runStar #. getOptic (castOptic @A_Lens o) .# Star
 {-# INLINE toLensVL #-}
 
 -- | Work with a lens in the van Laarhoven representation.

@@ -59,7 +59,6 @@ module Optics.IxTraversal
 
   -- * Subtyping
   , A_Traversal
-  , toIxTraversal
 
   -- * Re-exports
   , TraversableWithIndex(..)
@@ -87,14 +86,6 @@ type IxTraversal i s t a b = Optic A_Traversal (WithIx i) s t a b
 -- | Type synonym for a type-preserving indexed traversal.
 type IxTraversal' i s a = Optic' A_Traversal (WithIx i) s a
 
--- | Explicitly cast an optic to an indexed traversal.
-toIxTraversal
-  :: (Is k A_Traversal, is `HasSingleIndex` i)
-  => Optic k is s t a b
-  -> IxTraversal i s t a b
-toIxTraversal = castOptic
-{-# INLINE toIxTraversal #-}
-
 -- | Build an indexed traversal from the van Laarhoven representation.
 --
 -- @
@@ -117,7 +108,8 @@ itraverseOf
   :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> f b) -> s -> f t
-itraverseOf o = \f -> runIxStar (getOptic (toIxTraversal o) (IxStar f)) id
+itraverseOf o = \f ->
+  runIxStar (getOptic (castOptic @A_Traversal o) (IxStar f)) id
 {-# INLINE itraverseOf #-}
 
 -- | A version of 'itraverseOf' with the arguments flipped.
@@ -296,7 +288,7 @@ ipartsOf o = lensVL $ \f s ->
   evalState (traverseOf o update s) <$> f (itoListOf fo s)
   where
     fo :: IxFold i s a
-    fo = Optic $ rphantom . getOptic (toIxTraversal o)
+    fo = Optic $ rphantom . getOptic (castOptic @A_Traversal o)
 
     update a = get >>= \case
       []       ->            pure a

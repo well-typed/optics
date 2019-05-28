@@ -52,7 +52,6 @@ module Optics.IxSetter
 
   -- * Subtyping
   , A_Setter
-  , toIxSetter
 
   -- * Re-exports
   , FunctorWithIndex(..)
@@ -71,20 +70,12 @@ type IxSetter i s t a b = Optic A_Setter (WithIx i) s t a b
 -- | Type synonym for a type-preserving indexed setter.
 type IxSetter' i s a = Optic' A_Setter (WithIx i) s a
 
--- | Explicitly cast an optic to an indexeed setter.
-toIxSetter
-  :: (Is k A_Setter, is `HasSingleIndex` i)
-  => Optic k is s t a b
-  -> IxSetter i s t a b
-toIxSetter = castOptic
-{-# INLINE toIxSetter #-}
-
 -- | Apply an indexed setter as a modifier.
 iover
   :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
-iover o = \f -> runIxFunArrow (getOptic (toIxSetter o) (IxFunArrow f)) id
+iover o = \f -> runIxFunArrow (getOptic (castOptic @A_Setter o) (IxFunArrow f)) id
 {-# INLINE iover #-}
 
 -- | Apply an indexed setter as a modifier, strictly.
@@ -93,7 +84,7 @@ iover'
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
 iover' o = \f ->
-  let star = getOptic (toIxSetter o) $ IxStar (\i -> wrapIdentity' . f i)
+  let star = getOptic (castOptic @A_Setter o) $ IxStar (\i -> wrapIdentity' . f i)
   in unwrapIdentity' . runIxStar star id
 
 {-# INLINE iover' #-}

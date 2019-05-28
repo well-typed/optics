@@ -21,7 +21,6 @@ module Optics.IxAffineTraversal
 
   -- * Subtyping
   , An_AffineTraversal
-  , toIxAffineTraversal
 
   -- * Re-exports
   , module Optics.Optic
@@ -52,14 +51,6 @@ type IxAffineTraversalVL i s t a b =
 -- | Type synonym for a type-preserving van Laarhoven indexed affine traversal.
 type IxAffineTraversalVL' i s a = IxAffineTraversalVL i s s a a
 
--- | Explicitly cast an optic to an indexed affine traversal.
-toIxAffineTraversal
-  :: (Is k An_AffineTraversal, is `HasSingleIndex` i)
-  => Optic k is s t a b
-  -> IxAffineTraversal i s t a b
-toIxAffineTraversal = castOptic
-{-# INLINE toIxAffineTraversal #-}
-
 -- | Build an indexed affine traversal from the van Laarhoven representation.
 ixAtraversalVL :: IxAffineTraversalVL i s t a b -> IxAffineTraversal i s t a b
 ixAtraversalVL f = Optic (ivisit f)
@@ -71,5 +62,5 @@ toIxAtraversalVL
   => Optic k is s t a b
   -> IxAffineTraversalVL i s t a b
 toIxAtraversalVL o point = \f ->
-  runIxStarA (getOptic (toIxAffineTraversal o) (IxStarA point f)) id
+  runIxStarA (getOptic (castOptic @An_AffineTraversal o) (IxStarA point f)) id
 {-# INLINE toIxAtraversalVL #-}

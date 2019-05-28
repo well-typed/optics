@@ -56,7 +56,6 @@ module Optics.Setter
 
   -- * Subtyping
   , A_Setter
-  , toSetter
 
   -- * Re-exports
   , module Optics.Optic
@@ -73,20 +72,12 @@ type Setter s t a b = Optic A_Setter NoIx s t a b
 -- | Type synonym for a type-preserving setter.
 type Setter' s a = Optic' A_Setter NoIx s a
 
--- | Explicitly cast an optic to a setter.
-toSetter
-  :: Is k A_Setter
-  => Optic k is s t a b
-  -> Optic A_Setter is s t a b
-toSetter = castOptic
-{-# INLINE toSetter #-}
-
 -- | Apply a setter as a modifier.
 over
   :: Is k A_Setter
   => Optic k is s t a b
   -> (a -> b) -> s -> t
-over o = \f -> runFunArrow $ getOptic (toSetter o) (FunArrow f)
+over o = \f -> runFunArrow $ getOptic (castOptic @A_Setter o) (FunArrow f)
 {-# INLINE over #-}
 
 -- | Apply a setter as a modifier, strictly.
@@ -113,7 +104,7 @@ over'
   => Optic k is s t a b
   -> (a -> b) -> s -> t
 over' o = \f ->
-  let star = getOptic (toSetter o) $ Star (wrapIdentity' . f)
+  let star = getOptic (castOptic @A_Setter o) $ Star (wrapIdentity' . f)
   in unwrapIdentity' . runStar star
 {-# INLINE over' #-}
 

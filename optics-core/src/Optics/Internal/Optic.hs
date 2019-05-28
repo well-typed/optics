@@ -98,17 +98,17 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
 -- This is the identity function, modulo some constraint jiggery-pokery.
 --
 castOptic
-  :: forall k l is s t a b
-  .  Is k l
-  => Optic k is s t a b
-  -> Optic l is s t a b
+  :: forall destKind srcKind is s t a b
+  .  Is srcKind destKind
+  => Optic srcKind  is s t a b
+  -> Optic destKind is s t a b
 castOptic (Optic o) = Optic (implies' o)
   where
     implies'
       :: forall p j
-      .  Optic_ k p j (Curry is j) s t a b
-      -> Optic_ l p j (Curry is j) s t a b
-    implies' x = implies (IsProxy :: IsProxy k l p) x
+      .  Optic_ srcKind  p j (Curry is j) s t a b
+      -> Optic_ destKind p j (Curry is j) s t a b
+    implies' x = implies (IsProxy :: IsProxy srcKind destKind p) x
 {-# INLINE castOptic #-}
 
 -- | Compose two optics of compatible flavours.
