@@ -107,6 +107,18 @@ coreTests = testGroup "Core"
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs16)
   , testCase "optimized rhs16" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs16)
+  , testCase "iset (_1 % itraversed) = iset (_1 % imapped)" $
+    assertSuccess $(inspectTest $ 'lhs17 === 'rhs17)
+  , testCase "optimized lhs17" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'lhs17)
+  , testCase "optimized rhs17" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'rhs17)
+  , testCase "iset (each %> itraversed) = iset (each %> imapped)" $
+    assertSuccess $(inspectTest $ 'lhs18 === 'rhs18)
+  , testCase "optimized lhs18" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'lhs18)
+  , testCase "optimized rhs18" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'rhs18)
   , testCase "optimized failover" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'failoverCheck)
   , testCase "optimized failover'" $
@@ -258,6 +270,22 @@ lhs16, rhs16
   -> s (Either c (t b))
 lhs16 = iset (icompose (,) $ itraversed % _Right % itraversed)
 rhs16 = iset (icompose (,) $ imapped % _Right % imapped)
+
+lhs17, rhs17
+  :: (TraversableWithIndex i s)
+  => (i -> b)
+  -> (s a, r)
+  -> (s b, r)
+lhs17 = iset (_1 % itraversed)
+rhs17 = iset (_1 % imapped)
+
+lhs18, rhs18
+  :: (TraversableWithIndex i s)
+  => (i -> a)
+  -> [s a]
+  -> [s a]
+lhs18 = iset (each %> itraversed)
+rhs18 = iset (each %> imapped)
 
 failoverCheck
   :: (TraversableWithIndex i s, TraversableWithIndex j t)
