@@ -25,7 +25,10 @@ module Optics.AffineFold
   -- 'preview' ('afolding' f) ≡ f
   -- @
 
-  -- * Semigroup structure
+  -- * Additional elimination forms
+  , isn't
+
+    -- * Semigroup structure
   , afailing
 
   -- * Subtyping
@@ -34,6 +37,8 @@ module Optics.AffineFold
   -- * Re-exports
   , module Optics.Optic
   ) where
+
+import Data.Maybe
 
 import Optics.Internal.Bi
 import Optics.Internal.Profunctor
@@ -97,6 +102,15 @@ afailing
 afailing a b = afolding $ \s -> maybe (preview b s) Just (preview a s)
 infixl 3 `afailing` -- Same as (<|>)
 {-# INLINE afailing #-}
+
+-- | Check to see if this 'AffineFold' doesn't match.
+--
+-- >>> isn't _Just Nothing
+-- True
+--
+isn't :: Is k An_AffineFold => Optic' k is s a -> s -> Bool
+isn't k s = not (isJust (preview k s))
+{-# INLINE isn't #-}
 
 -- $setup
 -- >>> import Optics.Core

@@ -36,7 +36,6 @@ module Optics.AffineTraversal
 
   -- * Additional elimination forms
   , withAffineTraversal
-  , isn't
 
   -- * Subtyping
   , An_AffineTraversal
@@ -127,14 +126,6 @@ toAtraversalVL
   -> AffineTraversalVL s t a b
 toAtraversalVL o point = runStarA . getOptic (toAffineTraversal o) . StarA point
 {-# INLINE toAtraversalVL #-}
-
--- | Check to see if this 'AffineTraversal' doesn't match.
-isn't :: Is k An_AffineTraversal => Optic k is s t a b -> s -> Bool
-isn't k s =
-  case matching k s of
-    Left  _ -> True
-    Right _ -> False
-{-# INLINE isn't #-}
 
 -- | Retrieve the value targeted by an 'AffineTraversal' or return the original
 -- value while allowing the type to change if it does not match.
