@@ -95,6 +95,15 @@ data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
 
 -- | Explicit cast from one optic flavour to another.
 --
+-- The resulting optic kind is given in the first type argument, so you can use
+-- TypeApplications to set it. For example
+--
+-- @
+--  'castOptic' @'A_Lens' o
+-- @
+--
+-- turns @o@ into a 'Optics.Lens.Lens'.
+--
 -- This is the identity function, modulo some constraint jiggery-pokery.
 --
 castOptic
