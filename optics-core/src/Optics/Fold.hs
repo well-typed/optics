@@ -78,7 +78,6 @@ module Optics.Fold
 
   -- * Subtyping
   , A_Fold
-  , toFold
 
   -- * Re-exports
   , module Optics.Optic
@@ -103,14 +102,6 @@ import Optics.Optic
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a
 
--- | Explicitly cast an optic to a fold.
-toFold
-  :: Is k A_Fold
-  => Optic' k is s a
-  -> Optic' A_Fold is s a
-toFold = castOptic
-{-# INLINE toFold #-}
-
 -- | Obtain a 'Fold' by lifting 'traverse_' like function.
 --
 -- @
@@ -130,7 +121,7 @@ foldOf o = foldMapOf o id
 
 -- | Fold via embedding into a monoid.
 foldMapOf :: (Is k A_Fold, Monoid m) => Optic' k is s a -> (a -> m) -> s -> m
-foldMapOf o = runForget #. getOptic (toFold o) .# Forget
+foldMapOf o = runForget #. getOptic (castOptic @A_Fold o) .# Forget
 {-# INLINE foldMapOf #-}
 
 -- | Fold right-associatively.

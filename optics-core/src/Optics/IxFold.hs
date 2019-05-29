@@ -48,7 +48,6 @@ module Optics.IxFold
 
   -- * Subtyping
   , A_Fold
-  , toIxFold
 
   -- * Re-exports
   , FoldableWithIndex(..)
@@ -71,14 +70,6 @@ import Optics.Optic
 -- | Type synonym for an indexed fold.
 type IxFold i s a = Optic' A_Fold (WithIx i) s a
 
--- | Explicitly cast an optic to an indexed fold.
-toIxFold
-  :: (Is k A_Fold, is `HasSingleIndex` i)
-  => Optic' k is s a
-  -> IxFold i s a
-toIxFold = castOptic
-{-# INLINE toIxFold #-}
-
 -- | Obtain an indexed fold by lifting 'itraverse_' like function.
 --
 -- @
@@ -96,7 +87,7 @@ ifoldMapOf
   :: (Is k A_Fold, Monoid m, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> m) -> s -> m
-ifoldMapOf o = \f -> runIxForget (getOptic (toIxFold o) (IxForget f)) id
+ifoldMapOf o = \f -> runIxForget (getOptic (castOptic @A_Fold o) (IxForget f)) id
 {-# INLINE ifoldMapOf #-}
 
 -- | Fold with index right-associatively.

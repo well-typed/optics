@@ -35,7 +35,6 @@ module Optics.Getter
 
   -- * Subtyping
   , A_Getter
-  , toGetter
 
   -- * Re-exports
   , module Optics.Optic
@@ -50,11 +49,6 @@ import Optics.Optic
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter NoIx s a
 
--- | Explicitly cast an optic to a getter.
-toGetter :: Is k A_Getter => Optic' k is s a -> Optic' A_Getter is s a
-toGetter = castOptic
-{-# INLINE toGetter #-}
-
 -- | View the value pointed to by a getter.
 view :: Is k A_Getter => Optic' k is s a -> s -> a
 view o = views o id
@@ -62,7 +56,7 @@ view o = views o id
 
 -- | View the function of the value pointed to by a getter.
 views :: Is k A_Getter => Optic' k is s a -> (a -> r) -> s -> r
-views o = \f -> runForget $ getOptic (toGetter o) (Forget f)
+views o = \f -> runForget $ getOptic (castOptic @A_Getter o) (Forget f)
 {-# INLINE views #-}
 
 -- | Build a getter from a function.

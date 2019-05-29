@@ -161,7 +161,7 @@ instance Eq e => Ixed (e -> a) where
 
 type instance IxValue (Maybe a) = a
 instance Ixed (Maybe a) where
-  ix () = toAffineTraversal _Just
+  ix () = castOptic @An_AffineTraversal _Just
   {-# INLINE ix #-}
 
 type instance IxValue [a] = a

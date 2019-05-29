@@ -66,7 +66,7 @@ stateZoomMaybe
 stateZoomMaybe o m =
      fmap (coerce :: (First c, t) -> (Maybe c, t))
   .  unfocusing
-  #. traverseOf (toAffineTraversal o)
+  #. traverseOf (castOptic @An_AffineTraversal o)
                 (Focusing #. over (mapped % _1) (First #. Just) . m)
 {-# INLINE stateZoomMaybe #-}
 
@@ -115,7 +115,7 @@ rwsZoomMaybe
 rwsZoomMaybe o m = \r ->
      fmap (coerce :: (First c, t, w) -> (Maybe c, t, w))
   .  unfocusingWith
-  #. traverseOf (toAffineTraversal o)
+  #. traverseOf (castOptic @An_AffineTraversal o)
                 (FocusingWith #. over (mapped % _1) (First #. Just) . m r)
 {-# INLINE rwsZoomMaybe #-}
 

@@ -57,7 +57,6 @@ module Optics.Prism
 
   -- * Subtyping
   , A_Prism
-  , toPrism
 
   -- * Re-exports
   , module Optics.Optic
@@ -78,11 +77,6 @@ type Prism s t a b = Optic A_Prism NoIx s t a b
 -- | Type synonym for a type-preserving prism.
 type Prism' s a = Optic' A_Prism NoIx s a
 
--- | Explicitly cast an optic to a prism.
-toPrism :: Is k A_Prism => Optic k is s t a b -> Optic A_Prism is s t a b
-toPrism = castOptic
-{-# INLINE toPrism #-}
-
 -- | Build a prism from a constructor and a matcher, which must respect the
 -- well-formedness laws.
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
@@ -101,7 +95,7 @@ withPrism
   => Optic k is s t a b
   -> ((b -> t) -> (s -> Either t a) -> r)
   -> r
-withPrism o k = case getOptic (toPrism o) (Market id Right) of
+withPrism o k = case getOptic (castOptic @A_Prism o) (Market id Right) of
   Market construct match -> k construct match
 {-# INLINE withPrism #-}
 
