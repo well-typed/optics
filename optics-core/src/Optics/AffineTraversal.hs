@@ -18,14 +18,24 @@ module Optics.AffineTraversal
   , atraversal
 
   -- * Elimination
-  , withAffineTraversal
+  -- | An 'AffineTraversal' is a 'Optics.Setter.Setter', therefore you can
+  -- specialise types to obtain:
+  --
+  -- @
+  -- 'Optics.Setter.set' :: 'AffineTraversal' s t a b -> b -> s -> t
+  -- @
+  , matching
 
   -- * Computation
   -- |
   --
   -- @
-  -- 'withAffineTraversal' ('atraversal' f g) k = k f g
+  -- 'matching' ('atraversal' f g) ≡ f
+  -- 'Optics.Setter.set'      ('atraversal' f g) ≡ 'flip' g
   -- @
+
+  -- * Additional elimination forms
+  , withAffineTraversal
 
   -- * Subtyping
   , An_AffineTraversal
@@ -108,3 +118,13 @@ toAtraversalVL
 toAtraversalVL o point =
   runStarA . getOptic (castOptic @An_AffineTraversal o) . StarA point
 {-# INLINE toAtraversalVL #-}
+
+-- | Retrieve the value targeted by an 'AffineTraversal' or return the original
+-- value while allowing the type to change if it does not match.
+--
+-- @
+-- 'Optics.AffineFold.preview' o ≡ 'either' ('const' 'Nothing') 'id' . 'matching' o
+-- @
+matching :: Is k An_AffineTraversal => Optic k is s t a b -> s -> Either t a
+matching o = withAffineTraversal o $ \match _ -> match
+{-# INLINE matching #-}

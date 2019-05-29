@@ -16,6 +16,7 @@ import Data.Set as Set
 import qualified Data.Sequence as Seq
 
 import Data.Maybe.Optics
+import Optics.AffineTraversal
 import Optics.Internal.Utils
 import Optics.Iso
 import Optics.Fold
