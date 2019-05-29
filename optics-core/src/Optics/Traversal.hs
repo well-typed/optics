@@ -67,10 +67,9 @@ module Optics.Traversal
   , A_Traversal
 
   -- * van Laarhoven encoding
-  -- | The van Laarhoven representation of a 'Traversal' directly
-  -- expresses how it lifts an effectful operation @A -> F B@ on
-  -- elements to act on structures @S -> F T@.  Thus 'traverseOf'
-  -- converts a 'Traversal' to a 'TraversalVL'.
+  -- | The van Laarhoven representation of a 'Traversal' directly expresses how
+  -- it lifts an effectful operation @A -> F B@ on elements to act on structures
+  -- @S -> F T@.  Thus 'traverseOf' converts a 'Traversal' to a 'TraversalVL'.
   , TraversalVL
   , TraversalVL'
 

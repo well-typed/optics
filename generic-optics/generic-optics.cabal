@@ -24,6 +24,3 @@ library
     , profunctors   >=5.0 && <6.0
 
   exposed-modules: Optics.Generic.Product.Fields
-
-                   -- internal modules
-                   Optics.Generic.Internal.Utils
