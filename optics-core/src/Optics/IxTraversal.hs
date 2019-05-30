@@ -54,6 +54,7 @@ module Optics.IxTraversal
   , ifailover'
 
   -- * Combinators
+  , indices
   , ibackwards
   , ipartsOf
 
@@ -226,6 +227,17 @@ ignored = ixTraversalVL $ \_ -> pure
 
 ----------------------------------------
 -- Traversal combinators
+
+-- | Filter results of an 'IxTraversal' that don't satisfy a predicate on the
+-- indices.
+indices
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
+  => (i -> Bool)
+  -> Optic k is s t a a
+  -> IxTraversal i s t a a
+indices p o = ixTraversalVL $ \f ->
+  itraverseOf o $ \i a -> if p i then f i a else pure a
+{-# INLINE indices #-}
 
 -- | This allows you to 'traverse' the elements of an indexed traversal in the
 -- opposite order.

@@ -377,6 +377,9 @@ import Data.Either.Optics                    as P
 --   'Prism' produces an 'AffineTraversal', so for example @'matching' ('_1' '%'
 --   '_Left')@ is well-typed.
 --
+-- * Functions 'ifiltered' and 'indices' are defined as optic combinators due to
+--   restrictions of internal representation.
+--
 -- * We can't use 'traverse' as an optic directly.  Instead there is a
 --   'Traversal' called 'traversed'.  Similarly 'traverseOf' must be used to
 --   apply a 'Traversal', rather than simply using it as a function.
