@@ -226,11 +226,11 @@ instance IxOptic A_Setter s t a b where
 
 -- | Implementation of 'icomposeN'.
 icomposeN__
-  :: forall k p is i j l s t a b
+  :: forall k p is i j ci s t a b
   . (Constraints k p, Profunctor p, CurryCompose is)
   => Curry is i
   -> Optic k is s t a b
-  -> Optic__ p l j l (i -> j) s t a b
+  -> Optic__ p j ci (i -> j) ci s t a b
 icomposeN__ f o =
   ixcontramap (\ij -> composeN @is ij f) . getOptic o
 {-# INLINE icomposeN__ #-}

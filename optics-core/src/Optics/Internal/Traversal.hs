@@ -14,7 +14,7 @@ import Optics.Internal.Setter
 -- | Internal implementation of 'Optics.Traversal.traversed'.
 traversed__
   :: (Traversing p, Traversable f)
-  => Optic__ p l i l i (f a) (f b) a b
+  => Optic__ p i ci i ci (f a) (f b) a b
 traversed__ = wander traverse
 {-# INLINE [0] traversed__ #-}
 
@@ -25,15 +25,15 @@ traversed__ = wander traverse
 {-# RULES
 
 "traversed__ -> wander traverse"
-  forall (o :: Star g l i a b). traversed__ o = wander traverse o
-    :: Traversable f => Star g l i (f a) (f b)
+  forall (o :: Star g i ci a b). traversed__ o = wander traverse o
+    :: Traversable f => Star g i ci (f a) (f b)
 
 "traversed__ -> folded__"
-  forall (o :: Forget r l i a b). traversed__ o = folded__ o
-    :: Foldable f => Forget r l i (f a) (f b)
+  forall (o :: Forget r i ci a b). traversed__ o = folded__ o
+    :: Foldable f => Forget r i ci (f a) (f b)
 
 "traversed__ -> mapped__"
-  forall (o :: FunArrow l i a b). traversed__ o = mapped__ o
-    :: Functor f => FunArrow l i (f a) (f b)
+  forall (o :: FunArrow i ci a b). traversed__ o = mapped__ o
+    :: Functor f => FunArrow i ci (f a) (f b)
 
 #-}

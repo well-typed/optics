@@ -54,18 +54,18 @@ instance ReversibleOptic A_Review where
 
 -- | Internal implementation of re.
 re__
-  :: (Profunctor p, Constraints k (Re p a b l i))
-  => Optic k   NoIx s t a b
-  -> Optic__ p l i l i b a t s
+  :: (Profunctor p, Constraints k (Re p a b i ci))
+  => Optic k        NoIx s t a b
+  -> Optic__ p i ci i ci b a t s
 re__ o = unRe (getOptic o (Re id))
 {-# INLINE re__ #-}
 
 ----------------------------------------
 
 -- | Helper for reversing optics.
-newtype Re p s t j' i' i j a b = Re { unRe :: p j i b a -> p j' i' t s }
+newtype Re p s t j cj ci i a b = Re { unRe :: p i ci b a -> p j cj t s }
 
-instance Profunctor p => Profunctor (Re p s t j' i') where
+instance Profunctor p => Profunctor (Re p s t j cj) where
   dimap f g (Re p) = Re (p . dimap g f)
   lmap  f   (Re p) = Re (p . rmap f)
   rmap    g (Re p) = Re (p . lmap g)
@@ -86,7 +86,7 @@ instance Profunctor p => Profunctor (Re p s t j' i') where
   {-# INLINE ixcontramap #-}
   {-# INLINE ixmap #-}
 
-instance Bicontravariant p => Bifunctor (Re p s t j' i') where
+instance Bicontravariant p => Bifunctor (Re p s t j cj) where
   bimap  f g (Re p) = Re (p . contrabimap g f)
   first  f   (Re p) = Re (p . contrasecond f)
   second   g (Re p) = Re (p . contrafirst g)
@@ -94,7 +94,7 @@ instance Bicontravariant p => Bifunctor (Re p s t j' i') where
   {-# INLINE first #-}
   {-# INLINE second #-}
 
-instance Bifunctor p => Bicontravariant (Re p s t j' i') where
+instance Bifunctor p => Bicontravariant (Re p s t j cj) where
   contrabimap  f g (Re p) = Re (p . bimap g f)
   contrafirst  f   (Re p) = Re (p . second f)
   contrasecond   g (Re p) = Re (p . first g)
@@ -102,35 +102,35 @@ instance Bifunctor p => Bicontravariant (Re p s t j' i') where
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
-instance Strong p => Costrong (Re p s t j' i') where
+instance Strong p => Costrong (Re p s t j cj) where
   unfirst  (Re p) = Re (p . first')
   unsecond (Re p) = Re (p . second')
   {-# INLINE unfirst #-}
   {-# INLINE unsecond #-}
 
-  colinear f (Re p) = Re (p . linear f)
+  colinear  f (Re p) = Re (p . linear f)
   icolinear f (Re p) = Re (p . ilinear f)
   {-# INLINE colinear #-}
   {-# INLINE icolinear #-}
 
-instance Costrong p => Strong (Re p s t j' i') where
+instance Costrong p => Strong (Re p s t j cj) where
   first'  (Re p) = Re (p . unfirst)
   second' (Re p) = Re (p . unsecond)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
-  linear f (Re p) = Re (p . colinear f)
+  linear  f (Re p) = Re (p . colinear f)
   ilinear f (Re p) = Re (p . icolinear f)
   {-# INLINE linear #-}
   {-# INLINE ilinear #-}
 
-instance Choice p => Cochoice (Re p s t j' i') where
+instance Choice p => Cochoice (Re p s t j cj) where
   unleft  (Re p) = Re (p . left')
   unright (Re p) = Re (p . right')
   {-# INLINE unleft #-}
   {-# INLINE unright #-}
 
-instance Cochoice p => Choice (Re p s t j' i') where
+instance Cochoice p => Choice (Re p s t j cj) where
   left'  (Re p) = Re (p . unleft)
   right' (Re p) = Re (p . unright)
   {-# INLINE left' #-}

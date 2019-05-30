@@ -2,10 +2,9 @@
 -- Module: Optics.IxLens
 -- Description: An indexed version of an 'Optics.Lens.Lens'.
 --
--- An 'IxLens' is an indexed version of an
--- 'Optics.Lens.Lens'.  See the "Indexed optics" section
--- of the overview documentation in the @Optics@ module of the main @optics@
--- package for more details on indexed optics.
+-- An 'IxLens' is an indexed version of an 'Optics.Lens.Lens'. See the "Indexed
+-- optics" section of the overview documentation in the @Optics@ module of the
+-- main @optics@ package for more details on indexed optics.
 --
 module Optics.IxLens
   (
@@ -21,7 +20,6 @@ module Optics.IxLens
 
   -- * Subtyping
   , A_Lens
-  , toIxLens
 
   -- * Re-exports
   , module Optics.Optic
@@ -39,20 +37,11 @@ type IxLens i s t a b = Optic A_Lens (WithIx i) s t a b
 type IxLens' i s a = Optic' A_Lens (WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed lens.
---
 type IxLensVL i s t a b =
   forall f. Functor f => (i -> a -> f b) -> s -> f t
 
 -- | Type synonym for a type-preserving van Laarhoven indexed lens.
 type IxLensVL' i s a = IxLensVL i s s a a
-
--- | Explicitly cast an optic to an indexed lens.
-toIxLens
-  :: (Is k A_Lens, is `HasSingleIndex` i)
-  => Optic k is s t a b
-  -> IxLens i s t a b
-toIxLens = castOptic
-{-# INLINE toIxLens #-}
 
 -- | Build an indexed lens from the van Laarhoven representation.
 ixLensVL :: IxLensVL i s t a b -> IxLens i s t a b
@@ -65,5 +54,5 @@ toIxLensVL
   => Optic k is s t a b
   -> IxLensVL i s t a b
 toIxLensVL o = \f ->
-  runIxStar (getOptic (toIxLens o) (IxStar f)) id
+  runIxStar (getOptic (castOptic @A_Lens o) (IxStar f)) id
 {-# INLINE toIxLensVL #-}

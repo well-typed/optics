@@ -12,15 +12,15 @@ import Optics.Internal.Profunctor
 
 -- | Class for (covariant) bifunctors.
 class Bifunctor p where
-  bimap  :: (a -> b) -> (c -> d) -> p l i a c -> p l i b d
-  first  :: (a -> b)             -> p l i a c -> p l i b c
-  second ::             (c -> d) -> p l i a c -> p l i a d
+  bimap  :: (a -> b) -> (c -> d) -> p i ci a c -> p i ci b d
+  first  :: (a -> b)             -> p i ci a c -> p i ci b c
+  second ::             (c -> d) -> p i ci a c -> p i ci a d
 
 -- | Class for contravariant bifunctors.
 class Bicontravariant p where
-  contrabimap  :: (b -> a) -> (d -> c) -> p l i a c -> p l i b d
-  contrafirst  :: (b -> a)             -> p l i a c -> p l i b c
-  contrasecond ::             (c -> b) -> p l i a b -> p l i a c
+  contrabimap  :: (b -> a) -> (d -> c) -> p i ci a c -> p i ci b d
+  contrafirst  :: (b -> a)             -> p i ci a c -> p i ci b c
+  contrasecond ::             (c -> b) -> p i ci a b -> p i ci a c
 
 instance Bicontravariant (Forget r) where
   contrabimap  f _g (Forget k) = Forget (k . f)
@@ -58,12 +58,12 @@ instance Bicontravariant (IxForgetM r) where
 
 -- | If @p@ is a 'Profunctor' and a 'Bifunctor' then its left parameter must be
 -- phantom.
-lphantom :: (Profunctor p, Bifunctor p) => p l i a c -> p l i b c
+lphantom :: (Profunctor p, Bifunctor p) => p i ci a c -> p i ci b c
 lphantom = first absurd . lmap absurd
 {-# INLINE lphantom #-}
 
 -- | If @p@ is a 'Profunctor' and 'Bicontravariant' then its right parameter
 -- must be phantom.
-rphantom :: (Profunctor p, Bicontravariant p) => p l i c a -> p l i c b
+rphantom :: (Profunctor p, Bicontravariant p) => p i ci c a -> p i ci c b
 rphantom = rmap absurd . contrasecond absurd
 {-# INLINE rphantom #-}

@@ -16,28 +16,28 @@ import Optics.Internal.Utils
 -- Concrete profunctors
 
 -- | Needed for traversals.
-newtype Star f j i a b = Star { runStar :: a -> f b }
+newtype Star f i ci a b = Star { runStar :: a -> f b }
 
 -- | Needed for getters and folds.
-newtype Forget r j i a b = Forget { runForget :: a -> r }
+newtype Forget r i ci a b = Forget { runForget :: a -> r }
 
 -- | Needed for affine folds.
-newtype ForgetM r j i a b = ForgetM { runForgetM :: a -> Maybe r }
+newtype ForgetM r i ci a b = ForgetM { runForgetM :: a -> Maybe r }
 
 -- | Needed for setters.
-newtype FunArrow j i a b = FunArrow { runFunArrow :: a -> b }
+newtype FunArrow i ci a b = FunArrow { runFunArrow :: a -> b }
 
 -- | Needed for indexed traversals.
-newtype IxStar f j i a b = IxStar { runIxStar :: i -> a -> f b }
+newtype IxStar f i ci a b = IxStar { runIxStar :: i -> a -> f b }
 
 -- | Needed for indexed folds.
-newtype IxForget r j i a b = IxForget { runIxForget :: i -> a -> r }
+newtype IxForget r i ci a b = IxForget { runIxForget :: i -> a -> r }
 
 -- | Needed for indexed affine folds.
-newtype IxForgetM r j i a b = IxForgetM { runIxForgetM :: i -> a -> Maybe r }
+newtype IxForgetM r i ci a b = IxForgetM { runIxForgetM :: i -> a -> Maybe r }
 
 -- | Needed for indexed setters.
-newtype IxFunArrow j i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
+newtype IxFunArrow i ci a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
 ----------------------------------------
 -- Utils
@@ -73,7 +73,7 @@ unwrapIdentity' (Identity' () a) = a
 ----------------------------------------
 
 -- | Needed for conversion of affine traversal back to its VL representation.
-data StarA f j i a b = StarA (forall r. r -> f r) (a -> f b)
+data StarA f i ci a b = StarA (forall r. r -> f r) (a -> f b)
 
 -- | Unwrap 'StarA'.
 runStarA :: StarA f l i a b -> a -> f b
@@ -82,27 +82,27 @@ runStarA (StarA _ k) = k
 
 -- | Needed for conversion of indexed affine traversal back to its VL
 -- representation.
-data IxStarA f j i a b = IxStarA (forall r. r -> f r) (i -> a -> f b)
+data IxStarA f i ci a b = IxStarA (forall r. r -> f r) (i -> a -> f b)
 
 -- | Unwrap 'StarA'.
-runIxStarA :: IxStarA f l i a b -> i -> a -> f b
+runIxStarA :: IxStarA f i ci a b -> i -> a -> f b
 runIxStarA (IxStarA _ k) = k
 {-# INLINE runIxStarA #-}
 
 ----------------------------------------
 
 -- | Repack 'Star' to change its index type.
-reStar :: Star f l i a b -> Star f l j a b
+reStar :: Star f i ci a b -> Star f j ci a b
 reStar (Star k) = Star k
 {-# INLINE reStar #-}
 
 -- | Repack 'Forget' to change its index type.
-reForget :: Forget r l i a b -> Forget r l j a b
+reForget :: Forget r i ci a b -> Forget r j ci a b
 reForget (Forget k) = Forget k
 {-# INLINE reForget #-}
 
 -- | Repack 'FunArrow' to change its index type.
-reFunArrow :: FunArrow l i a b -> FunArrow l j a b
+reFunArrow :: FunArrow i ci a b -> FunArrow j ci a b
 reFunArrow (FunArrow k) = FunArrow k
 {-# INLINE reFunArrow #-}
 
@@ -110,63 +110,63 @@ reFunArrow (FunArrow k) = FunArrow k
 -- Classes and instances
 
 class Profunctor p where
-  dimap :: (a -> b) -> (c -> d) -> p j i b c -> p j i a d
-  lmap  :: (a -> b)             -> p j i b c -> p j i a c
-  rmap  ::             (c -> d) -> p j i b c -> p j i b d
+  dimap :: (a -> b) -> (c -> d) -> p i ci b c -> p i ci a d
+  lmap  :: (a -> b)             -> p i ci b c -> p i ci a c
+  rmap  ::             (c -> d) -> p i ci b c -> p i ci b d
 
-  lcoerce' :: Coercible a b => p j i a c -> p j i b c
+  lcoerce' :: Coercible a b => p i ci a c -> p i ci b c
   default lcoerce'
-    :: Coercible (p j i a c) (p j i b c)
-    => p j i a c
-    -> p j i b c
+    :: Coercible (p i ci a c) (p i ci b c)
+    => p i ci a c
+    -> p i ci b c
   lcoerce' = coerce
   {-# INLINE lcoerce' #-}
 
-  rcoerce' :: Coercible a b => p j i c a -> p j i c b
+  rcoerce' :: Coercible a b => p i ci c a -> p i ci c b
   default rcoerce'
-    :: Coercible (p j i c a) (p j i c b)
-    => p j i c a
-    -> p j i c b
+    :: Coercible (p i ci c a) (p i ci c b)
+    => p i ci c a
+    -> p i ci c b
   rcoerce' = coerce
   {-# INLINE rcoerce' #-}
 
   conjoined'
-    :: (p l i a b -> p l i s t)
-    -> (p l i a b -> p l j s t)
-    -> (p l i a b -> p l j s t)
+    :: (p i ci a b -> p i ci s t)
+    -> (p i ci a b -> p j ci s t)
+    -> (p i ci a b -> p j ci s t)
   default conjoined'
-    :: Coercible (p l i s t) (p l j s t)
-    => (p l i a b -> p l i s t)
-    -> (p l i a b -> p l j s t)
-    -> (p l i a b -> p l j s t)
+    :: Coercible (p i ci s t) (p j ci s t)
+    => (p i ci a b -> p i ci s t)
+    -> (p i ci a b -> p j ci s t)
+    -> (p i ci a b -> p j ci s t)
   conjoined' f _ = coerce . f
   {-# INLINE conjoined' #-}
 
-  ixcontramap :: (i -> j) -> p l j a b -> p l i a b
+  ixcontramap :: (j -> i) -> p i ci a b -> p j ci a b
   default ixcontramap
-    :: Coercible (p l j a b) (p l i a b)
-    => (i -> j)
-    -> p l j a b
-    -> p l i a b
+    :: Coercible (p i ci a b) (p j ci a b)
+    => (j -> i)
+    -> p i ci a b
+    -> p j ci a b
   ixcontramap _ = coerce
   {-# INLINE ixcontramap #-}
 
-  ixmap :: (j -> j') -> p j i a b -> p j' i a b
+  ixmap :: (ci -> cj) -> p i ci a b -> p i cj a b
   default ixmap
-    :: Coercible (p j i a b) (p j' i a b)
-    => (j -> j')
-    -> p j i a b
-    -> p j' i a b
+    :: Coercible (p i ci a b) (p i cj a b)
+    => (ci -> cj)
+    -> p i ci a b
+    -> p i cj a b
   ixmap _ = coerce
   {-# INLINE ixmap #-}
 
 -- | 'rcoerce'' with type arguments rearranged for TypeApplications.
-rcoerce :: (Coercible a b, Profunctor p) => p j i c a -> p j i c b
+rcoerce :: (Coercible a b, Profunctor p) => p i ci c a -> p i ci c b
 rcoerce = rcoerce'
 {-# INLINE rcoerce #-}
 
 -- | 'lcoerce'' with type arguments rearranged for TypeApplications.
-lcoerce :: (Coercible a b, Profunctor p) => p j i a c -> p j i b c
+lcoerce :: (Coercible a b, Profunctor p) => p i ci a c -> p i ci b c
 lcoerce = lcoerce'
 {-# INLINE lcoerce #-}
 
@@ -290,11 +290,14 @@ instance Profunctor IxFunArrow where
 ----------------------------------------
 
 class Profunctor p => Strong p where
-  first'  :: p j i a b -> p j i (a, c) (b, c)
-  second' :: p j i a b -> p j i (c, a) (c, b)
+  first'  :: p i ci a b -> p i ci (a, c) (b, c)
+  second' :: p i ci a b -> p i ci (c, a) (c, b)
 
   -- There are few places where default implementation is good enough.
-  linear  :: (forall f. Functor f => (a -> f b) -> s -> f t) -> p j i a b -> p j i s t
+  linear
+    :: (forall f. Functor f => (a -> f b) -> s -> f t)
+    -> p i ci a b
+    -> p i ci s t
   linear f = dimap
     ((\(Context bt a) -> (a, bt)) . f (Context id))
     (\(b, bt) -> bt b)
@@ -302,15 +305,15 @@ class Profunctor p => Strong p where
   {-# INLINE linear #-}
 
   -- There are few places where default implementation is good enough.
-  ilinear 
+  ilinear
     :: (forall f. Functor f => (i -> a -> f b) -> s -> f t)
-    -> p l       j  a b
-    -> p l (i -> j) s t
+    -> p       j  ci a b
+    -> p (i -> j) ci s t
   default ilinear
-    :: Coercible (p l j s t) (p l (i -> j) s t)
+    :: Coercible (p j ci s t) (p (i -> j) ci s t)
     => (forall f. Functor f => (i -> a -> f b) -> s -> f t)
-    -> p l       j  a b
-    -> p l (i -> j) s t 
+    -> p       j  ci a b
+    -> p (i -> j) ci s t
   ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
   {-# INLINE ilinear #-}
 
@@ -366,9 +369,8 @@ instance Functor f => Strong (IxStarA f) where
   {-# INLINE second' #-}
 
   linear f (IxStarA point k) = IxStarA point $ \i -> f (k i)
-  {-# INLINE linear #-}
-
   ilinear f (IxStarA point k) = IxStarA point $ \ij -> f $ \i -> k (ij i)
+  {-# INLINE linear #-}
   {-# INLINE ilinear #-}
 
 instance Functor f => Strong (IxStar f) where
@@ -378,8 +380,8 @@ instance Functor f => Strong (IxStar f) where
   {-# INLINE second' #-}
 
   linear f (IxStar k) = IxStar $ \i -> f (k i)
-  {-# INLINE linear #-}
   ilinear f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
+  {-# INLINE linear #-}
   {-# INLINE ilinear #-}
 
 instance Strong (IxForget r) where
@@ -389,8 +391,8 @@ instance Strong (IxForget r) where
   {-# INLINE second' #-}
 
   linear f (IxForget k) = IxForget $ \i -> getConst #. f (Const #. k i)
-  {-# INLINE linear #-}
   ilinear f (IxForget k) = IxForget $ \ij -> getConst #. f (\i -> Const #. k (ij i))
+  {-# INLINE linear #-}
   {-# INLINE ilinear #-}
 
 instance Strong (IxForgetM r) where
@@ -400,8 +402,8 @@ instance Strong (IxForgetM r) where
   {-# INLINE second' #-}
 
   linear f (IxForgetM k) = IxForgetM $ \i -> getConst #. f (Const #. k i)
-  {-# INLINE linear #-}
   ilinear f (IxForgetM k) = IxForgetM $ \ij -> getConst #. f (\i -> Const #. k (ij i))
+  {-# INLINE linear #-}
   {-# INLINE ilinear #-}
 
 instance Strong IxFunArrow where
@@ -410,25 +412,33 @@ instance Strong IxFunArrow where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
-  linear f (IxFunArrow k) = IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
+  linear f (IxFunArrow k) = IxFunArrow $ \i ->
+    runIdentity #. f (Identity #. k i)
+  ilinear f (IxFunArrow k) = IxFunArrow $ \ij ->
+    runIdentity #. f (\i -> Identity #. k (ij i))
   {-# INLINE linear #-}
-  ilinear f (IxFunArrow k) = IxFunArrow $ \ij -> runIdentity #. f (\i -> Identity #. k (ij i))
   {-# INLINE ilinear #-}
 
 ----------------------------------------
 
 class Profunctor p => Costrong p where
-  unfirst  :: p j i (a, d) (b, d) -> p j i a b
-  unsecond :: p j i (d, a) (d, b) -> p j i a b
+  unfirst  :: p i ci (a, d) (b, d) -> p i ci a b
+  unsecond :: p i ci (d, a) (d, b) -> p i ci a b
 
-  colinear :: (forall f. Functor f => (b -> f a) -> t -> f s) -> p j i s t -> p j i a b
-  icolinear :: (forall f. Functor f => (i -> b -> f a) -> t -> f s) -> p (i -> o) j s t -> p o j a b
+  colinear
+    :: (forall f. Functor f => (b -> f a) -> t -> f s)
+    -> p i ci s t
+    -> p i ci a b
+  icolinear
+    :: (forall f. Functor f => (ci -> b -> f a) -> t -> f s)
+    -> p i (ci -> cj) s t
+    -> p i        cj  a b
 
 ----------------------------------------
 
 class Profunctor p => Choice p where
-  left'  :: p j i a b -> p j i (Either a c) (Either b c)
-  right' :: p j i a b -> p j i (Either c a) (Either c b)
+  left'  :: p i ci a b -> p i ci (Either a c) (Either b c)
+  right' :: p i ci a b -> p i ci (Either c a) (Either c b)
 
 instance Functor f => Choice (StarA f) where
   left'  (StarA point k) = StarA point $ either (fmap Left . k) (point . Right)
@@ -495,8 +505,8 @@ instance Choice IxFunArrow where
 ----------------------------------------
 
 class Profunctor p => Cochoice p where
-  unleft  :: p j i (Either a d) (Either b d) -> p j i a b
-  unright :: p j i (Either d a) (Either d b) -> p j i a b
+  unleft  :: p i ci (Either a d) (Either b d) -> p i ci a b
+  unright :: p i ci (Either d a) (Either d b) -> p i ci a b
 
 instance Cochoice (Forget r) where
   unleft  (Forget k) = Forget (k . Left)
@@ -526,10 +536,10 @@ instance Cochoice (IxForgetM r) where
 
 class (Choice p, Strong p) => Visiting p where
   visit
-    :: forall j i s t a b
+    :: forall i ci s t a b
     . (forall f. Functor f => (forall r. r -> f r) -> (a -> f b) -> s -> f t)
-    -> p j i a b
-    -> p j i s t
+    -> p i ci a b
+    -> p i ci s t
   visit f =
     let match :: s -> Either a t
         match s = f Right Left s
@@ -543,13 +553,13 @@ class (Choice p, Strong p) => Visiting p where
 
   ivisit
     :: (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t)
-    -> p l       j  a b
-    -> p l (i -> j) s t
+    -> p       j  ci a b
+    -> p (i -> j) ci s t
   default ivisit
-    :: Coercible (p l j s t) (p l (i -> j) s t)
+    :: Coercible (p j ci s t) (p (i -> j) ci s t)
     => (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t)
-    -> p l       j  a b
-    -> p l (i -> j) s t
+    -> p       j  ci a b
+    -> p (i -> j) ci s t
   ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
   {-# INLINE ivisit #-}
 
@@ -627,12 +637,12 @@ instance Visiting IxFunArrow where
 class Visiting p => Traversing p where
   wander
     :: (forall f. Applicative f => (a -> f b) -> s -> f t)
-    -> p l i a b
-    -> p l i s t
+    -> p i ci a b
+    -> p i ci s t
   iwander
     :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
-    -> p l       j  a b
-    -> p l (i -> j) s t
+    -> p       j  ci a b
+    -> p (i -> j) ci s t
 
 instance Applicative f => Traversing (Star f) where
   wander  f (Star k) = Star $ f k
@@ -679,12 +689,12 @@ instance Traversing IxFunArrow where
 class Traversing p => Mapping p where
   roam
     :: ((a -> b) -> s -> t)
-    -> p q i a b
-    -> p q i s t
+    -> p i ci a b
+    -> p i ci s t
   iroam
     :: ((i -> a -> b) -> s -> t)
-    -> p q       j  a b
-    -> p q (i -> j) s t
+    -> p       j  ci a b
+    -> p (i -> j) ci s t
 
 instance Mapping (Star Identity') where
   roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)

@@ -139,7 +139,7 @@ conjoined__
   :: (Constraints k p, Profunctor p, is `HasSingleIndex` i)
   => Optic k NoIx s t a b
   -> Optic k is   s t a b
-  -> Optic__ p l j l (i -> j) s t a b
+  -> Optic__ p j ci (i -> j) ci s t a b
 conjoined__ (Optic f) (Optic g) = conjoined' f g
 {-# INLINE conjoined__ #-}
 
