@@ -58,6 +58,7 @@ library
     Optics.Setter
     Optics.Traversal
     Data.Either.Optics
+    Data.IntMap.Optics
     Data.Map.Optics
     Data.Maybe.Optics
     Data.Set.Optics
