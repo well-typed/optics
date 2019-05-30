@@ -51,5 +51,7 @@ instance Costrong Tagged where
   {-# INLINE unfirst #-}
   {-# INLINE unsecond #-}
 
-  colinear f (Tagged k) = Tagged $ getConst (f Const k)
+  colinear  f (Tagged k) = Tagged $ getConst (f Const k)
   icolinear f (Tagged k) = Tagged $ getConst (f (\_ -> Const) k)
+  {-# INLINE colinear #-}
+  {-# INLINE icolinear #-}

@@ -36,6 +36,7 @@ type IxGetter i s a = Optic' A_Getter (WithIx i) s a
 -- ('i', 'x')
 ito :: (s -> (i, a)) -> IxGetter i s a
 ito f = Optic (lmap f . ilinear uncurry . rphantom)
+{-# INLINE ito #-}
 
 -- | View the value pointed to by an indexed getter.
 iview
