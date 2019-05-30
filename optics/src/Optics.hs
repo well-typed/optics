@@ -4,60 +4,31 @@
 -- Description: The main module, usually you only need to import this one.
 --
 -- This library makes it possible to define and use 'Lens'es, 'Traversal's,
--- 'Prism's and other /optics/, using an abstract interface.  These are
--- frequently introduced as type synonyms for complex polymorphic types, for
--- example the @lens@ library defines:
---
--- @
--- type Lens s t a b = forall f. 'Functor' f => (a -> f b) -> s -> f t
--- @
---
--- In contrast, this library defines a newtype wrapper 'Optic' to capture the
--- general concept.  This newtype is indexed by the particular optic kind
--- (e.g. 'A_Lens'), so that while 'Lens' is still a type synonym, its definition
--- is much simpler:
---
--- @
--- type 'Lens' s t a b = 'Optic' 'A_Lens' 'NoIx' s t a b
--- @
---
--- The details of the internal implementation of 'Optic' are hidden behind an
--- abstraction boundary, so that the library can be used without needing to
--- think about the particular implementation choices.  (In fact, @optics@ uses
--- the \"profunctor\" representation rather than the \"van Laarhoven\"
--- representation mentioned above.)
+-- 'Prism's and other /optics/, using an /abstract interface/.
 --
 module Optics
   (
   -- * Introduction
   -- $introduction
 
-  -- ** Advantages
-  -- $advantages
+  -- ** What are optics?
+  -- $what
 
-  -- ** Disadvantages
-  -- $disadvantages
+  -- ** What is the abstract interface?
+  -- $abstract
 
-  -- ** Differences from @lens@
-  -- $differences
+  -- ** Comparison with @lens@
+  -- $lens_comparison
 
   -- ** Other resources
   -- $otherresources
 
-  -- * Basic usage
+  -- * Using the library
   -- $basicusage
-
-  -- * Core definitions and subtyping
-  -- $coredefinitions
     module Optics.Optic
 
-  -- * Optic kinds
-  -- $optickinds
+  -- ** Optic kinds #optickinds#
   , module O
-
-  -- * Indexed optics
-  -- $indexed
-  , module Optics.Indexed
 
   -- * Optics utilities
 
@@ -171,6 +142,10 @@ module Optics
   --
   , module Optics.Zoom
 
+  -- * Indexed optics
+  -- $indexed
+  , module Optics.Indexed
+
   -- * Generation of optics with Template Haskell
   , module Optics.TH
 
@@ -226,52 +201,356 @@ import Data.Either.Optics                    as P
 
 -- $introduction
 --
+-- Read on for a general introduction to the notion of optics, or if you are
+-- familiar with them already, you may wish to jump ahead to the "What is the
+-- abstract interface?"  section below in "Optics#abstract".
+
+-- $what
+--
+-- An optic is a first-class, composable /notion of substructure/.  As a highly
+-- abstract concept, the idea can be approached by considering several examples
+-- of optics and understanding their common features. What are the possible
+-- relationships between some "outer" type @S@ and some "inner" type @A@?
+--
+-- (For simplicity we will initially ignore the possibility of type-changing
+-- update operations, which change @A@ to some other type @B@ and hence change
+-- @S@ to some other type @T@.  These are fully supported by the library, at the
+-- cost of some extra type parameters.)
+--
+-- === "Optics.Iso": isomorphisms
+--
+-- First, @S@ and @A@ may be /isomorphic/, i.e. there exist mutually inverse
+-- functions to convert @S -> A@ and @A -> S@.  This is a somewhat trivial
+-- notion of substructure: @A@ is just another way to represent "all of @S@".
+--
+-- An @'Iso'' S A@ is an isomorphism between @S@ and @A@, with the conversion
+-- functions given by 'view' and 'review'. For example, given
+--
+-- >>> newtype Age = Age Int
+--
+-- there is an isomorphism between the newtype and its representation:
+--
+-- @
+--        'coerced' :: 'Iso'' Age Int
+-- 'view'   'coerced' :: Age -> Int
+-- 'review' 'coerced' :: Int -> Age
+-- @
+--
+-- === "Optics.Lens": generalised fields
+--
+-- If @S@ is a simple product type (i.e. it has a single constructor with one or
+-- more fields), @A@ may be a single field of @S@.  More generally, @A@ may be
+-- "part of @S@" in the sense that @S@ is isomorphic to the pair @(A,C)@ for
+-- some type @C@ representing the other fields.  In this case, there is a
+-- /projection/ function @S -> A@ for getting the value of the field, but the
+-- /update/ function (setting the value of the field) requires the "rest of @S@"
+-- and so has type @A -> S -> S@.
+--
+-- A @'Lens'' S A@ captures the structure of @A@ being a field of @S@, with the
+-- projection function given by 'view' and the update function by 'set'.  For
+-- example, for the pair type @(X,Y)@ there are lenses for each component:
+--
+-- @
+--      '_1' :: 'Lens'' (X,Y) X
+--      '_2' :: 'Lens'' (X,Y) Y
+-- 'view' '_1' :: (X,Y) -> X
+-- 'set'  '_2' :: Y -> (X,Y) -> (X,Y)
+-- @
+--
+-- (Note that the update function could arguably have the more precise type @A
+-- -> C -> S@, since we do not expect the result of setting a field to depend on
+-- the previous value of the field.  However, making @C@ explicit turns out to
+-- be awkward, so instead we impose /laws/ to require that the result of setting
+-- the field depends only on @C@, and, more generally, that the lens behaves as
+-- we would expect.)
+--
+-- === "Optics.Prism": generalised constructors
+--
+-- If @S@ is a simple sum type (i.e. it has one or more constructors, each with
+-- a single field), @A@ may be the type of the field for a single constructor of
+-- @S@.  More generally, @S@ may be isomorphic to the disjoint union @Either D
+-- A@ for some type @D@ representing the other constructors.  In this case,
+-- projecting out @A@ from @S@ (pattern-matching on the constructor) may fail,
+-- so it has type @S -> Maybe A@.  In the reverse direction we have a function
+-- of type @A -> S@ representing the constructor itself.
+--
+-- A @'Prism'' S A@ captures the structure of @A@ being a constructor of @S@,
+-- with the partial projection function given by 'preview' and the constructor
+-- function given by 'review'.  For example, for the type @'Either' X Y@ there
+-- is a prism for each constructor:
+--
+-- @
+--         '_Left'  :: 'Prism'' (Either X Y) X
+--         '_Right' :: 'Prism'' (Either X Y) Y
+-- 'preview' '_Left'  :: Either X Y -> Maybe X
+-- 'review'  '_Right' :: Y -> Either X Y
+-- @
+--
+-- === "Optics.Traversal": multiple substructures
+--
+-- Alternatively, @S@ may "contain" the substructure @A@ a variable number of
+-- times.  In this case, the projection function extracts the (possibly zero or
+-- many) elements so has type @S -> [A]@, while the update function may take
+-- different values for different elements so has type @(A -> A) -> S -> S@
+-- (though in fact more general formulations are possible).
+--
+-- A @'Traversal'' S A@ captures the structure of @A@ being contained in @S@
+-- perhaps multiple times, with the list of values given by 'toListOf' and the
+-- update function given by 'over' .  For example, for the type @Maybe X@ there
+-- is a traversal that may return zero or one element:
+--
+-- @
+--          'traversed' :: 'Traversal'' (Maybe X) X
+-- 'toListOf' 'traversed' :: Maybe X -> [X]
+-- 'over'     'traversed' :: (X -> X) -> Maybe X -> Maybe X
+-- @
+--
+-- (In fact, traversals of at most one element are known as /affine/ traversals,
+-- see "Optics.AffineTraversal".)
+--
+--
+-- === In general
+--
+-- So far we have seen four different kinds of optic or "notions of
+-- substructure", and many more are possible.  Observe the important properties
+-- they have in common:
+--
+-- * There are subtyping relationships between different optic kinds.  Any
+--   isomorphism is trivially a lens and a prism (with no other fields or
+--   constructors, respectively).  Any lens is a traversal (where the list of
+--   elements is always a singleton list), and any prism is also a traversal
+--   (where there will be zero or one element depending on whether the
+--   constructor matches).  This was implicit in the fact that we used that we
+--   used the same operators in multiple cases: 'view' gives the projection
+--   function of both an isomorphism and a lens, but cannot be applied to a
+--   traversal.
+--
+-- * Optics can be composed. If @S@ is isomorphic to @U@ and @U@ is isomorphic
+--   to @A@ then @S@ is isomorphic to @A@, and similarly for other optic kinds.
+--
+-- * Composition and subtyping interact: a lens and a prism can be composed, by
+--   first thinking of them as traverals using the subtyping relationship.  That
+--   is, if @S@ has a field @U@, and @U@ has a constructor @A@, then @S@
+--   contains zero or one @A@s that we can pick out with a traversal (but in
+--   general there is neither a lens from @S@ to @A@ nor a prism).
+--
+-- * Each optic kind can be described by certain operations it enables. For
+--   example lenses support projection and update, while prisms support partial
+--   projection and construction.
+--
+-- * Optics are subject to laws, which are necessary for the operations to make
+--   sense.
+--
+-- The point of the @optics@ library is to capture this common pattern.
+
+
+-- $abstract #abstract#
+--
 -- A key principle behind this library is the belief that optics are useful as
 -- an abstract concept, and that the purpose of types is to capture abstract
 -- concepts and make them useful.  The programmer using optics should be able to
 -- think in terms of the abstract interface, rather than the details of the
--- implementation, and implementation choices should not dictate the interface.
+-- implementation, and implementation choices should (as far as possible) not
+-- dictate the interface.
 --
--- Each optic kind has a module describing its abstract interface (e.g. see
--- "Optics.Lens"). See "Optic kinds" below in "Optics#optickinds" for a
--- discussion of the standard format in which these interfaces are described.
+-- Each optic kind is identified by a "tag type" (such as 'A_Lens'), which is an
+-- empty data type.  The type of the actual optics (such as 'Lens') is obtained
+-- by applying the 'Optic' newtype wrapper to the tag type.
 --
--- There is a subtyping relationship between optics, which is implemented using
--- typeclasses.  In particular, the 'Is' typeclass captures the property that
--- one optic kind can be used as another, for example the @'Is' 'A_Lens'
--- 'A_Traversal'@ instance means that lenses can be used as traversals.
+-- @
+-- type 'Lens'  s t a b = 'Optic'  'A_Lens' 'NoIx' s t a b
+-- type 'Lens'' s   a   = 'Optic'' 'A_Lens' 'NoIx' s   a
+-- @
+--
+-- 'NoIx' as the second parameter to 'Optic' indicates that the optic is not
+-- indexed.  See the "Indexed optics" section below in "Optics#indexed" for
+-- further discussion of indexed optics.
+--
+-- The details of the internal implementation of 'Optic' are hidden behind an
+-- abstraction boundary, so that the library can be used without needing to
+-- think about the particular implementation choices.
+--
+--
+-- === Specification of optics interfaces
+--
+-- Each different kind of optic is documented in a separate module describing
+-- its abstract interface, in a standard format with at least /formation/,
+-- /introduction/, /elimination/, and /well-formedness/ sections.  See "Optic
+-- kinds" below in "Optics#optickinds" for a list of these modules.
+--
+-- * The __formation__ sections contain type definitions. For example
+--   "Optics.Lens" defines:
+--
+--     @
+--     -- Type synonym for a type-modifying lens.
+--     type 'Lens' s t a b = 'Optic' 'A_Lens' 'NoIx' s t a b
+--     @
+--
+-- * The __introduction__ sections describe the canonical way to construct each
+--   particular optic. Continuing with a 'Lens' example:
+--
+--     @
+--     -- Build a lens from a getter and a setter.
+--     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' s t a b
+--     @
+--
+-- * Correspondingly, the __elimination__ sections show how you can destruct the
+--   optic into the pieces from which it was constructed.
+--
+--     @
+--     -- A 'Lens' is a 'Setter' and a 'Getter', therefore you can specialise types to obtain
+--     'view' :: 'Lens' s t a b -> s -> a
+--     'set'  :: 'Lens' s t a b -> b -> s -> t
+--     @
+--
+-- * The __computation__ rules tie introduction and elimination forms
+--   together. These rules are automatically fulfilled by the library (for
+--   well-formed optics).
+--
+--     @
+--     'view' ('lens' f g)   s ≡ f s
+--     'set'  ('lens' f g) a s ≡ g s a
+--     @
+--
+-- * The __well-formedness__ sections describe the laws that each optic should
+--   obey.  As far as possible, all optics provided by the library are
+--   well-formed, but in some cases this depends on invariants that cannot be
+--   expressed in types.  Ill-formed optics /might/ behave differently from what
+--   the computation rules specify.
+--
+--     For example, a 'Lens' should obey three laws, known as /GetPut/, /PutGet/
+--     and /PutPut/.  See the "Optics.Lens" module for their definitions.  The
+--     user of the 'lens' introduction form must ensure that these laws are
+--     satisfied.
+--
+-- * Some optic kinds have __additional introduction forms__,
+--   __additional elimination forms__ or __combinators__ sections, which give
+--   alternative ways to create and use optics of that kind.  In principle these
+--   are expressible in terms of the canonical introduction and elimination
+--   rules.
+--
+-- * The __subtyping__ section gives the "tag type" (such as 'A_Lens'), which in
+--   particular is accompanied by 'Is' instances that define the subtyping
+--   relationship discussed in the following section.
+--
+--
+-- === Subtyping
+--
+-- There is a subtyping relationship between optics, implemented using
+-- typeclasses.  The 'Is' typeclass captures the property that one optic kind
+-- can be used as another, and the 'castOptic' function can be used to
+-- explicitly cast between optic kinds.  'Is' forms a partial order, represented
+-- in the graph below.  For example, a lens can be used as a traversal, so there
+-- are arrows from 'Lens' to 'Traversal' (via 'AffineTraversal') and there is an
+-- instance of @'Is' 'A_Lens' 'A_Traversal'@.
+--
 -- Introduction forms (constructors) return a concrete optic kind, while
--- elimination forms are generally polymorphic in the optic kind they accept.
--- See "Core definitions and subtyping" below in "Optics#coredefinitions" for
--- more details.
---
--- For example,
+-- elimination forms (destructors) are generally polymorphic in the optic kind
+-- they accept.  This means that it is not normally necessary to explicitly cast
+-- between optic kinds, but if needed this is possible using 'castOptic'.
+-- For example, we have
 --
 -- @
 -- 'view' :: 'Is' k 'A_Getter' => 'Optic'' k is s a -> s -> a
 -- @
 --
--- so 'view' can be used with lenses, traverals or any other optic kind that can
--- be converted to a 'Getter'.  Note, however, that a 'Fold' cannot be
--- implicitly converted to a 'Getter'.  Instead there is a separate eliminator
+-- so 'view' can be used with isomorphisms or lenses, as these can be converted
+-- to a 'Getter'.
 --
--- @
--- 'foldOf' :: ('Is' k 'A_Fold', 'Monoid' a) => 'Optic'' k is s a -> s -> a
--- @
+-- Correspondingly, the optic kind module (e.g. "Optics.Lens") does not list all
+-- ways to construct or use particular the optic kind.  For example, since a
+-- 'Lens' is also a 'Traversal', a 'Fold' etc, so you can use 'traverseOf',
+-- 'preview' and many other combinators with lenses.
 --
--- which combines the (possibly multiple) results of the 'Fold' using the
--- 'Monoid' instance.
+--
+-- ==== Subtype hierarchy
+--
+-- This graph gives an overview of the optic kinds and their subtype
+-- relationships:
+--
+-- <<optics.png Optics hierarchy>>
+--
+-- In addition to the optic kinds included in the diagram, there are also
+-- indexed variants, including 'IxAffineTraversal', 'IxTraversal',
+-- 'IxAffineFold', 'IxFold' and 'IxSetter'.  These are explained in more detail
+-- in the "Indexed optics" section below in "Optics#indexed".
+--
+--
+-- === Composition
 --
 -- Since /optics are not functions/, they cannot be composed with the ('.')
 -- operator. Instead there is a separate composition operator ('%'). The
 -- composition operator returns the common supertype of its arguments, or
 -- generates a type error if the composition does not make sense.
-
-
--- $advantages
 --
--- In general, this leads to better results from type inference (the optic kind
--- is preserved in the inferred type):
+-- The optic kind resulting from a composition is the least upper bound (join)
+-- of the optic kinds being composed, if it exists.  The 'Join' type family
+-- computes the least upper bound given two optic kind tags.  For example the
+-- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
+--
+-- >>> :kind! Join A_Lens A_Prism
+-- Join A_Lens A_Prism :: *
+-- = An_AffineTraversal
+--
+-- The join does not exist for some pairs of optic kinds, which means that they
+-- cannot be composed.  For example there is no optic kind above both 'Setter'
+-- and 'Fold':
+--
+-- >>> :kind! Join A_Setter A_Fold
+-- Join A_Setter A_Fold :: *
+-- = (TypeError ...)
+--
+-- >>> :t mapped % folded
+-- ...
+-- ...A_Setter cannot be composed with A_Fold
+-- ...
+
+-- $lens_comparison
+--
+-- The @lens@ package is the best known Haskell library for optics, and
+-- established many of the foundations on which the @optics@ package builds (not
+-- least in quite a bit of code having been directly ported).  It defines optics
+-- based on the /van Laarhoven/ representation, where each optic kind is
+-- introduced as a /transparent/ type synonym for a complex polymorphic type,
+-- for example:
+--
+-- @
+-- type Lens s t a b = forall f. 'Functor' f => (a -> f b) -> s -> f t
+-- @
+--
+-- In contrast, @optics@ tries to preserve an abstraction boundary between the
+-- interface of optics and their implementation.  Optic kinds are expressed
+-- directly in the types, as 'Optic' is an /opaque/ newtype:
+--
+-- @
+-- type 'Lens' s t a b = 'Optic' 'A_Lens' 'NoIx' s t a b
+-- @
+--
+-- The choice of representation of 'Optic' is then an implementation detail, not
+-- essential for understanding the library.  (In fact, @optics@ uses the
+-- /profunctor/ representation rather than the /van Laarhoven/ representation;
+-- this affects the optic kinds and operations that can be conveniently
+-- supported, but not the essence of the design.)
+--
+-- Our design choice to use /opaque/ rather than /transparent/ abstractions
+-- leads to various consequences, both positive and negative, which are explored
+-- in the following subsections.
+--
+-- == Advantages of the opaque design
+--
+-- Since the interface is deliberately chosen rather than to some extent
+-- determined by the implementation, we are free to choose a more restricted
+-- interface where doing so leads to conceptual simplicity.  For example, in
+-- @lens@, the 'view' function can be used with a 'Fold' provided the result
+-- type has a 'Monoid' instance, and the multiple targets of the 'Fold' will be
+-- combined monoidally.  This behaviour can be confusing, so in @optics@ a
+-- 'Getter' cannot be silently used as a 'Fold', and we prefer to have 'view'
+-- work on 'Getter's and define a separate 'foldOf' operator for use on
+-- 'Fold's. (But the 'gview' function is available for users who may prefer
+-- otherwise.)
+--
+-- In general, opaque abstractions lead to better results from type inference
+-- (the optic kind is preserved in the inferred type):
 --
 --     >>> :t traversed % to not
 --     traversed % to not
@@ -303,43 +582,51 @@ import Data.Either.Optics                    as P
 -- >>> let { myoptic = _1; p = ('x','y') } in (view myoptic p, set myoptic 'c' p)
 -- ('x',('c','y'))
 --
--- Since the interface is chosen rather than predetermined by the
--- implementation, we are free to choose a more restricted interface where doing
--- so leads to conceptual simplicity.  Thus we prefer separate 'view' and
--- 'foldOf' operators rather than having 'view' unexpectedly introduce a
--- 'Monoid' constraint when used with a 'Fold'.
---
 -- Finally, having an abstract interface gives more freedom of choice in the
 -- internal implementation.  If there is a compelling reason to switch to an
 -- alternative representation, one can in principle do so without changing the
 -- interface.
-
-
--- $disadvantages
 --
--- Since 'Optic' is a newtype, it is not possible for other libraries to define
--- optics without depending on the definition of 'Optic'.  Thus the library is
--- split into a package @optics-core@, which has a minimal dependency footprint,
--- and the \"batteries-included\" @optics@ package for use in applications.
--- (Since the van Laarhoven representations of lenses and traversals depend only
--- on definitions from @base@, it is possible for libraries to define them
--- without any extra dependencies, although this does not hold for more advanced
--- optic kinds such as prisms or indexed optics).
+--
+-- == Disadvantages of the opaque design
+--
+-- Since 'Optic' is a newtype, other libraries that wish to define optics must
+-- depend upon its definition.  In contrast, with a transparent representation,
+-- and since the van Laarhoven representations of lenses and traversals depend
+-- only on definitions from @base@, it is possible for libraries to define them
+-- without any extra library dependencies (although this does not hold for more
+-- advanced optic kinds such as prisms or indexed optics).  To address this, the
+-- present library is split into a package @optics-core@, which has a minimal
+-- dependency footprint intended for use in libraries, and the
+-- \"batteries-included\" @optics@ package for use in applications.
+--
+-- It is something of an amazing fact that the composition operator for
+-- transparent optics is just function composition.  Moreover, since Haskell
+-- uses ('.')  for function composition, @lens@ is able to support a pseudo-OOP
+-- syntax.  In contrast, @optics@ must use a different composition operator
+-- ('%').  'Optic' does not quite form a 'Control.Category.Category', thanks to
+-- type-changing optics.
 --
 -- Rather than emerging naturally from the definitions, opportunities for
 -- polymorphism have to be identified in advance and explicitly introduced using
 -- type classes.  Similarly, the set of optic kinds and the subtyping
 -- relationships between them must be fixed in advance, and cannot be added to
--- in downstream libraries.
-
-
--- $differences
+-- in downstream libraries.  Thus in a sense the opaque approach is more
+-- restrictive than the transparent one. There are cases in @lens@ where the
+-- types work out nicely and permit abstraction-breaking-but-convenient
+-- shortcuts, such as applying a 'Traversal' as a 'traverse'-like function,
+-- whereas @optics@ requires a call to 'traverseOf'.
+--
+--
+-- == More specific differences
 --
 -- The sections above set out the major conceptual differences from the @lens@
--- package. Some more specific design differences:
+-- package, and their advantages and disadvantages.  Some more specific design
+-- differences, which may be useful for comparison or porting code between the
+-- libraries.  This list is no doubt incomplete.
 --
 -- * The composition operator is ('%') rather than ('.') and is defined as
--- * @infixl 9@ instead of @infixr 9@.
+--   @infixl 9@ instead of @infixr 9@.
 --
 -- * Fewer operators are provided, and none of operators are exported from the
 --   main "Optics" module. Import "Optics.Operators" or "Optics.Operators.State"
@@ -394,9 +681,13 @@ import Data.Either.Optics                    as P
 
 -- $otherresources
 --
--- * <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry
+-- * <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
+--
 -- * <https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/poptics.pdf Profunctor Optics: Modular Data Accessors> a paper by Matthew Pickering, Jeremy Gibbons and Nicolas Wu
--- * <http://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics> and <http://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery>, blog posts by Oleg Grenrus
+--
+-- * <https://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery> and <https://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics>, blog posts by Oleg Grenrus
+--
+-- * The <https://hackage.haskell.org/package/lens lens> package by Edward Kmett and contributors
 
 
 -- $basicusage
@@ -414,118 +705,6 @@ import Data.Either.Optics                    as P
 -- import "Optics.Operators.State"
 -- @
 
-
--- $coredefinitions #coredefinitions#
---
--- The "Optics.Optic" module provides core definitions:
---
--- * an opaque 'Optic' type, which is parameterised over a type representing an
---   optic kind (instantiated with tag types such as 'A_Lens');
---
--- * the optic composition operator ('%');
---
--- * the subtyping relation 'Is' with an accompanying 'castOptic' function to
---   convert an optic kind;
---
--- * the 'Join' operation used to find the optic kind resulting from a
---   composition.
---
--- Each optic kind is identified by a "tag type" (such as 'A_Lens'), which is an
--- empty data type.  The type of the actual optics (such as 'Lens') is obtained
--- by applying 'Optic' to the tag type.
---
--- The graph below represents the 'Is' partial order.  For example, a lens can
--- be used as a traversal, so there are arrows from 'Lens' to 'Traversal' (via
--- 'AffineTraversal') and there is an instance of @'Is' 'A_Lens' 'A_Traversal'@.
---
--- <<optics.png Optics hierarchy>>
---
--- The optic kind resulting from a composition is the least upper bound (join)
--- of the optic kinds being composed, if it exists.  The 'Join' type family
--- computes the least upper bound given two optic kind tags.  For example the
--- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
---
--- >>> :kind! Join A_Lens A_Prism
--- Join A_Lens A_Prism :: *
--- = An_AffineTraversal
---
--- The join does not exist for some pairs of optic kinds, which means that they
--- cannot be composed.  For example there is no optic kind above both 'Setter'
--- and 'Fold':
---
--- >>> :kind! Join A_Setter A_Fold
--- Join A_Setter A_Fold :: *
--- = (TypeError ...)
---
--- >>> :t mapped % folded
--- ...
--- ...A_Setter cannot be composed with A_Fold
--- ...
---
--- In addition to the optic kinds described above, there are also indexed
--- variants, namely 'IxAffineTraversal', 'IxTraversal', 'IxAffineFold', 'IxFold'
--- and 'IxSetter'.  These are explained in more detail in the "Indexed optics"
--- section below in "Optics#indexed".
-
-
--- $optickinds #optickinds#
---
--- There are 16 different kinds of optics, each documented in a separate
--- module.  Each optic module documentation has /formation/, /introduction/,
--- /elimination/, and /well-formedness/ sections.
---
--- * The __formation__ sections contain type definitions. For example
---
---     @
---     -- Tag for a lens.
---     data A_Lens
---
---     -- Type synonym for a type-modifying lens.
---     type 'Lens' s t a b = 'Optic' 'A_Lens' NoIx s t a b
---     @
---
--- * In the __introduction__ sections are described the ways to construct
---   the particular optic. Continuing with a 'Lens' example:
---
---     @
---     -- Build a lens from a getter and a setter.
---     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' s t a b
---     @
---
--- * In the __elimination__ sections are shown how you can destruct the
---   optic into a pieces it was constructed from.
---
---     @
---     -- 'Lens' is a 'Setter' and a 'Getter', therefore you can
---
---     'view' :: 'Lens' s t a b -> s -> a
---     'set'  :: 'Lens' s t a b -> b -> s -> t
---     'over' :: 'Lens' s t a b -> (a -> b) -> s -> t
---     @
---
--- * __Computation__ rules tie introduction and
---   elimination combinators together. These rules are automatically
---   fulfilled.
---
---     @
---     'view' ('lens' f g)   s = f s
---     'set'  ('lens' f g) a s = g s a
---     @
---
--- * All optics provided by the library are __well-formed__.
---     Constructing of ill-formed optics is possible, but should be avoided.
---     Ill-formed optic /might/ behave differently from what computation rules specify.
---
---     A 'Lens' should obey three laws, known as /GetPut/, /PutGet/ and /PutPut/.
---     See "Optics.Lens" module for their definitions.
---
--- /Note:/ you should also consult the optics hierarchy diagram.
--- Neither introduction or elimination sections list all ways to construct or use
--- particular optic kind.
--- For example you can construct 'Lens' from 'Iso' using 'castOptic'.
--- Also, as a 'Lens' is also a 'Traversal', a 'Fold' etc, so you can use 'traverseOf', 'preview'
--- and many other combinators.
---
 
 -- $indexed #indexed#
 --
