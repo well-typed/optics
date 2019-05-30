@@ -134,14 +134,19 @@ indexing l iafb s =
 
 ----------------------------------------
 
--- | Internal implementation of 'Optics.Indexed.Core.conjoined'.
-conjoined__
-  :: (Constraints k p, Profunctor p, is `HasSingleIndex` i)
+-- | Construct a conjoined indexed optic that provides a separate code path when
+-- used without indices. Useful for defining indexed optics that are as
+-- efficient as their unindexed equivalents when used without indices.
+--
+-- /Note:/ @'conjoined' f g@ is well-defined if and only if @f ≡
+-- 'Optics.Indexed.Core.noIx' g@.
+conjoined
+  :: is `HasSingleIndex` i
   => Optic k NoIx s t a b
   -> Optic k is   s t a b
-  -> Optic__ p j ci (i -> j) ci s t a b
-conjoined__ (Optic f) (Optic g) = conjoined' f g
-{-# INLINE conjoined__ #-}
+  -> Optic k is   s t a b
+conjoined (Optic f) (Optic g) = Optic (conjoined__ f g)
+{-# INLINE conjoined #-}
 
 ----------------------------------------
 

@@ -81,7 +81,7 @@ iafailing
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxAffineFold i s a
-iafailing a b = Optic $ conjoined__ (afailing a b) $ iafolding $ \s ->
+iafailing a b = conjoined (afailing a b) $ iafolding $ \s ->
   maybe (ipreview b s) Just (ipreview a s)
 infixl 3 `iafailing` -- Same as (<|>)
 {-# INLINE iafailing #-}

@@ -245,7 +245,7 @@ ibackwards
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> IxTraversal i s t a b
-ibackwards o = Optic $ conjoined__ (backwards o) $ ixTraversalVL $ \f ->
+ibackwards o = conjoined (backwards o) $ ixTraversalVL $ \f ->
   forwards #. itraverseOf o (\i -> Backwards #. f i)
 {-# INLINE ibackwards #-}
 

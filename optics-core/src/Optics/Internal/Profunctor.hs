@@ -130,17 +130,17 @@ class Profunctor p where
   rcoerce' = coerce
   {-# INLINE rcoerce' #-}
 
-  conjoined'
+  conjoined__
     :: (p i ci a b -> p i ci s t)
     -> (p i ci a b -> p j ci s t)
     -> (p i ci a b -> p j ci s t)
-  default conjoined'
+  default conjoined__
     :: Coercible (p i ci s t) (p j ci s t)
     => (p i ci a b -> p i ci s t)
     -> (p i ci a b -> p j ci s t)
     -> (p i ci a b -> p j ci s t)
-  conjoined' f _ = coerce . f
-  {-# INLINE conjoined' #-}
+  conjoined__ f _ = coerce . f
+  {-# INLINE conjoined__ #-}
 
   ixcontramap :: (j -> i) -> p i ci a b -> p j ci a b
   default ixcontramap
@@ -227,9 +227,9 @@ instance Functor f => Profunctor (IxStarA f) where
   rcoerce' = rmap coerce
   {-# INLINE rcoerce' #-}
 
-  conjoined' _ f = f
+  conjoined__ _ f = f
   ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
+  {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
 instance Functor f => Profunctor (IxStar f) where
@@ -243,9 +243,9 @@ instance Functor f => Profunctor (IxStar f) where
   rcoerce' = rmap coerce
   {-# INLINE rcoerce' #-}
 
-  conjoined' _ f = f
+  conjoined__ _ f = f
   ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
+  {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
 instance Profunctor (IxForget r) where
@@ -256,9 +256,9 @@ instance Profunctor (IxForget r) where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
-  conjoined' _ f = f
+  conjoined__ _ f = f
   ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
+  {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
 instance Profunctor (IxForgetM r) where
@@ -269,9 +269,9 @@ instance Profunctor (IxForgetM r) where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
-  conjoined' _ f = f
+  conjoined__ _ f = f
   ixcontramap ij (IxForgetM k) = IxForgetM $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
+  {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
 instance Profunctor IxFunArrow where
@@ -282,9 +282,9 @@ instance Profunctor IxFunArrow where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
-  conjoined' _ f = f
+  conjoined__ _ f = f
   ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
+  {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
 ----------------------------------------
@@ -293,7 +293,7 @@ class Profunctor p => Strong p where
   first'  :: p i ci a b -> p i ci (a, c) (b, c)
   second' :: p i ci a b -> p i ci (c, a) (c, b)
 
-  -- There are few places where default implementation is good enough.
+  -- There are a few places where default implementation is good enough.
   linear
     :: (forall f. Functor f => (a -> f b) -> s -> f t)
     -> p i ci a b
@@ -304,7 +304,7 @@ class Profunctor p => Strong p where
     . first'
   {-# INLINE linear #-}
 
-  -- There are few places where default implementation is good enough.
+  -- There are a few places where default implementation is good enough.
   ilinear
     :: (forall f. Functor f => (i -> a -> f b) -> s -> f t)
     -> p       j  ci a b

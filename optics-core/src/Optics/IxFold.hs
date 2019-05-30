@@ -199,7 +199,7 @@ ibackwards_
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> IxFold i s a
-ibackwards_ o = Optic $ conjoined__ (backwards_ o) $ mkIxFold $ \f ->
+ibackwards_ o = conjoined (backwards_ o) $ mkIxFold $ \f ->
   forwards #. itraverseOf_ o (\i -> Backwards #. f i)
 {-# INLINE ibackwards_ #-}
 
@@ -210,7 +210,7 @@ isumming
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-isumming a b = Optic $ conjoined__ (summing a b) $ mkIxFold $ \f s ->
+isumming a b = conjoined (summing a b) $ mkIxFold $ \f s ->
   itraverseOf_ a f s *> itraverseOf_ b f s
 infixr 6 `isumming` -- Same as (<>)
 {-# INLINE isumming #-}
@@ -221,7 +221,7 @@ ifailing
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-ifailing a b = Optic $ conjoined__ (failing a b) $ mkIxFold $ \f s ->
+ifailing a b = conjoined (failing a b) $ mkIxFold $ \f s ->
   let OrT visited fu = itraverseOf_ a (\i -> wrapOrT . f i) s
   in if visited
      then fu

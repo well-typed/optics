@@ -14,5 +14,5 @@ import Optics.Internal.Profunctor
 imapped__
   :: (Mapping p, FunctorWithIndex i f)
   => Optic__ p j ci (i -> j) ci (f a) (f b) a b
-imapped__ = conjoined' (roam fmap) (iroam imap)
+imapped__ = conjoined__ (roam fmap) (iroam imap)
 {-# INLINE imapped__ #-}

@@ -27,7 +27,7 @@ mkIxFold__ f = rphantom . iwander f . rphantom
 ifolded__
   :: (Bicontravariant p, Traversing p, FoldableWithIndex i f)
   => Optic__ p j ci (i -> j) ci (f a) t a b
-ifolded__ = conjoined' (mkFold__ traverse_) (mkIxFold__ itraverse_)
+ifolded__ = conjoined__ (mkFold__ traverse_) (mkIxFold__ itraverse_)
 {-# INLINE ifolded__ #-}
 
 -- | Internal implementation of 'Optics.IxFold.ifoldring'.

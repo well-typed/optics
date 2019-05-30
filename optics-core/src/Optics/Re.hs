@@ -78,8 +78,8 @@ instance Profunctor p => Profunctor (Re p s t j cj) where
   {-# INLINE lcoerce' #-}
   {-# INLINE rcoerce' #-}
 
-  conjoined' _ f = f
-  {-# INLINE conjoined' #-}
+  conjoined__ _ f = f
+  {-# INLINE conjoined__ #-}
 
   ixcontramap ij (Re f) = Re (f . ixmap ij)
   ixmap       ij (Re f) = Re (f . ixcontramap ij)

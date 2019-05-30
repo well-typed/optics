@@ -143,7 +143,7 @@ converted = iso convert convert
 vectorTraverse__
   :: (Traversing p, V.Vector v a, V.Vector w b)
   => Optic__ p j ci (Int -> j) ci (v a) (w b) a b
-vectorTraverse__ = conjoined' vectorTraverseNoIx__ vectorTraverseIx__
+vectorTraverse__ = conjoined__ vectorTraverseNoIx__ vectorTraverseIx__
 {-# INLINE [0] vectorTraverse__ #-}
 
 vectorTraverseNoIx__
