@@ -42,6 +42,7 @@ module Optics.Fold
   , folding
   , foldring
   , unfolded
+  , filtered
 
   -- * Additional elimination forms
   , has
@@ -69,7 +70,6 @@ module Optics.Fold
   , lookupOf
 
   -- * Combinators
-  , filtered
   , backwards_
 
   -- * Semigroup structure
@@ -229,12 +229,8 @@ unfolded step = mkFold $ \f -> fix $ \loop b ->
 {-# INLINE unfolded #-}
 
 -- | Filter results of a 'Fold' that don't satisfy a predicate.
-filtered
-  :: Is k A_Fold
-  => (a -> Bool)
-  -> Optic' k is s a
-  -> Fold s a
-filtered p o = mkFold $ \f -> traverseOf_ o (\a -> if p a then f a else pure ())
+filtered :: (a -> Bool) -> Fold a a
+filtered p = mkFold $ \f a -> if p a then f a else pure ()
 {-# INLINE filtered #-}
 
 -- | This allows you to traverse the elements of a 'Fold' in the opposite order.
