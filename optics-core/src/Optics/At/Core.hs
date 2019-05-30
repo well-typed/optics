@@ -393,6 +393,9 @@ instance At (Maybe a) where
   at () = lensVL id
   {-# INLINE at #-}
 
+-- | Usage of this instance might lead to space leaks as when @Just v@ is
+-- returned, @v@ is not forced to whnf before being put in the map. To work
+-- around that return @v `seq` Just v@ or use 'Data.IntMap.Optics.at'' instead.
 instance At (IntMap a) where
 #if MIN_VERSION_containers(0,5,8)
   at k = lensVL $ \f -> IntMap.alterF f k
