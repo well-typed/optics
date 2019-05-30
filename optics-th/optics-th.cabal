@@ -26,7 +26,7 @@ library
     , containers        >=0.5.7.1   && <0.7
     , mtl               >=2.2.2     && <2.3
     , template-haskell  >=2.11      && <2.15
-    , th-abstraction    >=0.2.1     && <0.3
+    , th-abstraction    >=0.2.1     && <0.4
     , transformers      >=0.5       && <0.6
 
   exposed-modules:  Language.Haskell.TH.Optics
