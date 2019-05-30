@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilyDependencies #-}
 module Optics.Re
   ( ReversibleOptic(..)
   ) where
@@ -9,7 +10,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 class ReversibleOptic k where
-  type ReversedOptic k :: *
+  type ReversedOptic k = r | r -> k
   -- | Reverses optics, turning around 'Optics.Iso.Iso' into 'Optics.Iso.Iso',
   -- 'Optics.Prism.Prism' into 'Optics.PrismaticGetter.PrismaticGetter' (and
   -- back), 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and back)
