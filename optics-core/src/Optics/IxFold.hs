@@ -184,6 +184,10 @@ ifoldring fr = Optic (ifoldring__ fr)
 {-# INLINE ifoldring #-}
 
 -- | Filter results of an 'IxFold' that don't satisfy a predicate.
+--
+-- >>> toListOf (ifolded %& ifiltered (>)) [3,2,1,0]
+-- [1,0]
+--
 ifiltered
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => (i -> a -> Bool)
@@ -192,6 +196,13 @@ ifiltered
 ifiltered p o = mkIxFold $ \f ->
   itraverseOf_ o (\i a -> if p i a then f i a else pure ())
 {-# INLINE ifiltered #-}
+-- Note: technically this should be defined per optic kind:
+--
+-- ifiltered :: _ -> IxFold i s a       -> IxFold i s a
+-- ifiltered :: _ -> IxGetter i s a     -> IxAffineFold i s a
+-- ifiltered :: _ -> IxAffineFold i s a -> IxAffineFold i s a
+--
+-- and similarly for (non-existent) unsafeIFiltered.
 
 -- | This allows you to traverse the elements of an 'IxFold' in the opposite
 -- order.

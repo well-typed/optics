@@ -230,6 +230,10 @@ ignored = ixTraversalVL $ \_ -> pure
 
 -- | Filter results of an 'IxTraversal' that don't satisfy a predicate on the
 -- indices.
+--
+-- >>> toListOf (itraversed %& indices even) "foobar"
+-- "foa"
+--
 indices
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => (i -> Bool)
