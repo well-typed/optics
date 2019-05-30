@@ -55,7 +55,7 @@ type NoIx = '[]
 -- | Singleton index list
 type WithIx i = '[i]
 
--- | Wrapper newtype for the whole family of vaguely lens-like things.
+-- | Wrapper newtype for the whole family of optics.
 --
 -- The first parameter @k@ identifies the particular optic kind (e.g. 'A_Lens'
 -- or 'A_Traversal').
