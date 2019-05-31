@@ -1,4 +1,8 @@
--- | This module defines operations to 'coerce' the type parameters of optics to
+-- |
+-- Module: Optics.Coerce
+-- Description: Operators to 'coerce' the type parameters of 'Optic'.
+--
+-- This module defines operations to 'coerce' the type parameters of optics to
 -- a representationally equal type.  For example, if we have
 --
 -- > newtype MkInt = MkInt Int

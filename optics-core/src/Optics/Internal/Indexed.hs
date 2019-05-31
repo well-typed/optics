@@ -161,6 +161,7 @@ conjoined (Optic f) (Optic g) = Optic (conjoined__ f g)
 
 ----------------------------------------
 
+-- | Class for 'Functor's that have an additional read-only index available.
 class Functor f => FunctorWithIndex i f | f -> i where
   imap :: (i -> a -> b) -> f a -> f b
   default imap
@@ -172,6 +173,7 @@ instance FunctorWithIndex i (IxContext i a b) where
   imap f (IxContext ibt a) = IxContext (\i -> f i . ibt i) a
   {-# INLINE imap #-}
 
+-- | Class for 'Foldable's that have an additional read-only index available.
 class (FunctorWithIndex i f, Foldable f
       ) => FoldableWithIndex i f | f -> i where
   ifoldMap :: Monoid m => (i -> a -> m) -> f a -> m
@@ -198,6 +200,7 @@ ifor_ :: (FoldableWithIndex i t, Applicative f) => t a -> (i -> a -> f b) -> f (
 ifor_ = flip itraverse_
 {-# INLINE ifor_ #-}
 
+-- | Class for 'Traversable's that have an additional read-only index available.
 class (FoldableWithIndex i t, Traversable t
       ) => TraversableWithIndex i t | t -> i where
   itraverse :: Applicative f => (i -> a -> f b) -> t a -> f (t b)

@@ -1,3 +1,8 @@
+-- |
+-- Module: Data.Maybe.Optics
+-- Description: 'Prism's for the 'Maybe' datatype.
+--
+-- This module defines 'Prism's for the constructors of the 'Maybe' datatype.
 module Data.Maybe.Optics
   ( _Nothing
   , _Just
@@ -6,6 +11,7 @@ module Data.Maybe.Optics
 
 import Optics.Prism
 
+-- | A 'Prism' that matches on the 'Nothing' constructor of 'Maybe'.
 _Nothing :: Prism' (Maybe a) ()
 _Nothing =
   prism
@@ -17,6 +23,7 @@ _Nothing =
     )
 {-# INLINE _Nothing #-}
 
+-- | A 'Prism' that matches on the 'Just' constructor of 'Maybe'.
 _Just :: Prism (Maybe a) (Maybe b) a b
 _Just =
   prism

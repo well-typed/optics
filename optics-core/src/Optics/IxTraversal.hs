@@ -37,6 +37,7 @@ module Optics.IxTraversal
   --
 
   -- * Additional introduction forms
+  -- | See also 'Optics.Each.Core.each', which is an 'IxTraversal' over each element of a (potentially monomorphic) container.
   , itraversed
   , ignored
   , elementsOf

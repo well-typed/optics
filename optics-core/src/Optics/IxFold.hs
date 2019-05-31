@@ -30,6 +30,7 @@ module Optics.IxFold
   , ifoldring
 
   -- * Additional elimination forms
+  -- | See also 'Data.Map.Optics.toMapOf', which constructs a 'Data.Map.Map' from an 'IxFold'.
   , iheadOf
   , ilastOf
   , ianyOf

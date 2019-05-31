@@ -1,3 +1,16 @@
+-- |
+-- Module: Optics.Empty
+-- Description: A 'Prism' for a type that may be '_Empty'.
+--
+-- This module defines the 'AsEmpty' class, which provides a 'Prism' for a type
+-- that may be '_Empty'.
+--
+-- >>> isn't _Empty [1,2,3]
+-- True
+--
+-- >>> case Nothing of { Empty -> True; _ -> False }
+-- True
+--
 {-# LANGUAGE PatternSynonyms #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Optics.Empty

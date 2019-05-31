@@ -1,3 +1,20 @@
+-- |
+-- Module: Optics.Empty.Core
+-- Description: A 'Prism' for a type that may be '_Empty'.
+--
+-- This module defines the 'AsEmpty' class, which provides a 'Prism' for a type
+-- that may be '_Empty'.
+--
+-- Note that orphan instances for this class are defined in the @Optics.Empty@
+-- module from @optics-extra@, so if you are not simply depending on @optics@
+-- you may wish to import that module instead.
+--
+-- >>> isn't _Empty [1,2,3]
+-- True
+--
+-- >>> case Nothing of { Empty -> True; _ -> False }
+-- True
+--
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -27,6 +44,8 @@ import Optics.Review
 import GHC.Event
 #endif
 
+-- | Class for types that may be '_Empty'.
+--
 class AsEmpty a where
   -- |
   --
@@ -37,6 +56,11 @@ class AsEmpty a where
   _Empty = only mempty
   {-# INLINE _Empty #-}
 
+-- | Pattern synonym for matching on any type with an 'AsEmpty' instance.
+--
+-- >>> case Nothing of { Empty -> True; _ -> False }
+-- True
+--
 pattern Empty :: forall a. AsEmpty a => a
 pattern Empty <- (has _Empty -> True) where
   Empty = review _Empty ()

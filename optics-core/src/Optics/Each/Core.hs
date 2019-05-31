@@ -1,3 +1,14 @@
+-- |
+-- Module: Optics.Each.Core
+-- Description: An 'IxTraversal' for each element of a (potentially monomorphic) container.
+--
+-- This module defines the 'Each' class, which provides an 'IxTraversal' that
+-- extracts 'each' element of a (potentially monomorphic) container.
+--
+-- Note that orphan instances for this class are defined in the @Optics.Each@
+-- module from @optics-extra@, so if you are not simply depending on @optics@
+-- you may wish to import that module instead.
+--
 {-# LANGUAGE UndecidableInstances #-}
 module Optics.Each.Core
   (

@@ -17,8 +17,8 @@
 --   composition.
 --
 -- Each optic kind is identified by a "tag type" (such as 'A_Lens'), which is an
--- empty data type.  The type of the actual optics (such as 'Lens') is obtained
--- by applying 'Optic' to the tag type.
+-- empty data type.  The type of the actual optics (such as 'Optics.Lens.Lens')
+-- is obtained by applying 'Optic' to the tag type.
 --
 -- See the @Optics@ module in the main @optics@ package for overview
 -- documentation.

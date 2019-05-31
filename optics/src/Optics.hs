@@ -67,7 +67,7 @@ module Optics
 
   -- ** Each
 
-  -- | A 'Traversal' for a (potentially monomorphic) container.
+  -- | An 'IxTraversal' for each element of a (potentially monomorphic) container.
   --
   -- >>> over each (*10) (1,2,3)
   -- (10,20,30)

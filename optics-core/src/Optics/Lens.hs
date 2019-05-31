@@ -79,6 +79,7 @@ module Optics.Lens
   --
 
   -- * Additional introduction forms
+  -- | See "Data.Tuple.Optics" for 'Lens'es for tuples.
   , chosen
   , devoid
   , united

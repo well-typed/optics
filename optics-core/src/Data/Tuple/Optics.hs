@@ -1,3 +1,28 @@
+-- |
+-- Module: Data.Tuple.Optics
+-- Description: 'Lens'es for tuple types.
+--
+-- This module defines 'Lens'es for the fields of tuple types.  These are
+-- overloaded using the 'Field1' to 'Field9' typeclasses, so that '_1' can be
+-- used as a 'Lens' for the first field of a tuple with any number of fields (up
+-- to the maximum supported tuple size, which is currently 9).  For example:
+--
+-- >>> view _1 ('a','b','c')
+-- 'a'
+--
+-- >>> set _3 True ('a','b','c')
+-- ('a','b',True)
+--
+-- If a single-constructor datatype has a 'Generic' instance, the corresponding
+-- @FieldN@ instances can be defined using their default methods:
+--
+-- >>> data T a = MkT Int a deriving (Generic, Show)
+-- ...
+-- >>> instance Field1 (T a) (T a) Int Int
+-- >>> instance Field2 (T a) (T b) a b
+-- >>> set _2 'x' (MkT 1 False)
+-- MkT 1 'x'
+--
 {-# LANGUAGE UndecidableInstances   #-}
 module Data.Tuple.Optics
   (

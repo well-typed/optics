@@ -1,3 +1,22 @@
+-- |
+-- Module: Optics.Re
+-- Description: The 're' operator allows some optics to be reversed.
+--
+-- Some optics can be reversed with 're'.  This is mainly useful to invert
+-- 'Optics.Iso.Iso's:
+--
+-- >>> let _Identity = iso runIdentity Identity
+-- >>> view (_1 % re _Identity) ('x', "yz")
+-- Identity 'x'
+--
+-- Yet we can use a 'Optics.Lens.Lens' as a 'Optics.Review.Review' too:
+--
+-- >>> review (re _1) ('x', "yz")
+-- 'x'
+--
+-- See the main @Optics@ module in the @optics@ package for a diagram of how
+-- 're' transforms optics.
+--
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 module Optics.Re
@@ -11,7 +30,20 @@ import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
+-- | Class for optics that can be 're'versed.
 class ReversibleOptic k where
+  -- | Injective type family that maps an optic kind to the optic kind produced
+  -- by 're'versing it.
+  --
+  -- @
+  -- 'ReversedOptic' 'An_Iso'            = 'An_Iso'
+  -- 'ReversedOptic' 'A_Prism'           = 'A_PrismaticGetter'
+  -- 'ReversedOptic' 'A_PrismaticGetter' = 'A_Prism'
+  -- 'ReversedOptic' 'A_Lens'            = 'A_LensyReview'
+  -- 'ReversedOptic' 'A_LensyReview'     = 'A_Lens'
+  -- 'ReversedOptic' 'A_Getter'          = 'A_Review'
+  -- 'ReversedOptic' 'A_Review'          = 'A_Getter'
+  -- @
   type ReversedOptic k = r | r -> k
   -- | Reverses optics, turning around 'Optics.Iso.Iso' into 'Optics.Iso.Iso',
   -- 'Optics.Prism.Prism' into 'Optics.PrismaticGetter.PrismaticGetter' (and

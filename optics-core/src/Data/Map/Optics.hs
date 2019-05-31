@@ -1,8 +1,10 @@
 {-# LANGUAGE CPP #-}
--- | One of most commonly-asked questions about this package is whether it
--- provides lenses for working with 'M.Map'. It does, but their uses are perhaps
--- obscured by their genericity. This module exists to provide documentation for
--- them.
+-- |
+-- Module: Data.Map.Optics
+-- Description: Optics for working with 'Data.Map.Map's.
+--
+-- This module exists to provide documentation for lenses for working with
+-- 'M.Map', which might otherwise be obscured by their genericity.
 --
 -- 'M.Map' is an instance of 'Optics.At.Core.At' and provides
 -- 'Optics.At.Core.at' as a lens on values at keys:
