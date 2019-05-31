@@ -17,15 +17,12 @@ hasNoProfunctors name = mkObligation name $ NoUseOf
   , 'P.rcoerce'
   , 'P.conjoined__
   , 'P.ixcontramap
-  , 'P.ixmap
   , 'P.first'
   , 'P.second'
   , 'P.linear
   , 'P.ilinear
   , 'P.unfirst
   , 'P.unsecond
-  , 'P.colinear
-  , 'P.icolinear
   , 'P.left'
   , 'P.right'
   , 'P.unleft

@@ -134,33 +134,33 @@ pattern Text a <- (view _Text -> a) where
 -- Internal implementations
 
 -- | Internal implementation of 'unpacked'.
-unpacked__ :: Profunctor p => Optic__ p i ci i ci Text Text String String
+unpacked__ :: Profunctor p => Optic__ p i i Text Text String String
 unpacked__ = dimap Text.unpack Text.pack
 {-# INLINE unpacked__ #-}
 
 -- | Internal implementation of 'text'.
-text__ :: Traversing p => Optic__ p j ci (Int -> j) ci Text Text Char Char
+text__ :: Traversing p => Optic__ p j (Int -> j) Text Text Char Char
 text__ = unpacked__ . itraversed__
 {-# INLINE [0] text__ #-}
 
 {-# RULES
 
 "lazy text__ -> foldr"
-  forall (o :: Forget r j ci Char Char). text__ o = foldring__ Text.foldr (reForget o)
-    :: Forget r (Int -> j) ci Text Text
+  forall (o :: Forget r j Char Char). text__ o = foldring__ Text.foldr (reForget o)
+    :: Forget r (Int -> j) Text Text
 
 "lazy text__ -> ifoldr"
-  forall (o :: IxForget r j ci Char Char). text__ o = ifoldring__ ifoldrLazy o
-    :: IxForget r (Int -> j) ci Text Text
+  forall (o :: IxForget r j Char Char). text__ o = ifoldring__ ifoldrLazy o
+    :: IxForget r (Int -> j) Text Text
 
 "lazy text__ -> map"
-  forall (o :: FunArrow j ci Char Char). text__ o
-                                       = roam Text.map (reFunArrow o)
-    :: FunArrow (Int -> j) ci Text Text
+  forall (o :: FunArrow j Char Char). text__ o
+                                    = roam Text.map (reFunArrow o)
+    :: FunArrow (Int -> j) Text Text
 
 "lazy text__ -> imap"
-  forall (o :: IxFunArrow j ci Char Char). text__ o = iroam imapLazy o
-    :: IxFunArrow (Int -> j) ci Text Text
+  forall (o :: IxFunArrow j Char Char). text__ o = iroam imapLazy o
+    :: IxFunArrow (Int -> j) Text Text
 
 #-}
 

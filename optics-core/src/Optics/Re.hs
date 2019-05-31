@@ -54,18 +54,18 @@ instance ReversibleOptic A_Review where
 
 -- | Internal implementation of re.
 re__
-  :: (Profunctor p, Constraints k (Re p a b i ci))
-  => Optic k        NoIx s t a b
-  -> Optic__ p i ci i ci b a t s
+  :: (Profunctor p, Constraints k (Re p a b))
+  => Optic k  NoIx s t a b
+  -> Optic__ p i i b a t s
 re__ o = unRe (getOptic o (Re id))
 {-# INLINE re__ #-}
 
 ----------------------------------------
 
 -- | Helper for reversing optics.
-newtype Re p s t j cj ci i a b = Re { unRe :: p i ci b a -> p j cj t s }
+newtype Re p s t i a b = Re { unRe :: p i b a -> p i t s }
 
-instance Profunctor p => Profunctor (Re p s t j cj) where
+instance Profunctor p => Profunctor (Re p s t) where
   dimap f g (Re p) = Re (p . dimap g f)
   lmap  f   (Re p) = Re (p . rmap f)
   rmap    g (Re p) = Re (p . lmap g)
@@ -78,15 +78,10 @@ instance Profunctor p => Profunctor (Re p s t j cj) where
   {-# INLINE lcoerce' #-}
   {-# INLINE rcoerce' #-}
 
-  conjoined__ _ f = f
-  {-# INLINE conjoined__ #-}
+  conjoined__ = error "conjoined__(Re) shouldn't be reachable"
+  ixcontramap = error "ixcontramap(Re) shouldn't be reachable"
 
-  ixcontramap ij (Re f) = Re (f . ixmap ij)
-  ixmap       ij (Re f) = Re (f . ixcontramap ij)
-  {-# INLINE ixcontramap #-}
-  {-# INLINE ixmap #-}
-
-instance Bicontravariant p => Bifunctor (Re p s t j cj) where
+instance Bicontravariant p => Bifunctor (Re p s t) where
   bimap  f g (Re p) = Re (p . contrabimap g f)
   first  f   (Re p) = Re (p . contrasecond f)
   second   g (Re p) = Re (p . contrafirst g)
@@ -94,7 +89,7 @@ instance Bicontravariant p => Bifunctor (Re p s t j cj) where
   {-# INLINE first #-}
   {-# INLINE second #-}
 
-instance Bifunctor p => Bicontravariant (Re p s t j cj) where
+instance Bifunctor p => Bicontravariant (Re p s t) where
   contrabimap  f g (Re p) = Re (p . bimap g f)
   contrafirst  f   (Re p) = Re (p . second f)
   contrasecond   g (Re p) = Re (p . first g)
@@ -102,35 +97,27 @@ instance Bifunctor p => Bicontravariant (Re p s t j cj) where
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
-instance Strong p => Costrong (Re p s t j cj) where
+instance Strong p => Costrong (Re p s t) where
   unfirst  (Re p) = Re (p . first')
   unsecond (Re p) = Re (p . second')
   {-# INLINE unfirst #-}
   {-# INLINE unsecond #-}
 
-  colinear  f (Re p) = Re (p . linear f)
-  icolinear f (Re p) = Re (p . ilinear f)
-  {-# INLINE colinear #-}
-  {-# INLINE icolinear #-}
-
-instance Costrong p => Strong (Re p s t j cj) where
+instance Costrong p => Strong (Re p s t) where
   first'  (Re p) = Re (p . unfirst)
   second' (Re p) = Re (p . unsecond)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
-  linear  f (Re p) = Re (p . colinear f)
-  ilinear f (Re p) = Re (p . icolinear f)
-  {-# INLINE linear #-}
-  {-# INLINE ilinear #-}
+  ilinear _ = error "ilinear(Re) shouldn't be reachable"
 
-instance Choice p => Cochoice (Re p s t j cj) where
+instance Choice p => Cochoice (Re p s t) where
   unleft  (Re p) = Re (p . left')
   unright (Re p) = Re (p . right')
   {-# INLINE unleft #-}
   {-# INLINE unright #-}
 
-instance Cochoice p => Choice (Re p s t j cj) where
+instance Cochoice p => Choice (Re p s t) where
   left'  (Re p) = Re (p . unleft)
   right' (Re p) = Re (p . unright)
   {-# INLINE left' #-}

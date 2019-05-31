@@ -39,7 +39,7 @@ data A_Review
 -- Using this type family we define the constraints that the various flavours of
 -- optics have to fulfill.
 --
-type family Constraints (k :: *) (p :: * -> * -> * -> * -> *) :: Constraint where
+type family Constraints (k :: *) (p :: * -> * -> * -> *) :: Constraint where
   Constraints An_Iso             p = Profunctor p
   Constraints A_Lens             p = Strong p
   Constraints A_LensyReview      p = Costrong p
