@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 module Optics.Re
   ( ReversibleOptic(..)
@@ -6,6 +7,7 @@ module Optics.Re
 import Data.Coerce
 
 import Optics.Internal.Bi
+import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -15,7 +17,10 @@ class ReversibleOptic k where
   -- 'Optics.Prism.Prism' into 'Optics.PrismaticGetter.PrismaticGetter' (and
   -- back), 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and back)
   -- and 'Optics.Getter.Getter' into 'Optics.Review.Review' (and back).
-  re :: Optic k NoIx s t a b -> Optic (ReversedOptic k) NoIx b a t s
+  re
+    :: "re" `AcceptsEmptyIndices` is
+    => Optic                k  is s t a b
+    -> Optic (ReversedOptic k) is b a t s
 
 instance ReversibleOptic An_Iso where
   type ReversedOptic An_Iso = An_Iso

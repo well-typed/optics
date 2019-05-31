@@ -28,6 +28,7 @@ module Optics.Indexed.Core
   -- * Constraints
   , HasSingleIndex
   , NonEmptyIndices
+  , AcceptsEmptyIndices
   ) where
 
 import Optics.Internal.Indexed

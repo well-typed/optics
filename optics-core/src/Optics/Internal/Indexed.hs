@@ -35,6 +35,17 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
+-- | Show useful error message when a function expects optics without indices.
+class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: [*])
+
+instance
+  ( TypeError
+    ('Text "‘" ':<>: 'Text f ':<>: 'Text "’ accepts only optics with no indices")
+  , (x ': xs) ~ NoIx
+  ) => AcceptsEmptyIndices f (x ': xs)
+
+instance AcceptsEmptyIndices f '[]
+
 -- | Check whether a list of indices is not empty and generate sensible error
 -- message if it's not.
 class NonEmptyIndices (is :: [*])
