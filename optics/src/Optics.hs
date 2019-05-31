@@ -544,7 +544,7 @@ import Data.Either.Optics                    as P
 -- @lens@, the 'view' function can be used with a 'Fold' provided the result
 -- type has a 'Monoid' instance, and the multiple targets of the 'Fold' will be
 -- combined monoidally.  This behaviour can be confusing, so in @optics@ a
--- 'Getter' cannot be silently used as a 'Fold', and we prefer to have 'view'
+-- 'Fold' cannot be silently used as a 'Getter', and we prefer to have 'view'
 -- work on 'Getter's and define a separate 'foldOf' operator for use on
 -- 'Fold's. (But the 'gview' function is available for users who may prefer
 -- otherwise.)
