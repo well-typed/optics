@@ -127,9 +127,9 @@ module Optics
   -- 'x'
   --
   -- In the following diagram, red arrows illustrate how 're' transforms optics.
-  -- The 'LensyReview' and 'PrismaticGetter' optic kinds are essentially
-  -- equivalent to 'Review' and 'Getter' respectively, but are present so that
-  -- @'re' . 're'@ does not change the optic kind.
+  -- The 'LensyReview' and 'PrismaticGetter' optic kinds are backwards versions
+  -- of 'Lens' and 'Prism' respectively, and are present so that @'re' . 're'@
+  -- does not change the optic kind.
   --
   -- <<reoptics.png Reversed Optics>>
   --
