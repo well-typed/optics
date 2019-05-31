@@ -12,6 +12,8 @@ module Optics.Indexed.Core
   -- * Class for optic kinds that can be indexed
     IxOptic(..)
 
+  , conjoined
+
   -- * Composition of indexed optics
   , (<%>)
   , (%>)
@@ -21,10 +23,12 @@ module Optics.Indexed.Core
   , icompose3
   , icompose4
   , icompose5
+  , icomposeN
 
   -- * Constraints
   , HasSingleIndex
   , NonEmptyIndices
+  , AcceptsEmptyIndices
   ) where
 
 import Optics.Internal.Indexed
@@ -34,6 +38,8 @@ import Optics.Internal.Profunctor
 import Optics.AffineFold
 import Optics.AffineTraversal
 import Optics.Fold
+import Optics.Getter
+import Optics.Lens
 import Optics.Setter
 import Optics.Traversal
 
@@ -86,7 +92,7 @@ o <% o' = o % noIx o'
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
 reindexed
-  :: (IxOptic k s t a b, is `HasSingleIndex` i)
+  :: is `HasSingleIndex` i
   => (i -> j)
   -> Optic k is         s t a b
   -> Optic k (WithIx j) s t a b
@@ -95,8 +101,7 @@ reindexed = icomposeN
 
 -- | Flatten indices obtained from two indexed optics.
 icompose
-  :: IxOptic k s t a b
-  => (i -> j -> ix)
+  :: (i -> j -> ix)
   -> Optic k '[i, j]     s t a b
   -> Optic k (WithIx ix) s t a b
 icompose = icomposeN
@@ -104,8 +109,7 @@ icompose = icomposeN
 
 -- | Flatten indices obtained from three indexed optics.
 icompose3
-  :: IxOptic k s t a b
-  => (i1 -> i2 -> i3 -> ix)
+  :: (i1 -> i2 -> i3 -> ix)
   -> Optic k '[i1, i2, i3] s t a b
   -> Optic k (WithIx ix)   s t a b
 icompose3 = icomposeN
@@ -113,8 +117,7 @@ icompose3 = icomposeN
 
 -- | Flatten indices obtained from four indexed optics.
 icompose4
-  :: IxOptic k s t a b
-  => (i1 -> i2 -> i3 -> i4 -> ix)
+  :: (i1 -> i2 -> i3 -> i4 -> ix)
   -> Optic k '[i1, i2, i3, i4] s t a b
   -> Optic k (WithIx ix)       s t a b
 icompose4 = icomposeN
@@ -122,12 +125,21 @@ icompose4 = icomposeN
 
 -- | Flatten indices obtained from five indexed optics.
 icompose5
-  :: IxOptic k s t a b
-  => (i1 -> i2 -> i3 -> i4 -> i5 -> ix)
+  :: (i1 -> i2 -> i3 -> i4 -> i5 -> ix)
   -> Optic k '[i1, i2, i3, i4, i5] s t a b
   -> Optic k (WithIx ix)           s t a b
 icompose5 = icomposeN
 {-# INLINE icompose5 #-}
+
+-- | Flatten indices obtained from arbitrary number of indexed optics.
+icomposeN
+  :: forall k i is s t a b
+  . (CurryCompose is, NonEmptyIndices is)
+  => Curry is i
+  -> Optic k is         s t a b
+  -> Optic k (WithIx i) s t a b
+icomposeN f (Optic o) = Optic (ixcontramap (\ij -> composeN @is ij f) . o)
+{-# INLINE icomposeN #-}
 
 ----------------------------------------
 -- IxOptic
@@ -137,85 +149,41 @@ class IxOptic k s t a b where
   -- | Convert an indexed optic to its unindexed equivalent.
   noIx
     :: NonEmptyIndices is
-    => Optic k is s t a b
+    => Optic k is   s t a b
     -> Optic k NoIx s t a b
 
-  -- | Flatten indices obtained from arbitrary number of indexed optics.
-  icomposeN
-    :: (CurryCompose is, NonEmptyIndices is)
-    => Curry is i
-    -> Optic k is         s t a b
-    -> Optic k (WithIx i) s t a b
+instance (s ~ t, a ~ b) => IxOptic A_Getter s t a b where
+  noIx o = to (view o)
+  {-# INLINE noIx #-}
 
-  -- | Construct a conjoined indexed optic that provides a separate code path
-  -- when used without indices. Useful for defining indexed optics that are as
-  -- efficient as their unindexed equivalents when used without indices.
-  --
-  -- /Note:/ @'conjoined' f g@ is well-defined if and only if @f ≡ 'noIx' g@.
-  conjoined
-    :: is `HasSingleIndex` i
-    => Optic k NoIx s t a b
-    -> Optic k is   s t a b
-    -> Optic k is   s t a b
+instance IxOptic A_Lens s t a b where
+  noIx o = lensVL (toLensVL o)
+  {-# INLINE noIx #-}
 
 instance IxOptic An_AffineTraversal s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = atraversalVL (toAtraversalVL o)
   {-# INLINE noIx #-}
-  icomposeN f o = Optic (icomposeN__ f o)
-  {-# INLINE icomposeN #-}
-  conjoined f g = Optic (conjoined__ f g)
-  {-# INLINE conjoined #-}
 
 instance (s ~ t, a ~ b) => IxOptic An_AffineFold s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = afolding (preview o)
   {-# INLINE noIx #-}
-  icomposeN f o = Optic (icomposeN__ f o)
-  {-# INLINE icomposeN #-}
-  conjoined f g = Optic (conjoined__ f g)
-  {-# INLINE conjoined #-}
 
 instance IxOptic A_Traversal s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = traversalVL (traverseOf o)
   {-# INLINE noIx #-}
-  icomposeN f o = Optic (icomposeN__ f o)
-  {-# INLINE icomposeN #-}
-  conjoined f g = Optic (conjoined__ f g)
-  {-# INLINE conjoined #-}
 
 instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = mkFold (traverseOf_ o)
   {-# INLINE noIx #-}
-  icomposeN f o = Optic (icomposeN__ f o)
-  {-# INLINE icomposeN #-}
-  conjoined f g = Optic (conjoined__ f g)
-  {-# INLINE conjoined #-}
 
 instance IxOptic A_Setter s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = sets (over o)
   {-# INLINE noIx #-}
-  icomposeN f o = Optic (icomposeN__ f o)
-  {-# INLINE icomposeN #-}
-  conjoined f g = Optic (conjoined__ f g)
-  {-# INLINE conjoined #-}
-
-----------------------------------------
--- Internal
-
--- | Implementation of 'icomposeN'.
-icomposeN__
-  :: forall k p is i j s t a b
-  . (Constraints k p, Visiting p, CurryCompose is)
-  => Curry is i
-  -> Optic k is s t a b
-  -> Optic__ p j (i -> j) s t a b
-icomposeN__ f o =
-  ixcontramap (\ij -> composeN @is ij f) . getOptic o
-{-# INLINE icomposeN__ #-}
 
 -- $setup
 -- >>> import Optics.Core

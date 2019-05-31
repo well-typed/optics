@@ -30,6 +30,8 @@ import Optics.Iso                              as O
 import Optics.IxAffineFold                     as O
 import Optics.IxAffineTraversal                as O
 import Optics.IxFold                           as O
+import Optics.IxGetter                         as O
+import Optics.IxLens                           as O
 import Optics.IxSetter                         as O
 import Optics.IxTraversal                      as O
 import Optics.Lens                             as O

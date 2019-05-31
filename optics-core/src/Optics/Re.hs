@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 module Optics.Re
   ( ReversibleOptic(..)
@@ -6,6 +7,7 @@ module Optics.Re
 import Data.Coerce
 
 import Optics.Internal.Bi
+import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
@@ -15,7 +17,10 @@ class ReversibleOptic k where
   -- 'Optics.Prism.Prism' into 'Optics.PrismaticGetter.PrismaticGetter' (and
   -- back), 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and back)
   -- and 'Optics.Getter.Getter' into 'Optics.Review.Review' (and back).
-  re :: Optic k NoIx s t a b -> Optic (ReversedOptic k) NoIx b a t s
+  re
+    :: "re" `AcceptsEmptyIndices` is
+    => Optic                k  is s t a b
+    -> Optic (ReversedOptic k) is b a t s
 
 instance ReversibleOptic An_Iso where
   type ReversedOptic An_Iso = An_Iso
@@ -55,7 +60,7 @@ instance ReversibleOptic A_Review where
 -- | Internal implementation of re.
 re__
   :: (Profunctor p, Constraints k (Re p a b))
-  => Optic k   NoIx s t a b
+  => Optic k  NoIx s t a b
   -> Optic__ p i i b a t s
 re__ o = unRe (getOptic o (Re id))
 {-# INLINE re__ #-}
@@ -78,6 +83,9 @@ instance Profunctor p => Profunctor (Re p s t) where
   {-# INLINE lcoerce' #-}
   {-# INLINE rcoerce' #-}
 
+  conjoined__ = error "conjoined__(Re) shouldn't be reachable"
+  ixcontramap = error "ixcontramap(Re) shouldn't be reachable"
+
 instance Bicontravariant p => Bifunctor (Re p s t) where
   bimap  f g (Re p) = Re (p . contrabimap g f)
   first  f   (Re p) = Re (p . contrasecond f)
@@ -94,6 +102,8 @@ instance Bifunctor p => Bicontravariant (Re p s t) where
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
+  selfIndex__ = error "selfIndex__(Re) shouldn't be reachable"
+
 instance Strong p => Costrong (Re p s t) where
   unfirst  (Re p) = Re (p . first')
   unsecond (Re p) = Re (p . second')
@@ -105,6 +115,8 @@ instance Costrong p => Strong (Re p s t) where
   second' (Re p) = Re (p . unsecond)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+
+  ilinear _ = error "ilinear(Re) shouldn't be reachable"
 
 instance Choice p => Cochoice (Re p s t) where
   unleft  (Re p) = Re (p . left')

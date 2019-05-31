@@ -6,6 +6,7 @@
 -- in subsequent releases.
 module Optics.Internal.Bi where
 
+import Data.Coerce
 import Data.Void
 
 import Optics.Internal.Profunctor
@@ -21,6 +22,16 @@ class Bicontravariant p where
   contrabimap  :: (b -> a) -> (d -> c) -> p i a c -> p i b d
   contrafirst  :: (b -> a)             -> p i a c -> p i b c
   contrasecond ::             (c -> b) -> p i a b -> p i a c
+
+  selfIndex__
+    :: p       j  a b
+    -> p (a -> j) a b
+  default selfIndex__
+    :: Coercible (p j a b) (p (a -> j) a b)
+    => p       j  a b
+    -> p (a -> j) a b
+  selfIndex__ = coerce
+  {-# INLINE selfIndex__ #-}
 
 instance Bicontravariant (Forget r) where
   contrabimap  f _g (Forget k) = Forget (k . f)
@@ -46,6 +57,9 @@ instance Bicontravariant (IxForget r) where
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
+  selfIndex__ (IxForget k) = IxForget $ \aj a -> k (aj a) a
+  {-# INLINE selfIndex__ #-}
+
 instance Bicontravariant (IxForgetM r) where
   contrabimap  f _g (IxForgetM k) = IxForgetM (\i -> k i . f)
   contrafirst  f    (IxForgetM k) = IxForgetM (\i -> k i . f)
@@ -53,6 +67,9 @@ instance Bicontravariant (IxForgetM r) where
   {-# INLINE contrabimap #-}
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
+
+  selfIndex__ (IxForgetM k) = IxForgetM $ \aj a -> k (aj a) a
+  {-# INLINE selfIndex__ #-}
 
 ----------------------------------------
 

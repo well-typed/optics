@@ -143,7 +143,7 @@ converted = iso convert convert
 vectorTraverse__
   :: (Traversing p, V.Vector v a, V.Vector w b)
   => Optic__ p j (Int -> j) (v a) (w b) a b
-vectorTraverse__ = conjoined' vectorTraverseNoIx__ vectorTraverseIx__
+vectorTraverse__ = conjoined__ vectorTraverseNoIx__ vectorTraverseIx__
 {-# INLINE [0] vectorTraverse__ #-}
 
 vectorTraverseNoIx__
@@ -189,6 +189,5 @@ vectorTraverseIx__ = iwander $ \f v ->
 "vectorTraverse__ -> imapped"
   forall (o :: IxFunArrow j a b). vectorTraverse__ o = iroam V.imap o
     :: (V.Vector v a, V.Vector v b) => IxFunArrow (Int -> j) (v a) (v b)
-
 
 #-}

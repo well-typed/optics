@@ -130,6 +130,27 @@ class Profunctor p where
   rcoerce' = coerce
   {-# INLINE rcoerce' #-}
 
+  conjoined__
+    :: (p i a b -> p i s t)
+    -> (p i a b -> p j s t)
+    -> (p i a b -> p j s t)
+  default conjoined__
+    :: Coercible (p i s t) (p j s t)
+    => (p i a b -> p i s t)
+    -> (p i a b -> p j s t)
+    -> (p i a b -> p j s t)
+  conjoined__ f _ = coerce . f
+  {-# INLINE conjoined__ #-}
+
+  ixcontramap :: (j -> i) -> p i a b -> p j a b
+  default ixcontramap
+    :: Coercible (p i a b) (p j a b)
+    => (j -> i)
+    -> p i a b
+    -> p j a b
+  ixcontramap _ = coerce
+  {-# INLINE ixcontramap #-}
+
 -- | 'rcoerce'' with type arguments rearranged for TypeApplications.
 rcoerce :: (Coercible a b, Profunctor p) => p i c a -> p i c b
 rcoerce = rcoerce'
@@ -197,6 +218,11 @@ instance Functor f => Profunctor (IxStarA f) where
   rcoerce' = rmap coerce
   {-# INLINE rcoerce' #-}
 
+  conjoined__ _ f = f
+  ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
+  {-# INLINE conjoined__ #-}
+  {-# INLINE ixcontramap #-}
+
 instance Functor f => Profunctor (IxStar f) where
   dimap f g (IxStar k) = IxStar (\i -> fmap g . k i . f)
   lmap  f   (IxStar k) = IxStar (\i -> k i . f)
@@ -208,6 +234,11 @@ instance Functor f => Profunctor (IxStar f) where
   rcoerce' = rmap coerce
   {-# INLINE rcoerce' #-}
 
+  conjoined__ _ f = f
+  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
+  {-# INLINE conjoined__ #-}
+  {-# INLINE ixcontramap #-}
+
 instance Profunctor (IxForget r) where
   dimap f _ (IxForget k) = IxForget (\i -> k i . f)
   lmap  f   (IxForget k) = IxForget (\i -> k i . f)
@@ -215,6 +246,11 @@ instance Profunctor (IxForget r) where
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
+
+  conjoined__ _ f = f
+  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
+  {-# INLINE conjoined__ #-}
+  {-# INLINE ixcontramap #-}
 
 instance Profunctor (IxForgetM r) where
   dimap f _ (IxForgetM k) = IxForgetM (\i -> k i . f)
@@ -224,6 +260,11 @@ instance Profunctor (IxForgetM r) where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
+  conjoined__ _ f = f
+  ixcontramap ij (IxForgetM k) = IxForgetM $ \i -> k (ij i)
+  {-# INLINE conjoined__ #-}
+  {-# INLINE ixcontramap #-}
+
 instance Profunctor IxFunArrow where
   dimap f g (IxFunArrow k) = IxFunArrow (\i -> g . k i . f)
   lmap  f   (IxFunArrow k) = IxFunArrow (\i -> k i . f)
@@ -232,19 +273,40 @@ instance Profunctor IxFunArrow where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
+  conjoined__ _ f = f
+  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
+  {-# INLINE conjoined__ #-}
+  {-# INLINE ixcontramap #-}
+
 ----------------------------------------
 
 class Profunctor p => Strong p where
   first'  :: p i a b -> p i (a, c) (b, c)
   second' :: p i a b -> p i (c, a) (c, b)
 
-  -- There are few places where default implementation is good enough.
-  linear  :: (forall f. Functor f => (a -> f b) -> s -> f t) -> p i a b -> p i s t
+  -- There are a few places where default implementation is good enough.
+  linear
+    :: (forall f. Functor f => (a -> f b) -> s -> f t)
+    -> p i a b
+    -> p i s t
   linear f = dimap
     ((\(Context bt a) -> (a, bt)) . f (Context id))
     (\(b, bt) -> bt b)
     . first'
   {-# INLINE linear #-}
+
+  -- There are a few places where default implementation is good enough.
+  ilinear
+    :: (forall f. Functor f => (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+  default ilinear
+    :: Coercible (p j s t) (p (i -> j) s t)
+    => (forall f. Functor f => (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
+  {-# INLINE ilinear #-}
 
 instance Functor f => Strong (StarA f) where
   first'  (StarA point k) = StarA point $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
@@ -298,7 +360,9 @@ instance Functor f => Strong (IxStarA f) where
   {-# INLINE second' #-}
 
   linear f (IxStarA point k) = IxStarA point $ \i -> f (k i)
+  ilinear f (IxStarA point k) = IxStarA point $ \ij -> f $ \i -> k (ij i)
   {-# INLINE linear #-}
+  {-# INLINE ilinear #-}
 
 instance Functor f => Strong (IxStar f) where
   first'  (IxStar k) = IxStar $ \i ~(a, c) -> (\b' -> (b', c)) <$> k i a
@@ -307,7 +371,9 @@ instance Functor f => Strong (IxStar f) where
   {-# INLINE second' #-}
 
   linear f (IxStar k) = IxStar $ \i -> f (k i)
+  ilinear f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
   {-# INLINE linear #-}
+  {-# INLINE ilinear #-}
 
 instance Strong (IxForget r) where
   first'  (IxForget k) = IxForget $ \i -> k i . fst
@@ -316,7 +382,9 @@ instance Strong (IxForget r) where
   {-# INLINE second' #-}
 
   linear f (IxForget k) = IxForget $ \i -> getConst #. f (Const #. k i)
+  ilinear f (IxForget k) = IxForget $ \ij -> getConst #. f (\i -> Const #. k (ij i))
   {-# INLINE linear #-}
+  {-# INLINE ilinear #-}
 
 instance Strong (IxForgetM r) where
   first'  (IxForgetM k) = IxForgetM $ \i -> k i . fst
@@ -325,7 +393,9 @@ instance Strong (IxForgetM r) where
   {-# INLINE second' #-}
 
   linear f (IxForgetM k) = IxForgetM $ \i -> getConst #. f (Const #. k i)
+  ilinear f (IxForgetM k) = IxForgetM $ \ij -> getConst #. f (\i -> Const #. k (ij i))
   {-# INLINE linear #-}
+  {-# INLINE ilinear #-}
 
 instance Strong IxFunArrow where
   first'  (IxFunArrow k) = IxFunArrow $ \i ~(a, c) -> (k i a, c)
@@ -333,8 +403,12 @@ instance Strong IxFunArrow where
   {-# INLINE first' #-}
   {-# INLINE second' #-}
 
-  linear f (IxFunArrow k) = IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
+  linear f (IxFunArrow k) = IxFunArrow $ \i ->
+    runIdentity #. f (Identity #. k i)
+  ilinear f (IxFunArrow k) = IxFunArrow $ \ij ->
+    runIdentity #. f (\i -> Identity #. k (ij i))
   {-# INLINE linear #-}
+  {-# INLINE ilinear #-}
 
 ----------------------------------------
 
@@ -471,28 +545,6 @@ class (Choice p, Strong p) => Visiting p where
   ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
   {-# INLINE ivisit #-}
 
-  -- TODO: move this to 'Profunctor'
-  conjoined'
-    :: (p i a b -> p i s t)
-    -> (p i a b -> p j s t)
-    -> (p i a b -> p j s t)
-  default conjoined'
-    :: Coercible (p i s t) (p j s t)
-    => (p i a b -> p i s t)
-    -> (p i a b -> p j s t)
-    -> (p i a b -> p j s t)
-  conjoined' f _ = coerce . f
-  {-# INLINE conjoined' #-}
-
-  -- TODO: move this to 'Profunctor'
-  ixcontramap :: (i -> j) -> p j a b -> p i a b
-  default ixcontramap
-    :: Coercible (p j a b) (p i a b)
-    => (i -> j)
-    -> p j a b
-    -> p i a b
-  ixcontramap _ = coerce
-  {-# INLINE ixcontramap #-}
 
 instance Functor f => Visiting (StarA f) where
   visit  f (StarA point k) = StarA point $ f point k
@@ -531,20 +583,12 @@ instance Functor f => Visiting (IxStarA f) where
   ivisit f (IxStarA point k) = IxStarA point $ \ij -> f point $ \i -> k (ij i)
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined' _ f = f
-  ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
-  {-# INLINE ixcontramap #-}
 
 instance Applicative f => Visiting (IxStar f) where
   visit  f (IxStar k) = IxStar $ \i  -> f pure (k i)
   ivisit f (IxStar k) = IxStar $ \ij -> f pure $ \i -> k (ij i)
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined' _ f = f
-  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
-  {-# INLINE ixcontramap #-}
 
 instance Monoid r => Visiting (IxForget r) where
   visit  f (IxForget k) =
@@ -553,10 +597,6 @@ instance Monoid r => Visiting (IxForget r) where
     IxForget $ \ij -> getConst #. f pure (\i -> Const #. k (ij i))
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined' _ f = f
-  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
-  {-# INLINE ixcontramap #-}
 
 instance Visiting (IxForgetM r) where
   visit  f (IxForgetM k) =
@@ -565,10 +605,6 @@ instance Visiting (IxForgetM r) where
     IxForgetM $ \ij -> getConst #. f (\_ -> Const Nothing) (\i -> Const #. k (ij i))
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined' _ f = f
-  ixcontramap ij (IxForgetM k) = IxForgetM $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
-  {-# INLINE ixcontramap #-}
 
 instance Visiting IxFunArrow where
   visit  f (IxFunArrow k) =
@@ -577,10 +613,6 @@ instance Visiting IxFunArrow where
     IxFunArrow $ \ij -> runIdentity #. f pure (\i -> Identity #. k (ij i))
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
-  conjoined' _ f = f
-  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
-  {-# INLINE conjoined' #-}
-  {-# INLINE ixcontramap #-}
 
 ----------------------------------------
 

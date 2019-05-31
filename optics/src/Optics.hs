@@ -197,6 +197,8 @@ import Optics.IxSetter                       as O
 import Optics.IxFold                         as O
 import Optics.IxAffineTraversal              as O
 import Optics.IxAffineFold                   as O
+import Optics.IxGetter                       as O
+import Optics.IxLens                         as O
 import Optics.Iso                            as O
 import Optics.Getter                         as O
 import Optics.Fold                           as O
@@ -369,7 +371,7 @@ import Data.Either.Optics                    as P
 -- * There are four variants of @backwards@ for (indexed) 'Traversal's and
 --   'Fold's: 'backwards', 'backwards_', 'ibackwards' and 'ibackwards_'.
 --
--- * There is no @IndexedLens@, @IndexedGetter@, @Traversal1@ nor @Fold1@.
+-- * There is no @Traversal1@ and @Fold1@.
 --
 -- * There are affine variants of (indexed) traversals and folds
 --   ('AffineTraversal', 'AffineFold', 'IxAffineTraversal' and 'IxAffineFold').
@@ -574,11 +576,11 @@ import Data.Either.Optics                    as P
 --
 -- As the example above illustrates, regular and indexed optics have the same
 -- tag in the first parameter of 'Optic', in this case 'A_Fold'.  Regular optics
--- simply don't have any indices.  The provided type aliases 'IxFold',
--- 'IxSetter' and 'IxTraversal' are variants with a single index. In general,
--- the second parameter of the 'Optic' newtype is a type-level list of indices,
--- which will typically be 'NoIx' (the empty index list) or @('WithIx' i)@ (a
--- singleton list).
+-- simply don't have any indices.  The provided type aliases 'IxLens',
+-- 'IxGetter', 'IxAffineTraversal', 'IxAffineFold', 'IxTraversal', 'IxFold' and
+-- 'IxSetter' are variants with a single index. In general, the second parameter
+-- of the 'Optic' newtype is a type-level list of indices, which will typically
+-- be 'NoIx' (the empty index list) or @('WithIx' i)@ (a singleton list).
 --
 -- When two optics are composed with ('%'), the index lists are concatenated.
 -- Thus composing an unindexed optic with an indexed optic preserves the
@@ -632,4 +634,11 @@ import Data.Either.Optics                    as P
 
 
 -- $setup
+-- >>> import Control.Monad.Trans.Reader
+-- >>> import Control.Monad.Trans.State
 -- >>> import Data.Functor.Identity
+-- >>> import Optics.Operators
+-- >>> import Optics.Operators.State
+-- >>> import qualified Data.IntSet as IntSet
+-- >>> import qualified Data.Map as Map
+--

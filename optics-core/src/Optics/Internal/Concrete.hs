@@ -74,7 +74,7 @@ instance Choice (Market a b) where
   {-# INLINE right' #-}
 
 -- | Type to represent the components of an affine traversal.
-data AffineMarket a b is s t = AffineMarket (s -> b -> t) (s -> Either t a)
+data AffineMarket a b i s t = AffineMarket (s -> b -> t) (s -> Either t a)
 
 instance Profunctor (AffineMarket a b) where
   dimap f g (AffineMarket sbt seta) = AffineMarket

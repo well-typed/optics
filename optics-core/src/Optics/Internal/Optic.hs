@@ -68,8 +68,10 @@ type WithIx i = '[i]
 -- The parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
-newtype Optic (k :: *) (is :: [*]) s t a b =
-  Optic { getOptic :: forall p j. Profunctor p => Optic_ k p j (Curry is j) s t a b }
+newtype Optic (k :: *) (is :: [*]) s t a b = Optic
+  { getOptic :: forall p i. Profunctor p
+             => Optic_ k p i (Curry is i) s t a b
+  }
 
 -- | Common special case of 'Optic' where source and target types are equal.
 --
@@ -83,10 +85,10 @@ type Optic' k is s a = Optic k is s s a a
 -- The tag parameter @k@ is translated into constraints on @p@
 -- via the type family 'Constraints'.
 --
-type Optic_ k p i o s t a b = Constraints k p => Optic__ p i o s t a b
+type Optic_ k p i j s t a b = Constraints k p => Optic__ p i j s t a b
 
 -- | Optic internally as a profunctor transformation.
-type Optic__ p i o s t a b = p i a b -> p o s t
+type Optic__ p i j s t a b = p i a b -> p j s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
@@ -114,9 +116,9 @@ castOptic
 castOptic (Optic o) = Optic (implies' o)
   where
     implies'
-      :: forall p j
-      .  Optic_ srcKind  p j (Curry is j) s t a b
-      -> Optic_ destKind p j (Curry is j) s t a b
+      :: forall p i
+      .  Optic_ srcKind  p i (Curry is i) s t a b
+      -> Optic_ destKind p i (Curry is i) s t a b
     implies' x = implies (IsProxy :: IsProxy srcKind destKind p) x
 {-# INLINE castOptic #-}
 
@@ -145,10 +147,10 @@ infixl 9 %%
 Optic o %% Optic o' = Optic oo
   where
     -- unsafeCoerce to the rescue, for a proof see below.
-    oo :: forall p j. Profunctor p => Optic_ k p j (Curry ks j) s t a b
+    oo :: forall p i. Profunctor p => Optic_ k p i (Curry ks i) s t a b
     oo = (unsafeCoerce
-           :: Optic_ k p j (Curry is (Curry js j)) s t a b
-           -> Optic_ k p i (Curry ks j           ) s t a b)
+           :: Optic_ k p i (Curry is (Curry js i)) s t a b
+           -> Optic_ k p i (Curry ks i           ) s t a b)
       (o . o')
 {-# INLINE (%%) #-}
 

@@ -18,7 +18,7 @@ import Optics.Internal.Setter
 itraversed__
   :: (Traversing p, TraversableWithIndex i f)
   => Optic__ p j (i -> j) (f a) (f b) a b
-itraversed__ = conjoined' (wander traverse) (iwander itraverse)
+itraversed__ = conjoined__ (wander traverse) (iwander itraverse)
 {-# INLINE [0] itraversed__ #-}
 
 -- Because itraversed__ inlines late, GHC needs rewrite rules for all cases in
