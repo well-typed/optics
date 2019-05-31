@@ -226,14 +226,16 @@ import Data.Either.Optics                    as P
 -- An @'Iso'' S A@ is an isomorphism between @S@ and @A@, with the conversion
 -- functions given by 'view' and 'review'. For example, given
 --
--- >>> newtype Age = Age Int
+-- @
+-- newtype Age = Age Int
+-- @
 --
 -- there is an isomorphism between the newtype and its representation:
 --
 -- @
---        'coerced' :: 'Iso'' Age Int
--- 'view'   'coerced' :: Age -> Int
--- 'review' 'coerced' :: Int -> Age
+--        'coerced' :: 'Iso'' Age 'Int'
+-- 'view'   'coerced' :: Age -> 'Int'
+-- 'review' 'coerced' :: 'Int' -> Age
 -- @
 --
 -- === "Optics.Lens": generalised fields
@@ -280,10 +282,10 @@ import Data.Either.Optics                    as P
 -- is a prism for each constructor:
 --
 -- @
---         '_Left'  :: 'Prism'' (Either X Y) X
---         '_Right' :: 'Prism'' (Either X Y) Y
--- 'preview' '_Left'  :: Either X Y -> Maybe X
--- 'review'  '_Right' :: Y -> Either X Y
+--         '_Left'  :: 'Prism'' ('Either' X Y) X
+--         '_Right' :: 'Prism'' ('Either' X Y) Y
+-- 'preview' '_Left'  :: 'Either' X Y -> 'Maybe' X
+-- 'review'  '_Right' :: Y -> 'Either' X Y
 -- @
 --
 -- === "Optics.Traversal": multiple substructures
@@ -300,9 +302,9 @@ import Data.Either.Optics                    as P
 -- is a traversal that may return zero or one element:
 --
 -- @
---          'traversed' :: 'Traversal'' (Maybe X) X
--- 'toListOf' 'traversed' :: Maybe X -> [X]
--- 'over'     'traversed' :: (X -> X) -> Maybe X -> Maybe X
+--          'traversed' :: 'Traversal'' ('Maybe' X) X
+-- 'toListOf' 'traversed' :: 'Maybe' X -> [X]
+-- 'over'     'traversed' :: (X -> X) -> 'Maybe' X -> 'Maybe' X
 -- @
 --
 -- (In fact, traversals of at most one element are known as /affine/ traversals,
