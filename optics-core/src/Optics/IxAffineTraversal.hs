@@ -13,14 +13,14 @@ module Optics.IxAffineTraversal
     IxAffineTraversal
   , IxAffineTraversal'
 
-  -- * Van Laarhoven representation
+  -- * Subtyping
+  , An_AffineTraversal
+
+  -- * van Laarhoven encoding
   , IxAffineTraversalVL
   , IxAffineTraversalVL'
   , ixAtraversalVL
   , toIxAtraversalVL
-
-  -- * Subtyping
-  , An_AffineTraversal
 
   -- * Re-exports
   , module Optics.Optic
@@ -39,11 +39,11 @@ type IxAffineTraversal' i s a = Optic' An_AffineTraversal (WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed affine traversal.
 --
--- Note: this isn't exactly van Laarhoven representation as there is
--- no @Pointed@ class (which would be a superclass of 'Applicative'
--- that contains 'pure' but not '<*>'). You can interpret the first
--- argument as a dictionary of @Pointed@ that supplies the @point@
--- function (i.e. the implementation of 'pure').
+-- Note: this isn't exactly van Laarhoven representation as there is no
+-- @Pointed@ class (which would be a superclass of 'Applicative' that contains
+-- 'pure' but not '<*>'). You can interpret the first argument as a dictionary
+-- of @Pointed@ that supplies the @point@ function (i.e. the implementation of
+-- 'pure').
 --
 type IxAffineTraversalVL i s t a b =
   forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t

@@ -12,14 +12,14 @@ module Optics.IxLens
     IxLens
   , IxLens'
 
-  -- * Van Laarhoven representation
+  -- * Subtyping
+  , A_Lens
+
+  -- * van Laarhoven encoding
   , IxLensVL
   , IxLensVL'
   , ixLensVL
   , toIxLensVL
-
-  -- * Subtyping
-  , A_Lens
 
   -- * Re-exports
   , module Optics.Optic
