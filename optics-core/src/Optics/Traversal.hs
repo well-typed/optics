@@ -47,7 +47,6 @@ module Optics.Traversal
 
   -- * Additional introduction forms
   , traversed
-  , unsafeFiltered
 
   -- * Additional elimination forms
   , forOf
@@ -276,28 +275,6 @@ failover' o = \f s ->
 traversed :: Traversable t => Traversal (t a) (t b) a b
 traversed = Optic traversed__
 {-# INLINE traversed #-}
-
--- | Filter results of a 'Traversal' that don't satisfy a predicate.
---
--- /Note:/ This is /not/ a legal 'Traversal', unless you are very careful not to
--- invalidate the predicate on the target.
---
--- As a counter example, consider that given @evens = 'unsafeFiltered' 'even'@
--- the second 'Traversal' law is violated:
---
--- @
--- 'Optics.Setter.over' evens 'succ' '.' 'Optics.over' evens 'succ' '/=' 'Optics.Setter.over' evens ('succ' '.' 'succ')
--- @
---
--- So, in order for this to qualify as a legal 'Traversal' you can only use it
--- for actions that preserve the result of the predicate!
---
--- For a safe variant see 'Optics.IxTraversal.indices' (or 'filtered' for
--- read-only optics).
---
-unsafeFiltered :: (a -> Bool) -> Traversal' a a
-unsafeFiltered p = traversalVL $ \f a -> if p a then f a else pure a
-{-# INLINE unsafeFiltered #-}
 
 ----------------------------------------
 -- Traversal combinators

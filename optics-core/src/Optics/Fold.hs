@@ -42,7 +42,6 @@ module Optics.Fold
   , folding
   , foldring
   , unfolded
-  , filtered
 
   -- * Additional elimination forms
   -- | See also 'Data.Set.Optics.setOf', which constructs a 'Data.Set.Set' from a 'Fold'.
@@ -228,11 +227,6 @@ unfolded step = foldVL $ \f -> fix $ \loop b ->
     Just (a, b') -> f a *> loop b'
     Nothing      -> pure ()
 {-# INLINE unfolded #-}
-
--- | Filter results of a 'Fold' that don't satisfy a predicate.
-filtered :: (a -> Bool) -> Fold a a
-filtered p = foldVL $ \f a -> if p a then f a else pure ()
-{-# INLINE filtered #-}
 
 -- | This allows you to traverse the elements of a 'Fold' in the opposite order.
 backwards_
