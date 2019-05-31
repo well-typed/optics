@@ -102,6 +102,8 @@ instance Bifunctor p => Bicontravariant (Re p s t) where
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}
 
+  selfIndex__ = error "selfIndex__(Re) shouldn't be reachable"
+
 instance Strong p => Costrong (Re p s t) where
   unfirst  (Re p) = Re (p . first')
   unsecond (Re p) = Re (p . second')
