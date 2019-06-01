@@ -88,7 +88,10 @@ o <% o' = o % noIx o'
 
 -- | Remap the index.
 --
--- >>> itoListOf (reindex succ ifolded) "foo"
+-- >>> itoListOf (reindexed succ ifolded) "foo"
+-- [(1,'f'),(2,'o'),(3,'o')]
+--
+-- itoListOf (ifolded %& reindexed succ) "foo"
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
 reindexed
@@ -100,6 +103,10 @@ reindexed = icomposeN
 {-# INLINE reindexed #-}
 
 -- | Flatten indices obtained from two indexed optics.
+--
+-- >>> itoListOf (ifolded % ifolded %& icompose (,)) ["foo","bar"]
+-- [((0,0),'f'),((0,1),'o'),((0,2),'o'),((1,0),'b'),((1,1),'a'),((1,2),'r')]
+--
 icompose
   :: (i -> j -> ix)
   -> Optic k '[i, j]     s t a b
@@ -108,6 +115,10 @@ icompose = icomposeN
 {-# INLINE icompose #-}
 
 -- | Flatten indices obtained from three indexed optics.
+--
+-- >>> itoListOf (ifolded % ifolded % ifolded %& icompose3 (,,)) [["foo","bar"],["xyz"]]
+-- [((0,0,0),'f'),((0,0,1),'o'),((0,0,2),'o'),((0,1,0),'b'),((0,1,1),'a'),((0,1,2),'r'),((1,0,0),'x'),((1,0,1),'y'),((1,0,2),'z')]
+--
 icompose3
   :: (i1 -> i2 -> i3 -> ix)
   -> Optic k '[i1, i2, i3] s t a b

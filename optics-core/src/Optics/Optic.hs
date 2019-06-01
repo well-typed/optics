@@ -21,6 +21,7 @@ module Optics.Optic
   -- * Composition
   , (%)
   , (%%)
+  , (%&)
 
   -- * Labels
   , LabelOptic(..)

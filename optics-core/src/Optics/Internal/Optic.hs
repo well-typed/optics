@@ -26,6 +26,7 @@ module Optics.Internal.Optic
   , castOptic
   , (%)
   , (%%)
+  , (%&)
   , IsProxy(..)
   -- * Labels
   , LabelOptic(..)
@@ -36,6 +37,7 @@ module Optics.Internal.Optic
   , module Optics.Internal.Optic.TypeLevel
   ) where
 
+import Data.Function ((&))
 import Data.Proxy (Proxy (..))
 import Data.Type.Equality
 import GHC.OverloadedLabels
@@ -153,6 +155,21 @@ Optic o %% Optic o' = Optic oo
            -> Optic_ k p i (Curry ks i           ) s t a b)
       (o . o')
 {-# INLINE (%%) #-}
+
+-- | Flipped function application, specialised to optics and binding tightly.
+--
+-- Useful for post-composing optics transformations:
+--
+-- >>> toListOf (ifolded %& ifiltered (\i s -> length s <= i)) ["", "a","abc"]
+-- ["","a"]
+--
+infixl 9 %&
+(%&) :: Optic k is s t a b
+     -> (Optic k is s t a b -> Optic l js s' t' a' b')
+     -> Optic l js s' t' a' b'
+(%&) = (&)
+{-# INLINE (%&) #-}
+
 
 -- |
 --
