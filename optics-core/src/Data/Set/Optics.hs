@@ -1,3 +1,9 @@
+-- |
+-- Module: Data.Set.Optics
+-- Description: Optics for working with 'Set's.
+--
+-- This module defines optics for constructing and manipulating finite 'Set's.
+--
 module Data.Set.Optics
   ( setmapped
   , setOf

@@ -34,6 +34,11 @@ module Optics.AffineTraversal
   -- 'Optics.Setter.set'      ('atraversal' f g) ≡ 'flip' g
   -- @
 
+  -- * Additional introduction forms
+  -- | See 'Optics.Cons.Core._head', 'Optics.Cons.Core._tail',
+  -- 'Optics.Cons.Core._init' and 'Optics.Cons.Core._last' for
+  -- 'AffineTraversal's for container types.
+
   -- * Additional elimination forms
   , withAffineTraversal
 

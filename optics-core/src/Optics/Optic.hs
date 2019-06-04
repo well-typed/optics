@@ -3,8 +3,22 @@
 -- Module: Optics.Optic
 -- Description: Common abstraction for all kinds of optics.
 --
--- This module defines the common 'Optic' type, the subtyping relationships
--- between different kinds of optics, and composition of optics.
+-- This module provides core definitions:
+--
+-- * an opaque 'Optic' type, which is parameterised over a type representing an
+--   optic kind (instantiated with tag types such as 'A_Lens');
+--
+-- * the optic composition operator ('%');
+--
+-- * the subtyping relation 'Is' with an accompanying 'castOptic' function to
+--   convert an optic kind;
+--
+-- * the 'Join' operation used to find the optic kind resulting from a
+--   composition.
+--
+-- Each optic kind is identified by a "tag type" (such as 'A_Lens'), which is an
+-- empty data type.  The type of the actual optics (such as 'Optics.Lens.Lens')
+-- is obtained by applying 'Optic' to the tag type.
 --
 -- See the @Optics@ module in the main @optics@ package for overview
 -- documentation.

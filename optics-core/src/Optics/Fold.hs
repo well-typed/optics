@@ -45,6 +45,7 @@ module Optics.Fold
   , filtered
 
   -- * Additional elimination forms
+  -- | See also 'Data.Set.Optics.setOf', which constructs a 'Data.Set.Set' from a 'Fold'.
   , has
   , hasn't
   , headOf

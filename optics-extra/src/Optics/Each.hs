@@ -1,3 +1,10 @@
+-- |
+-- Module: Optics.Each
+-- Description: An 'IxTraversal' for 'each' element of a (potentially monomorphic) container.
+--
+-- This module defines the 'Each' class, which provides an 'IxTraversal' that
+-- extracts 'each' element of a (potentially monomorphic) container.
+--
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Optics.Each

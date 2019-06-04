@@ -1,5 +1,9 @@
 {-# LANGUAGE PolyKinds #-}
--- | Note: "GHC.Generics" exports a number of names that collide with "Optics"
+-- |
+-- Module: GHC.Generics.Optics
+-- Description: Optics for types defined in "GHC.Generics".
+--
+-- Note: "GHC.Generics" exports a number of names that collide with "Optics"
 -- (at least 'GHC.Generics.to').
 --
 -- You can use hiding or imports to mitigate this to an extent, and the
@@ -8,6 +12,7 @@
 -- @
 -- import "Optics"
 -- import "GHC.Generics" hiding (to)
+-- import "GHC.Generics.Optics"
 -- @
 --
 -- You can use 'generic' to replace 'GHC.Generics.from' and 'GHC.Generics.to'

@@ -41,6 +41,9 @@ module Optics.Prism
   -- @
 
   -- * Additional introduction forms
+  -- | See "Data.Maybe.Optics" and "Data.Either.Optics" for 'Prism's for the
+  -- corresponding types, and 'Optics.Cons.Core._Cons', 'Optics.Cons.Core._Snoc'
+  -- and 'Optics.Empty.Core._Empty' for 'Prism's for container types.
   , prism'
   , only
   , nearly

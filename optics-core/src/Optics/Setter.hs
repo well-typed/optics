@@ -47,6 +47,7 @@ module Optics.Setter
   --     @
 
   -- * Additional introduction forms
+  -- | See also 'Data.Set.Optics.setmapped', which changes the elements of a 'Data.Set.Set'.
   , mapped
 
   -- * Additional elimination forms

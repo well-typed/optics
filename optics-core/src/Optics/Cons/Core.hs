@@ -1,3 +1,14 @@
+-- |
+-- Module: Optics.Cons.Core
+-- Description: Optics to access the left or right element of a container.
+--
+-- This module defines the 'Cons' and 'Snoc' classes, which provide 'Prism's for
+-- the leftmost and rightmost elements of a container, respectively.
+--
+-- Note that orphan instances for these classes are defined in the @Optics.Cons@
+-- module from @optics-extra@, so if you are not simply depending on @optics@
+-- you may wish to import that module instead.
+--
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
 module Optics.Cons.Core
@@ -41,6 +52,11 @@ import Optics.Review
 infixr 5 <|, `cons`
 infixl 5 |>, `snoc`
 
+-- | Pattern synonym for matching on the leftmost element of a structure.
+--
+-- >>> case ['a','b','c'] of (x :< _) -> x
+-- 'a'
+--
 pattern (:<) :: forall s a. Cons s s a a => a -> s -> s
 pattern (:<) a s <- (preview _Cons -> Just (a, s)) where
   (:<) a s = review _Cons (a, s)
@@ -48,6 +64,11 @@ pattern (:<) a s <- (preview _Cons -> Just (a, s)) where
 infixr 5 :<
 infixl 5 :>
 
+-- | Pattern synonym for matching on the rightmost element of a structure.
+--
+-- >>> case ['a','b','c'] of (_ :> x) -> x
+-- 'c'
+--
 pattern (:>) :: forall s a. Snoc s s a a => s -> a -> s
 pattern (:>) s a <- (preview _Snoc -> Just (s, a)) where
   (:>) a s = review _Snoc (a, s)
