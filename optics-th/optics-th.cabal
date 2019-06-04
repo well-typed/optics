@@ -6,7 +6,7 @@ build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Michael Sloan, Eric Mertens, Edward Kmett, Andrzej Rybczak
 cabal-version: >=1.10
-tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
+tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1
 synopsis:      Optics for generics-sop, and using generics-sop
 category:      Data, Optics, Lenses, Generics
 description:
