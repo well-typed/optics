@@ -3,6 +3,7 @@ packages:
   optics-core/*.cabal
   optics-extra/*.cabal
   optics-sop/*.cabal
+  optics-template-haskell/*.cabal
   optics-th/*.cabal
   optics-vl/*.cabal
   generic-optics/*.cabal
