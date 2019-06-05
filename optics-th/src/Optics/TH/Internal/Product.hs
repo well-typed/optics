@@ -31,7 +31,7 @@ import qualified Language.Haskell.TH.Datatype as D
 import Data.Either.Optics
 import Data.Tuple.Optics
 import Data.Set.Optics
-import Language.Haskell.TH.Optics
+import Language.Haskell.TH.Optics.Internal
 import Optics.Core hiding (cons)
 import Optics.TH.Internal.Utils
 

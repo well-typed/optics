@@ -10,11 +10,9 @@ tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1
 synopsis:      Optics for generics-sop, and using generics-sop
 category:      Data, Optics, Lenses, Generics
 description:
-  This package provides:
+  This package provides machinery to construct optics using @TemplateHaskell@.
   .
-  * optics to work with @template-haskell@ types,
-  .
-  * machinery to construct optics using @TemplateHaskell@
+  See the @optics-template-haskell@ package for optics to work with @template-haskell@ types.
 
 library
   default-language: Haskell2010
@@ -29,11 +27,12 @@ library
     , th-abstraction    >=0.2.1     && <0.4
     , transformers      >=0.5       && <0.6
 
-  exposed-modules:  Language.Haskell.TH.Optics
-                    Optics.TH
+  exposed-modules:  Optics.TH
                     Optics.TH.Internal.Utils
                     Optics.TH.Internal.Product
                     Optics.TH.Internal.Sum
+
+  other-modules:    Language.Haskell.TH.Optics.Internal
 
 test-suite optics-th-tests
   default-language: Haskell2010

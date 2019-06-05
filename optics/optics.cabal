@@ -96,7 +96,6 @@ library
                     , Data.Vector.Generic.Optics
                     , Data.Vector.Optics
                     , GHC.Generics.Optics
-                    , Language.Haskell.TH.Optics
 
 test-suite optics-tests
   default-language: Haskell2010
