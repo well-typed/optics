@@ -188,7 +188,7 @@ instance IxOptic A_Traversal s t a b where
 
 instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
   -- Reinterpret the optic as unindexed one for conjoined to work.
-  noIx o = mkFold (traverseOf_ o)
+  noIx o = foldVL (traverseOf_ o)
   {-# INLINE noIx #-}
 
 instance IxOptic A_Setter s t a b where
