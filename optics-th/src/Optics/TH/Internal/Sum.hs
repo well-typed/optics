@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
 module Optics.TH.Internal.Sum
   ( makePrisms
   , makePrismLabels
