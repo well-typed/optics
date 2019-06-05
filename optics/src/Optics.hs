@@ -106,6 +106,9 @@ module Optics
   --
   , module Optics.Re
 
+  -- ** ReadOnly
+  , module Optics.ReadOnly
+
   -- ** View
 
   -- | A generalized view function 'gview', which returns a single result (like
@@ -187,6 +190,7 @@ import Optics.Each
 import Optics.Empty
 import Optics.Indexed
 import Optics.Re
+import Optics.ReadOnly
 import Optics.View
 import Optics.Zoom
 

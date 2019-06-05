@@ -75,6 +75,7 @@ library
                     , Optics.Operators.State
                     , Optics.Passthrough
                     , Optics.Re
+                    , Optics.ReadOnly
                     , Optics.View
                     , Optics.Zoom
 

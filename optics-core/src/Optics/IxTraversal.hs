@@ -71,7 +71,6 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.State
 import Data.Functor.Identity
 
-import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.IxTraversal
 import Optics.Internal.Profunctor
@@ -80,6 +79,7 @@ import Optics.Internal.Utils
 import Optics.Optic
 import Optics.IxLens
 import Optics.IxFold
+import Optics.ReadOnly
 import Optics.Traversal
 
 -- | Type synonym for a type-modifying indexed traversal.
@@ -302,11 +302,9 @@ ipartsOf
   => Optic k is s t a a
   -> IxLens [i] s t [a] [a]
 ipartsOf o = conjoined (partsOf $ traversalVL $ traverseOf o) $ ixLensVL $ \f s ->
-  evalState (traverseOf o update s) <$> uncurry f (unzip $ itoListOf fo s)
+  evalState (traverseOf o update s)
+    <$> uncurry f (unzip $ itoListOf (getting $ castOptic @A_Traversal o) s)
   where
-    fo :: IxFold i s a
-    fo = Optic $ rphantom . getOptic (castOptic @A_Traversal o)
-
     update a = get >>= \case
       []       ->            pure a
       a' : as' -> put as' >> pure a'
