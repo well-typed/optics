@@ -25,6 +25,9 @@ module Optics.AffineFold
   -- 'preview' ('afolding' f) ≡ f
   -- @
 
+  -- * Additional introduction forms
+  , filtered
+
   -- * Additional elimination forms
   , isn't
 
@@ -76,6 +79,11 @@ previews o = \f -> runForgetM $
 afolding :: (s -> Maybe a) -> AffineFold s a
 afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right')
 {-# INLINE afolding #-}
+
+-- | Filter result(s) of a fold that don't satisfy a predicate.
+filtered :: (a -> Bool) -> AffineFold a a
+filtered p = Optic (visit (\point f a -> if p a then f a else point a))
+{-# INLINE filtered #-}
 
 -- | Try the first 'AffineFold'. If it returns no entry, try the second one.
 --

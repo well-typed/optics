@@ -38,6 +38,7 @@ module Optics.AffineTraversal
   -- | See 'Optics.Cons.Core._head', 'Optics.Cons.Core._tail',
   -- 'Optics.Cons.Core._init' and 'Optics.Cons.Core._last' for
   -- 'AffineTraversal's for container types.
+  , unsafeFiltered
 
   -- * Additional elimination forms
   , withAffineTraversal
@@ -133,3 +134,25 @@ toAtraversalVL o point =
 matching :: Is k An_AffineTraversal => Optic k is s t a b -> s -> Either t a
 matching o = withAffineTraversal o $ \match _ -> match
 {-# INLINE matching #-}
+
+-- | Filter result(s) of a traversal that don't satisfy a predicate.
+--
+-- /Note:/ This is /not/ a legal 'Optics.Traversal.Traversal', unless you are
+-- very careful not to invalidate the predicate on the target.
+--
+-- As a counter example, consider that given @evens = 'unsafeFiltered' 'even'@
+-- the second 'Optics.Traversal.Traversal' law is violated:
+--
+-- @
+-- 'Optics.Setter.over' evens 'succ' '.' 'Optics.over' evens 'succ' '/=' 'Optics.Setter.over' evens ('succ' '.' 'succ')
+-- @
+--
+-- So, in order for this to qualify as a legal 'Optics.Traversal.Traversal' you
+-- can only use it for actions that preserve the result of the predicate!
+--
+-- For a safe variant see 'Optics.IxTraversal.indices' (or
+-- 'Optics.AffineFold.filtered' for read-only optics).
+--
+unsafeFiltered :: (a -> Bool) -> AffineTraversal' a a
+unsafeFiltered p = atraversalVL (\point f a -> if p a then f a else point a)
+{-# INLINE unsafeFiltered #-}
