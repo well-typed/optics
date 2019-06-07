@@ -1,4 +1,4 @@
-name:          optics-template-haskell
+name:          template-haskell-optics
 version:       0.1
 license:       BSD3
 license-file:  LICENSE
