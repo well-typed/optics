@@ -14,6 +14,7 @@ module Optics.Operators
   , (#)
   , (%~)
   , (.~)
+  , (?~)
   )
   where
 
@@ -63,3 +64,20 @@ infixr 4 %~
 {-# INLINE (.~) #-}
 
 infixr 4 .~
+
+-- | Set the target of a 'Setter' to 'Just' a value.
+--
+-- @
+-- o '?~' b ≡ 'set' o ('Just' b)
+-- @
+--
+-- >>> Nothing & equality ?~ 'x'
+-- Just 'x'
+--
+-- >>> Map.empty & at 3 ?~ 'x'
+-- fromList [(3,'x')]
+(?~) :: Is k A_Setter => Optic k is s t a (Maybe b) -> b -> s -> t
+(?~) = \o -> set o . Just
+{-# INLINE (?~) #-}
+
+infixr 4 ?~
