@@ -135,6 +135,7 @@ benchmark folds
                , bytestring
                , containers
                , criterion
+               , lens
                , optics
                , unordered-containers
                , vector
@@ -150,6 +151,7 @@ benchmark traversals
                , bytestring
                , containers
                , criterion
+               , lens
                , optics
                , transformers
                , unordered-containers
