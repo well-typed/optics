@@ -78,7 +78,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 import Optics.Internal.Utils
 import Optics.Optic
-import Optics.Lens
+import Optics.IxLens
 import Optics.IxFold
 import Optics.Traversal
 
@@ -295,14 +295,14 @@ element :: Traversable f => Int -> IxTraversal' Int (f a) a
 element = elementOf traversed
 {-# INLINE element #-}
 
--- | An indexed version of 'partsOf' that receives the list of values paired
--- with their indices.
+-- | An indexed version of 'partsOf' that receives the entire list of indices as
+-- its indices.
 ipartsOf
   :: forall k is i s t a. (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
-  -> Lens s t [(i, a)] [a]
-ipartsOf o = lensVL $ \f s ->
-  evalState (traverseOf o update s) <$> f (itoListOf fo s)
+  -> IxLens [i] s t [a] [a]
+ipartsOf o = conjoined (partsOf $ traversalVL $ traverseOf o) $ ixLensVL $ \f s ->
+  evalState (traverseOf o update s) <$> uncurry f (unzip $ itoListOf fo s)
   where
     fo :: IxFold i s a
     fo = Optic $ rphantom . getOptic (castOptic @A_Traversal o)

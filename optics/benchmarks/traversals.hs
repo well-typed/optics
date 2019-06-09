@@ -78,6 +78,16 @@ main = defaultMainWith config
       , bench "elements"        $ nf (iover (elements $ const True) (+)) v
       , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) v
       ]
+    , bgroup "partsOf"
+      [ bench "partsOf"        $ nf (over (partsOf traversed) reverse) v
+      , bench "partsOf/lens"   $ nf (L.over (L.partsOf traverse) reverse) v
+      , bench "ipartsOf"       $ nf (iover (ipartsOf itraversed) (\is -> reverse . zipWith (+) is)) v
+      , bench "ipartsOf/lens"  $ nf (L.iover (L.ipartsOf L.itraversed) (\is -> reverse . zipWith (+) is)) v
+      ]
+    , bgroup "indices"
+      [ bench "indices"         $ nf (iover (itraversed %& indices even) (+)) v
+      , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) v
+      ]
     ]
   , bgroup "unboxed-vector"
     [ bgroup "map"
@@ -135,6 +145,16 @@ main = defaultMainWith config
       , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) s
       , bench "elements"        $ nf (iover (elements $ const True) (+)) s
       , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) s
+      ]
+    , bgroup "partsOf"
+      [ bench "partsOf"        $ nf (over (partsOf traversed) reverse) s
+      , bench "partsOf/lens"   $ nf (L.over (L.partsOf traverse) reverse) s
+      , bench "ipartsOf"       $ nf (iover (ipartsOf itraversed) (\is -> reverse . zipWith (+) is)) s
+      , bench "ipartsOf/lens"  $ nf (L.iover (L.ipartsOf L.itraversed) (\is -> reverse . zipWith (+) is)) s
+      ]
+    , bgroup "indices"
+      [ bench "indices"         $ nf (iover (itraversed %& indices even) (+)) s
+      , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) s
       ]
     ]
   , bgroup "bytestring"
@@ -230,6 +250,16 @@ main = defaultMainWith config
       , bench "elements"        $ nf (iover (elements $ const True) (+)) l
       , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) l
       ]
+    , bgroup "partsOf"
+      [ bench "partsOf"        $ nf (over (partsOf traversed) reverse) l
+      , bench "partsOf/lens"   $ nf (L.over (L.partsOf traverse) reverse) l
+      , bench "ipartsOf"       $ nf (iover (ipartsOf itraversed) (\is -> reverse . zipWith (+) is)) l
+      , bench "ipartsOf/lens"  $ nf (L.iover (L.ipartsOf L.itraversed) (\is -> reverse . zipWith (+) is)) l
+      ]
+    , bgroup "indices"
+      [ bench "indices"         $ nf (iover (itraversed %& indices even) (+)) l
+      , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) l
+      ]
     ]
   , bgroup "intmap"
     [ bgroup "traverse"
@@ -276,6 +306,16 @@ main = defaultMainWith config
       , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) im
       , bench "elements"        $ nf (iover (elements $ const True) (+)) im
       , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) im
+      ]
+    , bgroup "partsOf"
+      [ bench "partsOf"        $ nf (over (partsOf traversed) reverse) im
+      , bench "partsOf/lens"   $ nf (L.over (L.partsOf traverse) reverse) im
+      , bench "ipartsOf"       $ nf (iover (ipartsOf itraversed) (\is -> reverse . zipWith (+) is)) im
+      , bench "ipartsOf/lens"  $ nf (L.iover (L.ipartsOf L.itraversed) (\is -> reverse . zipWith (+) is)) im
+      ]
+    , bgroup "indices"
+      [ bench "indices"         $ nf (iover (itraversed %& indices even) (+)) im
+      , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) im
       ]
     ]
   , bgroup "map"
@@ -324,6 +364,16 @@ main = defaultMainWith config
       , bench "elements"        $ nf (iover (elements $ const True) (+)) m
       , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) m
       ]
+    , bgroup "partsOf"
+      [ bench "partsOf"        $ nf (over (partsOf traversed) reverse) m
+      , bench "partsOf/lens"   $ nf (L.over (L.partsOf traverse) reverse) m
+      , bench "ipartsOf"       $ nf (iover (ipartsOf itraversed) (\is -> reverse . zipWith (+) is)) m
+      , bench "ipartsOf/lens"  $ nf (L.iover (L.ipartsOf L.itraversed) (\is -> reverse . zipWith (+) is)) m
+      ]
+    , bgroup "indices"
+      [ bench "indices"         $ nf (iover (itraversed %& indices even) (+)) m
+      , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) m
+      ]
     ]
   , bgroup "hash map"
     [ bgroup "traverse"
@@ -370,6 +420,16 @@ main = defaultMainWith config
       , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) h
       , bench "elements"        $ nf (iover (elements $ const True) (+)) h
       , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) h
+      ]
+    , bgroup "partsOf"
+      [ bench "partsOf"        $ nf (over (partsOf traversed) reverse) h
+      , bench "partsOf/lens"   $ nf (L.over (L.partsOf traverse) reverse) h
+      , bench "ipartsOf"       $ nf (iover (ipartsOf itraversed) (\is -> reverse . zipWith (+) is)) h
+      , bench "ipartsOf/lens"  $ nf (L.iover (L.ipartsOf L.itraversed) (\is -> reverse . zipWith (+) is)) h
+      ]
+    , bgroup "indices"
+      [ bench "indices"         $ nf (iover (itraversed %& indices even) (+)) h
+      , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) h
       ]
     ]
   ]
