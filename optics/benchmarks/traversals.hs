@@ -72,6 +72,12 @@ main = defaultMainWith config
       , bench "imapped"         $ nf (iover imapped        (\i x -> x + i +100)) v
       , bench "imapped/lens"    $ nf (L.iover L.imapped    (\i x -> x + i +100)) v
       ]
+    , bgroup "elements"
+      [ bench "itraversed"      $ nf (iover itraversed (+)) v
+      , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) v
+      , bench "elements"        $ nf (iover (elements $ const True) (+)) v
+      , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) v
+      ]
     ]
   , bgroup "unboxed-vector"
     [ bgroup "map"
@@ -123,6 +129,12 @@ main = defaultMainWith config
       , bench "itraversed/lens" $ nf (L.iover L.itraversed (\i x -> x + i +100)) s
       , bench "imapped"         $ nf (iover imapped        (\i x -> x + i +100)) s
       , bench "imapped/lens"    $ nf (L.iover L.imapped    (\i x -> x + i +100)) s
+      ]
+    , bgroup "elements"
+      [ bench "itraversed"      $ nf (iover itraversed (+)) s
+      , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) s
+      , bench "elements"        $ nf (iover (elements $ const True) (+)) s
+      , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) s
       ]
     ]
   , bgroup "bytestring"
@@ -212,6 +224,12 @@ main = defaultMainWith config
       , bench "imapped"         $ nf (iover imapped (\i x -> x + i +100)) l
       , bench "imapped/lens"    $ nf (L.iover L.imapped (\i x -> x + i +100)) l
       ]
+    , bgroup "elements"
+      [ bench "itraversed"      $ nf (iover itraversed (+)) l
+      , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) l
+      , bench "elements"        $ nf (iover (elements $ const True) (+)) l
+      , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) l
+      ]
     ]
   , bgroup "intmap"
     [ bgroup "traverse"
@@ -252,6 +270,12 @@ main = defaultMainWith config
       , bench "itraversed/lens" $ nf (L.iover L.itraversed (\i x -> x + i +100)) im
       , bench "imapped"         $ nf (iover imapped        (\i x -> x + i +100)) im
       , bench "imapped/lens"    $ nf (L.iover L.imapped    (\i x -> x + i +100)) im
+      ]
+    , bgroup "elements"
+      [ bench "itraversed"      $ nf (iover itraversed (+)) im
+      , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) im
+      , bench "elements"        $ nf (iover (elements $ const True) (+)) im
+      , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) im
       ]
     ]
   , bgroup "map"
@@ -294,6 +318,12 @@ main = defaultMainWith config
       , bench "imapped"         $ nf (iover imapped        (\i x -> x + i +100)) m
       , bench "imapped/lens"    $ nf (L.iover L.imapped    (\i x -> x + i +100)) m
       ]
+    , bgroup "elements"
+      [ bench "itraversed"      $ nf (iover itraversed (+)) m
+      , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) m
+      , bench "elements"        $ nf (iover (elements $ const True) (+)) m
+      , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) m
+      ]
     ]
   , bgroup "hash map"
     [ bgroup "traverse"
@@ -334,6 +364,12 @@ main = defaultMainWith config
       , bench "itraversed/lens" $ nf (L.iover L.itraversed (\i x -> x + i +100)) h
       , bench "imapped"         $ nf (iover imapped        (\i x -> x + i +100)) h
       , bench "imapped/lens"    $ nf (L.iover L.imapped    (\i x -> x + i +100)) h
+      ]
+    , bgroup "elements"
+      [ bench "itraversed"      $ nf (iover itraversed (+)) h
+      , bench "itraversed/lens" $ nf (L.iover L.itraversed (+)) h
+      , bench "elements"        $ nf (iover (elements $ const True) (+)) h
+      , bench "elements/lens"   $ nf (L.iover (L.elements $ const True) (+)) h
       ]
     ]
   ]
