@@ -102,7 +102,7 @@ import Optics.TH.Internal.Sum
 --   | Dog { animalAge    :: Int
 --         , animalAbsurd :: forall a b. a -> b
 --         }
--- makeFieldLabels ''Animmal
+-- makeFieldLabels ''Animal
 -- @
 --
 -- will create
