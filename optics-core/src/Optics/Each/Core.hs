@@ -143,6 +143,16 @@ instance
                 <*> f 5 a5 <*> f 6 a6 <*> f 7 a7 <*> f 8 a8 <*> f 9 a9
   {-# INLINE[1] each #-}
 
+-- | @'each' :: 'IxTraversal' ('Either' () ()) ('Either' a a) ('Either' b b) a
+-- b@
+instance
+  (a ~ a', b ~ b'
+  ) => Each (Either () ()) (Either a a') (Either b b') a b where
+  each = ixTraversalVL $ \f -> \case
+    Left  a -> Left  <$> f (Left ())  a
+    Right a -> Right <$> f (Right ()) a
+  {-# INLINE[1] each #-}
+
 -- | @'each' :: ('RealFloat' a, 'RealFloat' b) => 'IxTraversal' (Either () ())
 -- ('Complex' a) ('Complex' b) a b@
 instance Each (Either () ()) (Complex a) (Complex b) a b where
