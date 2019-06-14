@@ -118,13 +118,14 @@ install:
     echo 'packages: "optics-extra"' >> cabal.project
     echo 'packages: "optics-sop"' >> cabal.project
     echo 'packages: "optics-th"' >> cabal.project
+    echo 'packages: "optics-vl"' >> cabal.project
     echo 'packages: "generic-optics"' >> cabal.project
     echo 'packages: "metametapost"' >> cabal.project
   - |
     echo "constraints:                 aeson==1.4.3.0"       >> cabal.project
     echo "constraints:                 statistics==0.15.0.0" >> cabal.project
     echo "write-ghc-environment-files: always"               >> cabal.project
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "optics/configure.ac" ]; then (cd "optics" && autoreconf -i); fi
@@ -132,6 +133,7 @@ install:
   - if [ -f "optics-extra/configure.ac" ]; then (cd "optics-extra" && autoreconf -i); fi
   - if [ -f "optics-sop/configure.ac" ]; then (cd "optics-sop" && autoreconf -i); fi
   - if [ -f "optics-th/configure.ac" ]; then (cd "optics-th" && autoreconf -i); fi
+  - if [ -f "optics-vl/configure.ac" ]; then (cd "optics-vl" && autoreconf -i); fi
   - if [ -f "generic-optics/configure.ac" ]; then (cd "generic-optics" && autoreconf -i); fi
   - if [ -f "metametapost/configure.ac" ]; then (cd "metametapost" && autoreconf -i); fi
   - ${CABAL} v2-freeze -w ${HC} ${TEST} ${BENCH} | color_cabal_output
@@ -156,13 +158,14 @@ script:
     echo 'packages: "optics-extra-*/*.cabal"' >> cabal.project
     echo 'packages: "optics-sop-*/*.cabal"' >> cabal.project
     echo 'packages: "optics-th-*/*.cabal"' >> cabal.project
+    echo 'packages: "optics-vl-*/*.cabal"' >> cabal.project
     echo 'packages: "generic-optics-*/*.cabal"' >> cabal.project
     echo 'packages: "metametapost-*/*.cabal"' >> cabal.project
   - |
     echo "constraints:                 aeson==1.4.3.0"       >> cabal.project
     echo "constraints:                 statistics==0.15.0.0" >> cabal.project
     echo "write-ghc-environment-files: always"               >> cabal.project
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # Building...
@@ -179,6 +182,7 @@ script:
   - (cd optics-extra-* && ${CABAL} -vnormal check)
   - (cd optics-sop-* && ${CABAL} -vnormal check)
   - (cd optics-th-* && ${CABAL} -vnormal check)
+  - (cd optics-vl-* && ${CABAL} -vnormal check)
   - (cd generic-optics-* && ${CABAL} -vnormal check)
   - (cd metametapost-* && ${CABAL} -vnormal check)
   # haddock...

@@ -62,6 +62,14 @@ module Optics.IxTraversal
   -- * Subtyping
   , A_Traversal
 
+  -- * van Laarhoven encoding
+  -- | The van Laarhoven representation of an 'IxTraversal' directly expresses
+  -- how it lifts an effectful operation @I -> A -> F B@ on elements and their
+  -- indices to act on structures @S -> F T@.  Thus 'itraverseOf' converts an
+  -- 'IxTraversal' to a 'IxTraversalVL'.
+  , IxTraversalVL
+  , IxTraversalVL'
+
   -- * Re-exports
   , TraversableWithIndex(..)
   , module Optics.Optic
@@ -87,6 +95,13 @@ type IxTraversal i s t a b = Optic A_Traversal (WithIx i) s t a b
 
 -- | Type synonym for a type-preserving indexed traversal.
 type IxTraversal' i s a = Optic' A_Traversal (WithIx i) s a
+
+-- | Type synonym for a type-modifying van Laarhoven indexed traversal.
+type IxTraversalVL i s t a b =
+  forall f. Applicative f => (i -> a -> f b) -> s -> f t
+
+-- | Type synonym for a type-preserving van Laarhoven indexed traversal.
+type IxTraversalVL' i s a = IxTraversalVL i s s a a
 
 -- | Build an indexed traversal from the van Laarhoven representation.
 --
