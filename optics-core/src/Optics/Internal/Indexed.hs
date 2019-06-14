@@ -120,19 +120,24 @@ type family ShowTypes (types :: [*]) :: ErrorMessage where
 
 ----------------------------------------
 
-newtype Indexing f a = Indexing { runIndexing :: Int -> (Int, f a) }
+data IntT f a = IntT {-# UNPACK #-} !Int (f a)
+
+unIntT :: IntT f a -> f a
+unIntT (IntT _ fa) = fa
+
+newtype Indexing f a = Indexing { runIndexing :: Int -> IntT f a }
 
 instance Functor f => Functor (Indexing f) where
   fmap f (Indexing m) = Indexing $ \i -> case m i of
-    (j, x) -> (j, fmap f x)
+    IntT j x -> IntT j (fmap f x)
   {-# INLINE fmap #-}
 
 instance Applicative f => Applicative (Indexing f) where
-  pure x = Indexing $ \i -> (i, pure x)
+  pure x = Indexing $ \i -> IntT i (pure x)
   {-# INLINE pure #-}
   Indexing mf <*> Indexing ma = Indexing $ \i -> case mf i of
-    (j, ff) -> case ma j of
-       ~(k, fa) -> (k, ff <*> fa)
+    IntT j ff -> case ma j of
+       IntT k fa -> IntT k (ff <*> fa)
   {-# INLINE (<*>) #-}
 
 -- | Index a traversal by position of visited elements.
@@ -140,7 +145,7 @@ indexing
   :: ((a -> Indexing f b) -> s -> Indexing f t)
   -> ((Int -> a -> f b) -> s -> f t)
 indexing l iafb s =
-  snd $ runIndexing (l (\a -> Indexing (\i -> i `seq` (i + 1, iafb i a))) s) 0
+  unIntT $ runIndexing (l (\a -> Indexing (\i -> IntT (i + 1) (iafb i a))) s) 0
 {-# INLINE indexing #-}
 
 ----------------------------------------
