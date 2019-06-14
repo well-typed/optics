@@ -7,8 +7,9 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
 -- | Class for read-write optics that have their read-only counterparts.
-class ToReadOnly k where
-  -- | Turn read-write optic into its read-only counterpart.
+class ToReadOnly k s t a b where
+  -- | Turn read-write optic into its read-only counterpart (or leave read-only
+  -- optics as-is).
   --
   -- This is useful when you have an @optic :: Optic k is s t a b@ of read-write
   -- kind @k@ such that @s@, @t@, @a@, @b@ are rigid, there is no evidence that
@@ -32,24 +33,40 @@ class ToReadOnly k where
   -- @
   getting :: Optic k is s t a b -> Optic' (Join A_Getter k) is s a
 
-instance ToReadOnly An_Iso where
+instance ToReadOnly An_Iso s t a b where
   getting o = Optic (getting__ o)
   {-# INLINE getting #-}
 
-instance ToReadOnly A_Lens where
+instance ToReadOnly A_Lens s t a b where
   getting o = Optic (getting__ o)
   {-# INLINE getting #-}
 
-instance ToReadOnly A_Prism where
+instance ToReadOnly A_Prism s t a b where
   getting o = Optic (getting__ o)
   {-# INLINE getting #-}
 
-instance ToReadOnly An_AffineTraversal where
+instance ToReadOnly An_AffineTraversal s t a b where
   getting o = Optic (getting__ o)
   {-# INLINE getting #-}
 
-instance ToReadOnly A_Traversal where
+instance ToReadOnly A_Traversal s t a b where
   getting o = Optic (getting__ o)
+  {-# INLINE getting #-}
+
+instance ToReadOnly A_PrismaticGetter s t a b where
+  getting o = Optic (getting__ o)
+  {-# INLINE getting #-}
+
+instance (s ~ t, a ~ b) => ToReadOnly A_Getter s t a b where
+  getting = id
+  {-# INLINE getting #-}
+
+instance (s ~ t, a ~ b) => ToReadOnly An_AffineFold s t a b where
+  getting = id
+  {-# INLINE getting #-}
+
+instance (s ~ t, a ~ b) => ToReadOnly A_Fold s t a b where
+  getting = id
   {-# INLINE getting #-}
 
 -- | Internal implementation of 'getting'.
