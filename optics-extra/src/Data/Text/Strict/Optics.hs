@@ -34,14 +34,10 @@ import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
--- $setup
--- >>> :set -XOverloadedStrings
--- >>> import Optics.Core
-
 -- | This isomorphism can be used to 'pack' (or 'unpack') strict 'Strict.Text'.
 --
 --
--- >>> "hello"^.packed -- :: Text
+-- >>> "hello" ^. packed -- :: Text
 -- "hello"
 --
 -- @
@@ -56,7 +52,7 @@ packed = iso pack unpack
 
 -- | This isomorphism can be used to 'unpack' (or 'pack') strict 'Strict.Text'.
 --
--- >>> "hello"^.unpacked -- :: String
+-- >>> Strict.pack "hello" ^. unpacked -- :: String
 -- "hello"
 --
 -- This 'Iso' is provided for notational convenience rather than out of great
@@ -96,13 +92,13 @@ builder = iso fromText (toStrict . toLazyText)
 
 -- | Traverse the individual characters in strict 'Strict.Text'.
 --
--- >>> anyOf text (=='o') "hello"
+-- >>> anyOf text (=='o') (Strict.pack "hello")
 -- True
 --
 -- When the type is unambiguous, you can also use the more general 'each'.
 --
 -- @
--- 'text' ≡ 'unpacked' . 'traversed'
+-- 'text' ≡ 'unpacked' % 'traversed'
 -- 'text' ≡ 'each'
 -- @
 --
@@ -114,7 +110,7 @@ text = Optic text__
 
 -- | Encode\/Decode a strict 'Strict.Text' to\/from strict 'ByteString', via UTF-8.
 --
--- >>> utf8 # "☃"
+-- >>> utf8 # Strict.pack "☃"
 -- "\226\152\131"
 utf8 :: Prism' ByteString Text
 utf8 = prism' encodeUtf8 (preview _Right . decodeUtf8')

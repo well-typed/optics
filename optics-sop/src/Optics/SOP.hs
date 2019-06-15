@@ -16,12 +16,12 @@
 -- >>> import qualified GHC.Generics as GHC
 -- >>> import qualified Generics.SOP as SOP
 -- >>> data T = MkT { _foo :: Int, _bar :: Bool } deriving (GHC.Generic, SOP.Generic)
--- >>> Lenses (foo, bar) = mkLenses :: LensesFor T
--- >>> view foo (MkT 42 True)
+-- >>> Lenses (sopFoo, sopBar) = mkLenses :: LensesFor T
+-- >>> view sopFoo (MkT 42 True)
 -- 42
 --
--- >>> Prisms (_Nothing, _Just) = mkPrisms :: PrismsFor (Maybe a)
--- >>> isn't _Just Nothing
+-- >>> Prisms (sopNothing, sopJust) = mkPrisms :: PrismsFor (Maybe a)
+-- >>> isn't sopJust Nothing
 -- True
 --
 module Optics.SOP

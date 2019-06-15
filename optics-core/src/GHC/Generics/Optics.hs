@@ -93,5 +93,4 @@ _R1 = prism R1 reviewer
 {-# INLINE _R1 #-}
 
 -- $setup
--- >>> :set -XNoOverloadedStrings
--- >>> import Optics
+-- >>> import Optics.Core

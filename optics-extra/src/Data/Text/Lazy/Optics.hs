@@ -21,7 +21,7 @@ module Data.Text.Lazy.Optics
   , pattern Text
   ) where
 
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy as ByteString
 import Data.Text.Lazy as Text
 import Data.Text.Lazy.Builder
 import Data.Text.Lazy.Encoding
@@ -33,13 +33,9 @@ import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 
--- $setup
--- >>> :set -XOverloadedStrings
--- >>> import Optics.Core
-
 -- | This isomorphism can be used to 'pack' (or 'unpack') lazy 'Text.Text'.
 --
--- >>> "hello"^.packed -- :: Text
+-- >>> "hello" ^. packed -- :: Text
 -- "hello"
 --
 -- @
@@ -53,7 +49,7 @@ packed = iso Text.pack Text.unpack
 
 -- | This isomorphism can be used to 'unpack' (or 'pack') lazy 'Text.Text'.
 --
--- >>> "hello"^.unpacked -- :: String
+-- >>> Text.pack "hello" ^. unpacked -- :: String
 -- "hello"
 --
 -- @
@@ -96,11 +92,11 @@ builder = iso fromLazyText toLazyText
 
 -- | Traverse the individual characters in a 'Text.Text'.
 --
--- >>> anyOf text (=='c') "chello"
+-- >>> anyOf text (=='c') $ Text.pack "chello"
 -- True
 --
 -- @
--- 'text' = 'unpacked' . 'traversed'
+-- 'text' = 'unpacked' % 'traversed'
 -- @
 --
 -- When the type is unambiguous, you can also use the more general 'each'.
@@ -120,7 +116,7 @@ text = Optic text__
 -- Note: This function does not decode lazily, as it must consume the entire
 -- input before deciding whether or not it fails.
 --
--- >>> ByteString.unpack (utf8 # "☃")
+-- >>> ByteString.unpack (utf8 # Text.pack "☃")
 -- [226,152,131]
 utf8 :: Prism' ByteString Text
 utf8 = prism' encodeUtf8 (preview _Right . decodeUtf8')

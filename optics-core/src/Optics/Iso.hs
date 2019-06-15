@@ -263,5 +263,6 @@ instance Swapped Either where
   {-# INLINE swapped #-}
 
 -- $setup
--- >>> import Optics.Core
 -- >>> import Data.Functor.Identity
+-- >>> import Data.Monoid
+-- >>> import Optics.Core

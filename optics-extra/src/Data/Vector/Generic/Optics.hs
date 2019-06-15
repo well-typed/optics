@@ -29,9 +29,6 @@ import Optics.Internal.IxFold
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 
--- $setup
--- >>> import Data.Vector as Vector
-
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting at
 -- index @i@ from a 'Lens'.
 --
@@ -44,7 +41,7 @@ import Optics.Internal.Optic
 -- >>> Vector.fromList [1..10] ^. sliced 2 5 == Vector.fromList [3,4,5,6,7]
 -- True
 --
--- >>> (Vector.fromList [1..10] & sliced 2 5 . mapped .~ 0) == Vector.fromList [1,2,0,0,0,0,0,8,9,10]
+-- >>> (Vector.fromList [1..10] & sliced 2 5 % mapped .~ 0) == Vector.fromList [1,2,0,0,0,0,0,8,9,10]
 -- True
 sliced
   :: Vector v a
@@ -72,7 +69,7 @@ toVectorOf l s = fromList (toListOf l s)
 -- >>> ([1,2,3] ^. vector :: Vector.Vector Int) == Vector.fromList [1,2,3]
 -- True
 --
--- >>> Vector.fromList [0,8,15] ^. from vector
+-- >>> Vector.fromList [0,8,15] ^. re vector
 -- [0,8,15]
 vector
   :: (Vector v a, Vector v b)
@@ -191,3 +188,6 @@ vectorTraverseIx__ = iwander $ \f v ->
     :: (V.Vector v a, V.Vector v b) => IxFunArrow (Int -> j) (v a) (v b)
 
 #-}
+
+-- $setup
+-- >>> import qualified Data.Vector as Vector

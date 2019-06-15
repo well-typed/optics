@@ -137,6 +137,7 @@ forOf = flip . traverseOf
 --
 -- >>> sequenceOf each ([1,2],[3,4])
 -- [(1,3),(1,4),(2,3),(2,4)]
+--
 -- @
 -- 'sequence' ≡ 'sequenceOf' 'traversed' ≡ 'traverse' 'id'
 -- 'sequenceOf' o ≡ 'traverseOf' o 'id'
@@ -292,17 +293,17 @@ backwards o = traversalVL $ \f -> forwards #. traverseOf o (Backwards #. f)
 -- /Note:/ You should really try to maintain the invariant of the number of
 -- children in the list.
 --
--- >>> (a,b,c) & partsOf each .~ [x,y,z]
--- (x,y,z)
+-- >>> ('a','b','c') & partsOf each .~ ['x','y','z']
+-- ('x','y','z')
 --
 -- Any extras will be lost. If you do not supply enough, then the remainder will
 -- come from the original structure.
 --
--- >>> (a,b,c) & partsOf each .~ [w,x,y,z]
--- (w,x,y)
+-- >>> ('a','b','c') & partsOf each .~ ['w','x','y','z']
+-- ('w','x','y')
 --
--- >>> (a,b,c) & partsOf each .~ [x,y]
--- (x,y,c)
+-- >>> ('a','b','c') & partsOf each .~ ['x','y']
+-- ('x','y','c')
 --
 -- >>> ('b', 'a', 'd', 'c') & partsOf each %~ sort
 -- ('a','b','c','d')
@@ -320,3 +321,7 @@ partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
       a' : as' -> put as' >> pure a'
       []       ->            pure a
 {-# INLINE partsOf #-}
+
+-- $setup
+-- >>> import Data.List
+-- >>> import Optics.Core

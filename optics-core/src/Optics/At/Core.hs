@@ -84,16 +84,6 @@ type instance Index (Identity a) = ()
 type instance Index (Maybe a) = ()
 type instance Index (Tree a) = [Int]
 
--- $setup
--- >>> :set -XNoOverloadedStrings
--- >>> import Control.Lens
--- >>> import Debug.SimpleReflect.Expr
--- >>> import Debug.SimpleReflect.Vars as Vars hiding (f,g)
--- >>> let f  :: Expr -> Expr; f = Debug.SimpleReflect.Vars.f
--- >>> let g  :: Expr -> Expr; g = Debug.SimpleReflect.Vars.g
--- >>> let f' :: Int -> Expr -> Expr; f' = Debug.SimpleReflect.Vars.f'
--- >>> let h  :: Int -> Expr; h = Debug.SimpleReflect.Vars.h
-
 -- | This class provides a simple 'Lens' that lets you view (and modify)
 -- information about whether or not a container contains a given 'Index'.
 -- Instances are provided for 'Set'-like containers only.
@@ -132,16 +122,16 @@ class Ixed m where
   --
   -- If you want to be able to insert /missing/ values, you want 'at'.
   --
-  -- >>> Seq.fromList [a,b,c,d] & ix 2 %~ f
-  -- fromList [a,b,f c,d]
+  -- >>> [1,2,3,4] & ix 2 %~ (*10)
+  -- [1,2,30,4]
   --
-  -- >>> Seq.fromList [a,b,c,d] & ix 2 .~ e
-  -- fromList [a,b,e,d]
+  -- >>> "abcd" & ix 2 .~ 'e'
+  -- "abed"
   --
-  -- >>> Seq.fromList [a,b,c,d] ^? ix 2
-  -- Just c
+  -- >>> "abcd" ^? ix 2
+  -- Just 'c'
   --
-  -- >>> Seq.fromList [] ^? ix 2
+  -- >>> [] ^? ix 2
   -- Nothing
   ix :: Index m -> AffineTraversal' m (IxValue m)
   default ix :: At m => Index m -> AffineTraversal' m (IxValue m)
@@ -455,3 +445,6 @@ ixListVL k point f xs0 =
            go (a:as) i = (a:) <$> (go as $! i - 1)
        in go xs0 k
 {-# INLINE ixListVL #-}
+
+-- $setup
+-- >>> import Optics.Core

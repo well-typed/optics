@@ -28,7 +28,7 @@ import qualified Data.Vector.Generic.Optics as G
 -- >>> Vector.fromList [1..10] ^. sliced 2 5 == Vector.fromList [3,4,5,6,7]
 -- True
 --
--- >>> (Vector.fromList [1..10] & sliced 2 5 . mapped .~ 0) == Vector.fromList [1,2,0,0,0,0,0,8,9,10]
+-- >>> (Vector.fromList [1..10] & sliced 2 5 % mapped .~ 0) == Vector.fromList [1,2,0,0,0,0,0,8,9,10]
 -- True
 sliced
   :: Int -- ^ @i@ starting index
@@ -54,10 +54,10 @@ toVectorOf = G.toVectorOf
 -- >>> [1,2,3] ^. vector == Vector.fromList [1,2,3]
 -- True
 --
--- >>> [1,2,3] ^. vector . from vector
+-- >>> [1,2,3] ^. vector % re vector
 -- [1,2,3]
 --
--- >>> Vector.fromList [0,8,15] ^. from vector . vector == Vector.fromList [0,8,15]
+-- >>> Vector.fromList [0,8,15] ^. re vector % vector == Vector.fromList [0,8,15]
 -- True
 vector :: Iso [a] [b] (Vector a) (Vector b)
 vector = G.vector

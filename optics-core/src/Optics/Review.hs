@@ -59,3 +59,6 @@ review o = unTagged #. getOptic (toReview o) .# Tagged
 unto :: (b -> t) -> Review t b
 unto f = Optic (lphantom . rmap f)
 {-# INLINE unto #-}
+
+-- $setup
+-- >>> import Optics.Core

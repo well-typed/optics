@@ -141,3 +141,6 @@ instance AsEmpty IntSet where
 instance AsEmpty (Seq.Seq a) where
   _Empty = nearly Seq.empty Seq.null
   {-# INLINE _Empty #-}
+
+-- $setup
+-- >>> import Optics.Core

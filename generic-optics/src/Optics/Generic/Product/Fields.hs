@@ -5,8 +5,6 @@
 
 module Optics.Generic.Product.Fields
   ( -- * Lenses
-
-    -- $setup
     field
   , field'
   , GL.HasField

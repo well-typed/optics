@@ -115,7 +115,6 @@ over' o = \f ->
 -- 'set' o v ≡ 'over' o ('const' v)
 -- @
 --
--- >>> let _1  = lens fst $ \(_,y) x -> (x, y)
 -- >>> set _1 'x' ('y', 'z')
 -- ('x','z')
 --
@@ -154,3 +153,6 @@ sets f = Optic (roam f)
 mapped :: Functor f => Setter (f a) (f b) a b
 mapped = Optic mapped__
 {-# INLINE mapped #-}
+
+-- $setup
+-- >>> import Optics.Core

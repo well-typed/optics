@@ -191,3 +191,6 @@ instance Each [Int] (Tree a) (Tree b) a b
 
 -- | @'each' :: 'Ix' i => 'IxTraversal' i ('Array' i a) ('Array' i b) a b@
 instance (Ix i, i ~ j) => Each i (Array i a) (Array j b) a b
+
+-- $setup
+-- >>> import Optics.Core

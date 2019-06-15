@@ -81,3 +81,7 @@ infixr 4 .~
 {-# INLINE (?~) #-}
 
 infixr 4 ?~
+
+-- $setup
+-- >>> import qualified Data.Map as Map
+-- >>> import Optics.Core

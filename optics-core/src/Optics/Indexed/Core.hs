@@ -172,27 +172,22 @@ instance IxOptic A_Lens s t a b where
   {-# INLINE noIx #-}
 
 instance IxOptic An_AffineTraversal s t a b where
-  -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = atraversalVL (toAtraversalVL o)
   {-# INLINE noIx #-}
 
 instance (s ~ t, a ~ b) => IxOptic An_AffineFold s t a b where
-  -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = afolding (preview o)
   {-# INLINE noIx #-}
 
 instance IxOptic A_Traversal s t a b where
-  -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = traversalVL (traverseOf o)
   {-# INLINE noIx #-}
 
 instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
-  -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = foldVL (traverseOf_ o)
   {-# INLINE noIx #-}
 
 instance IxOptic A_Setter s t a b where
-  -- Reinterpret the optic as unindexed one for conjoined to work.
   noIx o = sets (over o)
   {-# INLINE noIx #-}
 

@@ -564,7 +564,7 @@ import Data.Either.Optics                    as P
 --
 --     >>> :t traversed % to not
 --     traversed % to not
---       :: Traversable t => Optic A_Fold NoIx (t Bool) (t Bool) Bool Bool
+--       :: Traversable t => Optic A_Fold '[] (t Bool) (t Bool) Bool Bool
 --
 -- Error messages are domain-specific:
 --
@@ -777,16 +777,16 @@ import Data.Either.Optics                    as P
 --
 -- >>> :t (ifolded % ifolded)
 -- (ifolded % ifolded)
---  :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
---     Optic A_Fold '[i1, i2] (f1 (f2 b)) (f1 (f2 b)) b b
+--   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
+--      Optic A_Fold '[i1, i2] (f1 (f2 b)) (f1 (f2 b)) b b
 --
 -- In order to use such an optic, it is necessary to flatten the indices into a
 -- single index using 'icompose' or a similar function:
 --
 -- >>> :t icompose (,) (ifolded % ifolded)
 -- icompose (,) (ifolded % ifolded)
---  :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
---     Optic A_Fold (WithIx (i1, i2)) (f1 (f2 b)) (f1 (f2 b)) b b
+--   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
+--      Optic A_Fold (WithIx (i1, i2)) (f1 (f2 b)) (f1 (f2 b)) b b
 --
 -- For example:
 --
@@ -816,18 +816,15 @@ import Data.Either.Optics                    as P
 -- >>> let fst' = _1 :: Lens (a, c) (b, c) a b
 -- >>> :t fst' % itraversed
 -- fst' % itraversed
---   :: TraversableWithIndex i t =>
---      Optic A_Traversal (WithIx i) (t a, c) (t b, c) a b
+--   :: TraversableWithIndex i f =>
+--      Optic A_Traversal '[i] (f a, c) (f b, c) a b
 --
 -- <<indexedoptics.png Indexed Optics>>
 
-
 -- $setup
--- >>> import Control.Monad.Trans.Reader
--- >>> import Control.Monad.Trans.State
+-- >>> import Control.Monad.Reader
+-- >>> import Control.Monad.State
 -- >>> import Data.Functor.Identity
--- >>> import Optics.Operators
--- >>> import Optics.Operators.State
 -- >>> import qualified Data.IntSet as IntSet
 -- >>> import qualified Data.Map as Map
---
+-- >>> import Optics.Operators.State

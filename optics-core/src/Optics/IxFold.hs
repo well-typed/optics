@@ -336,3 +336,6 @@ ifindMOf o = \f -> ifoldrOf o
   (\i a y -> f i a >>= \r -> if r then pure (Just (i, a)) else y)
   (pure Nothing)
 {-# INLINE ifindMOf #-}
+
+-- $setup
+-- >>> import Optics.Core

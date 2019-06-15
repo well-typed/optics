@@ -9,7 +9,7 @@ module Optics.Zoom
   , MagnifyMany(..)
   ) where
 
-import Control.Monad.Reader
+import Control.Monad.Reader as Reader
 import Control.Monad.State
 import Control.Monad.Trans.Error
 import Control.Monad.Trans.Except
@@ -26,17 +26,6 @@ import Control.Monad.Trans.Writer.Strict as S
 import Optics.Core
 import Optics.Internal.Utils
 import Optics.Extra.Internal.Zoom
-
--- $setup
--- >>> import Optics.Core
--- >>> import Optics.Operators.State
--- >>> import Control.Monad.State
--- >>> import Data.Map as Map
--- >>> import Debug.SimpleReflect.Expr as Expr
--- >>> import Debug.SimpleReflect.Vars as Vars
--- >>> let f :: Expr -> Expr; f = Debug.SimpleReflect.Vars.f
--- >>> let g :: Expr -> Expr; g = Debug.SimpleReflect.Vars.g
--- >>> let h :: Expr -> Expr -> Expr; h = Debug.SimpleReflect.Vars.h
 
 -- Chosen so that they have lower fixity than ('%=').
 infixr 2 `zoom`, `zoomMaybe`, `zoomMany`
@@ -62,20 +51,20 @@ infixr 2 `magnify`, `magnifyMaybe`, `magnifyMany`
 -- This can be used to edit pretty much any 'Monad' transformer stack with a
 -- 'State' in it!
 --
--- >>> flip evalState (a,b) $ zoom _1 $ use equality
--- a
+-- >>> flip L.evalState ('a','b') $ zoom _1 $ use equality
+-- 'a'
 --
--- >>> flip execState (a,b) $ zoom _1 $ equality .= c
--- (c,b)
+-- >>> flip S.execState ('a','b') $ zoom _1 $ equality .= 'c'
+-- ('c','b')
 --
--- >>> flip execState [(a,b),(c,d)] $ zoomMany traversed $ _2 %= f
--- [(a,f b),(c,f d)]
+-- >>> flip L.execState [(1,2),(3,4)] $ zoomMany traversed $ _2 %= (*10)
+-- [(1,20),(3,40)]
 --
--- >>> flip unState [(a,b),(c,d)] $ zoomMany traversed $ _2 <%= f
--- (f b <> f d <> mempty,[(a,f b),(c,f d)])
+-- >>> flip S.runState [('a',"b"),('c',"d")] $ zoomMany traversed $ _2 <%= (\x -> x <> x)
+-- ("bbdd",[('a',"bb"),('c',"dd")])
 --
--- >>> flip evalState (a,b) $ zoomMany each (use equality)
--- a <> b
+-- >>> flip S.evalState ("a","b") $ zoomMany each (use equality)
+-- "ab"
 --
 class
   (MonadState s m, MonadState t n
@@ -226,10 +215,10 @@ instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
 -- >>> (1,2) & magnify _2 (+1)
 -- 3
 --
--- >>> flip runReader (1,2) $ magnify _1 ask
+-- >>> flip runReader (1,2) $ magnify _1 Reader.ask
 -- 1
 --
--- >>> flip runReader (1,2,[10..20]) $ magnifyMaybe (_3 % _tail) ask
+-- >>> flip runReader (1,2,[10..20]) $ magnifyMaybe (_3 % _tail) Reader.ask
 -- Just [11,12,13,14,15,16,17,18,19,20]
 --
 class
@@ -415,3 +404,7 @@ instance Magnify m n b a => Magnify (ExceptT e m) (ExceptT e n) b a where
 instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a where
   magnifyMany o = ExceptT #. fmap getErr . magnifyMany o . fmap Err .# runExceptT
   {-# INLINE magnifyMany #-}
+
+-- $setup
+-- >>> import Optics.Operators.State
+-- >>> import Optics.View
