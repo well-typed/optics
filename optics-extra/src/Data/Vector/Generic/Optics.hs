@@ -57,7 +57,7 @@ sliced i n = lensVL $ \f v ->
 
 -- | Similar to 'toListOf', but returning a 'Vector'.
 --
--- >>> (toVectorOf both (8,15) :: Vector.Vector Int) == Vector.fromList [8,15]
+-- >>> (toVectorOf each (8,15) :: Vector.Vector Int) == Vector.fromList [8,15]
 -- True
 toVectorOf
   :: (Is k A_Fold, Vector v a)

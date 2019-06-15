@@ -135,7 +135,7 @@ forOf = flip . traverseOf
 -- | Evaluate each action in the structure from left to right, and collect the
 -- results.
 --
--- >>> sequenceOf both ([1,2],[3,4])
+-- >>> sequenceOf each ([1,2],[3,4])
 -- [(1,3),(1,4),(2,3),(2,4)]
 -- @
 -- 'sequence' ≡ 'sequenceOf' 'traversed' ≡ 'traverse' 'id'
