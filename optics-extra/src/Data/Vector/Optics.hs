@@ -39,7 +39,7 @@ sliced = G.sliced
 
 -- | Similar to 'toListOf', but returning a 'Vector'.
 --
--- >>> toVectorOf both (8,15) == Vector.fromList [8,15]
+-- >>> toVectorOf each (8,15) == Vector.fromList [8,15]
 -- True
 toVectorOf
   :: Is k A_Fold

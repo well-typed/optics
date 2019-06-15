@@ -146,7 +146,7 @@ toListOf o = foldrOf o (:) []
 -- construct a new structure. 'traverseOf_' generalizes
 -- 'Data.Foldable.traverse_' to work over any 'Fold'.
 --
--- >>> traverseOf_ both putStrLn ("hello","world")
+-- >>> traverseOf_ each putStrLn ("hello","world")
 -- hello
 -- world
 --
@@ -175,7 +175,7 @@ forOf_ = flip . traverseOf_
 -- 'sequenceA_' ≡ 'sequenceOf_' 'folded'
 -- @
 --
--- >>> sequenceOf_ both (putStrLn "hello",putStrLn "world")
+-- >>> sequenceOf_ each (putStrLn "hello",putStrLn "world")
 -- hello
 -- world
 sequenceOf_
@@ -301,7 +301,7 @@ hasn't o = getAll #. foldMapOf o (\_ -> All False)
 -- >>> headOf folded [1..10]
 -- Just 1
 --
--- >>> headOf both (1,2)
+-- >>> headOf each (1,2)
 -- Just 1
 headOf :: Is k A_Fold => Optic' k is s a -> s -> Maybe a
 headOf o = getLeftmost . foldMapOf o LLeaf
@@ -312,7 +312,7 @@ headOf o = getLeftmost . foldMapOf o LLeaf
 -- >>> lastOf folded [1..10]
 -- Just 10
 --
--- >>> lastOf both (1,2)
+-- >>> lastOf each (1,2)
 -- Just 2
 lastOf :: Is k A_Fold => Optic' k is s a -> s -> Maybe a
 lastOf o = getRightmost . foldMapOf o RLeaf
@@ -320,9 +320,9 @@ lastOf o = getRightmost . foldMapOf o RLeaf
 
 -- | Returns 'True' if every target of a 'Fold' is 'True'.
 --
--- >>> andOf both (True, False)
+-- >>> andOf each (True, False)
 -- False
--- >>> andOf both (True, True)
+-- >>> andOf each (True, True)
 -- True
 --
 -- @
@@ -334,9 +334,9 @@ andOf o = getAll #. foldMapOf o All
 
 -- | Returns 'True' if any target of a 'Fold' is 'True'.
 --
--- >>> orOf both (True, False)
+-- >>> orOf each (True, False)
 -- True
--- >>> orOf both (False, False)
+-- >>> orOf each (False, False)
 -- False
 --
 -- @
@@ -348,7 +348,7 @@ orOf o = getAny #. foldMapOf o Any
 
 -- | Returns 'True' if any target of a 'Fold' satisfies a predicate.
 --
--- >>> anyOf both (=='x') ('x','y')
+-- >>> anyOf each (=='x') ('x','y')
 -- True
 anyOf :: Is k A_Fold => Optic' k is s a -> (a -> Bool) -> s -> Bool
 anyOf o = \f -> getAny #. foldMapOf o (Any #. f)
@@ -356,7 +356,7 @@ anyOf o = \f -> getAny #. foldMapOf o (Any #. f)
 
 -- | Returns 'True' if every target of a 'Fold' satisfies a predicate.
 --
--- >>> allOf both (>=3) (4,5)
+-- >>> allOf each (>=3) (4,5)
 -- True
 -- >>> allOf folded (>=2) [1..10]
 -- False
@@ -380,7 +380,7 @@ noneOf o = \f -> not . anyOf o f
 
 -- | Calculate the 'Product' of every number targeted by a 'Fold'.
 --
--- >>> productOf both (4,5)
+-- >>> productOf each (4,5)
 -- 20
 -- >>> productOf folded [1,2,3,4,5]
 -- 120
@@ -397,11 +397,11 @@ productOf o = foldlOf' o (*) 1
 
 -- | Calculate the 'Sum' of every number targeted by a 'Fold'.
 --
--- >>> sumOf both (5,6)
+-- >>> sumOf each (5,6)
 -- 11
 -- >>> sumOf folded [1,2,3,4]
 -- 10
--- >>> sumOf (folded % both) [(1,2),(3,4)]
+-- >>> sumOf (folded % each) [(1,2),(3,4)]
 -- 10
 --
 -- @
@@ -416,7 +416,7 @@ sumOf o = foldlOf' o (+) 0
 
 -- | The sum of a collection of actions.
 --
--- >>> asumOf both ("hello","world")
+-- >>> asumOf each ("hello","world")
 -- "helloworld"
 --
 -- >>> asumOf each (Nothing, Just "hello", Nothing)
@@ -431,7 +431,7 @@ asumOf o = foldrOf o (<|>) empty
 
 -- | The sum of a collection of actions.
 --
--- >>> msumOf both ("hello","world")
+-- >>> msumOf each ("hello","world")
 -- "helloworld"
 --
 -- >>> msumOf each (Nothing, Just "hello", Nothing)
@@ -446,7 +446,7 @@ msumOf o = foldrOf o mplus mzero
 
 -- | Does the element occur anywhere within a given 'Fold' of the structure?
 --
--- >>> elemOf both "hello" ("hello","world")
+-- >>> elemOf each "hello" ("hello","world")
 -- True
 --
 -- @
