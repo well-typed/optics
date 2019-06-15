@@ -83,7 +83,6 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.State
 import Data.Functor.Identity
 
-import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
@@ -92,6 +91,7 @@ import Optics.Internal.Utils
 import Optics.Lens
 import Optics.Fold
 import Optics.Optic
+import Optics.ReadOnly
 
 -- | Type synonym for a type-modifying traversal.
 type Traversal s t a b = Optic A_Traversal NoIx s t a b
@@ -313,12 +313,9 @@ partsOf
   :: forall k s t a. Is k A_Traversal
   => Optic k NoIx s t a a
   -> Lens s t [a] [a]
-partsOf o = lensVL $ \f s ->
-  evalState (traverseOf o update s) <$> f (toListOf fo s)
+partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
+  <$> f (toListOf (getting $ castOptic @A_Traversal o) s)
   where
-    fo :: Fold s a
-    fo = Optic $ rphantom . getOptic (castOptic @A_Traversal o)
-
     update a = get >>= \case
       a' : as' -> put as' >> pure a'
       []       ->            pure a

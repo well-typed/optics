@@ -51,6 +51,7 @@ import Optics.Cons.Core                        as P
 import Optics.Each.Core                        as P
 import Optics.Empty.Core                       as P
 import Optics.Re                               as P
+import Optics.ReadOnly                         as P
 
 import Data.Either.Optics                      as D
 import Data.Maybe.Optics                       as D
