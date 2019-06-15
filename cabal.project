@@ -6,6 +6,7 @@ packages:
   optics-th/*.cabal
   optics-vl/*.cabal
   generic-optics/*.cabal
+  template-haskell-optics/*.cabal
 
 -- An example, using optics to generate optics diagrams
 packages:

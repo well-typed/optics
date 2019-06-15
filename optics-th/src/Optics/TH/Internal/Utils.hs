@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE FlexibleContexts #-}
 module Optics.TH.Internal.Utils where
 
 import Language.Haskell.TH
