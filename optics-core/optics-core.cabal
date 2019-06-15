@@ -5,13 +5,16 @@ license-file:  LICENSE
 build-type:    Simple
 cabal-version: 1.24
 maintainer:    optics@well-typed.com
-author:        Adam Gundry, Andres Löh, Andrzej Rybczak, Edward Kmett, Oleg Grenrus
+author:        Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
 tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 ||  ==8.6.5 || ==8.8.1
 synopsis:      Optics as an abstract interface: core definitions
-category:      Data, Optics, Lenses, Generics
+category:      Data, Optics, Lenses
 description:
-  This package provides core definitions with a minimal dependency footprint.
-  See @optics@ package (and its dependencies) for documentation and
+  This package makes it possible to define and use Lenses, Traversals, Prisms
+  and other optics, using an abstract interface.
+  .
+  This variant provides core definitions with a minimal dependency footprint.
+  See @optics@ package (and its dependencies) for documentation and the
   "batteries-included" variant.
 
 library
