@@ -14,6 +14,9 @@ module Optics.Core
   -- * Indexed optics
   , module I
 
+  -- * Overloaded labels
+  , module Optics.Label
+
   -- * Combinators
   , module P
 
@@ -53,6 +56,8 @@ import Optics.Empty.Core                       as P
 import Optics.Operators                        as P
 import Optics.Re                               as P
 import Optics.ReadOnly                         as P
+
+import Optics.Label
 
 import Data.Either.Optics                      as D
 import Data.Maybe.Optics                       as D

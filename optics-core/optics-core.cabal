@@ -52,6 +52,7 @@ library
     Optics.IxLens
     Optics.IxSetter
     Optics.IxTraversal
+    Optics.Label
     Optics.Lens
     Optics.LensyReview
     Optics.Operators
