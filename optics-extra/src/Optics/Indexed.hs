@@ -17,6 +17,8 @@ module Optics.Indexed
     -- * Class for optic kinds that can be indexed
     IxOptic(..)
 
+  , conjoined
+
     -- * Composition of indexed optics
   , (<%>)
   , (%>)
@@ -26,11 +28,14 @@ module Optics.Indexed
   , icompose3
   , icompose4
   , icompose5
+  , icomposeN
 
     -- * Indexed optic flavours
   , module Optics.IxAffineFold
   , module Optics.IxAffineTraversal
   , module Optics.IxFold
+  , module Optics.IxGetter
+  , module Optics.IxLens
   , module Optics.IxSetter
   , module Optics.IxTraversal
 
@@ -53,6 +58,8 @@ import Optics.Internal.Indexed
 import Optics.IxAffineFold
 import Optics.IxAffineTraversal
 import Optics.IxFold
+import Optics.IxGetter
+import Optics.IxLens
 import Optics.IxSetter
 import Optics.IxTraversal
 

@@ -47,6 +47,7 @@ module Optics.Optic
   , Append
   , NonEmptyIndices
   , HasSingleIndex
+  , AcceptsEmptyIndices
 
     -- * Base re-exports
   , (&)
