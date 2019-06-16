@@ -310,8 +310,8 @@ backwards o = traversalVL $ \f -> forwards #. traverseOf o (Backwards #. f)
 -- So technically, this is only a 'Lens' if you do not change the number of
 -- results it returns.
 partsOf
-  :: forall k s t a. Is k A_Traversal
-  => Optic k NoIx s t a a
+  :: forall k is s t a. Is k A_Traversal
+  => Optic k is s t a a
   -> Lens s t [a] [a]
 partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
   <$> f (toListOf (getting $ castOptic @A_Traversal o) s)

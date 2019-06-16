@@ -316,7 +316,7 @@ ipartsOf
   :: forall k is i s t a. (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
   -> IxLens [i] s t [a] [a]
-ipartsOf o = conjoined (partsOf $ traversalVL $ traverseOf o) $ ixLensVL $ \f s ->
+ipartsOf o = conjoined (partsOf o) $ ixLensVL $ \f s ->
   evalState (traverseOf o update s)
     <$> uncurry f (unzip $ itoListOf (getting $ castOptic @A_Traversal o) s)
   where
