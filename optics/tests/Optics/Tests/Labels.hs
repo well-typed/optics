@@ -20,7 +20,6 @@ import Test.Inspection
 import qualified System.Random as R
 
 import Optics
-import Optics.Operators
 import Optics.Tests.Utils
 
 labelsTests :: TestTree

@@ -3,7 +3,6 @@ module MMP.Optics.Re where
 
 import           Control.Monad.State
 import           Optics
-import           Optics.Operators
 
 import           MetaMetaPost
 import           MMP.Optics.Common
