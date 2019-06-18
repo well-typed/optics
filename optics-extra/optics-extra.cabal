@@ -38,8 +38,9 @@ library
                    Optics.Each
                    Optics.Empty
                    Optics.Indexed
-                   Optics.Operators.State
                    Optics.Passthrough
+                   Optics.State
+                   Optics.State.Operators
                    Optics.View
                    Optics.Zoom
 
