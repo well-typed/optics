@@ -2,7 +2,6 @@ module MMP.Optics.Hierarchy where
 
 import           Control.Monad.State
 import           Optics
-import           Optics.Operators
 
 import MMP.Optics.Common
 import MetaMetaPost

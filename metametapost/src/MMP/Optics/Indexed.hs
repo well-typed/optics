@@ -5,7 +5,6 @@ module MMP.Optics.Indexed where
 
 import           Control.Monad.State
 import           Optics
-import           Optics.Operators
 
 import           MetaMetaPost
 import           MMP.Optics.Common
