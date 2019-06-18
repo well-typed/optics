@@ -13,7 +13,6 @@ module Main where
 import Data.Typeable
 
 import Optics.Core
-import Optics.Operators
 import Optics.TH
 import Optics.TH.Tests.T799 ()
 

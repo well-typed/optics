@@ -15,7 +15,6 @@ import Control.Monad.State (MonadState)
 import qualified Control.Monad.State as State
 
 import Optics.Core
-import Optics.Operators
 import Optics.Passthrough
 import Optics.View
 

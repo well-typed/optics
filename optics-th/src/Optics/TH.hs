@@ -82,7 +82,6 @@ import Language.Haskell.TH
 import qualified Data.Set as Set
 
 import Optics.Core hiding (cons)
-import Optics.Operators
 import Optics.TH.Internal.Product
 import Optics.TH.Internal.Sum
 

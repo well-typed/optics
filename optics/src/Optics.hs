@@ -30,6 +30,9 @@ module Optics
   -- ** Optic kinds #optickinds#
   , module O
 
+  -- ** Optic operators
+  , module Optics.Operators
+
   -- * Optics utilities
 
   -- ** At
@@ -189,6 +192,7 @@ import Optics.Cons
 import Optics.Each
 import Optics.Empty
 import Optics.Indexed
+import Optics.Operators
 import Optics.Re
 import Optics.ReadOnly
 import Optics.View
