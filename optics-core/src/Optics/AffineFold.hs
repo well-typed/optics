@@ -115,4 +115,3 @@ isn't k s = not (isJust (preview k s))
 
 -- $setup
 -- >>> import Optics.Core
--- >>> import Data.Maybe (listToMaybe)

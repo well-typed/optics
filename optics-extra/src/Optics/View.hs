@@ -103,11 +103,11 @@ instance Monoid r => ViewableOptic A_Fold r where
 -- | Use the target of a 'Lens', 'Iso', or 'Getter' in the current state, or use
 -- a summary of a 'Fold' or 'Traversal' that points to a monoidal value.
 --
--- >>> evalState (use _1) (a,b)
--- a
+-- >>> evalState (use _1) ('a','b')
+-- 'a'
 --
--- >>> evalState (use _1) ("hello","world")
--- "hello"
+-- >>> evalState (use _2) ("hello","world")
+-- "world"
 use
   :: (ViewableOptic k a, MonadState s m)
   => Optic' k is s a

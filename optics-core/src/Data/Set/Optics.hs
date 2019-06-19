@@ -17,9 +17,9 @@ import Optics.Setter
 -- | This 'Setter' can be used to change the type of a 'Set' by mapping the
 -- elements to new values.
 --
--- Sadly, you can't create a valid 'Optics.Traversal.Traversal' for a
--- 'Set', but you can manipulate it by reading using
--- 'Optics.Fold.folded' and reindexing it via 'setmapped'.
+-- Sadly, you can't create a valid 'Optics.Traversal.Traversal' for a 'Set', but
+-- you can manipulate it by reading using 'Optics.Fold.folded' and reindexing it
+-- via 'setmapped'.
 --
 -- >>> over setmapped (+1) (fromList [1,2,3,4])
 -- fromList [2,3,4,5]
@@ -39,6 +39,4 @@ setOf l = foldMapOf l Set.singleton
 {-# INLINE setOf #-}
 
 -- $setup
--- >>> import Data.Set
--- >>> import Optics
--- >>> import Optics.Operators
+-- >>> import Optics.Core

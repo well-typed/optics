@@ -16,10 +16,6 @@ import Data.Word (Word8)
 import Optics.Core
 import Optics.Extra.Internal.ByteString
 
--- $setup
--- >>> :set -XOverloadedStrings
--- >>> import Numeric.Lens
-
 -- | 'Data.ByteString.Lazy.pack' (or 'Data.ByteString.Lazy.unpack') a list of
 -- bytes into a 'ByteString'.
 --
@@ -29,7 +25,7 @@ import Optics.Extra.Internal.ByteString
 -- 'Data.ByteString.unpack' x ≡ x '^.' 're' 'packedBytes'
 -- @
 --
--- >>> [104,101,108,108,111]^.packedBytes == Char8.pack "hello"
+-- >>> [104,101,108,108,111] ^. packedBytes == Char8.pack "hello"
 -- True
 packedBytes :: Iso' [Word8] ByteString
 packedBytes = iso Words.pack Words.unpack
@@ -44,7 +40,7 @@ packedBytes = iso Words.pack Words.unpack
 -- 'Data.ByteString.pack' x ≡  x '^.' 're' 'unpackedBytes'
 -- @
 --
--- >>> "hello"^.packedChars.unpackedBytes
+-- >>> "hello" ^. packedChars % unpackedBytes
 -- [104,101,108,108,111]
 unpackedBytes :: Iso' ByteString [Word8]
 unpackedBytes = re packedBytes
@@ -58,7 +54,7 @@ unpackedBytes = re packedBytes
 -- the much slower:
 --
 -- @
--- 'bytes' ≡ 'unpackedBytes' '.' 'traversed'
+-- 'bytes' ≡ 'unpackedBytes' '%' 'traversed'
 -- @
 --
 -- >>> anyOf bytes (== 0x80) (Char8.pack "hello")
@@ -82,7 +78,7 @@ bytes = traversedLazy
 -- 'Data.ByteString.Char8.unpack' x ≡ x '^.' 're' 'packedChars'
 -- @
 --
--- >>> "hello"^.packedChars.each.re (base 16 . enum).to (\x -> if Prelude.length x == 1 then '0':x else x)
+-- >>> foldOf (packedChars % each % to (\w -> let x = showHex w "" in if Prelude.length x == 1 then '0':x else x)) "hello"
 -- "68656c6c6f"
 packedChars :: Iso' String ByteString
 packedChars = iso Char8.pack Char8.unpack
@@ -100,7 +96,7 @@ packedChars = iso Char8.pack Char8.unpack
 -- 'Data.ByteString.Char8.pack' x ≡ x '^.' 're' 'unpackedChars'
 -- @
 --
--- >>> [104,101,108,108,111]^.packedBytes.unpackedChars
+-- >>> [104,101,108,108,111] ^. packedBytes % unpackedChars
 -- "hello"
 unpackedChars :: Iso' ByteString String
 unpackedChars = re packedChars
@@ -116,10 +112,10 @@ unpackedChars = re packedChars
 -- queries, but up to associativity (and constant factors) it is equivalent to:
 --
 -- @
--- 'chars' = 'unpackedChars' '.' 'traversed'
+-- 'chars' = 'unpackedChars' '%' 'traversed'
 -- @
 --
--- >>> anyOf chars (== 'h') "hello"
+-- >>> anyOf chars (== 'h') $ Char8.pack "hello"
 -- True
 chars :: IxTraversal' Int64 ByteString Char
 chars = traversedLazy8
@@ -132,3 +128,7 @@ pattern Bytes b <- (view unpackedBytes -> b) where
 pattern Chars :: [Char] -> ByteString
 pattern Chars b <- (view unpackedChars -> b) where
   Chars b = review unpackedChars b
+
+-- $setup
+-- >>> import Numeric
+-- >>> import Optics.Each

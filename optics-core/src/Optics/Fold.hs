@@ -504,7 +504,7 @@ lengthOf o = foldlOf' o (\ n _ -> 1 + n) 0
 -- >>> maximumOf folded []
 -- Nothing
 --
--- >>> maximumOf (filtered even folded) [1,4,3,6,7,9,2]
+-- >>> maximumOf (folded % filtered even) [1,4,3,6,7,9,2]
 -- Just 6
 --
 -- @
@@ -531,7 +531,7 @@ maximumOf o = foldlOf' o mf Nothing where
 -- >>> minimumOf folded []
 -- Nothing
 --
--- >>> minimumOf (filtered even folded) [1,4,3,6,7,9,2]
+-- >>> minimumOf (folded % filtered even) [1,4,3,6,7,9,2]
 -- Just 2
 --
 -- @
@@ -641,3 +641,6 @@ findMOf o = \f -> foldrOf o
 lookupOf :: (Is k A_Fold, Eq a) => Optic' k is s (a, v) -> a -> s -> Maybe v
 lookupOf o a = foldrOf o (\(a', v) next -> if a == a' then Just v else next) Nothing
 {-# INLINE lookupOf #-}
+
+-- $setup
+-- >>> import Optics.Core

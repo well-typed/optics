@@ -175,3 +175,6 @@ only a = prism' (\() -> a) $ guard . (a ==)
 nearly :: a -> (a -> Bool) -> Prism' a ()
 nearly a p = prism' (\() -> a) $ guard . p
 {-# INLINE nearly #-}
+
+-- $setup
+-- >>> import Optics.Core

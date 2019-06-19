@@ -161,3 +161,7 @@ instance Cochoice p => Choice (Re p s t) where
   right' (Re p) = Re (p . unright)
   {-# INLINE left' #-}
   {-# INLINE right' #-}
+
+-- $setup
+-- >>> import Data.Functor.Identity
+-- >>> import Optics.Core

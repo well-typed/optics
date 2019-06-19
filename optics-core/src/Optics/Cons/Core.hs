@@ -41,14 +41,6 @@ import Optics.Coerce
 import Optics.Prism
 import Optics.Review
 
--- $setup
--- >>> :set -XNoOverloadedStrings
--- >>> import Control.Lens
--- >>> import Debug.SimpleReflect.Expr
--- >>> import Debug.SimpleReflect.Vars as Vars hiding (f,g)
--- >>> let f :: Expr -> Expr; f = Debug.SimpleReflect.Vars.f
--- >>> let g :: Expr -> Expr; g = Debug.SimpleReflect.Vars.g
-
 infixr 5 <|, `cons`
 infixl 5 |>, `snoc`
 
@@ -116,34 +108,28 @@ instance Cons (Seq a) (Seq b) a b where
 --
 -- This is an infix alias for 'cons'.
 --
--- >>> a <| []
--- [a]
+-- >>> 1 <| []
+-- [1]
 --
--- >>> a <| [b, c]
--- [a,b,c]
+-- >>> 'a' <| "bc"
+-- "abc"
 --
--- >>> a <| Seq.fromList []
--- fromList [a]
+-- >>> 1 <| []
+-- [1]
 --
--- >>> a <| Seq.fromList [b, c]
--- fromList [a,b,c]
+-- >>> 1 <| [2, 3]
+-- [1,2,3]
 (<|) :: Cons s s a a => a -> s -> s
 (<|) = curry (review _Cons)
 {-# INLINE (<|) #-}
 
 -- | 'cons' an element onto a container.
 --
--- >>> cons a []
--- [a]
+-- >>> cons 'a' ""
+-- "a"
 --
--- >>> cons a [b, c]
--- [a,b,c]
---
--- >>> cons a (Seq.fromList [])
--- fromList [a]
---
--- >>> cons a (Seq.fromList [b, c])
--- fromList [a,b,c]
+-- >>> cons 'a' "bc"
+-- "abc"
 cons :: Cons s s a a => a -> s -> s
 cons = curry (review _Cons)
 {-# INLINE cons #-}
@@ -154,8 +140,8 @@ cons = curry (review _Cons)
 -- >>> uncons []
 -- Nothing
 --
--- >>> uncons [a, b, c]
--- Just (a,[b,c])
+-- >>> uncons [1, 2, 3]
+-- Just (1,[2,3])
 uncons :: Cons s s a a => s -> Maybe (a, s)
 uncons = preview _Cons
 {-# INLINE uncons #-}
@@ -163,25 +149,25 @@ uncons = preview _Cons
 -- | An 'AffineTraversal' reading and writing to the 'head' of a /non-empty/
 -- container.
 --
--- >>> [a,b,c]^? _head
--- Just a
+-- >>> "abc" ^? _head
+-- Just 'a'
 --
--- >>> [a,b,c] & _head .~ d
--- [d,b,c]
+-- >>> "abc" & _head .~ 'd'
+-- "dbc"
 --
--- >>> [a,b,c] & _head %~ f
--- [f a,b,c]
+-- >>> [1,2,3] & _head %~ (*10)
+-- [10,2,3]
 --
--- >>> [] & _head %~ f
+-- >>> [] & _head %~ absurd
 -- []
 --
--- >>> [1,2,3]^?!_head
--- 1
+-- >>> [1,2,3] ^? _head
+-- Just 1
 --
--- >>> []^?_head
+-- >>> [] ^? _head
 -- Nothing
 --
--- >>> [1,2]^?_head
+-- >>> [1,2] ^? _head
 -- Just 1
 --
 -- >>> [] & _head .~ 1
@@ -192,25 +178,6 @@ uncons = preview _Cons
 --
 -- >>> [0,1] & _head .~ 2
 -- [2,1]
---
--- This isn't limited to lists.
---
--- For instance you can also 'Data.Traversable.traverse' the head of a 'Seq':
---
--- >>> Seq.fromList [a,b,c,d] & _head %~ f
--- fromList [f a,b,c,d]
---
--- >>> Seq.fromList [] ^? _head
--- Nothing
---
--- >>> Seq.fromList [a,b,c,d] ^? _head
--- Just a
---
--- @
--- '_head' :: 'AffineTraversal'' [a] a
--- '_head' :: 'AffineTraversal'' ('Seq' a) a
--- '_head' :: 'AffineTraversal'' ('Vector' a) a
--- @
 _head :: Cons s s a a => AffineTraversal' s a
 _head = _Cons % _1
 {-# INLINE _head #-}
@@ -218,14 +185,14 @@ _head = _Cons % _1
 -- | An 'AffineTraversal' reading and writing to the 'tail' of a /non-empty/
 -- container.
 --
--- >>> [a,b] & _tail .~ [c,d,e]
--- [a,c,d,e]
+-- >>> "ab" & _tail .~ "cde"
+-- "acde"
 --
--- >>> [] & _tail .~ [a,b]
+-- >>> [] & _tail .~ [1,2]
 -- []
 --
--- >>> [a,b,c,d,e] & _tail.traverse %~ f
--- [a,f b,f c,f d,f e]
+-- >>> [1,2,3,4,5] & _tail % traversed %~ (*10)
+-- [1,20,30,40,50]
 --
 -- >>> [1,2] & _tail .~ [3,4,5]
 -- [1,3,4,5]
@@ -233,35 +200,14 @@ _head = _Cons % _1
 -- >>> [] & _tail .~ [1,2]
 -- []
 --
--- >>> [a,b,c]^?_tail
--- Just [b,c]
+-- >>> "abc" ^? _tail
+-- Just "bc"
 --
--- >>> [1,2]^?!_tail
--- [2]
+-- >>> "hello" ^? _tail
+-- Just "ello"
 --
--- >>> "hello"^._tail
--- "ello"
---
--- >>> ""^._tail
--- ""
---
--- This isn't limited to lists. For instance you can also
--- 'Control.Traversable.traverse' the tail of a 'Seq'.
---
--- >>> Seq.fromList [a,b] & _tail .~ Seq.fromList [c,d,e]
--- fromList [a,c,d,e]
---
--- >>> Seq.fromList [a,b,c] ^? _tail
--- Just (fromList [b,c])
---
--- >>> Seq.fromList [] ^? _tail
+-- >>> "" ^? _tail
 -- Nothing
---
--- @
--- '_tail' :: 'AffineTraversal'' [a] [a]
--- '_tail' :: 'AffineTraversal'' ('Seq' a) ('Seq' a)
--- '_tail' :: 'AffineTraversal'' ('Vector' a) ('Vector' a)
--- @
 _tail :: Cons s s a a => AffineTraversal' s s
 _tail = _Cons % _2
 {-# INLINE _tail #-}
@@ -270,19 +216,9 @@ _tail = _Cons % _2
 -- Snoc
 ------------------------------------------------------------------------------
 
--- | This class provides a way to attach or detach elements on the right
--- side of a structure in a flexible manner.
+-- | This class provides a way to attach or detach elements on the right side of
+-- a structure in a flexible manner.
 class Snoc s t a b | s -> a, t -> b, s b -> t, t a -> s where
-  -- |
-  --
-  -- @
-  -- '_Snoc' :: 'Prism' [a] [b] ([a], a) ([b], b)
-  -- '_Snoc' :: 'Prism' ('Seq' a) ('Seq' b) ('Seq' a, a) ('Seq' b, b)
-  -- '_Snoc' :: 'Prism' ('Vector' a) ('Vector' b) ('Vector' a, a) ('Vector' b, b)
-  -- '_Snoc' :: 'Prism'' 'String' ('String', 'Char')
-  -- '_Snoc' :: 'Prism'' 'StrictT.Text' ('StrictT.Text', 'Char')
-  -- '_Snoc' :: 'Prism'' 'StrictB.ByteString' ('StrictB.ByteString', 'Word8')
-  -- @
   _Snoc :: Prism s t (s, a) (t, b)
 
 instance Snoc [a] [b] a b where
@@ -309,38 +245,29 @@ instance Snoc (Seq a) (Seq b) a b where
 -- | An 'AffineTraversal' reading and replacing all but the a last element of a
 -- /non-empty/ container.
 --
--- >>> [a,b,c,d]^?_init
--- Just [a,b,c]
+-- >>> "abcd" ^? _init
+-- Just "abc"
 --
--- >>> []^?_init
+-- >>> "" ^? _init
 -- Nothing
 --
--- >>> [a,b] & _init .~ [c,d,e]
--- [c,d,e,b]
+-- >>> "ab" & _init .~ "cde"
+-- "cdeb"
 --
--- >>> [] & _init .~ [a,b]
+-- >>> [] & _init .~ [1,2]
 -- []
 --
--- >>> [a,b,c,d] & _init.traverse %~ f
--- [f a,f b,f c,d]
+-- >>> [1,2,3,4] & _init % traversed %~ (*10)
+-- [10,20,30,4]
 --
--- >>> [1,2,3]^?_init
+-- >>> [1,2,3] ^? _init
 -- Just [1,2]
 --
--- >>> [1,2,3,4]^?!_init
--- [1,2,3]
+-- >>> "hello" ^? _init
+-- Just "hell"
 --
--- >>> "hello"^._init
--- "hell"
---
--- >>> ""^._init
--- ""
---
--- @
--- '_init' :: 'AffineTraversal'' [a] [a]
--- '_init' :: 'AffineTraversal'' ('Seq' a) ('Seq' a)
--- '_init' :: 'AffineTraversal'' ('Vector' a) ('Vector' a)
--- @
+-- >>> [] ^? _init
+-- Nothing
 _init :: Snoc s s a a => AffineTraversal' s s
 _init = _Snoc % _1
 {-# INLINE _init #-}
@@ -348,16 +275,16 @@ _init = _Snoc % _1
 -- | An 'AffineTraversal' reading and writing to the last element of a
 -- /non-empty/ container.
 --
--- >>> [a,b,c]^?!_last
--- c
+-- >>> "abc" ^? _last
+-- Just 'c'
 --
--- >>> []^?_last
+-- >>> "" ^? _last
 -- Nothing
 --
--- >>> [a,b,c] & _last %~ f
--- [a,b,f c]
+-- >>> [1,2,3] & _last %~ (+1)
+-- [1,2,4]
 --
--- >>> [1,2]^?_last
+-- >>> [1,2] ^? _last
 -- Just 2
 --
 -- >>> [] & _last .~ 1
@@ -368,24 +295,6 @@ _init = _Snoc % _1
 --
 -- >>> [0,1] & _last .~ 2
 -- [0,2]
---
--- This 'AffineTraversal' is not limited to lists, however. We can also work
--- with other containers, such as a 'Vector'.
---
--- >>> Vector.fromList "abcde" ^? _last
--- Just 'e'
---
--- >>> Vector.empty ^? _last
--- Nothing
---
--- >>> (Vector.fromList "abcde" & _last .~ 'Q') == Vector.fromList "abcdQ"
--- True
---
--- @
--- '_last' :: 'AffineTraversal'' [a] a
--- '_last' :: 'AffineTraversal'' ('Seq' a) a
--- '_last' :: 'AffineTraversal'' ('Vector' a) a
--- @
 _last :: Snoc s s a a => AffineTraversal' s a
 _last = _Snoc % _2
 {-# INLINE _last #-}
@@ -394,27 +303,18 @@ _last = _Snoc % _2
 --
 -- This is an infix alias for 'snoc'.
 --
--- >>> Seq.fromList [] |> a
--- fromList [a]
+-- >>> "" |> 'a'
+-- "a"
 --
--- >>> Seq.fromList [b, c] |> a
--- fromList [b,c,a]
---
--- >>> LazyT.pack "hello" |> '!'
--- "hello!"
+-- >>> "bc" |> 'a'
+-- "bca"
 (|>) :: Snoc s s a a => s -> a -> s
 (|>) = curry (review _Snoc)
 {-# INLINE (|>) #-}
 
 -- | 'snoc' an element onto the end of a container.
 --
--- >>> snoc (Seq.fromList []) a
--- fromList [a]
---
--- >>> snoc (Seq.fromList [b, c]) a
--- fromList [b,c,a]
---
--- >>> snoc (LazyT.pack "hello") '!'
+-- >>> snoc "hello" '!'
 -- "hello!"
 snoc  :: Snoc s s a a => s -> a -> s
 snoc = curry (review _Snoc)
@@ -423,17 +323,15 @@ snoc = curry (review _Snoc)
 -- | Attempt to extract the right-most element from a container, and a version
 -- of the container without that element.
 --
--- >>> unsnoc (LazyT.pack "hello!")
+-- >>> unsnoc "hello!"
 -- Just ("hello",'!')
 --
--- >>> unsnoc (LazyT.pack "")
--- Nothing
---
--- >>> unsnoc (Seq.fromList [b,c,a])
--- Just (fromList [b,c],a)
---
--- >>> unsnoc (Seq.fromList [])
+-- >>> unsnoc ""
 -- Nothing
 unsnoc :: Snoc s s a a => s -> Maybe (s, a)
 unsnoc s = preview _Snoc s
 {-# INLINE unsnoc #-}
+
+-- $setup
+-- >>> import Data.Void
+-- >>> import Optics.Core

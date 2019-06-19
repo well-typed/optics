@@ -27,9 +27,6 @@ import Optics.Core
 import qualified Data.Text.Lazy.Optics as Lazy
 import qualified Data.Text.Strict.Optics as Strict
 
--- $setup
--- >>> import Optics.Core
-
 -- | Traversals for strict or lazy 'Text'
 class IsText t where
   -- | This isomorphism can be used to 'pack' (or 'unpack') strict or lazy

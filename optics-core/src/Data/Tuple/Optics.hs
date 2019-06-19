@@ -16,10 +16,11 @@
 -- If a single-constructor datatype has a 'Generic' instance, the corresponding
 -- @FieldN@ instances can be defined using their default methods:
 --
+-- >>> :set -XDeriveGeneric
 -- >>> data T a = MkT Int a deriving (Generic, Show)
--- ...
 -- >>> instance Field1 (T a) (T a) Int Int
 -- >>> instance Field2 (T a) (T b) a b
+--
 -- >>> set _2 'x' (MkT 1 False)
 -- MkT 1 'x'
 --
@@ -52,11 +53,8 @@ import Optics.Lens
 class Field1 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- | Access the 1st field of a tuple (and possibly change its type).
   --
-  -- >>> (1,2)^._1
+  -- >>> (1,2) ^. _1
   -- 1
-  --
-  -- >>> _1 .~ "hello" $ (1,2)
-  -- ("hello",2)
   --
   -- >>> (1,2) & _1 .~ "hello"
   -- ("hello",2)
@@ -517,5 +515,4 @@ proxyN8 = Proxy
 {-# INLINE proxyN8 #-}
 
 -- $setup
--- >>> import Optics
--- >>> import Optics.Operators
+-- >>> import Optics.Core

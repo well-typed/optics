@@ -4,42 +4,42 @@
 -- Description: Optics for working with 'Data.Map.Map's.
 --
 -- This module exists to provide documentation for lenses for working with
--- 'M.Map', which might otherwise be obscured by their genericity.
+-- 'Map', which might otherwise be obscured by their genericity.
 --
--- 'M.Map' is an instance of 'Optics.At.Core.At' and provides
--- 'Optics.At.Core.at' as a lens on values at keys:
+-- 'Map' is an instance of 'Optics.At.Core.At' and provides 'Optics.At.Core.at'
+-- as a lens on values at keys:
 --
--- >>> M.fromList [(1, "world")] ^. at 1
+-- >>> Map.fromList [(1, "world")] ^. at 1
 -- Just "world"
 --
--- >>> M.empty & at 1 .~ Just "world"
+-- >>> Map.empty & at 1 .~ Just "world"
 -- fromList [(1,"world")]
 --
--- >>> M.empty & at 0 .~ Just "hello"
+-- >>> Map.empty & at 0 .~ Just "hello"
 -- fromList [(0,"hello")]
 --
--- We can traverse, fold over, and map over key-value pairs in a 'M.Map',
+-- We can traverse, fold over, and map over key-value pairs in a 'Map',
 -- thanks to indexed traversals, folds and setters.
 --
--- >>> iover imapped const $ M.fromList [(1, "Venus")]
+-- >>> iover imapped const $ Map.fromList [(1, "Venus")]
 -- fromList [(1,1)]
 --
--- >>> ifoldMapOf ifolded (\i _ -> Sum i) $ M.fromList [(2, "Earth"), (3, "Mars")]
+-- >>> ifoldMapOf ifolded (\i _ -> Sum i) $ Map.fromList [(2, "Earth"), (3, "Mars")]
 -- Sum {getSum = 5}
 --
--- >>> itraverseOf_ ifolded (curry print) $ M.fromList [(4, "Jupiter")]
+-- >>> itraverseOf_ ifolded (curry print) $ Map.fromList [(4, "Jupiter")]
 -- (4,"Jupiter")
 --
--- >>> itoListOf ifolded $ M.fromList [(5, "Saturn")]
+-- >>> itoListOf ifolded $ Map.fromList [(5, "Saturn")]
 -- [(5,"Saturn")]
 --
 -- A related class, 'Optics.At.Core.Ixed', allows us to use 'Optics.At.Core.ix' to
 -- traverse a value at a particular key.
 --
--- >>> M.fromList [(2, "Earth")] & ix 2 %~ ("New " ++)
+-- >>> Map.fromList [(2, "Earth")] & ix 2 %~ ("New " ++)
 -- fromList [(2,"New Earth")]
 --
--- >>> preview (ix 8) M.empty
+-- >>> preview (ix 8) Map.empty
 -- Nothing
 --
 module Data.Map.Optics
@@ -51,19 +51,16 @@ module Data.Map.Optics
   , ge
   ) where
 
-import qualified Data.Map as M
+import Data.Map as Map
 import qualified Data.Map.Strict as Strict
 
 import Optics.IxAffineTraversal
 import Optics.IxFold
 import Optics.Lens
 
--- $setup
--- >>> import Data.Monoid
-
 -- | Construct a map from an 'IxFold'.
 --
--- The construction is left-biased (see 'M.union'), i.e. the first
+-- The construction is left-biased (see 'Map.union'), i.e. the first
 -- occurences of keys in the fold or traversal order are preferred.
 --
 -- >>> toMapOf ifolded ["hello", "world"]
@@ -80,12 +77,12 @@ import Optics.Lens
 --
 toMapOf
   :: (Is k A_Fold, is `HasSingleIndex` i, Ord i)
-  => Optic' k is s a -> s -> M.Map i a
-toMapOf o = ifoldMapOf o M.singleton
+  => Optic' k is s a -> s -> Map i a
+toMapOf o = ifoldMapOf o Map.singleton
 {-# INLINE toMapOf #-}
 
--- | Strict version of 'Optics.At.Core.at' for 'M.Map'.
-at' :: Ord k => k -> Lens' (M.Map k a) (Maybe a)
+-- | Strict version of 'Optics.At.Core.at' for 'Map'.
+at' :: Ord k => k -> Lens' (Map k a) (Maybe a)
 at' k = lensVL $ \f s ->
 #if MIN_VERSION_containers(0,5,8)
   Strict.alterF f k s
@@ -100,59 +97,63 @@ at' k = lensVL $ \f s ->
 -- | Focus on the largest key smaller than the given one and its corresponding
 -- value.
 --
--- >>> M.fromList [('a', "hi"), ('b', "there")] & over (lt 'b') (++ "!")
+-- >>> Map.fromList [('a', "hi"), ('b', "there")] & over (lt 'b') (++ "!")
 -- fromList [('a',"hi!"),('b',"there")]
 --
--- >>> ipreview (lt 'a') $ M.fromList [('a', 'x'), ('b', 'y')]
+-- >>> ipreview (lt 'a') $ Map.fromList [('a', 'x'), ('b', 'y')]
 -- Nothing
-lt :: Ord k => k -> IxAffineTraversal' k (M.Map k v) v
+lt :: Ord k => k -> IxAffineTraversal' k (Map k v) v
 lt k = ixAtraversalVL $ \point f s ->
-  case M.lookupLT k s of
+  case lookupLT k s of
     Nothing      -> point s
-    Just (k', v) -> f k' v <&> \v' -> M.insert k' v' s
+    Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
 {-# INLINE lt #-}
 
 -- | Focus on the smallest key greater than the given one and its corresponding
 -- value.
 --
--- >>> M.fromList [('a', "hi"), ('b', "there")] & over (gt 'b') (++ "!")
+-- >>> Map.fromList [('a', "hi"), ('b', "there")] & over (gt 'b') (++ "!")
 -- fromList [('a',"hi"),('b',"there")]
 --
--- >>> ipreview (gt 'a') $ M.fromList [('a', 'x'), ('b', 'y')]
+-- >>> ipreview (gt 'a') $ Map.fromList [('a', 'x'), ('b', 'y')]
 -- Just ('b','y')
-gt :: Ord k => k -> IxAffineTraversal' k (M.Map k v) v
+gt :: Ord k => k -> IxAffineTraversal' k (Map k v) v
 gt k = ixAtraversalVL $ \point f s ->
-  case M.lookupGT k s of
+  case lookupGT k s of
     Nothing      -> point s
-    Just (k', v) -> f k' v <&> \v' -> M.insert k' v' s
+    Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
 {-# INLINE gt #-}
 
 -- | Focus on the largest key smaller or equal than the given one and its
 -- corresponding value.
 --
--- >>> M.fromList [('a', "hi"), ('b', "there")] & over (le 'b') (++ "!")
+-- >>> Map.fromList [('a', "hi"), ('b', "there")] & over (le 'b') (++ "!")
 -- fromList [('a',"hi"),('b',"there!")]
 --
--- >>> ipreview (le 'a') $ M.fromList [('a', 'x'), ('b', 'y')]
+-- >>> ipreview (le 'a') $ Map.fromList [('a', 'x'), ('b', 'y')]
 -- Just ('a','x')
-le :: Ord k => k -> IxAffineTraversal' k (M.Map k v) v
+le :: Ord k => k -> IxAffineTraversal' k (Map k v) v
 le k = ixAtraversalVL $ \point f s ->
-  case M.lookupLE k s of
+  case lookupLE k s of
     Nothing      -> point s
-    Just (k', v) -> f k' v <&> \v' -> M.insert k' v' s
+    Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
 {-# INLINE le #-}
 
 -- | Focus on the smallest key greater or equal than the given one and its
 -- corresponding value.
 --
--- >>> M.fromList [('a', "hi"), ('c', "there")] & over (ge 'b') (++ "!")
+-- >>> Map.fromList [('a', "hi"), ('c', "there")] & over (ge 'b') (++ "!")
 -- fromList [('a',"hi"),('c',"there!")]
 --
--- >>> preview (ge 'b') $ M.fromList [('a', 'x'), ('c', 'y')]
+-- >>> ipreview (ge 'b') $ Map.fromList [('a', 'x'), ('c', 'y')]
 -- Just ('c','y')
-ge :: Ord k => k -> IxAffineTraversal' k (M.Map k v) v
+ge :: Ord k => k -> IxAffineTraversal' k (Map k v) v
 ge k = ixAtraversalVL $ \point f s ->
-  case M.lookupGE k s of
+  case lookupGE k s of
     Nothing      -> point s
-    Just (k', v) -> f k' v <&> \v' -> M.insert k' v' s
+    Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
 {-# INLINE ge #-}
+
+-- $setup
+-- >>> import Data.Monoid
+-- >>> import Optics.Core

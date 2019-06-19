@@ -34,7 +34,7 @@ type IxGetter i s a = Optic' A_Getter (WithIx i) s a
 -- | Build an indexed getter from a function.
 --
 -- >>> iview (ito id) ('i', 'x')
--- ('i', 'x')
+-- ('i','x')
 ito :: (s -> (i, a)) -> IxGetter i s a
 ito f = Optic (lmap f . ilinear uncurry . rphantom)
 {-# INLINE ito #-}

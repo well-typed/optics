@@ -324,3 +324,7 @@ ipartsOf o = conjoined (partsOf o) $ ixLensVL $ \f s ->
       []       ->            pure a
       a' : as' -> put as' >> pure a'
 {-# INLINE ipartsOf #-}
+
+-- $setup
+-- >>> import Data.Void
+-- >>> import Optics.Core

@@ -330,7 +330,7 @@ instance
 -- @LabelOptic "age"@ is written without type equalities:
 --
 -- @
--- >>> view #age peter :: Char
+-- λ> view #age peter :: Char
 --
 -- <interactive>:28:6: error:
 --     • No instance for LabelOptic "age" ‘k0’ ‘Human’ ‘Human’ ‘Char’ ‘Char’
@@ -338,7 +338,7 @@ instance
 --     • In the first argument of ‘view’, namely ‘#age’
 --       In the expression: view #age peter :: Char
 --       In an equation for ‘it’: it = view #age peter :: Char
--- >>> peter & set #age "hi"
+-- λ> peter & set #age "hi"
 --
 -- <interactive>:29:1: error:
 --     • No instance for LabelOptic "age" ‘k’ ‘Human’ ‘b’ ‘a’ ‘[Char]’
@@ -350,7 +350,7 @@ instance
 -- If we use the first form, error messages become more accurate:
 --
 -- @
--- >>> view #age peter :: Char
+-- λ> view #age peter :: Char
 --
 -- <interactive>:31:6: error:
 --     • Couldn't match type ‘Char’ with ‘Integer’
@@ -358,7 +358,7 @@ instance
 --     • In the first argument of ‘view’, namely ‘#age’
 --       In the expression: view #age peter :: Char
 --       In an equation for ‘it’: it = view #age peter :: Char
--- >>> peter & set #age "hi"
+-- λ> peter & set #age "hi"
 --
 -- <interactive>:32:13: error:
 --     • Couldn't match type ‘[Char]’ with ‘Integer’
@@ -402,3 +402,6 @@ instance
 #else
   fromLabel _ = labelOptic @name @k @s @t @a @b
 #endif
+
+-- $setup
+-- >>> import Optics.Core
