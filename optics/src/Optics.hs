@@ -155,8 +155,11 @@ module Optics
   -- $indexed
   , module Optics.Indexed
 
-  -- * Generation of optics with Template Haskell
+  -- * Generation of optics
+  -- ** ...with Template Haskell
   , module Optics.TH
+  -- ** ...with @OverloadedLabels@
+  , module Optics.Label
 
   -- * Optics for concrete base types
   , module P
@@ -201,6 +204,9 @@ import Optics.ReadOnly
 import Optics.State
 import Optics.View
 import Optics.Zoom
+
+-- Overloaded labels support
+import Optics.Label
 
 -- Template Haskell support
 import Optics.TH

@@ -37,10 +37,6 @@ module Optics.Optic
   , (%%)
   , (%&)
 
-  -- * Labels
-  , LabelOptic(..)
-  , LabelOptic'
-
   -- * Indexed optics
   , NoIx
   , WithIx
