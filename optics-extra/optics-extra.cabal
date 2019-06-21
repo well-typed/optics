@@ -46,6 +46,7 @@ library
   exposed-modules: Data.ByteString.Lazy.Optics
                    Data.ByteString.Optics
                    Data.ByteString.Strict.Optics
+                   Data.HashMap.Optics
                    Data.Text.Lazy.Optics
                    Data.Text.Optics
                    Data.Text.Strict.Optics
