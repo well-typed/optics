@@ -71,10 +71,11 @@ library
                     , Optics.Empty
                     , Optics.Indexed
                     , Optics.Operators
-                    , Optics.Operators.State
                     , Optics.Passthrough
                     , Optics.Re
                     , Optics.ReadOnly
+                    , Optics.State
+                    , Optics.State.Operators
                     , Optics.View
                     , Optics.Zoom
 

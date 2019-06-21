@@ -1,4 +1,4 @@
-module Optics.Operators.State (
+module Optics.State.Operators (
   -- * State modifying optics
   (.=), (?=), (%=),
   -- * State modifying optics with passthrough
@@ -16,6 +16,7 @@ import qualified Control.Monad.State as State
 
 import Optics.Core
 import Optics.Passthrough
+import Optics.State
 import Optics.View
 
 infix 4 .=, ?=, %=
@@ -29,7 +30,7 @@ infix 4 .=, ?=, %=
   => Optic k is s s a b
   -> b
   -> m ()
-o .= x = o %= const x
+(.=) = assign
 {-# INLINE (.=) #-}
 
 -- | Replace the target(s) of an 'Optic' in our monadic state with 'Just' a new
@@ -39,7 +40,7 @@ o .= x = o %= const x
   => Optic k is s s (Maybe a) (Maybe b)
   -> b
   -> m ()
-o ?= x = o %= const (Just x)
+(?=) = \o -> assign o . Just
 {-# INLINE (?=) #-}
 
 -- | Map over the target(s) of an 'Optic' in our monadic state.
@@ -50,7 +51,7 @@ o ?= x = o %= const (Just x)
   => Optic k is s s a b
   -> (a -> b)
   -> m ()
-o %= f = State.modify (o %~ f)
+(%=) = modifying
 {-# INLINE (%=) #-}
 
 -------------------------------------------------------------------------------

@@ -30,7 +30,7 @@ import           Generics.SOP.Optics    (productRep, rep, sop)
 import qualified GHC.Generics           as GHC
 
 import           Optics
-import           Optics.Operators.State
+import           Optics.State.Operators
 
 import qualified Data.Set as Set
 

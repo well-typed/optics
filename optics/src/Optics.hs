@@ -112,6 +112,9 @@ module Optics
   -- ** ReadOnly
   , module Optics.ReadOnly
 
+  -- ** 'Setter' utilities for working in 'MonadState'.
+  , module Optics.State
+
   -- ** View
 
   -- | A generalized view function 'gview', which returns a single result (like
@@ -195,6 +198,7 @@ import Optics.Indexed
 import Optics.Operators
 import Optics.Re
 import Optics.ReadOnly
+import Optics.State
 import Optics.View
 import Optics.Zoom
 
@@ -827,4 +831,4 @@ import Data.Either.Optics                    as P
 -- >>> import Data.Functor.Identity
 -- >>> import qualified Data.IntSet as IntSet
 -- >>> import qualified Data.Map as Map
--- >>> import Optics.Operators.State
+-- >>> import Optics.State.Operators
