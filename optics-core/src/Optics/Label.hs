@@ -91,7 +91,7 @@
 --
 -- == Structure of 'LabelOptic' instances
 --
--- /Note:/ You might wonder why instances above are written in form
+-- You might wonder why instances above are written in form
 --
 -- @
 -- instance (a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" A_Lens Human Human a b where
@@ -168,7 +168,7 @@
 --
 -- == Limitations arising from functional dependencies
 --
--- /Note:/ Functional dependencies guarantee good type inference, but also
+-- Functional dependencies guarantee good type inference, but also
 -- create limitations. We can split them into two groups:
 --
 -- - @name s -> k a@, @name t -> k b@
