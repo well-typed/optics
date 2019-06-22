@@ -54,9 +54,9 @@ library
                     , Optics.IxSetter
                     , Optics.IxTraversal
                     , Optics.Lens
-                    , Optics.LensyReview
+                    , Optics.ReversedLens
                     , Optics.Prism
-                    , Optics.PrismaticGetter
+                    , Optics.ReversedPrism
 
                     , Optics.Review
                     , Optics.Setter

@@ -37,17 +37,17 @@ class ReversibleOptic k where
   --
   -- @
   -- 'ReversedOptic' 'An_Iso'            = 'An_Iso'
-  -- 'ReversedOptic' 'A_Prism'           = 'A_PrismaticGetter'
-  -- 'ReversedOptic' 'A_PrismaticGetter' = 'A_Prism'
-  -- 'ReversedOptic' 'A_Lens'            = 'A_LensyReview'
-  -- 'ReversedOptic' 'A_LensyReview'     = 'A_Lens'
+  -- 'ReversedOptic' 'A_Prism'           = 'A_ReversedPrism'
+  -- 'ReversedOptic' 'A_ReversedPrism'   = 'A_Prism'
+  -- 'ReversedOptic' 'A_Lens'            = 'A_ReversedLens'
+  -- 'ReversedOptic' 'A_ReversedLens'    = 'A_Lens'
   -- 'ReversedOptic' 'A_Getter'          = 'A_Review'
   -- 'ReversedOptic' 'A_Review'          = 'A_Getter'
   -- @
   type ReversedOptic k = r | r -> k
   -- | Reverses optics, turning around 'Optics.Iso.Iso' into 'Optics.Iso.Iso',
-  -- 'Optics.Prism.Prism' into 'Optics.PrismaticGetter.PrismaticGetter' (and
-  -- back), 'Optics.Lens.Lens' into 'Optics.LensyReview.LensyReview' (and back)
+  -- 'Optics.Prism.Prism' into 'Optics.ReversedPrism.ReversedPrism' (and
+  -- back), 'Optics.Lens.Lens' into 'Optics.ReversedLens.ReversedLens' (and back)
   -- and 'Optics.Getter.Getter' into 'Optics.Review.Review' (and back).
   re
     :: "re" `AcceptsEmptyIndices` is
@@ -60,22 +60,22 @@ instance ReversibleOptic An_Iso where
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Prism where
-  type ReversedOptic A_Prism = A_PrismaticGetter
+  type ReversedOptic A_Prism = A_ReversedPrism
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_PrismaticGetter where
-  type ReversedOptic A_PrismaticGetter = A_Prism
+instance ReversibleOptic A_ReversedPrism where
+  type ReversedOptic A_ReversedPrism = A_Prism
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
 instance ReversibleOptic A_Lens where
-  type ReversedOptic A_Lens = A_LensyReview
+  type ReversedOptic A_Lens = A_ReversedLens
   re o = Optic (re__ o)
   {-# INLINE re #-}
 
-instance ReversibleOptic A_LensyReview where
-  type ReversedOptic A_LensyReview = A_Lens
+instance ReversibleOptic A_ReversedLens where
+  type ReversedOptic A_ReversedLens = A_Lens
   re o = Optic (re__ o)
   {-# INLINE re #-}
 

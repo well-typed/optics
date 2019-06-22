@@ -54,11 +54,11 @@ library
     Optics.IxTraversal
     Optics.Label
     Optics.Lens
-    Optics.LensyReview
+    Optics.ReversedLens
     Optics.Operators
     Optics.Optic
     Optics.Prism
-    Optics.PrismaticGetter
+    Optics.ReversedPrism
     Optics.Re
     Optics.ReadOnly
     Optics.Review

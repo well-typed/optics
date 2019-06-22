@@ -101,7 +101,7 @@ module Optics
   -- 'x'
   --
   -- In the following diagram, red arrows illustrate how 're' transforms optics.
-  -- The 'LensyReview' and 'PrismaticGetter' optic kinds are backwards versions
+  -- The 'ReversedLens' and 'ReversedPrism' optic kinds are backwards versions
   -- of 'Lens' and 'Prism' respectively, and are present so that @'re' . 're'@
   -- does not change the optic kind.
   --
@@ -175,9 +175,9 @@ import Optics.Optic
 import Optics.Traversal                      as O
 import Optics.Setter                         as O
 import Optics.Review                         as O
-import Optics.PrismaticGetter                as O
+import Optics.ReversedPrism                  as O
 import Optics.Prism                          as O
-import Optics.LensyReview                    as O
+import Optics.ReversedLens                   as O
 import Optics.Lens                           as O
 import Optics.IxTraversal                    as O
 import Optics.IxSetter                       as O

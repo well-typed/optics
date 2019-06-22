@@ -21,16 +21,16 @@ data An_AffineTraversal
 data A_Traversal
 -- | Tag for a setter.
 data A_Setter
--- | Tag for a prismatic getter.
-data A_PrismaticGetter
+-- | Tag for a reversed prism.
+data A_ReversedPrism
 -- | Tag for a getter.
 data A_Getter
 -- | Tag for an affine fold.
 data An_AffineFold
 -- | Tag for a fold.
 data A_Fold
--- | Tag for a lensy review.
-data A_LensyReview
+-- | Tag for a reversed lens.
+data A_ReversedLens
 -- | Tag for a review.
 data A_Review
 
@@ -42,9 +42,9 @@ data A_Review
 type family Constraints (k :: *) (p :: * -> * -> * -> *) :: Constraint where
   Constraints An_Iso             p = Profunctor p
   Constraints A_Lens             p = Strong p
-  Constraints A_LensyReview      p = Costrong p
+  Constraints A_ReversedLens     p = Costrong p
   Constraints A_Prism            p = Choice p
-  Constraints A_PrismaticGetter  p = Cochoice p
+  Constraints A_ReversedPrism    p = Cochoice p
   Constraints An_AffineTraversal p = Visiting p
   Constraints A_Traversal        p = Traversing p
   Constraints A_Setter           p = Mapping p

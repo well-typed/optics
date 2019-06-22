@@ -34,16 +34,16 @@ data OpticKind
   |  A_Traversal
   -- | Tag for a setter.
   |  A_Setter
-  -- | Tag for a prismatic getter.
-  |  A_PrismaticGetter
+  -- | Tag for a reversed prism.
+  |  A_ReversedPrism
   -- | Tag for a getter.
   |  A_Getter
   -- | Tag for an affine fold.
   |  An_AffineFold
   -- | Tag for a fold.
   |  A_Fold
-  -- | Tag for a lensy review.
-  |  A_LensyReview
+  -- | Tag for a reversed lens.
+  |  A_ReversedLens
   -- | Tag for a review.
   |  A_Review
   deriving (Eq, Ord, Show, Enum, Bounded)
@@ -53,10 +53,10 @@ opticsKind :: Map OpticKind (Set OpticKind)
 opticsKind = mkProper $ Map.fromListWith (<>)
     [ An_Iso             ~> A_Lens
     , An_Iso             ~> A_Prism
-    , An_Iso             ~> A_LensyReview
-    , An_Iso             ~> A_PrismaticGetter
-    , A_PrismaticGetter  ~> A_Getter
-    , A_LensyReview      ~> A_Review
+    , An_Iso             ~> A_ReversedLens
+    , An_Iso             ~> A_ReversedPrism
+    , A_ReversedPrism    ~> A_Getter
+    , A_ReversedLens     ~> A_Review
     , A_Prism            ~> A_Review
     , A_Prism            ~> An_AffineTraversal
     , A_Lens             ~> An_AffineTraversal

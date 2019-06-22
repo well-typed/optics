@@ -26,10 +26,10 @@ hierarchy = do
 
     arrow Tag_Iso Tag_Lens
     arrow Tag_Iso Tag_Prism
-    arrow Tag_Iso Tag_LensyReview
-    arrow Tag_Iso Tag_PrismaticGetter
+    arrow Tag_Iso Tag_ReversedLens
+    arrow Tag_Iso Tag_ReversedPrism
 
-    arrow Tag_LensyReview Tag_Review
+    arrow Tag_ReversedLens Tag_Review
     arrow Tag_Prism Tag_Review
     arrow Tag_Prism Tag_AffineTraversal
 
@@ -37,7 +37,7 @@ hierarchy = do
     arrow Tag_AffineTraversal Tag_Traversal
     arrow Tag_Traversal Tag_Setter
 
-    arrow Tag_PrismaticGetter Tag_Getter
+    arrow Tag_ReversedPrism Tag_Getter
     arrow Tag_Getter Tag_AffineFold
     arrow Tag_AffineFold Tag_Fold
 

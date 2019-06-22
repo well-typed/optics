@@ -38,9 +38,9 @@ import Optics.IxLens                           as O
 import Optics.IxSetter                         as O
 import Optics.IxTraversal                      as O
 import Optics.Lens                             as O
-import Optics.LensyReview                      as O
+import Optics.ReversedLens                     as O
 import Optics.Prism                            as O
-import Optics.PrismaticGetter                  as O
+import Optics.ReversedPrism                    as O
 import Optics.Review                           as O
 import Optics.Setter                           as O
 import Optics.Traversal                        as O
