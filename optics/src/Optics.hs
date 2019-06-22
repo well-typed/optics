@@ -694,7 +694,7 @@ import Data.Either.Optics                    as P
 --   apply a 'Traversal', rather than simply using it as a function.
 --
 -- * The 're' combinator produces a different optic kind depending on the kind
---   of the input 'Iso', for example 'Prism' reverses to 'Getter' while a
+--   of the input 'Iso', for example 'Review' reverses to 'Getter' while a
 --   reversed 'Iso' is still an 'Iso'.  Thus there is no separate @from@
 --   combinator for reversing 'Iso's.
 
