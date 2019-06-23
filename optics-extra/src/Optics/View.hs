@@ -13,7 +13,7 @@ import Optics.Core
 --
 -- The type of the result depends on the optic. You get:
 --
---   * Exactly one result @a@ with 'Iso', 'Lens', 'PrismaticGetter' and
+--   * Exactly one result @a@ with 'Iso', 'Lens', 'ReversedPrism' and
 --   'Getter'.
 --
 --   * At most one result @Maybe a@ with 'Prism', 'AffineTraversal' and
@@ -51,8 +51,8 @@ instance ViewableOptic A_Lens r where
   {-# INLINE gview #-}
   {-# INLINE gviews #-}
 
-instance ViewableOptic A_PrismaticGetter r where
-  type ViewResult A_PrismaticGetter r = r
+instance ViewableOptic A_ReversedPrism r where
+  type ViewResult A_ReversedPrism r = r
   gview    = asks . view
   gviews o = asks . views o
   {-# INLINE gview #-}

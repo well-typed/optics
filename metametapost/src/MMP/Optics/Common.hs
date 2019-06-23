@@ -24,11 +24,11 @@ data OK
     |  Tag_AffineTraversal
     |  Tag_Traversal
     |  Tag_Setter
-    |  Tag_PrismaticGetter
+    |  Tag_ReversedPrism
     |  Tag_Getter
     |  Tag_AffineFold
     |  Tag_Fold
-    |  Tag_LensyReview
+    |  Tag_ReversedLens
     |  Tag_Review
 
     -- indexed
@@ -73,13 +73,13 @@ okName Tag_Traversal         = "Traversal"
 okName Tag_IxTraversal       = "IxTraversal"
 okName Tag_Setter            = "Setter"
 okName Tag_IxSetter          = "IxSetter"
-okName Tag_PrismaticGetter   = "PrismaticGetter"
+okName Tag_ReversedPrism     = "ReversedPrism"
 okName Tag_Getter            = "Getter"
 okName Tag_IxGetter          = "IxGetter"
 okName Tag_AffineFold        = "AffineFold"
 okName Tag_Fold              = "Fold"
 okName Tag_IxFold            = "IxFold"
-okName Tag_LensyReview       = "LensyReview"
+okName Tag_ReversedLens      = "ReversedLens"
 okName Tag_Review            = "Review"
 okName Tag_IxLens            = "IxLens"
 okName Tag_IxAffineFold      = "IxAffineFold"
@@ -99,14 +99,14 @@ positions = tabulate $ \case
     Tag_IxTraversal       -> pair 2 5
     Tag_Setter            -> pair 4 5
     Tag_IxSetter          -> pair 3 6
-    Tag_PrismaticGetter   -> pair 0 2
+    Tag_ReversedPrism     -> pair 0 2
     Tag_Getter            -> pair 1 3
     Tag_IxGetter          -> pair 0 4
     Tag_AffineFold        -> pair 2 4
     Tag_IxAffineFold      -> pair 1 5
     Tag_Fold              -> pair 3 5
     Tag_IxFold            -> pair 2 6
-    Tag_LensyReview       -> pair 4 2
+    Tag_ReversedLens      -> pair 4 2
     Tag_Review            -> pair 3 3
   where
     pair x y = Pair (L x .* dimX) (L y .* dimY)

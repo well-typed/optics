@@ -53,7 +53,7 @@ instance ToReadOnly A_Traversal s t a b where
   getting o = Optic (getting__ o)
   {-# INLINE getting #-}
 
-instance ToReadOnly A_PrismaticGetter s t a b where
+instance ToReadOnly A_ReversedPrism s t a b where
   getting o = Optic (getting__ o)
   {-# INLINE getting #-}
 

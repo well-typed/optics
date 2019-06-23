@@ -101,7 +101,7 @@ module Optics
   -- 'x'
   --
   -- In the following diagram, red arrows illustrate how 're' transforms optics.
-  -- The 'LensyReview' and 'PrismaticGetter' optic kinds are backwards versions
+  -- The 'ReversedLens' and 'ReversedPrism' optic kinds are backwards versions
   -- of 'Lens' and 'Prism' respectively, and are present so that @'re' . 're'@
   -- does not change the optic kind.
   --
@@ -175,9 +175,9 @@ import Optics.Optic
 import Optics.Traversal                      as O
 import Optics.Setter                         as O
 import Optics.Review                         as O
-import Optics.PrismaticGetter                as O
+import Optics.ReversedPrism                  as O
 import Optics.Prism                          as O
-import Optics.LensyReview                    as O
+import Optics.ReversedLens                   as O
 import Optics.Lens                           as O
 import Optics.IxTraversal                    as O
 import Optics.IxSetter                       as O
@@ -694,7 +694,7 @@ import Data.Either.Optics                    as P
 --   apply a 'Traversal', rather than simply using it as a function.
 --
 -- * The 're' combinator produces a different optic kind depending on the kind
---   of the input 'Iso', for example 'Prism' reverses to 'Getter' while a
+--   of the input 'Iso', for example 'Review' reverses to 'Getter' while a
 --   reversed 'Iso' is still an 'Iso'.  Thus there is no separate @from@
 --   combinator for reversing 'Iso's.
 
