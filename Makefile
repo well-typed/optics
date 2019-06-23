@@ -48,5 +48,7 @@ metametapost/%.mp : metametapost/src/MetaMetaPost.hs metametapost/src/Cli.hs
 metametapost/%.png : metametapost/%.mp
 	make -C metametapost $*.png
 
+# This rule was:
+# cp $< $@
 optics/%.png : metametapost/%.png
-	cp $< $@
+	optipng -o7 -zm1-9 $< -dir optics/
