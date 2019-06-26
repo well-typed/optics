@@ -4,17 +4,17 @@
 --
 -- Defines some infix operators for optics operations.
 --
--- These are not exported by default from "Optics.Core".
--- They have to be imported separately.
---
 module Optics.Operators
   ( (^.)
   , (^..)
   , (^?)
   , (#)
   , (%~)
+  , (%!~)
   , (.~)
+  , (!~)
   , (?~)
+  , (?!~)
   )
   where
 
@@ -49,6 +49,7 @@ infixl 8 ^..
 (#) :: Is k A_Review => Optic' k is t b -> b -> t
 (#) = review
 {-# INLINE (#) #-}
+
 infixr 8 #
 
 -- | Infix version of 'over'.
@@ -58,12 +59,26 @@ infixr 8 #
 
 infixr 4 %~
 
+-- | Infix version of 'over''.
+(%!~) :: Is k A_Setter => Optic k is s t a b -> (a -> b) -> s -> t
+(%!~) = over'
+{-# INLINE (%!~) #-}
+
+infixr 4 %!~
+
 -- | Infix version of 'set'.
 (.~) :: Is k A_Setter => Optic k is s t a b -> b -> s -> t
 (.~) = set
 {-# INLINE (.~) #-}
 
 infixr 4 .~
+
+-- | Infix version of 'set''.
+(!~) :: Is k A_Setter => Optic k is s t a b -> b -> s -> t
+(!~) = set'
+{-# INLINE (!~) #-}
+
+infixr 4 !~
 
 -- | Set the target of a 'Setter' to 'Just' a value.
 --
@@ -81,6 +96,13 @@ infixr 4 .~
 {-# INLINE (?~) #-}
 
 infixr 4 ?~
+
+-- | Strict version of '(?~)'.
+(?!~) :: Is k A_Setter => Optic k is s t a (Maybe b) -> b -> s -> t
+(?!~) = \o !b -> set' o (Just b)
+{-# INLINE (?!~) #-}
+
+infixr 4 ?!~
 
 -- $setup
 -- >>> import qualified Data.Map as Map
