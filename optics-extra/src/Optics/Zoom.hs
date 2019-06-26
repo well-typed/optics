@@ -406,5 +406,6 @@ instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a wher
   {-# INLINE magnifyMany #-}
 
 -- $setup
+-- >>> import Data.Monoid
 -- >>> import Optics.State.Operators
 -- >>> import Optics.View

@@ -12,10 +12,11 @@
 -- use @'mkLenses' :: 'LensesFor' T@ to obtain a tuple of lenses, or similarly
 -- use @'mkPrisms' :: 'PrismsFor' T@ to obtain a tuple of prisms. For example:
 --
--- >>> :set -XDeriveGeneric -XDeriveAnyClass
+-- >>> :set -XDeriveGeneric -XDeriveAnyClass -XStandaloneDeriving
 -- >>> import qualified GHC.Generics as GHC
 -- >>> import qualified Generics.SOP as SOP
--- >>> data T = MkT { _foo :: Int, _bar :: Bool } deriving (GHC.Generic, SOP.Generic)
+-- >>> data T = MkT { _foo :: Int, _bar :: Bool } deriving GHC.Generic
+-- >>> deriving instance SOP.Generic T
 -- >>> Lenses (sopFoo, sopBar) = mkLenses :: LensesFor T
 -- >>> view sopFoo (MkT 42 True)
 -- 42
