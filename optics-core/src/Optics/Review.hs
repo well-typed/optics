@@ -25,6 +25,7 @@ module Optics.Review
 
   -- * Subtyping
   , A_Review
+  -- | <<Review.png Review in the optics hierarchy>>
   , toReview
 
   -- * Re-exports

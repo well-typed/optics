@@ -65,6 +65,7 @@ module Optics.Traversal
 
   -- * Subtyping
   , A_Traversal
+  -- | <<Traversal.png Traversal in the optics hierarchy>>
 
   -- * van Laarhoven encoding
   -- | The van Laarhoven representation of a 'Traversal' directly expresses how

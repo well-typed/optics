@@ -17,6 +17,20 @@ description:
   See @optics@ package (and its dependencies) for documentation and the
   "batteries-included" variant.
 
+extra-doc-files:
+  Iso.png
+  Lens.png
+  Prism.png
+  AffineTraversal.png
+  Traversal.png
+  Setter.png
+  ReversedPrism.png
+  Getter.png
+  AffineFold.png
+  Fold.png
+  ReversedLens.png
+  Review.png
+
 library
   default-language:   Haskell2010
   hs-source-dirs:     src

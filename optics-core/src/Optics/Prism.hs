@@ -58,6 +58,7 @@ module Optics.Prism
 
   -- * Subtyping
   , A_Prism
+  -- | <<Prism.png Prism in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic
