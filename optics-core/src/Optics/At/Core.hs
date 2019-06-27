@@ -360,7 +360,7 @@ instance
 -- @
 class Ixed m => At m where
   -- |
-  -- >>> Map.fromList [(1,"world")] ^.at 1
+  -- >>> Map.fromList [(1,"world")] ^. at 1
   -- Just "world"
   --
   -- >>> at 1 ?~ "hello" $ Map.empty
