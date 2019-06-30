@@ -19,9 +19,7 @@ description:
   limited dependency footprint.
 
 extra-doc-files:
-  optics.png
-  reoptics.png
-  indexedoptics.png
+  diagrams/*.png
 
 library
   default-language:   Haskell2010

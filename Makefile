@@ -39,7 +39,7 @@ codegen-join :
 
 DIAGRAMS=optics reoptics indexedoptics
 
-diagrams : optics/optics.png optics/reoptics.png optics/indexedoptics.png
+diagrams : $(DIAGRAMS:%=optics/diagrams/%.png)
 
 OPTIC_KINDS=AffineFold AffineTraversal Fold Getter Iso Lens Prism ReversedLens ReversedPrism Review Setter Traversal
 
@@ -54,8 +54,8 @@ metametapost/%.png : metametapost/%.mp
 
 # This rule was:
 # cp $< $@
-optics/%.png : metametapost/%.png
-	optipng -o7 -zm1-9 $< -dir optics/
+optics/diagrams/%.png : metametapost/%.png
+	optipng -o7 -zm1-9 $< -dir optics/diagrams/
 
 optics-core/diagrams/%.png : metametapost/%.png
 	optipng -o7 -zm1-9 $< -dir optics-core/diagrams/
