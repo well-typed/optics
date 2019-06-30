@@ -57,7 +57,7 @@ module Optics.Setter
 
   -- * Subtyping
   , A_Setter
-  -- | <<Setter.png Setter in the optics hierarchy>>
+  -- | <<diagrams/Setter.png Setter in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic

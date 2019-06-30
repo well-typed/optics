@@ -35,7 +35,7 @@ module Optics.Getter
 
   -- * Subtyping
   , A_Getter
-  -- | <<Getter.png Getter in the optics hierarchy>>
+  -- | <<diagrams/Getter.png Getter in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic

@@ -45,7 +45,7 @@ module Optics.AffineTraversal
 
   -- * Subtyping
   , An_AffineTraversal
-  -- | <<AffineTraversal.png AffineTraversal in the optics hierarchy>>
+  -- | <<diagrams/AffineTraversal.png AffineTraversal in the optics hierarchy>>
 
   -- * van Laarhoven encoding
   , AffineTraversalVL

@@ -68,7 +68,7 @@ module Optics.Iso
 
   -- * Subtyping
   , An_Iso
-  -- | <<Iso.png Iso in the optics hierarchy>>
+  -- | <<diagrams/Iso.png Iso in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic

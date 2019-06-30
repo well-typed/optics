@@ -89,7 +89,7 @@ module Optics.Lens
 
   -- * Subtyping
   , A_Lens
-  -- | <<Lens.png Lens in the optics hierarchy>>
+  -- | <<diagrams/Lens.png Lens in the optics hierarchy>>
 
   -- * van Laarhoven encoding
   -- | The van Laarhoven encoding of lenses is isomorphic to the profunctor

@@ -41,7 +41,9 @@ DIAGRAMS=optics reoptics indexedoptics
 
 diagrams : optics/optics.png optics/reoptics.png optics/indexedoptics.png
 
-per-kind-diagrams : optics-core/Iso.png optics-core/Lens.png optics-core/Prism.png optics-core/AffineTraversal.png optics-core/Traversal.png optics-core/Setter.png optics-core/ReversedPrism.png optics-core/Getter.png optics-core/AffineFold.png optics-core/Fold.png optics-core/ReversedLens.png optics-core/Review.png
+OPTIC_KINDS=AffineFold AffineTraversal Fold Getter Iso Lens Prism ReversedLens ReversedPrism Review Setter Traversal
+
+per-kind-diagrams : $(OPTIC_KINDS:%=optics-core/diagrams/%.png)
 
 metametapost/%.mp : metametapost/src/MetaMetaPost.hs metametapost/src/Cli.hs
 	cabal new-build metametapost-optics
@@ -55,5 +57,5 @@ metametapost/%.png : metametapost/%.mp
 optics/%.png : metametapost/%.png
 	optipng -o7 -zm1-9 $< -dir optics/
 
-optics-core/%.png : metametapost/%.png
-	optipng -o7 -zm1-9 $< -dir optics-core/
+optics-core/diagrams/%.png : metametapost/%.png
+	optipng -o7 -zm1-9 $< -dir optics-core/diagrams/

@@ -51,7 +51,7 @@ module Optics.ReversedPrism
 
   -- * Subtyping
   , A_ReversedPrism
-  -- | <<ReversedPrism.png ReversedPrism in the optics hierarchy>>
+  -- | <<diagrams/ReversedPrism.png ReversedPrism in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic
