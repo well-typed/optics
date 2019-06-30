@@ -78,8 +78,8 @@ hierarchyFocus focus = hierarchyColoured (text_colour . fromEnum)
 
     text_colour k
       | k == f           = red
-      | G.path graph f k = light_blue
-      | G.path graph k f = dark_blue
+      | G.path graph f k = black
+      | G.path graph k f = black
       | otherwise        = grey
 
     arrow_colour j k
@@ -87,9 +87,7 @@ hierarchyFocus focus = hierarchyColoured (text_colour . fromEnum)
       | G.path graph j f, G.path graph k f = black
       | otherwise                          = grey
 
-red, light_blue, dark_blue, grey, black :: Expr s 'Color
-red        = RGB (L 1)   (L 0)   (L 0)
-light_blue = RGB (L 0)   (L 0)   (L 0.75)
-dark_blue  = RGB (L 0)   (L 0)   (L 0.5)
-grey       = RGB (L 0.5) (L 0.5) (L 0.5)
-black      = RGB (L 0)   (L 0)   (L 0)
+red, grey, black :: Expr s 'Color
+red        = RGB (L 0.75) (L 0)    (L 0)
+grey       = RGB (L 0.75) (L 0.75) (L 0.75)
+black      = RGB (L 0)    (L 0)    (L 0)
