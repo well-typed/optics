@@ -44,8 +44,9 @@ module Data.Tuple.Optics
 import Data.Functor.Identity
 import Data.Functor.Product
 import Data.Proxy
-import GHC.Generics ((:*:)(..), Generic(..), K1(..), M1(..), U1(..))
+import GHC.Generics ((:*:)(..), Generic(..), K1, M1, U1)
 
+import GHC.Generics.Optics
 import Optics.Iso
 import Optics.Lens
 
@@ -399,7 +400,7 @@ _9' = lensVL $ \f !x -> toLensVL _9 f x
 {-# INLINE _9' #-}
 
 ix :: (Generic s, Generic t, GIxed n (Rep s) (Rep t) a b) => f n -> Lens s t a b
-ix n = lensVL $ \f -> fmap to . gix n f . from
+ix n = generic % gix n
 {-# INLINE ix #-}
 
 -- TODO: this can be replaced by generic-optics position
@@ -410,21 +411,21 @@ type instance GSize (M1 i c f) = GSize f
 type instance GSize (a :*: b) = Add (GSize a) (GSize b)
 
 class GIxed n s t a b | n s -> a, n t -> b, n s b -> t, n t a -> s where
-  gix :: f n -> LensVL (s x) (t x) a b
+  gix :: f n -> Lens (s x) (t x) a b
 
 instance GIxed N0 (K1 i a) (K1 i b) a b where
-  gix _ = toLensVL (iso unK1 K1)
+  gix _ = castOptic _K1
   {-# INLINE gix #-}
 
 instance GIxed n s t a b => GIxed n (M1 i c s) (M1 i c t) a b where
-  gix n = toLensVL (iso unM1 M1) . gix n
+  gix n = _M1 % gix n
   {-# INLINE gix #-}
 
 instance (p ~ GT (GSize s) n,
           p ~ GT (GSize t) n,
           GIxed' p n s s' t t' a b)
       => GIxed n (s :*: s') (t :*: t') a b where
-  gix = gix' (Proxy :: Proxy p)
+  gix = gix' (Proxy @p)
   {-# INLINE gix #-}
 
 class (p ~ GT (GSize s) n,
@@ -433,20 +434,20 @@ class (p ~ GT (GSize s) n,
                                , p n t t' -> b
                                , p n s s' b -> t t'
                                , p n t t' a -> s s' where
-  gix' :: f p -> g n -> LensVL ((s :*: s') x) ((t :*: t') x) a b
+  gix' :: f p -> g n -> Lens ((s :*: s') x) ((t :*: t') x) a b
 
 instance (GT (GSize s) n ~ T,
           GT (GSize t) n ~ T,
           GIxed n s t a b)
       => GIxed' T n s s' t s' a b where
-  gix' _ n f (s :*: s') = (:*: s') <$> gix n f s
+  gix' _ n = _1 % gix n
   {-# INLINE gix' #-}
 
 instance (GT (GSize s) n ~ F,
           n' ~ Subtract (GSize s) n,
           GIxed n' s' t' a b)
       => GIxed' F n s s' s t' a b where
-  gix' _ _ f (s :*: s') = (s :*:) <$> gix (Proxy :: Proxy n') f s'
+  gix' _ _ = _2 % gix (Proxy @n')
   {-# INLINE gix' #-}
 
 data Z
