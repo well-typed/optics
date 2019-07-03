@@ -49,7 +49,6 @@ module Data.HashMap.Optics
 
 import Data.Hashable
 import Data.HashMap.Lazy as HashMap
-import qualified Data.HashMap.Strict as Strict
 
 import Optics.Core
 
@@ -72,19 +71,6 @@ toMapOf
   => Optic' k is s a -> s -> HashMap i a
 toMapOf o = ifoldMapOf o HashMap.singleton
 {-# INLINE toMapOf #-}
-
--- | Strict version of 'Optics.At.Core.at' for 'HashMap'.
-at' :: (Eq k, Hashable k) => k -> Lens' (HashMap k a) (Maybe a)
-at' k = lensVL $ \f s ->
-#if MIN_VERSION_unordered_containers(0,2,10)
-  Strict.alterF f k s
-#else
-  let mv = Strict.lookup k s
-  in f mv <&> \case
-    Nothing -> maybe s (\_ -> Strict.delete k s) mv
-    Just v  -> Strict.insert k v s
-#endif
-{-# INLINE at' #-}
 
 -- $setup
 -- >>> import Data.Monoid

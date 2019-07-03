@@ -29,11 +29,12 @@ module Optics.At.Core
   , IxValue
 
     -- * Ixed
-  , Ixed(ix)
+  , Ixed(..)
   , ixAt
 
     -- * At
   , At(..)
+  , at'
   , sans
 
   -- * Contains
@@ -54,6 +55,7 @@ import Data.Tree
 
 import Data.Maybe.Optics
 import Optics.AffineTraversal
+import Optics.Iso
 import Optics.Lens
 import Optics.Setter
 
@@ -366,9 +368,47 @@ class Ixed m => At m where
   -- >>> at 1 ?~ "hello" $ Map.empty
   -- fromList [(1,"hello")]
   --
+  -- /Note:/ Usage of this function might introduce space leaks if you're not
+  -- careful to make sure that values put inside the 'Just' constructor are
+  -- evaluated. To force the values and avoid such leaks, use 'at'' instead.
+  --
   -- /Note:/ 'Map'-like containers form a reasonable instance, but not
   -- 'Array'-like ones, where you cannot satisfy the 'Lens' laws.
   at :: Index m -> Lens' m (Maybe (IxValue m))
+
+-- | Version of 'at' strict in the value inside the `Just` constructor.
+--
+-- Example:
+--
+-- >>> (at () .~ Just (error "oops") $ Nothing) `seq` ()
+-- ()
+--
+-- >>> (at' () .~ Just (error "oops") $ Nothing) `seq` ()
+-- *** Exception: oops
+-- ...
+--
+-- >>> view (at ()) (Just $ error "oops") `seq` ()
+-- ()
+--
+-- >>> view (at' ()) (Just $ error "oops") `seq` ()
+-- *** Exception: oops
+-- ...
+--
+-- It also works as expected for other data structures:
+--
+-- >>> (at 1 .~ Just (error "oops") $ Map.empty) `seq` ()
+-- ()
+--
+-- >>> (at' 1 .~ Just (error "oops") $ Map.empty) `seq` ()
+-- *** Exception: oops
+-- ...
+at' :: At m => Index m -> Lens' m (Maybe (IxValue m))
+at' k = at k % iso f f
+  where
+    f = \case
+      Just !x -> Just x
+      Nothing -> Nothing
+{-# INLINE at' #-}
 
 -- | Delete the value associated with a key in a 'Map'-like container
 --
@@ -383,9 +423,6 @@ instance At (Maybe a) where
   at () = lensVL id
   {-# INLINE at #-}
 
--- | Usage of this instance might lead to space leaks as when @Just v@ is
--- returned, @v@ is not forced to whnf before being put in the map. To work
--- around that return @v `seq` Just v@ or use 'Data.IntMap.Optics.at'' instead.
 instance At (IntMap a) where
 #if MIN_VERSION_containers(0,5,8)
   at k = lensVL $ \f -> IntMap.alterF f k
@@ -398,9 +435,6 @@ instance At (IntMap a) where
 #endif
   {-# INLINE at #-}
 
--- | Usage of this instance might lead to space leaks as when @Just v@ is
--- returned, @v@ is not forced to whnf before being put in the map. To work
--- around that return @v `seq` Just v@ or use 'Data.Map.Optics.at'' instead.
 instance Ord k => At (Map k a) where
 #if MIN_VERSION_containers(0,5,8)
   at k = lensVL $ \f -> Map.alterF f k
