@@ -45,7 +45,7 @@ module Optics.Iso
   , equality
   , simple
   , coerced
-  , coerced'
+  , coercedTo
   , coerced1
   , curried
   , uncurried
@@ -163,16 +163,17 @@ coerced :: (Coercible s a, Coercible t b) => Iso s t a b
 coerced = Optic (lcoerce' . rcoerce')
 {-# INLINE coerced #-}
 
--- | Type-preserving version of 'coerced'.
+-- | Type-preserving version of 'coerced' with type parameters rearranged for
+-- TypeApplications.
 --
 -- >>> newtype MkInt = MkInt Int deriving Show
 --
--- >>> over (coerced' @MkInt @Int) (*3) (MkInt 2)
+-- >>> over (coercedTo @Int) (*3) (MkInt 2)
 -- MkInt 6
 --
-coerced' :: Coercible s a => Iso' s a
-coerced' = Optic (lcoerce' . rcoerce')
-{-# INLINE coerced' #-}
+coercedTo :: Coercible a s => Iso' s a
+coercedTo = Optic (lcoerce' . rcoerce')
+{-# INLINE coercedTo #-}
 
 -- | Special case of 'coerced' for trivial newtype wrappers.
 --
