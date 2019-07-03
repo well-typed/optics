@@ -171,7 +171,7 @@ coerced = Optic (lcoerce' . rcoerce')
 -- >>> over (coercedTo @Int) (*3) (MkInt 2)
 -- MkInt 6
 --
-coercedTo :: Coercible a s => Iso' s a
+coercedTo :: forall a s. Coercible s a => Iso' s a
 coercedTo = Optic (lcoerce' . rcoerce')
 {-# INLINE coercedTo #-}
 
