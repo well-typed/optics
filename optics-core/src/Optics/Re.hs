@@ -14,8 +14,12 @@
 -- >>> review (re _1) ('x', "yz")
 -- 'x'
 --
--- See the main @Optics@ module in the @optics@ package for a diagram of how
--- 're' transforms optics.
+-- In the following diagram, red arrows illustrate how 're' transforms optics.
+-- The 'ReversedLens' and 'ReversedPrism' optic kinds are backwards versions
+-- of 'Lens' and 'Prism' respectively, and are present so that @'re' . 're'@
+-- does not change the optic kind.
+--
+-- <<diagrams/reoptics.png Reversed Optics>>
 --
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}

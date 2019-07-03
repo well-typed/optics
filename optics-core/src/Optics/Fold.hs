@@ -78,6 +78,7 @@ module Optics.Fold
 
   -- * Subtyping
   , A_Fold
+  -- | <<diagrams/Fold.png Fold in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic

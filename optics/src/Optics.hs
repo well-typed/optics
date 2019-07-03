@@ -105,7 +105,7 @@ module Optics
   -- of 'Lens' and 'Prism' respectively, and are present so that @'re' . 're'@
   -- does not change the optic kind.
   --
-  -- <<reoptics.png Reversed Optics>>
+  -- <<diagrams/reoptics.png Reversed Optics>>
   --
   , module Optics.Re
 
@@ -488,7 +488,7 @@ import Data.Either.Optics                    as P
 -- This graph gives an overview of the optic kinds and their subtype
 -- relationships:
 --
--- <<optics.png Optics hierarchy>>
+-- <<diagrams/optics.png Optics hierarchy>>
 --
 -- In addition to the optic kinds included in the diagram, there are also
 -- indexed variants, including 'IxAffineTraversal', 'IxTraversal',
@@ -835,7 +835,7 @@ import Data.Either.Optics                    as P
 --   :: TraversableWithIndex i f =>
 --      Optic A_Traversal '[i] (f a, c) (f b, c) a b
 --
--- <<indexedoptics.png Indexed Optics>>
+-- <<diagrams/indexedoptics.png Indexed Optics>>
 
 -- $setup
 -- >>> import Control.Monad.Reader

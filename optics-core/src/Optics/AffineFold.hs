@@ -36,6 +36,7 @@ module Optics.AffineFold
 
   -- * Subtyping
   , An_AffineFold
+  -- | <<diagrams/AffineFold.png AffineFold in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic

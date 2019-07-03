@@ -51,6 +51,7 @@ module Optics.ReversedLens
 
   -- * Subtyping
   , A_ReversedLens
+  -- | <<diagrams/ReversedLens.png ReversedLens in the optics hierarchy>>
 
   -- * Re-exports
   , module Optics.Optic
