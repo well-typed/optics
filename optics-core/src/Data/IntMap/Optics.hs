@@ -37,7 +37,6 @@
 --
 module Data.IntMap.Optics
   ( toMapOf
-  , at'
   , lt
   , gt
   , le
@@ -45,11 +44,9 @@ module Data.IntMap.Optics
   ) where
 
 import Data.IntMap as IntMap
-import qualified Data.IntMap.Strict as Strict
 
 import Optics.IxAffineTraversal
 import Optics.IxFold
-import Optics.Lens
 
 -- | Construct a map from an 'IxFold'.
 --
@@ -73,19 +70,6 @@ toMapOf
   => Optic' k is s a -> s -> IntMap a
 toMapOf o = ifoldMapOf o IntMap.singleton
 {-# INLINE toMapOf #-}
-
--- | Strict version of 'Optics.At.Core.at' for 'IntMap'.
-at' :: Int -> Lens' (IntMap a) (Maybe a)
-at' k = lensVL $ \f s ->
-#if MIN_VERSION_containers(0,5,8)
-  Strict.alterF f k s
-#else
-  let mv = Strict.lookup k s
-  in f mv <&> \case
-    Nothing -> maybe s (\_ -> Strict.delete k s) mv
-    Just v  -> Strict.insert k v s
-#endif
-{-# INLINE at' #-}
 
 -- | Focus on the largest key smaller than the given one and its corresponding
 -- value.

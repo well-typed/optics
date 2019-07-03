@@ -31,11 +31,12 @@ module Optics.At
   , IxValue
 
     -- * Ixed
-  , Ixed(ix)
+  , Ixed(..)
   , ixAt
 
     -- * At
   , At(..)
+  , at'
   , sans
 
   -- * Contains
