@@ -26,7 +26,6 @@ module Optics.Review
   -- * Subtyping
   , A_Review
   -- | <<diagrams/Review.png Review in the optics hierarchy>>
-  , toReview
 
   -- * Re-exports
   , module Optics.Optic
@@ -43,17 +42,12 @@ import Optics.Optic
 -- | Type synonym for a review.
 type Review t b = Optic' A_Review NoIx t b
 
--- | Explicitly cast an optic to a review.
-toReview :: Is k A_Review => Optic k is s t a b -> Optic A_Review is s t a b
-toReview = castOptic
-{-# INLINE toReview #-}
-
 -- | Retrieve the value targeted by a 'Review'.
 --
 -- >>> review _Left "hi"
 -- Left "hi"
 review :: Is k A_Review => Optic' k is t b -> b -> t
-review o = unTagged #. getOptic (toReview o) .# Tagged
+review o = unTagged #. getOptic (castOptic @A_Review o) .# Tagged
 {-# INLINE review #-}
 
 -- | An analogue of 'Optics.Getter.to' for reviews.
