@@ -39,7 +39,7 @@ codegen-join :
 
 DIAGRAMS=optics reoptics indexedoptics
 
-diagrams : $(DIAGRAMS:%=optics/diagrams/%.png)
+diagrams : $(DIAGRAMS:%=optics/diagrams/%.png) optics-core/diagrams/reoptics.png
 
 OPTIC_KINDS=AffineFold AffineTraversal Fold Getter Iso Lens Prism ReversedLens ReversedPrism Review Setter Traversal
 
