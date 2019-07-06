@@ -86,6 +86,7 @@ library
                     , Data.ByteString.Strict.Optics
                     , Data.Either.Optics
                     , Data.HashMap.Optics
+                    , Data.HashSet.Optics
                     , Data.IntMap.Optics
                     , Data.IntSet.Optics
                     , Data.List.Optics

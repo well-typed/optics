@@ -48,6 +48,7 @@ library
                    Data.ByteString.Optics
                    Data.ByteString.Strict.Optics
                    Data.HashMap.Optics
+                   Data.HashSet.Optics
                    Data.Text.Lazy.Optics
                    Data.Text.Optics
                    Data.Text.Strict.Optics
