@@ -96,6 +96,7 @@ library
                     , Data.Text.Lazy.Optics
                     , Data.Text.Optics
                     , Data.Text.Strict.Optics
+                    , Data.Tree.Optics
                     , Data.Tuple.Optics
                     , Data.Typeable.Optics
                     , Data.Vector.Generic.Optics
