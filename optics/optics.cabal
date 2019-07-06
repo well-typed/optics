@@ -91,6 +91,7 @@ library
                     , Data.IntSet.Optics
                     , Data.List.Optics
                     , Data.Maybe.Optics
+                    , Data.Sequence.Optics
                     , Data.Set.Optics
                     , Data.Text.Lazy.Optics
                     , Data.Text.Optics
