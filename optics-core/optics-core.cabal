@@ -76,6 +76,7 @@ library
     Data.Sequence.Optics
     Data.Set.Optics
     Data.Tuple.Optics
+    Data.Typeable.Optics
     GHC.Generics.Optics
 
     -- internal modules

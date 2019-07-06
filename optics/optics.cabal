@@ -97,6 +97,7 @@ library
                     , Data.Text.Optics
                     , Data.Text.Strict.Optics
                     , Data.Tuple.Optics
+                    , Data.Typeable.Optics
                     , Data.Vector.Generic.Optics
                     , Data.Vector.Optics
                     , GHC.Generics.Optics
