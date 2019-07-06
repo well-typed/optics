@@ -81,6 +81,7 @@ module Optics.Lens
   -- * Additional introduction forms
   -- | See "Data.Tuple.Optics" for 'Lens'es for tuples.
   , chosen
+  , alongside
   , devoid
   , united
 
@@ -178,6 +179,25 @@ withLensVL o k = k (toLensVL o)
 chosen :: Lens (Either a a) (Either b b) a b
 chosen = lensVL $ \f -> either (fmap Left . f) (fmap Right . f)
 {-# INLINE chosen #-}
+
+-- | Make a 'Lens' from two other lenses by executing them on their respective
+-- halves of a product.
+--
+-- >>> (Left 'a', Right 'b') ^. alongside chosen chosen
+-- ('a','b')
+--
+-- >>> (Left 'a', Right 'b') & alongside chosen chosen .~ ('c','d')
+-- (Left 'c',Right 'd')
+alongside
+  :: (Is k A_Lens, Is l A_Lens)
+  => Optic k is s  t  a  b
+  -> Optic l js s' t' a' b'
+  -> Lens (s, s') (t, t') (a, a') (b, b')
+alongside l r = withLens l $ \getl setl ->
+                withLens r $ \getr setr ->
+  lens (\(s, s')         -> (getl s,   getr s'   ))
+       (\(s, s') (b, b') -> (setl s b, setr s' b'))
+{-# INLINE alongside #-}
 
 -- | There is a field for every type in the 'Void'.
 --
