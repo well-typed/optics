@@ -69,6 +69,7 @@ library
     Optics.Traversal
     Data.Either.Optics
     Data.IntMap.Optics
+    Data.IntSet.Optics
     Data.List.Optics
     Data.Map.Optics
     Data.Maybe.Optics
