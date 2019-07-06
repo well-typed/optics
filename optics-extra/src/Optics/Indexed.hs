@@ -54,7 +54,6 @@ import qualified Data.HashMap.Lazy as HM
 import qualified Data.Vector as V
 
 import Optics.Indexed.Core
-import Optics.Internal.Indexed
 import Optics.IxAffineFold
 import Optics.IxAffineTraversal
 import Optics.IxFold

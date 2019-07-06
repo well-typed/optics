@@ -79,6 +79,7 @@ library
     Data.Tuple.Optics
     Data.Typeable.Optics
     GHC.Generics.Optics
+    Numeric.Optics
 
     -- internal modules
     Optics.Internal.Bi
