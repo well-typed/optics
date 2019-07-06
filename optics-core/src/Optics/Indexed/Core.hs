@@ -25,10 +25,24 @@ module Optics.Indexed.Core
   , icompose5
   , icomposeN
 
-  -- * Constraints
-  , HasSingleIndex
-  , NonEmptyIndices
-  , AcceptsEmptyIndices
+    -- * Indexed optic flavours
+  , module Optics.IxAffineFold
+  , module Optics.IxAffineTraversal
+  , module Optics.IxFold
+  , module Optics.IxGetter
+  , module Optics.IxLens
+  , module Optics.IxSetter
+  , module Optics.IxTraversal
+
+  -- * Functors with index
+  , FunctorWithIndex (..)
+  -- ** Foldable with index
+  , FoldableWithIndex (..)
+  , itraverse_
+  , ifor_
+  -- ** Traversable with index
+  , TraversableWithIndex (..)
+  , ifor
   ) where
 
 import Optics.Internal.Indexed
@@ -39,6 +53,13 @@ import Optics.AffineFold
 import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Getter
+import Optics.IxAffineFold
+import Optics.IxAffineTraversal
+import Optics.IxFold
+import Optics.IxGetter
+import Optics.IxLens
+import Optics.IxSetter
+import Optics.IxTraversal
 import Optics.Lens
 import Optics.Setter
 import Optics.Traversal

@@ -87,6 +87,7 @@ library
                     , Data.Either.Optics
                     , Data.HashMap.Optics
                     , Data.IntMap.Optics
+                    , Data.List.Optics
                     , Data.Maybe.Optics
                     , Data.Set.Optics
                     , Data.Text.Lazy.Optics
