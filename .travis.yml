@@ -40,8 +40,6 @@ matrix:
       addons: {"apt":{"sources":["hvr-ghc"],"packages":["ghc-8.2.2","cabal-install-2.4"]}}
     - compiler: ghc-8.0.2
       addons: {"apt":{"sources":["hvr-ghc"],"packages":["ghc-8.0.2","cabal-install-2.4"]}}
-  allow_failures:
-    - compiler: ghc-8.8.1
 before_install:
   - HC=$(echo "/opt/$CC/bin/ghc" | sed 's/-/\//')
   - HCPKG="$HC-pkg"
