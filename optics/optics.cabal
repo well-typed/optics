@@ -25,14 +25,15 @@ library
   default-language:   Haskell2010
   hs-source-dirs:     src
   ghc-options:        -Wall
-  build-depends: array           >=0.5.1.1 && <0.6
-               , base            >=4.9     && <5
-               , containers      >=0.5.7.1 && <0.7
-               , mtl             >=2.2.2   && <2.3
-               , optics-core     >=0.1     && <1
-               , optics-extra    >=0.1     && <1
-               , optics-th       >=0.1     && <1
-               , transformers    >=0.5     && <0.6
+
+  build-depends: base                   >= 4.9       && <5
+               , array                  >= 0.5.1.1   && <0.6
+               , containers             >= 0.5.7.1   && <0.7
+               , mtl                    >= 2.2.2     && <2.3
+               , optics-core            >= 0.1       && <1
+               , optics-extra           >= 0.1       && <1
+               , optics-th              >= 0.1       && <1
+               , transformers           >= 0.5       && <0.6
 
   -- main module to land with repl
   exposed-modules:    Optics
@@ -49,13 +50,14 @@ library
                     , Optics.IxAffineFold
                     , Optics.IxAffineTraversal
                     , Optics.IxFold
+                    , Optics.IxGetter
+                    , Optics.IxLens
                     , Optics.IxSetter
                     , Optics.IxTraversal
                     , Optics.Lens
-                    , Optics.ReversedLens
                     , Optics.Prism
+                    , Optics.ReversedLens
                     , Optics.ReversedPrism
-
                     , Optics.Review
                     , Optics.Setter
                     , Optics.Traversal
@@ -68,6 +70,7 @@ library
                     , Optics.Each
                     , Optics.Empty
                     , Optics.Indexed
+                    , Optics.Label
                     , Optics.Operators
                     , Optics.Passthrough
                     , Optics.Re
@@ -90,6 +93,7 @@ library
                     , Data.IntMap.Optics
                     , Data.IntSet.Optics
                     , Data.List.Optics
+                    , Data.Map.Optics
                     , Data.Maybe.Optics
                     , Data.Sequence.Optics
                     , Data.Set.Optics
@@ -111,17 +115,17 @@ test-suite optics-tests
 
   build-depends: base
                , containers
-               , inspection-testing  >=0.4.1.1 && <0.5
+               , inspection-testing     >= 0.4.1.1    && <0.5
                , mtl
-               , optics-core
                , optics
+               , optics-core
                , random
                , tasty
                , tasty-hunit
                , template-haskell
 
-  type:          exitcode-stdio-1.0
-  main-is:       Optics/Tests.hs
+  type:    exitcode-stdio-1.0
+  main-is: Optics/Tests.hs
 
   other-modules: Optics.Tests.Computation
                  Optics.Tests.Core
@@ -132,11 +136,10 @@ test-suite optics-tests
 
 -- Benchmarking folds
 benchmark folds
-  type:             exitcode-stdio-1.0
-  main-is:          folds.hs
-  ghc-options:      -Wall -threaded
-  hs-source-dirs:   benchmarks
   default-language: Haskell2010
+  hs-source-dirs:   benchmarks
+  ghc-options:      -Wall -threaded
+
   build-depends: base
                , bytestring
                , containers
@@ -146,13 +149,15 @@ benchmark folds
                , unordered-containers
                , vector
 
+  type:    exitcode-stdio-1.0
+  main-is: folds.hs
+
 -- Benchmarking traversals
 benchmark traversals
-  type:             exitcode-stdio-1.0
-  main-is:          traversals.hs
-  ghc-options:      -Wall -threaded
-  hs-source-dirs:   benchmarks
   default-language: Haskell2010
+  hs-source-dirs:   benchmarks
+  ghc-options:      -Wall -threaded
+
   build-depends: base
                , bytestring
                , containers
@@ -162,3 +167,6 @@ benchmark traversals
                , transformers
                , unordered-containers
                , vector
+
+  type:    exitcode-stdio-1.0
+  main-is: traversals.hs
