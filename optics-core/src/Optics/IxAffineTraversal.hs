@@ -13,6 +13,9 @@ module Optics.IxAffineTraversal
     IxAffineTraversal
   , IxAffineTraversal'
 
+  -- * Introduction
+  , iatraversal
+
   -- * Subtyping
   , An_AffineTraversal
 
@@ -50,6 +53,10 @@ type IxAffineTraversalVL i s t a b =
 
 -- | Type synonym for a type-preserving van Laarhoven indexed affine traversal.
 type IxAffineTraversalVL' i s a = IxAffineTraversalVL i s s a a
+
+iatraversal :: (s -> Either t (i, a)) -> (s -> b -> t) -> IxAffineTraversal i s t a b
+iatraversal match update = ixAtraversalVL $ \point f s ->
+  either point (\a -> update s <$> uncurry f a) (match s)
 
 -- | Build an indexed affine traversal from the van Laarhoven representation.
 ixAtraversalVL :: IxAffineTraversalVL i s t a b -> IxAffineTraversal i s t a b
