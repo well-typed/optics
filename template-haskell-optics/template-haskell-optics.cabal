@@ -4,9 +4,9 @@ license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
 maintainer:    optics@well-typed.com
-author:        Michael Sloan, Eric Mertens, Edward Kmett, Andrzej Rybczak
+author:        Andrzej Rybczak
 cabal-version: >=1.10
-tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1
+tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5
 synopsis:      Optics for template-haskell types
 category:      Data, Optics, Lenses
 description:
@@ -25,3 +25,6 @@ library
     , template-haskell  >=2.11      && <2.15
 
   exposed-modules:  Language.Haskell.TH.Optics
+
+  if impl(ghc >= 8.8)
+    buildable: False

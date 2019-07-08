@@ -40,8 +40,6 @@ matrix:
       addons: {"apt":{"sources":["hvr-ghc"],"packages":["ghc-8.2.2","cabal-install-2.4"]}}
     - compiler: ghc-8.0.2
       addons: {"apt":{"sources":["hvr-ghc"],"packages":["ghc-8.0.2","cabal-install-2.4"]}}
-  allow_failures:
-    - compiler: ghc-8.8.1
 before_install:
   - HC=$(echo "/opt/$CC/bin/ghc" | sed 's/-/\//')
   - HCPKG="$HC-pkg"
@@ -181,7 +179,7 @@ script:
   # Testing...
   - ${CABAL} v2-test -w ${HC} ${TEST} ${BENCH} all | color_cabal_output
   # Doctest...
-  - "doctest --fast $(find */src -name '*.hs') -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs"
+  - "doctest --fast $(find */src  -name '*.hs' ! -path 'template-haskell-optics*/*') -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs"
   # cabal check...
   - (cd optics-* && ${CABAL} -vnormal check)
   - (cd optics-core-* && ${CABAL} -vnormal check)
