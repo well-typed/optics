@@ -36,6 +36,7 @@ module Optics.Lens
 
   -- * Introduction
   , lens
+  , lensVL
 
   -- * Elimination
   -- | A 'Lens' is a 'Optics.Setter.Setter' and a
@@ -99,7 +100,6 @@ module Optics.Lens
   -- have a performance penalty.
   , LensVL
   , LensVL'
-  , lensVL
   , toLensVL
   , withLensVL
 
