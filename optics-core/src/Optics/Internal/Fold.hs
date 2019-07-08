@@ -48,13 +48,7 @@ foldring__ fr = foldVL__ $ \f -> void . fr (\a -> (f a *>)) (pure v)
 data Leftmost a = LPure | LLeaf a | LStep (Leftmost a)
 
 instance SG.Semigroup (Leftmost a) where
-  (<>) = mappend
-  {-# INLINE (<>) #-}
-
-instance Monoid (Leftmost a) where
-  mempty = LPure
-  {-# INLINE mempty #-}
-  mappend x y = LStep $ case x of
+  x <> y = LStep $ case x of
     LPure    -> y
     LLeaf _  -> x
     LStep x' -> case y of
@@ -64,7 +58,13 @@ instance Monoid (Leftmost a) where
       -- this means that firstOf (backwards folded) [1..] is Just _|_.
       LPure    -> x'
       LLeaf a  -> LLeaf $ fromMaybe a (getLeftmost x')
-      LStep y' -> mappend x' y'
+      LStep y' -> x' SG.<> y'
+
+instance Monoid (Leftmost a) where
+  mempty  = LPure
+  mappend = (SG.<>)
+  {-# INLINE mempty #-}
+  {-# INLINE mappend #-}
 
 -- | Extract the 'Leftmost' element. This will fairly eagerly determine that it
 -- can return 'Just' the moment it sees any element at all.
@@ -82,13 +82,7 @@ getLeftmost (LStep x) = go x
 data Rightmost a = RPure | RLeaf a | RStep (Rightmost a)
 
 instance SG.Semigroup (Rightmost a) where
-  (<>) = mappend
-  {-# INLINE (<>) #-}
-
-instance Monoid (Rightmost a) where
-  mempty = RPure
-  {-# INLINE mempty #-}
-  mappend x y = RStep $ case y of
+  x <> y = RStep $ case y of
     RPure    -> x
     RLeaf _  -> y
     RStep y' -> case x of
@@ -99,6 +93,12 @@ instance Monoid (Rightmost a) where
       RPure    -> y'
       RLeaf a  -> RLeaf $ fromMaybe a (getRightmost y')
       RStep x' -> mappend x' y'
+
+instance Monoid (Rightmost a) where
+  mempty  = RPure
+  mappend = (SG.<>)
+  {-# INLINE mempty #-}
+  {-# INLINE mappend #-}
 
 -- | Extract the 'Rightmost' element. This will fairly eagerly determine that it
 -- can return 'Just' the moment it sees any element at all.

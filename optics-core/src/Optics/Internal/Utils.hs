@@ -47,7 +47,7 @@ instance Applicative f => SG.Semigroup (Traversed f a) where
 
 instance Applicative f => Monoid (Traversed f a) where
   mempty = Traversed (pure (error "Traversed: value used"))
-  Traversed ma `mappend` Traversed mb = Traversed (ma *> mb)
+  mappend = (SG.<>)
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
 
