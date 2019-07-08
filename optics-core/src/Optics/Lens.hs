@@ -80,6 +80,7 @@ module Optics.Lens
 
   -- * Additional introduction forms
   -- | See "Data.Tuple.Optics" for 'Lens'es for tuples.
+  , equality'
   , chosen
   , alongside
   , devoid
@@ -174,6 +175,17 @@ withLensVL o k = k (toLensVL o)
 
 ----------------------------------------
 -- Lenses
+
+-- | Strict version of 'Optics.Iso.equality'.
+--
+-- Useful for strictifying optics with lazy (irrefutable) pattern matching by
+-- precomposition, e.g.
+--
+-- @
+-- 'Data.Tuple.Optics._1'' = 'equality'' % 'Data.Tuple.Optics._1'
+-- @
+equality' :: Lens a b a b
+equality' = lensVL ($!)
 
 -- | Focus on both sides of an 'Either'.
 chosen :: Lens (Either a a) (Either b b) a b

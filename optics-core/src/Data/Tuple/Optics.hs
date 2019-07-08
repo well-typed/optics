@@ -356,47 +356,47 @@ instance Field9 (a,b,c,d,e,f,g,h,i) (a,b,c,d,e,f,g,h,i') i i' where
 
 -- | Strict version of '_1'
 _1' :: Field1 s t a b => Lens s t a b
-_1' = lensVL $ \f !x -> toLensVL _1 f x
+_1' = equality' % _1
 {-# INLINE _1' #-}
 
 -- | Strict version of '_2'
 _2' :: Field2 s t a b => Lens s t a b
-_2' = lensVL $ \f !x -> toLensVL _2 f x
+_2' = equality' % _2
 {-# INLINE _2' #-}
 
 -- | Strict version of '_3'
 _3' :: Field3 s t a b => Lens s t a b
-_3' = lensVL $ \f !x -> toLensVL _3 f x
+_3' = equality' % _3
 {-# INLINE _3' #-}
 
 -- | Strict version of '_4'
 _4' :: Field4 s t a b => Lens s t a b
-_4' = lensVL $ \f !x -> toLensVL _4 f x
+_4' = equality' % _4
 {-# INLINE _4' #-}
 
 -- | Strict version of '_5'
 _5' :: Field5 s t a b => Lens s t a b
-_5' = lensVL $ \f !x -> toLensVL _5 f x
+_5' = equality' % _5
 {-# INLINE _5' #-}
 
 -- | Strict version of '_6'
 _6' :: Field6 s t a b => Lens s t a b
-_6' = lensVL $ \f !x -> toLensVL _6 f x
+_6' = equality' % _6
 {-# INLINE _6' #-}
 
 -- | Strict version of '_7'
 _7' :: Field7 s t a b => Lens s t a b
-_7' = lensVL $ \f !x -> toLensVL _7 f x
+_7' = equality' % _7
 {-# INLINE _7' #-}
 
 -- | Strict version of '_8'
 _8' :: Field8 s t a b => Lens s t a b
-_8' = lensVL $ \f !x -> toLensVL _8 f x
+_8' = equality' % _8
 {-# INLINE _8' #-}
 
 -- | Strict version of '_9'
 _9' :: Field9 s t a b => Lens s t a b
-_9' = lensVL $ \f !x -> toLensVL _9 f x
+_9' = equality' % _9
 {-# INLINE _9' #-}
 
 ix :: (Generic s, Generic t, GIxed n (Rep s) (Rep t) a b) => f n -> Lens s t a b

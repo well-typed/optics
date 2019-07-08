@@ -632,10 +632,10 @@ generateUpdateableOptics = lensVL $ \f r ->
 -- this flag is turned off, and strict optics are generated.
 --
 -- When using lazy optics the strict optic can be recovered by composing with
--- '$!':
+-- 'equality'':
 --
 -- @
--- strictOptic = ($!) . lazyOptic
+-- strictOptic = equality' % lazyOptic
 -- @
 generateLazyPatterns :: Lens' LensRules Bool
 generateLazyPatterns = lensVL $ \f r ->
