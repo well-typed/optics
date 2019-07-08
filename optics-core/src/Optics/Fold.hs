@@ -70,6 +70,7 @@ module Optics.Fold
   , lookupOf
 
   -- * Combinators
+  , pre
   , backwards_
 
   -- * Semigroup structure
@@ -97,7 +98,7 @@ import Optics.Internal.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
-import Optics.Getter
+import Optics.AffineFold
 import Optics.Optic
 
 -- | Type synonym for a fold.
@@ -228,6 +229,12 @@ unfolded step = foldVL $ \f -> fix $ \loop b ->
     Just (a, b') -> f a *> loop b'
     Nothing      -> pure ()
 {-# INLINE unfolded #-}
+
+-- | Convert a fold to an 'AffineFold' that visits the first element of the
+-- original fold.
+pre :: Is k A_Fold => Optic' k is s a -> AffineFold s a
+pre = afolding . headOf
+{-# INLINE pre #-}
 
 -- | This allows you to traverse the elements of a 'Fold' in the opposite order.
 backwards_

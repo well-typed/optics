@@ -40,6 +40,7 @@ module Optics.IxFold
   , ifindMOf
 
   -- * Combinators
+  , ipre
   , ifiltered
   , ibackwards_
 
@@ -65,6 +66,7 @@ import Optics.Internal.IxFold
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
+import Optics.IxAffineFold
 import Optics.Fold
 import Optics.Optic
 
@@ -183,6 +185,15 @@ ifoldring
   -> IxFold i s a
 ifoldring fr = Optic (ifoldring__ fr)
 {-# INLINE ifoldring #-}
+
+-- | Convert an indexed fold to an 'IxAffineFold' that visits the first element
+-- of the original fold.
+ipre
+  :: (Is k A_Fold, is `HasSingleIndex` i)
+  => Optic' k is s a
+  -> IxAffineFold i s a
+ipre = iafolding . iheadOf
+{-# INLINE ipre #-}
 
 -- | Filter results of an 'IxFold' that don't satisfy a predicate.
 --

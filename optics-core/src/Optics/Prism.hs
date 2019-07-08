@@ -114,6 +114,9 @@ aside k =
 {-# INLINE aside #-}
 
 -- | Given a pair of prisms, project sums.
+--
+-- Viewing a 'Prism' as a co-'Optics.Lens.Lens', this combinator can be seen to
+-- be dual to 'Optics.Lens.alongside'.
 without
   :: (Is k A_Prism, Is l A_Prism)
   => Optic k is s t a b

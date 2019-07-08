@@ -86,16 +86,23 @@ library
                     , Data.ByteString.Strict.Optics
                     , Data.Either.Optics
                     , Data.HashMap.Optics
+                    , Data.HashSet.Optics
                     , Data.IntMap.Optics
+                    , Data.IntSet.Optics
+                    , Data.List.Optics
                     , Data.Maybe.Optics
+                    , Data.Sequence.Optics
                     , Data.Set.Optics
                     , Data.Text.Lazy.Optics
                     , Data.Text.Optics
                     , Data.Text.Strict.Optics
+                    , Data.Tree.Optics
                     , Data.Tuple.Optics
+                    , Data.Typeable.Optics
                     , Data.Vector.Generic.Optics
                     , Data.Vector.Optics
                     , GHC.Generics.Optics
+                    , Numeric.Optics
 
 test-suite optics-tests
   default-language: Haskell2010
