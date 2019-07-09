@@ -108,7 +108,7 @@ forced = iso force force
 -- >>> toListOf (ordinals [1,3,2,5,9,10]) $ Vector.fromList [2,4..40]
 -- [4,8,6,12,20,22]
 ordinals :: forall v a. Vector v a => [Int] -> IxTraversal' Int (v a) a
-ordinals is = ixTraversalVL $ \f v ->
+ordinals is = itraversalVL $ \f v ->
   (v //) <$> traverse (\i -> (,) i <$> f i (v ! i)) (ordinalNub (length v) is)
 {-# INLINE ordinals #-}
 

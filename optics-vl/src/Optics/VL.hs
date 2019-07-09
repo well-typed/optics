@@ -25,7 +25,7 @@ module Optics.VL
   -- * IxLens
   , IxLensVL
   , IxLensVL'
-  , ixLensVL
+  , ilensVL
   -- * AffineTraversal
   , AffineTraversalVL
   , AffineTraversalVL'
@@ -33,7 +33,7 @@ module Optics.VL
   -- * IxAffineTraversal
   , IxAffineTraversalVL
   , IxAffineTraversalVL'
-  , ixAtraversalVL
+  , iatraversalVL
   -- * Traversal
   , TraversalVL
   , TraversalVL'
@@ -41,7 +41,7 @@ module Optics.VL
   -- * IxTraversal
   , IxTraversalVL
   , IxTraversalVL'
-  , ixTraversalVL
+  , itraversalVL
   ) where
 
 import Data.Functor.Identity

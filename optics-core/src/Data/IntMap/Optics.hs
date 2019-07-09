@@ -80,7 +80,7 @@ toMapOf o = ifoldMapOf o IntMap.singleton
 -- >>> ipreview (lt 1) $ IntMap.fromList [(1, 'x'), (2, 'y')]
 -- Nothing
 lt :: Int -> IxAffineTraversal' Int (IntMap v) v
-lt k = ixAtraversalVL $ \point f s ->
+lt k = iatraversalVL $ \point f s ->
   case lookupLT k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
@@ -95,7 +95,7 @@ lt k = ixAtraversalVL $ \point f s ->
 -- >>> ipreview (gt 1) $ IntMap.fromList [(1, 'x'), (2, 'y')]
 -- Just (2,'y')
 gt :: Int -> IxAffineTraversal' Int (IntMap v) v
-gt k = ixAtraversalVL $ \point f s ->
+gt k = iatraversalVL $ \point f s ->
   case lookupGT k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
@@ -110,7 +110,7 @@ gt k = ixAtraversalVL $ \point f s ->
 -- >>> ipreview (le 1) $ IntMap.fromList [(1, 'x'), (2, 'y')]
 -- Just (1,'x')
 le :: Int -> IxAffineTraversal' Int (IntMap v) v
-le k = ixAtraversalVL $ \point f s ->
+le k = iatraversalVL $ \point f s ->
   case lookupLE k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
@@ -125,7 +125,7 @@ le k = ixAtraversalVL $ \point f s ->
 -- >>> ipreview (ge 2) $ IntMap.fromList [(1, 'x'), (3, 'y')]
 -- Just (3,'y')
 ge :: Int -> IxAffineTraversal' Int (IntMap v) v
-ge k = ixAtraversalVL $ \point f s ->
+ge k = iatraversalVL $ \point f s ->
   case lookupGE k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s

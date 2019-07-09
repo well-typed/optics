@@ -14,7 +14,7 @@ module Optics.IxLens
 
   -- * Introduction
   , ilens
-  , ixLensVL
+  , ilensVL
 
   -- * Subtyping
   , A_Lens
@@ -49,13 +49,13 @@ type IxLensVL' i s a = IxLensVL i s s a a
 
 -- | Build an indexed lens from a getter and a setter.
 ilens :: (s -> (i, a)) -> (s -> b -> t) -> IxLens i s t a b
-ilens get set = ixLensVL $ \f s -> set s <$> uncurry f (get s)
+ilens get set = ilensVL $ \f s -> set s <$> uncurry f (get s)
 {-# INLINE ilens #-}
 
 -- | Build an indexed lens from the van Laarhoven representation.
-ixLensVL :: IxLensVL i s t a b -> IxLens i s t a b
-ixLensVL f = Optic (ilinear f)
-{-# INLINE ixLensVL #-}
+ilensVL :: IxLensVL i s t a b -> IxLens i s t a b
+ilensVL f = Optic (ilinear f)
+{-# INLINE ilensVL #-}
 
 -- | Convert an indexed lens to its van Laarhoven representation.
 toIxLensVL

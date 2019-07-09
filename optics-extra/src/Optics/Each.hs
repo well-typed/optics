@@ -39,7 +39,7 @@ import Optics.Extra.Internal.ByteString
 -- | @'each' :: 'IxTraversal' k ('HashMap' k a) ('HashMap' k b) a b@
 instance k ~ k' => Each k (HashMap k a) (HashMap k' b) a b where
   -- traverseWithKey has best performance for all flavours for some reason.
-  each = ixTraversalVL HashMap.traverseWithKey
+  each = itraversalVL HashMap.traverseWithKey
   {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' Int ('V.Vector' a) ('V.Vector' b) a b@
