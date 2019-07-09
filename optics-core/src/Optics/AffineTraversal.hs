@@ -19,11 +19,16 @@ module Optics.AffineTraversal
   , atraversalVL
 
   -- * Elimination
-  -- | An 'AffineTraversal' is a 'Optics.Setter.Setter', therefore you can
-  -- specialise types to obtain:
+  -- | An 'AffineTraversal' is in particular an 'Optics.AffineFold.AffineFold'
+  -- and a 'Optics.Setter.Setter', therefore you can specialise types to obtain:
   --
   -- @
-  -- 'Optics.Setter.set' :: 'AffineTraversal' s t a b -> b -> s -> t
+  -- 'Optics.AffineFold.preview' :: 'AffineTraversal' s t a b -> s -> Maybe a
+  -- @
+  --
+  -- @
+  -- 'Optics.Setter.over'    :: 'AffineTraversal' s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Setter.set'     :: 'AffineTraversal' s t a b ->       b  -> s -> t
   -- @
   , matching
 
@@ -32,7 +37,7 @@ module Optics.AffineTraversal
   --
   -- @
   -- 'matching' ('atraversal' f g) ≡ f
-  -- 'Optics.Setter.set'      ('atraversal' f g) ≡ 'flip' g
+  -- 'Data.Either.isRight' (f s)  =>  'Optics.Setter.set' ('atraversal' f g) b s ≡ g s b
   -- @
 
   -- * Additional introduction forms

@@ -2,14 +2,16 @@
 -- Module: Optics.Fold
 -- Description: Extracts elements from a container.
 --
--- A @'Fold' S A@ has the ability to extract some number of elements
--- of type @A@ from a container of type @S@.  For example, 'toListOf'
--- can be used to obtain the contained elements as a list. Unlike a
--- 'Optics.Traversal.Traversal', there is no way to set or update
--- elements.
+-- A @'Fold' S A@ has the ability to extract some number of elements of type @A@
+-- from a container of type @S@.  For example, 'toListOf' can be used to obtain
+-- the contained elements as a list. Unlike a 'Optics.Traversal.Traversal',
+-- there is no way to set or update elements.
 --
--- A close relative is the 'Optics.AffineFold.AffineFold', which is a
--- 'Fold' that contains at most one element.
+-- This can be seen as a generalisation of 'traverse_', where the type @S@ does
+-- not need to be a type constructor with @A@ as the last parameter.
+--
+-- A close relative is the 'Optics.AffineFold.AffineFold', which is a 'Fold'
+-- that contains at most one element.
 --
 module Optics.Fold
   (

@@ -78,7 +78,7 @@ slicedTo n = conjoined noix ix
     noix = traversalVL $ \f m -> case Seq.splitAt n m of
       (l, r) -> (>< r) <$> traverse f l
 
-    ix = ixTraversalVL $ \f m -> case Seq.splitAt n m of
+    ix = itraversalVL $ \f m -> case Seq.splitAt n m of
       (l, r) -> (>< r) <$> itraverse f l
 {-# INLINE slicedTo #-}
 
@@ -98,7 +98,7 @@ slicedFrom n = conjoined noix ix
     noix = traversalVL $ \f m -> case Seq.splitAt n m of
       (l, r) -> (l ><) <$> traverse f r
 
-    ix = ixTraversalVL $ \f m -> case Seq.splitAt n m of
+    ix = itraversalVL $ \f m -> case Seq.splitAt n m of
       (l, r) -> (l ><) <$> itraverse (f . (+n)) r
 {-# INLINE slicedFrom #-}
 
@@ -119,7 +119,7 @@ sliced i j = conjoined noix ix
       (l, mr) -> case Seq.splitAt (j-i) mr of
         (m, r) -> traverse f m <&> \n -> l >< n >< r
 
-    ix = ixTraversalVL $ \f s -> case Seq.splitAt i s of
+    ix = itraversalVL $ \f s -> case Seq.splitAt i s of
       (l, mr) -> case Seq.splitAt (j-i) mr of
         (m, r) -> itraverse (f . (+i)) m <&> \n -> l >< n >< r
 {-# INLINE sliced #-}

@@ -491,9 +491,9 @@ import Data.Either.Optics                    as P
 -- <<diagrams/optics.png Optics hierarchy>>
 --
 -- In addition to the optic kinds included in the diagram, there are also
--- indexed variants, including 'IxAffineTraversal', 'IxTraversal',
--- 'IxAffineFold', 'IxFold' and 'IxSetter'.  These are explained in more detail
--- in the "Indexed optics" section below in "Optics#indexed".
+-- indexed variants such as 'IxLens', 'IxGetter', 'IxAffineTraversal',
+-- 'IxTraversal', 'IxAffineFold', 'IxFold' and 'IxSetter'.  These are explained
+-- in more detail in the "Indexed optics" section below in "Optics#indexed".
 --
 --
 -- === Composition
@@ -648,9 +648,8 @@ import Data.Either.Optics                    as P
 -- * The composition operator is ('%') rather than ('.') and is defined as
 --   @infixl 9@ instead of @infixr 9@.
 --
--- * Fewer operators are provided, and none of operators are exported from the
---   main "Optics" module. Import "Optics.Operators" or "Optics.Operators.State"
---   if you want them.
+-- * Fewer operators are provided, and some of them are not exported from the
+--   main "Optics" module. Import "Optics.State.Operators" if you want them.
 --
 -- * The 'view' function and corresponding ('Optics.Operators.^.') operator work
 --   only for 'Getter's and have a more restricted type. The equivalent for
@@ -703,6 +702,8 @@ import Data.Either.Optics                    as P
 --
 -- * <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
 --
+-- * <https://skillsmatter.com/skillscasts/12360-profunctors-and-data-accessors Profunctors and Data Accessors> a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
+--
 -- * <https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/poptics.pdf Profunctor Optics: Modular Data Accessors> a paper by Matthew Pickering, Jeremy Gibbons and Nicolas Wu
 --
 -- * <https://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery> and <https://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics>, blog posts by Oleg Grenrus
@@ -717,14 +718,6 @@ import Data.Either.Optics                    as P
 -- @
 -- import "Optics"
 -- @
---
--- and if you prefer to use operators
---
--- @
--- import "Optics.Operators"
--- import "Optics.Operators.State"
--- @
-
 
 -- $indexed #indexed#
 --

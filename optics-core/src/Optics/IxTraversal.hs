@@ -15,7 +15,7 @@ module Optics.IxTraversal
   , IxTraversal'
 
   -- * Introduction
-  , ixTraversalVL
+  , itraversalVL
 
   -- * Elimination
   , itraverseOf
@@ -24,7 +24,7 @@ module Optics.IxTraversal
   -- |
   --
   -- @
-  -- 'itraverseOf' ('ixTraversalVL' f) ≡ f
+  -- 'itraverseOf' ('itraversalVL' f) ≡ f
   -- @
 
   -- * Well-formedness
@@ -106,12 +106,12 @@ type IxTraversalVL' i s a = IxTraversalVL i s s a a
 -- | Build an indexed traversal from the van Laarhoven representation.
 --
 -- @
--- 'ixTraversalVL' '.' 'itraverseOf' ≡ 'id'
--- 'itraverseOf' '.' 'ixTraversalVL' ≡ 'id'
+-- 'itraversalVL' '.' 'itraverseOf' ≡ 'id'
+-- 'itraverseOf' '.' 'itraversalVL' ≡ 'id'
 -- @
-ixTraversalVL :: IxTraversalVL i s t a b -> IxTraversal i s t a b
-ixTraversalVL t = Optic (iwander t)
-{-# INLINE ixTraversalVL #-}
+itraversalVL :: IxTraversalVL i s t a b -> IxTraversal i s t a b
+itraversalVL t = Optic (iwander t)
+{-# INLINE itraversalVL #-}
 
 ----------------------------------------
 
@@ -237,7 +237,7 @@ itraversed = Optic itraversed__
 -- >>> 6 & ignored %~ absurd
 -- 6
 ignored :: IxTraversal i s s a b
-ignored = ixTraversalVL $ \_ -> pure
+ignored = itraversalVL $ \_ -> pure
 
 ----------------------------------------
 -- Traversal combinators
@@ -253,7 +253,7 @@ indices
   => (i -> Bool)
   -> Optic k is s t a a
   -> IxTraversal i s t a a
-indices p o = ixTraversalVL $ \f ->
+indices p o = itraversalVL $ \f ->
   itraverseOf o $ \i a -> if p i then f i a else pure a
 {-# INLINE indices #-}
 
@@ -263,7 +263,7 @@ ibackwards
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> IxTraversal i s t a b
-ibackwards o = conjoined (backwards o) $ ixTraversalVL $ \f ->
+ibackwards o = conjoined (backwards o) $ itraversalVL $ \f ->
   forwards #. itraverseOf o (\i -> Backwards #. f i)
 {-# INLINE ibackwards #-}
 
@@ -274,7 +274,7 @@ elementsOf
   => Optic k is s t a a
   -> (Int -> Bool)
   -> IxTraversal Int s t a a
-elementsOf o = \p -> ixTraversalVL $ \f ->
+elementsOf o = \p -> itraversalVL $ \f ->
   indexing (traverseOf o) $ \i a -> if p i then f i a else pure a
 {-# INLINE elementsOf #-}
 
@@ -314,7 +314,7 @@ ipartsOf
   :: forall k is i s t a. (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a a
   -> IxLens [i] s t [a] [a]
-ipartsOf o = conjoined (partsOf o) $ ixLensVL $ \f s ->
+ipartsOf o = conjoined (partsOf o) $ ilensVL $ \f s ->
   evalState (traverseOf o update s)
     <$> uncurry f (unzip $ itoListOf (getting $ castOptic @A_Traversal o) s)
   where

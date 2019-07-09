@@ -14,7 +14,23 @@ module Optics.IxLens
 
   -- * Introduction
   , ilens
-  , ixLensVL
+  , ilensVL
+
+  -- * Elimination
+  -- | An 'IxLens' is in particular an 'Optics.IxGetter.IxGetter' and an
+  -- 'Optics.IxSetter.IxSetter', therefore you can specialise types to obtain:
+  --
+  -- @
+  -- 'Optics.IxGetter.iview' :: 'IxLens' i s t a b -> s -> (i, a)
+  -- @
+  --
+  -- @
+  -- 'Optics.IxSetter.iover' :: 'IxLens' i s t a b -> (i -> a -> b) -> s -> t
+  -- 'Optics.IxSetter.iset'  :: 'IxLens' i s t a b -> (i      -> b) -> s -> t
+  -- @
+
+  -- * Additional introduction forms
+  , devoid
 
   -- * Subtyping
   , A_Lens
@@ -28,6 +44,8 @@ module Optics.IxLens
   -- * Re-exports
   , module Optics.Optic
   ) where
+
+import Data.Void
 
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
@@ -49,13 +67,13 @@ type IxLensVL' i s a = IxLensVL i s s a a
 
 -- | Build an indexed lens from a getter and a setter.
 ilens :: (s -> (i, a)) -> (s -> b -> t) -> IxLens i s t a b
-ilens get set = ixLensVL $ \f s -> set s <$> uncurry f (get s)
+ilens get set = ilensVL $ \f s -> set s <$> uncurry f (get s)
 {-# INLINE ilens #-}
 
 -- | Build an indexed lens from the van Laarhoven representation.
-ixLensVL :: IxLensVL i s t a b -> IxLens i s t a b
-ixLensVL f = Optic (ilinear f)
-{-# INLINE ixLensVL #-}
+ilensVL :: IxLensVL i s t a b -> IxLens i s t a b
+ilensVL f = Optic (ilinear f)
+{-# INLINE ilensVL #-}
 
 -- | Convert an indexed lens to its van Laarhoven representation.
 toIxLensVL
@@ -74,3 +92,21 @@ withIxLensVL
   -> r
 withIxLensVL o k = k (toIxLensVL o)
 {-# INLINE withIxLensVL #-}
+
+----------------------------------------
+-- Lenses
+
+-- | There is an indexed field for every type in the 'Void'.
+--
+-- >>> set (mapped % devoid) 1 []
+-- []
+--
+-- >>> over (_Just % devoid) abs Nothing
+-- Nothing
+--
+devoid :: IxLens' i Void a
+devoid = ilens absurd const
+{-# INLINE devoid #-}
+
+-- $setup
+-- >>> import Optics.Core

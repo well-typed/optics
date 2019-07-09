@@ -14,7 +14,7 @@ module Optics.IxFold
     IxFold
 
   -- * Introduction
-  , ixFoldVL
+  , ifoldVL
 
   -- * Elimination
   , ifoldMapOf
@@ -76,14 +76,14 @@ type IxFold i s a = Optic' A_Fold (WithIx i) s a
 -- | Obtain an indexed fold by lifting 'itraverse_' like function.
 --
 -- @
--- 'ixFoldVL' '.' 'itraverseOf_' ≡ 'id'
--- 'itraverseOf_' '.' 'ixFoldVL' ≡ 'id'
+-- 'ifoldVL' '.' 'itraverseOf_' ≡ 'id'
+-- 'itraverseOf_' '.' 'ifoldVL' ≡ 'id'
 -- @
-ixFoldVL
+ifoldVL
   :: (forall f. Applicative f => (i -> a -> f u) -> s -> f v)
   -> IxFold i s a
-ixFoldVL f = Optic (ixFoldVL__ f)
-{-# INLINE ixFoldVL #-}
+ifoldVL f = Optic (ifoldVL__ f)
+{-# INLINE ifoldVL #-}
 
 -- | Fold with index via embedding into a monoid.
 ifoldMapOf
@@ -205,7 +205,7 @@ ifiltered
   => (i -> a -> Bool)
   -> Optic' k is s a
   -> IxFold i s a
-ifiltered p o = ixFoldVL $ \f ->
+ifiltered p o = ifoldVL $ \f ->
   itraverseOf_ o (\i a -> if p i a then f i a else pure ())
 {-# INLINE ifiltered #-}
 -- Note: technically this should be defined per optic kind:
@@ -222,7 +222,7 @@ ibackwards_
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a
   -> IxFold i s a
-ibackwards_ o = conjoined (backwards_ o) $ ixFoldVL $ \f ->
+ibackwards_ o = conjoined (backwards_ o) $ ifoldVL $ \f ->
   forwards #. itraverseOf_ o (\i -> Backwards #. f i)
 {-# INLINE ibackwards_ #-}
 
@@ -233,7 +233,7 @@ isumming
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-isumming a b = conjoined (summing a b) $ ixFoldVL $ \f s ->
+isumming a b = conjoined (summing a b) $ ifoldVL $ \f s ->
   itraverseOf_ a f s *> itraverseOf_ b f s
 infixr 6 `isumming` -- Same as (<>)
 {-# INLINE isumming #-}
@@ -244,7 +244,7 @@ ifailing
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-ifailing a b = conjoined (failing a b) $ ixFoldVL $ \f s ->
+ifailing a b = conjoined (failing a b) $ ifoldVL $ \f s ->
   let OrT visited fu = itraverseOf_ a (\i -> wrapOrT . f i) s
   in if visited
      then fu

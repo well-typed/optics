@@ -39,13 +39,16 @@ module Optics.Lens
   , lensVL
 
   -- * Elimination
-  -- | A 'Lens' is a 'Optics.Setter.Setter' and a
-  -- 'Optics.Getter.Getter', therefore you can specialise types to
-  -- obtain:
+  -- | A 'Lens' is in particular a 'Optics.Getter.Getter' and a
+  -- 'Optics.Setter.Setter', therefore you can specialise types to obtain:
   --
   -- @
-  -- 'Optics.Getter.view' :: 'Lens' i s t a b -> s -> a
-  -- 'Optics.Setter.set'  :: 'Lens' i s t a b -> b -> s -> t
+  -- 'Optics.Getter.view' :: 'Lens' s t a b -> s -> a
+  -- @
+  --
+  -- @
+  -- 'Optics.Setter.over' :: 'Lens' s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Setter.set'  :: 'Lens' s t a b ->       b  -> s -> t
   -- @
   --
 
@@ -84,7 +87,6 @@ module Optics.Lens
   , equality'
   , chosen
   , alongside
-  , devoid
   , united
 
   -- * Additional elimination forms
@@ -107,8 +109,6 @@ module Optics.Lens
   , module Optics.Optic
   )
   where
-
-import Data.Void
 
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
@@ -211,18 +211,6 @@ alongside l r = withLens l $ \getl setl ->
   lens (\(s, s')         -> (getl s,   getr s'   ))
        (\(s, s') (b, b') -> (setl s b, setr s' b'))
 {-# INLINE alongside #-}
-
--- | There is a field for every type in the 'Void'.
---
--- >>> set (mapped % devoid) 1 []
--- []
---
--- >>> over (_Just % devoid) abs Nothing
--- Nothing
---
-devoid :: Lens' Void a
-devoid = lens absurd const
-{-# INLINE devoid #-}
 
 -- | We can always retrieve a @()@ from any type.
 --

@@ -87,7 +87,7 @@ toMapOf o = ifoldMapOf o Map.singleton
 -- >>> ipreview (lt 'a') $ Map.fromList [('a', 'x'), ('b', 'y')]
 -- Nothing
 lt :: Ord k => k -> IxAffineTraversal' k (Map k v) v
-lt k = ixAtraversalVL $ \point f s ->
+lt k = iatraversalVL $ \point f s ->
   case lookupLT k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
@@ -102,7 +102,7 @@ lt k = ixAtraversalVL $ \point f s ->
 -- >>> ipreview (gt 'a') $ Map.fromList [('a', 'x'), ('b', 'y')]
 -- Just ('b','y')
 gt :: Ord k => k -> IxAffineTraversal' k (Map k v) v
-gt k = ixAtraversalVL $ \point f s ->
+gt k = iatraversalVL $ \point f s ->
   case lookupGT k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
@@ -117,7 +117,7 @@ gt k = ixAtraversalVL $ \point f s ->
 -- >>> ipreview (le 'a') $ Map.fromList [('a', 'x'), ('b', 'y')]
 -- Just ('a','x')
 le :: Ord k => k -> IxAffineTraversal' k (Map k v) v
-le k = ixAtraversalVL $ \point f s ->
+le k = iatraversalVL $ \point f s ->
   case lookupLE k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
@@ -132,7 +132,7 @@ le k = ixAtraversalVL $ \point f s ->
 -- >>> ipreview (ge 'b') $ Map.fromList [('a', 'x'), ('c', 'y')]
 -- Just ('c','y')
 ge :: Ord k => k -> IxAffineTraversal' k (Map k v) v
-ge k = ixAtraversalVL $ \point f s ->
+ge k = iatraversalVL $ \point f s ->
   case lookupGE k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
