@@ -16,6 +16,9 @@ module Optics.IxLens
   , ilens
   , ilensVL
 
+  -- * Additional introduction forms
+  , devoid
+
   -- * Subtyping
   , A_Lens
 
@@ -28,6 +31,8 @@ module Optics.IxLens
   -- * Re-exports
   , module Optics.Optic
   ) where
+
+import Data.Void
 
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
@@ -74,3 +79,21 @@ withIxLensVL
   -> r
 withIxLensVL o k = k (toIxLensVL o)
 {-# INLINE withIxLensVL #-}
+
+----------------------------------------
+-- Lenses
+
+-- | There is an indexed field for every type in the 'Void'.
+--
+-- >>> set (mapped % devoid) 1 []
+-- []
+--
+-- >>> over (_Just % devoid) abs Nothing
+-- Nothing
+--
+devoid :: IxLens' i Void a
+devoid = ilens absurd const
+{-# INLINE devoid #-}
+
+-- $setup
+-- >>> import Optics.Core

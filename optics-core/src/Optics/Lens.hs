@@ -84,7 +84,6 @@ module Optics.Lens
   , equality'
   , chosen
   , alongside
-  , devoid
   , united
 
   -- * Additional elimination forms
@@ -107,8 +106,6 @@ module Optics.Lens
   , module Optics.Optic
   )
   where
-
-import Data.Void
 
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
@@ -211,18 +208,6 @@ alongside l r = withLens l $ \getl setl ->
   lens (\(s, s')         -> (getl s,   getr s'   ))
        (\(s, s') (b, b') -> (setl s b, setr s' b'))
 {-# INLINE alongside #-}
-
--- | There is a field for every type in the 'Void'.
---
--- >>> set (mapped % devoid) 1 []
--- []
---
--- >>> over (_Just % devoid) abs Nothing
--- Nothing
---
-devoid :: Lens' Void a
-devoid = lens absurd const
-{-# INLINE devoid #-}
 
 -- | We can always retrieve a @()@ from any type.
 --
