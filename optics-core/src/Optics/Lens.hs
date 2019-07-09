@@ -39,13 +39,16 @@ module Optics.Lens
   , lensVL
 
   -- * Elimination
-  -- | A 'Lens' is a 'Optics.Setter.Setter' and a
-  -- 'Optics.Getter.Getter', therefore you can specialise types to
-  -- obtain:
+  -- | A 'Lens' is in particular a 'Optics.Getter.Getter' and a
+  -- 'Optics.Setter.Setter', therefore you can specialise types to obtain:
   --
   -- @
-  -- 'Optics.Getter.view' :: 'Lens' i s t a b -> s -> a
-  -- 'Optics.Setter.set'  :: 'Lens' i s t a b -> b -> s -> t
+  -- 'Optics.Getter.view' :: 'Lens' s t a b -> s -> a
+  -- @
+  --
+  -- @
+  -- 'Optics.Setter.over' :: 'Lens' s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Setter.set'  :: 'Lens' s t a b ->       b  -> s -> t
   -- @
   --
 

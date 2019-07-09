@@ -16,13 +16,18 @@ module Optics.Iso
   , iso
 
   -- * Elimination
-  -- | An 'Iso' is a 'Optics.Getter.Getter' and an
-  -- 'Optics.Review.Review', therefore you can specialise types to
-  -- obtain:
+  -- | An 'Iso' is in particular a 'Optics.Getter.Getter', a
+  -- 'Optics.Review.Review' and a 'Optics.Setter.Setter', therefore you can
+  -- specialise types to obtain:
   --
   -- @
   -- 'Optics.Getter.view'   :: 'Iso' s t a b -> s -> a
   -- 'Optics.Review.review' :: 'Iso' s t a b -> b -> t
+  -- @
+  --
+  -- @
+  -- 'Optics.Setter.over'   :: 'Iso' s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Setter.set'    :: 'Iso' s t a b ->       b  -> s -> t
   -- @
 
   -- * Computation

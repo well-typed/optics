@@ -17,6 +17,20 @@ module Optics.IxAffineTraversal
   , iatraversal
   , iatraversalVL
 
+  -- * Elimination
+  -- | An 'IxAffineTraversal' is in particular an
+  -- 'Optics.IxAffineFold.IxAffineFold' and an 'Optics.IxSetter.IxSetter',
+  -- therefore you can specialise types to obtain:
+  --
+  -- @
+  -- 'Optics.IxAffineFold.ipreview' :: 'IxAffineTraversal' i s t a b -> s -> Maybe (i, a)
+  -- @
+  --
+  -- @
+  -- 'Optics.IxSetter.iover'    :: 'IxAffineTraversal' i s t a b -> (i -> a -> b) -> s -> t
+  -- 'Optics.IxSetter.iset'     :: 'IxAffineTraversal' i s t a b -> (i      -> b) -> s -> t
+  -- @
+
   -- * Subtyping
   , An_AffineTraversal
 

@@ -16,6 +16,19 @@ module Optics.IxLens
   , ilens
   , ilensVL
 
+  -- * Elimination
+  -- | An 'IxLens' is in particular an 'Optics.IxGetter.IxGetter' and an
+  -- 'Optics.IxSetter.IxSetter', therefore you can specialise types to obtain:
+  --
+  -- @
+  -- 'Optics.IxGetter.iview' :: 'IxLens' i s t a b -> s -> (i, a)
+  -- @
+  --
+  -- @
+  -- 'Optics.IxSetter.iover' :: 'IxLens' i s t a b -> (i -> a -> b) -> s -> t
+  -- 'Optics.IxSetter.iset'  :: 'IxLens' i s t a b -> (i      -> b) -> s -> t
+  -- @
+
   -- * Additional introduction forms
   , devoid
 

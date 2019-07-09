@@ -15,13 +15,18 @@ module Optics.Prism
   , prism
 
   -- * Elimination
-  -- | A 'Prism' is a 'Optics.Review.Review' and
-  -- 'Optics.AffineTraversal.AffineTraversal', therefore you can specialise
-  -- types to obtain:
+  -- | A 'Prism' is in particular an 'Optics.AffineFold.AffineFold', a
+  -- 'Optics.Review.Review' and a 'Optics.Setter.Setter', therefore you can
+  -- specialise types to obtain:
   --
   -- @
-  -- 'Optics.Review.review'   :: 'Prism' s t a b -> b -> t
-  -- 'Optics.AffineTraversal.matching' :: 'Prism' s t a b -> s -> 'Either' t a
+  -- 'Optics.AffineFold.preview' :: 'Prism' s t a b -> s -> Maybe a
+  -- 'Optics.Review.review'  :: 'Prism' s t a b -> b -> t
+  -- @
+  --
+  -- @
+  -- 'Optics.Setter.over'    :: 'Prism' s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Setter.set'     :: 'Prism' s t a b ->       b  -> s -> t
   -- @
 
   -- * Computation
@@ -36,8 +41,8 @@ module Optics.Prism
   -- |
   --
   -- @
-  -- 'Optics.AffineTraversal.matching' o ('Optics.Review.review' o b) ≡ 'Left' b
-  -- 'Optics.AffineTraversal.matching' o s ≡ 'Left' a  =>  'Optics.Review.review' o a ≡ s
+  -- 'Optics.AffineTraversal.matching' o ('Optics.Review.review' o b) ≡ 'Right' b
+  -- 'Optics.AffineTraversal.matching' o s ≡ 'Right' a  =>  'Optics.Review.review' o a ≡ s
   -- @
 
   -- * Additional introduction forms

@@ -5,18 +5,17 @@
 -- A 'Traversal' lifts an effectful operation on elements to act on structures
 -- containing those elements.
 --
--- That is, given a function @op :: A -> F B@ where @F@ is
--- 'Applicative', a @'Traversal' S T A B@ can produce a function @S ->
--- F T@ that applies @op@ to all the @A@s contained in the @S@.
+-- That is, given a function @op :: A -> F B@ where @F@ is 'Applicative', a
+-- @'Traversal' S T A B@ can produce a function @S -> F T@ that applies @op@ to
+-- all the @A@s contained in the @S@.
 --
--- This can be seen as a generalisation of 'traverse', where the type
--- @S@ does not need to be a type constructor with @A@ as the last
--- parameter.
+-- This can be seen as a generalisation of 'traverse', where the type @S@ does
+-- not need to be a type constructor with @A@ as the last parameter.
 --
 -- A 'Lens' is a 'Traversal' that acts on a single value.
 --
--- A close relative is the 'Optics.AffineTraversal.AffineTraversal',
--- which is a 'Traversal' that acts on at most one value.
+-- A close relative is the 'Optics.AffineTraversal.AffineTraversal', which is a
+-- 'Traversal' that acts on at most one value.
 --
 module Optics.Traversal
   (
