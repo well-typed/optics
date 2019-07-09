@@ -109,9 +109,7 @@ type IxTraversalVL' i s a = IxTraversalVL i s s a a
 -- 'ixTraversalVL' '.' 'itraverseOf' ≡ 'id'
 -- 'itraverseOf' '.' 'ixTraversalVL' ≡ 'id'
 -- @
-ixTraversalVL
-  :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
-  -> IxTraversal i s t a b
+ixTraversalVL :: IxTraversalVL i s t a b -> IxTraversal i s t a b
 ixTraversalVL t = Optic (iwander t)
 {-# INLINE ixTraversalVL #-}
 

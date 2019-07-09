@@ -16,6 +16,7 @@ module Optics.AffineTraversal
 
   -- * Introduction
   , atraversal
+  , atraversalVL
 
   -- * Elimination
   -- | An 'AffineTraversal' is a 'Optics.Setter.Setter', therefore you can
@@ -50,7 +51,6 @@ module Optics.AffineTraversal
   -- * van Laarhoven encoding
   , AffineTraversalVL
   , AffineTraversalVL'
-  , atraversalVL
   , toAtraversalVL
 
   -- * Re-exports
@@ -113,6 +113,28 @@ withAffineTraversal o = \k ->
 {-# INLINE withAffineTraversal #-}
 
 -- | Build an affine traversal from the van Laarhoven representation.
+--
+-- Example:
+--
+-- >>> :{
+-- azSnd = atraversalVL $ \point f ab@(a, b) ->
+--   if a >= 'a' && a <= 'z'
+--   then (a, ) <$> f b
+--   else point ab
+-- :}
+--
+-- >>> preview azSnd ('a', "Hi")
+-- Just "Hi"
+--
+-- >>> preview azSnd ('@', "Hi")
+-- Nothing
+--
+-- >>> over azSnd (++ "!!!") ('f', "Hi")
+-- ('f',"Hi!!!")
+--
+-- >>> set azSnd "Bye" ('Y', "Hi")
+-- ('Y',"Hi")
+--
 atraversalVL :: AffineTraversalVL s t a b -> AffineTraversal s t a b
 atraversalVL f = Optic (visit f)
 {-# INLINE atraversalVL #-}
@@ -157,3 +179,6 @@ matching o = withAffineTraversal o $ \match _ -> match
 unsafeFiltered :: (a -> Bool) -> AffineTraversal' a a
 unsafeFiltered p = atraversalVL (\point f a -> if p a then f a else point a)
 {-# INLINE unsafeFiltered #-}
+
+-- $setup
+-- >>> import Optics.Core
