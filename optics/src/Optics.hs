@@ -491,9 +491,9 @@ import Data.Either.Optics                    as P
 -- <<diagrams/optics.png Optics hierarchy>>
 --
 -- In addition to the optic kinds included in the diagram, there are also
--- indexed variants, including 'IxAffineTraversal', 'IxTraversal',
--- 'IxAffineFold', 'IxFold' and 'IxSetter'.  These are explained in more detail
--- in the "Indexed optics" section below in "Optics#indexed".
+-- indexed variants such as 'IxLens', 'IxGetter', 'IxAffineTraversal',
+-- 'IxTraversal', 'IxAffineFold', 'IxFold' and 'IxSetter'.  These are explained
+-- in more detail in the "Indexed optics" section below in "Optics#indexed".
 --
 --
 -- === Composition
@@ -648,9 +648,8 @@ import Data.Either.Optics                    as P
 -- * The composition operator is ('%') rather than ('.') and is defined as
 --   @infixl 9@ instead of @infixr 9@.
 --
--- * Fewer operators are provided, and none of operators are exported from the
---   main "Optics" module. Import "Optics.Operators" or "Optics.Operators.State"
---   if you want them.
+-- * Fewer operators are provided, and some of them are not exported from the
+--   main "Optics" module. Import "Optics.State.Operators" if you want them.
 --
 -- * The 'view' function and corresponding ('Optics.Operators.^.') operator work
 --   only for 'Getter's and have a more restricted type. The equivalent for
@@ -717,14 +716,6 @@ import Data.Either.Optics                    as P
 -- @
 -- import "Optics"
 -- @
---
--- and if you prefer to use operators
---
--- @
--- import "Optics.Operators"
--- import "Optics.Operators.State"
--- @
-
 
 -- $indexed #indexed#
 --
