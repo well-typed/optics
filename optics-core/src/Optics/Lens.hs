@@ -186,6 +186,7 @@ withLensVL o k = k (toLensVL o)
 -- @
 equality' :: Lens a b a b
 equality' = lensVL ($!)
+{-# INLINE equality' #-}
 
 -- | Focus on both sides of an 'Either'.
 chosen :: Lens (Either a a) (Either b b) a b
