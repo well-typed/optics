@@ -36,7 +36,6 @@ module Optics.Lens
 
   -- * Introduction
   , lens
-  , lensVL
 
   -- * Elimination
   -- | A 'Lens' is in particular a 'Optics.Getter.Getter' and a
@@ -102,6 +101,7 @@ module Optics.Lens
   -- have a performance penalty.
   , LensVL
   , LensVL'
+  , lensVL
   , toLensVL
   , withLensVL
 
@@ -130,6 +130,9 @@ type LensVL' s a = LensVL s s a a
 
 -- | Build a lens from a getter and a setter, which must respect the
 -- well-formedness laws.
+--
+-- If you want to build a 'Lens' from the van Laarhoven representation, use
+-- 'lensVL'.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens get set = Optic $
   -- Do not define lens in terms of lensVL, mixing profunctor-style definitions
