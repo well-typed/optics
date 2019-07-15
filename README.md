@@ -44,7 +44,7 @@ Edward Kmett and contributors.
 
    * `optics-th`: machinery to construct optics using `TemplateHaskell`.
 
- * `optics-vl`: utilities for compatibility with van Laarhoven isomorsphims and
+ * `optics-vl`: utilities for compatibility with van Laarhoven isomorphisms and
    prisms, as defined in the `lens` library.  This package is not included in
    `optics` as it imposes a dependency on `profunctors`.  Note that
    `optics-core` already supports conversion for van Laarhoven lenses and
