@@ -174,10 +174,6 @@ class Functor f => FunctorWithIndex i f | f -> i where
   imap f = runIxFunArrow (iwander itraverse (IxFunArrow f)) id
   {-# INLINE imap #-}
 
-instance FunctorWithIndex i (IxContext i a b) where
-  imap f (IxContext ibt a) = IxContext (\i -> f i . ibt i) a
-  {-# INLINE imap #-}
-
 -- | Class for 'Foldable's that have an additional read-only index available.
 class (FunctorWithIndex i f, Foldable f
       ) => FoldableWithIndex i f | f -> i where

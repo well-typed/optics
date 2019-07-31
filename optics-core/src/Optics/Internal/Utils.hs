@@ -10,9 +10,6 @@ import qualified Data.Semigroup as SG
 data Context a b t = Context (b -> t) a
   deriving Functor
 
-data IxContext i a b t = IxContext (i -> b -> t) a
-  deriving Functor
-
 -- | Composition operator where the first argument must be an identity
 -- function up to representational equivalence (e.g. a newtype wrapper
 -- or unwrapper), and will be ignored at runtime.
