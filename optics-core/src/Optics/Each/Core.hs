@@ -50,7 +50,7 @@ instance
    b ~ b1
   ) => Each Int (a, a1)
                 (b, b1) a b where
-  each = itraversalVL $ \f ~(a0, a1) ->
+  each = itraversalVL $ \f (a0, a1) ->
     (,) <$> f 0 a0 <*> f 1 a1
   {-# INLINE[1] each #-}
 
@@ -60,7 +60,7 @@ instance
    b ~ b1, b ~ b2
   ) => Each Int (a, a1, a2)
                 (b, b1, b2) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2) ->
+  each = itraversalVL $ \f (a0, a1, a2) ->
     (,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2
   {-# INLINE[1] each #-}
 
@@ -70,7 +70,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3
   ) => Each Int (a, a1, a2, a3)
                 (b, b1, b2, b3) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3) ->
     (,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3
   {-# INLINE[1] each #-}
 
@@ -80,7 +80,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3, b ~ b4
   ) => Each Int (a, a1, a2, a3, a4)
                 (b, b1, b2, b3, b4) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3, a4) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3, a4) ->
     (,,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3 <*> f 4 a4
   {-# INLINE[1] each #-}
 
@@ -90,7 +90,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5
   ) => Each Int (a, a1, a2, a3, a4, a5)
                 (b, b1, b2, b3, b4, b5) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3, a4, a5) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3, a4, a5) ->
     (,,,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3 <*> f 4 a4
             <*> f 5 a5
   {-# INLINE[1] each #-}
@@ -102,7 +102,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6
   ) => Each Int (a, a1, a2, a3, a4, a5, a6)
                 (b, b1, b2, b3, b4, b5, b6) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3, a4, a5, a6) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3, a4, a5, a6) ->
     (,,,,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3 <*> f 4 a4
              <*> f 5 a5 <*> f 6 a6
   {-# INLINE[1] each #-}
@@ -114,7 +114,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6, b ~ b7
   ) => Each Int (a, a1, a2, a3, a4, a5, a6, a7)
                 (b, b1, b2, b3, b4, b5, b6, b7) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3, a4, a5, a6, a7) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3, a4, a5, a6, a7) ->
     (,,,,,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3 <*> f 4 a4
               <*> f 5 a5 <*> f 6 a6 <*> f 7 a7
   {-# INLINE[1] each #-}
@@ -126,7 +126,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6, b ~ b7, b ~ b8
   ) => Each Int (a, a1, a2, a3, a4, a5, a6, a7, a8)
                 (b, b1, b2, b3, b4, b5, b6, b7, b8) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3, a4, a5, a6, a7, a8) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3, a4, a5, a6, a7, a8) ->
     (,,,,,,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3 <*> f 4 a4
                <*> f 5 a5 <*> f 6 a6 <*> f 7 a7 <*> f 8 a8
   {-# INLINE[1] each #-}
@@ -138,7 +138,7 @@ instance
    b ~ b1, b ~ b2, b ~ b3, b ~ b4, b ~ b5, b ~ b6, b ~ b7, b ~ b8, b ~ b9
   ) => Each Int (a, a1, a2, a3, a4, a5, a6, a7, a8, a9)
                 (b, b1, b2, b3, b4, b5, b6, b7, b8, b9) a b where
-  each = itraversalVL $ \f ~(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) ->
+  each = itraversalVL $ \f (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) ->
     (,,,,,,,,,) <$> f 0 a0 <*> f 1 a1 <*> f 2 a2 <*> f 3 a3 <*> f 4 a4
                 <*> f 5 a5 <*> f 6 a6 <*> f 7 a7 <*> f 8 a8 <*> f 9 a9
   {-# INLINE[1] each #-}

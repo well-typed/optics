@@ -79,11 +79,11 @@ instance Field1 (Identity a) (Identity b) a b where
   {-# INLINE[1] _1 #-}
 
 instance Field1 (Product f g a) (Product f' g a) (f a) (f' a) where
-  _1 = lensVL $ \f (Pair a b) -> flip Pair b <$> f a
+  _1 = lensVL $ \f ~(Pair a b) -> flip Pair b <$> f a
   {-# INLINE[1] _1 #-}
 
 instance Field1 ((f :*: g) p) ((f' :*: g) p) (f p) (f' p) where
-  _1 = lensVL $ \f (l :*: r) -> (:*: r) <$> f l
+  _1 = lensVL $ \f ~(l :*: r) -> (:*: r) <$> f l
   {-# INLINE[1] _1 #-}
 
 instance Field1 (a,b) (a',b) a a' where
@@ -138,11 +138,11 @@ class Field2 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE[1] _2 #-}
 
 instance Field2 (Product f g a) (Product f g' a) (g a) (g' a) where
-  _2 = lensVL $ \f (Pair a b) -> Pair a <$> f b
+  _2 = lensVL $ \f ~(Pair a b) -> Pair a <$> f b
   {-# INLINE[1] _2 #-}
 
 instance Field2 ((f :*: g) p) ((f :*: g') p) (g p) (g' p) where
-  _2 = lensVL $ \f (l :*: r) -> (l :*:) <$> f r
+  _2 = lensVL $ \f ~(l :*: r) -> (l :*:) <$> f r
   {-# INLINE[1] _2 #-}
 
 instance Field2 (a,b) (a,b') b b' where
