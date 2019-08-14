@@ -14,10 +14,6 @@ packages:
 
 tests: true
 
--- temporary for 8.8.1
-constraints: aeson==1.4.3.0
-constraints: statistics==0.15.0.0
-
 -- repository head.hackage
 --     url:           http://head.hackage.haskell.org/
 --     secure:        True
