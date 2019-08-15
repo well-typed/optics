@@ -16,7 +16,6 @@ module Optics.AffineTraversal
 
   -- * Introduction
   , atraversal
-  , atraversalVL
 
   -- * Elimination
   -- | An 'AffineTraversal' is in particular an 'Optics.AffineFold.AffineFold'
@@ -56,6 +55,7 @@ module Optics.AffineTraversal
   -- * van Laarhoven encoding
   , AffineTraversalVL
   , AffineTraversalVL'
+  , atraversalVL
   , toAtraversalVL
 
   -- * Re-exports
@@ -96,6 +96,9 @@ type AffineTraversalVL s t a b =
 type AffineTraversalVL' s a = AffineTraversalVL s s a a
 
 -- | Build an affine traversal from a matcher and an updater.
+--
+-- If you want to build an 'AffineTraversal' from the van Laarhoven
+-- representation, use 'atraversalVL'.
 atraversal :: (s -> Either t a) -> (s -> b -> t) -> AffineTraversal s t a b
 atraversal match update = Optic $
   -- Do not define atraversal in terms of atraversalVL, mixing profunctor-style

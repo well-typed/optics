@@ -14,7 +14,6 @@ module Optics.IxLens
 
   -- * Introduction
   , ilens
-  , ilensVL
 
   -- * Elimination
   -- | An 'IxLens' is in particular an 'Optics.IxGetter.IxGetter' and an
@@ -38,6 +37,7 @@ module Optics.IxLens
   -- * van Laarhoven encoding
   , IxLensVL
   , IxLensVL'
+  , ilensVL
   , toIxLensVL
   , withIxLensVL
 
@@ -66,6 +66,9 @@ type IxLensVL i s t a b =
 type IxLensVL' i s a = IxLensVL i s s a a
 
 -- | Build an indexed lens from a getter and a setter.
+--
+-- If you want to build an 'IxLens' from the van Laarhoven representation, use
+-- 'ilensVL'.
 ilens :: (s -> (i, a)) -> (s -> b -> t) -> IxLens i s t a b
 ilens get set = ilensVL $ \f s -> set s <$> uncurry f (get s)
 {-# INLINE ilens #-}

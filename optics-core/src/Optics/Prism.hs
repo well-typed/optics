@@ -86,6 +86,9 @@ type Prism' s a = Optic' A_Prism NoIx s a
 
 -- | Build a prism from a constructor and a matcher, which must respect the
 -- well-formedness laws.
+--
+-- If you want to build a 'Prism' from the van Laarhoven representation, use
+-- 'prismVL' from the @optics-vl@ package.
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism construct match = Optic $ dimap match (either id construct) . right'
 {-# INLINE prism #-}

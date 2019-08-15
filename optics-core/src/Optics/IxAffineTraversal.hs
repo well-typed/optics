@@ -15,7 +15,6 @@ module Optics.IxAffineTraversal
 
   -- * Introduction
   , iatraversal
-  , iatraversalVL
 
   -- * Elimination
   -- | An 'IxAffineTraversal' is in particular an
@@ -37,6 +36,7 @@ module Optics.IxAffineTraversal
   -- * van Laarhoven encoding
   , IxAffineTraversalVL
   , IxAffineTraversalVL'
+  , iatraversalVL
   , toIxAtraversalVL
 
   -- * Re-exports
@@ -69,6 +69,9 @@ type IxAffineTraversalVL i s t a b =
 type IxAffineTraversalVL' i s a = IxAffineTraversalVL i s s a a
 
 -- | Build an indexed affine traversal from a matcher and an updater.
+--
+-- If you want to build an 'IxAffineTraversal' from the van Laarhoven
+-- representation, use 'iatraversalVL'.
 iatraversal :: (s -> Either t (i, a)) -> (s -> b -> t) -> IxAffineTraversal i s t a b
 iatraversal match update = iatraversalVL $ \point f s ->
   either point (\a -> update s <$> uncurry f a) (match s)
