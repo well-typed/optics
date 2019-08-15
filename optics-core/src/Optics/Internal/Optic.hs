@@ -2,6 +2,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
@@ -38,6 +39,7 @@ module Optics.Internal.Optic
   ) where
 
 import Data.Function ((&))
+import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 import Data.Type.Equality
 import GHC.OverloadedLabels
@@ -70,7 +72,7 @@ type WithIx i = '[i]
 -- The parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
-newtype Optic (k :: *) (is :: [*]) s t a b = Optic
+newtype Optic (k :: OpticKind) (is :: [Type]) s t a b = Optic
   { getOptic :: forall p i. Profunctor p
              => Optic_ k p i (Curry is i) s t a b
   }
@@ -94,7 +96,7 @@ type Optic__ p i j s t a b = p i a b -> p j s t
 
 -- | Proxy type for use as an argument to 'implies'.
 --
-data IsProxy (k :: *) (l :: *) (p :: * -> * -> * -> *) =
+data IsProxy (k :: Type) (l :: Type) (p :: Type -> Type -> Type -> Type) =
   IsProxy
 
 -- | Explicit cast from one optic flavour to another.
@@ -183,7 +185,7 @@ infixl 9 %&
 --
 -- It shows that usage of 'unsafeCoerce' in '(%%)' is, in fact, safe.
 --
-class Append xs ys ~ zs => AppendProof (xs :: [*]) (ys :: [*]) (zs :: [*])
+class Append xs ys ~ zs => AppendProof (xs :: [Type]) (ys :: [Type]) (zs :: [Type])
   | xs ys -> zs, zs xs -> ys {- , zs ys -> xs -} where
   appendProof :: Proxy i -> Curry xs (Curry ys i) :~: Curry zs i
 

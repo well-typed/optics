@@ -24,7 +24,8 @@
 -- documentation.
 --
 module Optics.Optic
-  ( Optic
+  ( OpticKind
+  , Optic
   , Optic'
 
   -- * Subtyping
