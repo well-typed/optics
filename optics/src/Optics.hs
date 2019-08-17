@@ -467,8 +467,7 @@ import Data.Either.Optics                    as P
 -- Introduction forms (constructors) return a concrete optic kind, while
 -- elimination forms (destructors) are generally polymorphic in the optic kind
 -- they accept.  This means that it is not normally necessary to explicitly cast
--- between optic kinds, but if needed this is possible using 'castOptic'.
--- For example, we have
+-- between optic kinds.  For example, we have
 --
 -- @
 -- 'view' :: 'Is' k 'A_Getter' => 'Optic'' k is s a -> s -> a
@@ -477,10 +476,16 @@ import Data.Either.Optics                    as P
 -- so 'view' can be used with isomorphisms or lenses, as these can be converted
 -- to a 'Getter'.
 --
--- Correspondingly, the optic kind module (e.g. "Optics.Lens") does not list all
--- ways to construct or use particular the optic kind.  For example, since a
--- 'Lens' is also a 'Traversal', a 'Fold' etc, so you can use 'traverseOf',
--- 'preview' and many other combinators with lenses.
+-- If an explicit cast is needed, you can use 'castOptic'. This arises when you
+-- use optics of different kinds in a context that requires them to have the
+-- same type. For example @['folded', 'traversed']@ gives a type error (since
+-- 'A_Traversal' is not 'A_Fold') but @['folded', 'castOptic' 'traversed']@
+-- works.
+--
+-- The optic kind module (e.g. "Optics.Lens") does not list all ways to
+-- construct or use particular the optic kind.  For example, since a 'Lens' is
+-- also a 'Traversal', a 'Fold' etc, so you can use 'traverseOf', 'preview' and
+-- many other combinators with lenses.
 --
 --
 -- ==== Subtype hierarchy
