@@ -718,10 +718,19 @@ import Data.Either.Optics                    as P
 
 -- $basicusage
 --
--- To get started, you can just
+-- To get started, you can just add @optics@ as a dependency to your @.cabal@
+-- file, and then:
 --
 -- @
 -- import "Optics"
+-- @
+--
+-- If you are writing a library for which it is important to keep the dependency
+-- footprint minimal, you may wish to depend upon @optics-core@ instead (and
+-- perhaps @optics-extra@ or @optics-th@), and then:
+--
+-- @
+-- import "Optics.Core"
 -- @
 
 -- $indexed #indexed#
