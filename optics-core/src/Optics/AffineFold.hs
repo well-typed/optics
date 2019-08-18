@@ -37,9 +37,6 @@ module Optics.AffineFold
   -- * Subtyping
   , An_AffineFold
   -- | <<diagrams/AffineFold.png AffineFold in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   ) where
 
 import Data.Maybe
@@ -47,7 +44,6 @@ import Data.Maybe
 import Optics.Internal.Bi
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
-import Optics.Optic
 
 -- | Type synonym for an affine fold.
 type AffineFold s a = Optic' An_AffineFold NoIx s a

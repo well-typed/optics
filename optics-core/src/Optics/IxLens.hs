@@ -40,9 +40,6 @@ module Optics.IxLens
   , ilensVL
   , toIxLensVL
   , withIxLensVL
-
-  -- * Re-exports
-  , module Optics.Optic
   ) where
 
 import Data.Void
@@ -50,7 +47,6 @@ import Data.Void
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Optic
 
 -- | Type synonym for a type-modifying indexed lens.
 type IxLens i s t a b = Optic A_Lens (WithIx i) s t a b

@@ -72,7 +72,6 @@ module Optics.IxTraversal
 
   -- * Re-exports
   , TraversableWithIndex(..)
-  , module Optics.Optic
   ) where
 
 import Control.Applicative.Backwards
@@ -84,7 +83,6 @@ import Optics.Internal.IxTraversal
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 import Optics.Internal.Utils
-import Optics.Optic
 import Optics.IxLens
 import Optics.IxFold
 import Optics.ReadOnly

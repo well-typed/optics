@@ -52,13 +52,9 @@ module Optics.ReversedPrism
   -- * Subtyping
   , A_ReversedPrism
   -- | <<diagrams/ReversedPrism.png ReversedPrism in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   ) where
 
 import Optics.Internal.Optic
-import Optics.Optic
 
 -- | Type synonym for a type-modifying reversed prism.
 type ReversedPrism s t a b = Optic A_ReversedPrism NoIx s t a b

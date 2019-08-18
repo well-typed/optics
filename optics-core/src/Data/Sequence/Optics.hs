@@ -16,6 +16,7 @@ import Optics.Internal.Indexed
 import Optics.Fold
 import Optics.Iso
 import Optics.IxTraversal
+import Optics.Optic
 import Optics.Traversal
 
 -- * Sequence isomorphisms

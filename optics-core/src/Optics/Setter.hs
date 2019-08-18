@@ -58,15 +58,11 @@ module Optics.Setter
   -- * Subtyping
   , A_Setter
   -- | <<diagrams/Setter.png Setter in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   ) where
 
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Setter
-import Optics.Optic
 
 -- | Type synonym for a type-modifying setter.
 type Setter s t a b = Optic A_Setter NoIx s t a b

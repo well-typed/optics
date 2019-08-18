@@ -47,6 +47,7 @@ import Data.IntMap as IntMap
 
 import Optics.IxAffineTraversal
 import Optics.IxFold
+import Optics.Optic
 
 -- | Construct a map from an 'IxFold'.
 --

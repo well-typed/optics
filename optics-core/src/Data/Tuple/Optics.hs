@@ -47,8 +47,8 @@ import Data.Proxy
 import GHC.Generics ((:*:)(..), Generic(..), K1, M1, U1)
 
 import GHC.Generics.Optics
-import Optics.Iso
 import Optics.Lens
+import Optics.Optic
 
 -- | Provides access to 1st field of a tuple.
 class Field1 s t a b | s -> a, t -> b, s b -> t, t a -> s where

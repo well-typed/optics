@@ -52,13 +52,9 @@ module Optics.ReversedLens
   -- * Subtyping
   , A_ReversedLens
   -- | <<diagrams/ReversedLens.png ReversedLens in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   ) where
 
 import Optics.Internal.Optic
-import Optics.Optic
 
 -- | Type synonym for a type-modifying reversed lens.
 type ReversedLens s t a b = Optic A_ReversedLens NoIx s t a b

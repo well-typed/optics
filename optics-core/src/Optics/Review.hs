@@ -26,9 +26,6 @@ module Optics.Review
   -- * Subtyping
   , A_Review
   -- | <<diagrams/Review.png Review in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
@@ -37,7 +34,6 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Tagged
 import Optics.Internal.Utils
-import Optics.Optic
 
 -- | Type synonym for a review.
 type Review t b = Optic' A_Review NoIx t b

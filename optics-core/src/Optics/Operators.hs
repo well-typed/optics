@@ -21,6 +21,7 @@ module Optics.Operators
 import Optics.AffineFold
 import Optics.Fold
 import Optics.Getter
+import Optics.Optic
 import Optics.Review
 import Optics.Setter
 
