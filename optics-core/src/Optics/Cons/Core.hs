@@ -77,10 +77,10 @@ class Cons s t a b | s -> a, t -> b, s b -> t, t a -> s where
   -- @
   -- '_Cons' :: 'Prism' [a] [b] (a, [a]) (b, [b])
   -- '_Cons' :: 'Prism' ('Seq' a) ('Seq' b) (a, 'Seq' a) (b, 'Seq' b)
-  -- '_Cons' :: 'Prism' ('Vector' a) ('Vector' b) (a, 'Vector' a) (b, 'Vector' b)
+  -- '_Cons' :: 'Prism' (Vector a) (Vector b) (a, Vector a) (b, Vector b)
   -- '_Cons' :: 'Prism'' 'String' ('Char', 'String')
-  -- '_Cons' :: 'Prism'' 'StrictT.Text' ('Char', 'StrictT.Text')
-  -- '_Cons' :: 'Prism'' 'StrictB.ByteString' ('Word8', 'StrictB.ByteString')
+  -- '_Cons' :: 'Prism'' Text ('Char', Text)
+  -- '_Cons' :: 'Prism'' ByteString ('Data.Word.Word8', ByteString)
   -- @
   _Cons :: Prism s t (a, s) (b, t)
 
