@@ -1,3 +1,11 @@
+-- |
+-- Module: Optics.State.Operators
+-- Description: Infix operators for state-modifying optics.
+--
+-- Defines infix operators for the operations in "Optics.State".  These
+-- operators are not exposed by the main @Optics@ module, but must be imported
+-- explicitly.
+--
 module Optics.State.Operators (
   -- * State modifying optics
   (.=), (?=), (%=),

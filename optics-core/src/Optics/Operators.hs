@@ -2,7 +2,11 @@
 -- Module: Optics.Operators
 -- Description: Definitions of infix operators for optics.
 --
--- Defines some infix operators for optics operations.
+-- Defines some infix operators for optics operations. This is a deliberately
+-- small collection.
+--
+-- If you like operators, you may also wish to import @Optics.State.Operators@
+-- from the @optics-extra@ package.
 --
 module Optics.Operators
   ( (^.)
@@ -97,7 +101,7 @@ infixr 4 !~
 
 infixr 4 ?~
 
--- | Strict version of '(?~)'.
+-- | Strict version of ('?~').
 (?!~) :: Is k A_Setter => Optic k is s t a (Maybe b) -> b -> s -> t
 (?!~) = \o !b -> set' o (Just b)
 {-# INLINE (?!~) #-}

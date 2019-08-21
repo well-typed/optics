@@ -15,9 +15,10 @@
 -- 'x'
 --
 -- In the following diagram, red arrows illustrate how 're' transforms optics.
--- The 'ReversedLens' and 'ReversedPrism' optic kinds are backwards versions
--- of 'Lens' and 'Prism' respectively, and are present so that @'re' . 're'@
--- does not change the optic kind.
+-- The 'Optics.ReversedLens.ReversedLens' and
+-- 'Optics.ReversedPrism.ReversedPrism' optic kinds are backwards versions of
+-- 'Optics.Lens.Lens' and 'Optics.Prism.Prism' respectively, and are present so
+-- that @'re' . 're'@ does not change the optic kind.
 --
 -- <<diagrams/reoptics.png Reversed Optics>>
 --
