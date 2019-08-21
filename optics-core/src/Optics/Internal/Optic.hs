@@ -126,7 +126,8 @@ castOptic (Optic o) = Optic (implies' o)
 
 -- | Compose two optics of compatible flavours.
 --
--- Returns an optic of the appropriate supertype.
+-- Returns an optic of the appropriate supertype.  If either or both optics are
+-- indexed, the composition preserves all the indices.
 --
 infixl 9 %
 (%) :: (Is k m, Is l m, m ~ Join k l, ks ~ Append is js)
