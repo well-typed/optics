@@ -74,9 +74,6 @@ module Optics.Iso
   -- * Subtyping
   , An_Iso
   -- | <<diagrams/Iso.png Iso in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
@@ -87,7 +84,6 @@ import Data.Coerce
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Optic
 
 -- | Type synonym for a type-modifying iso.
 type Iso s t a b = Optic An_Iso NoIx s t a b

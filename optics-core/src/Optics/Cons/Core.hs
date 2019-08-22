@@ -38,6 +38,7 @@ import Data.Tuple.Optics
 import Optics.AffineFold
 import Optics.AffineTraversal
 import Optics.Coerce
+import Optics.Optic
 import Optics.Prism
 import Optics.Review
 

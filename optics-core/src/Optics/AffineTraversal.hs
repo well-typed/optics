@@ -57,16 +57,12 @@ module Optics.AffineTraversal
   , AffineTraversalVL'
   , atraversalVL
   , toAtraversalVL
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Optic
 
 -- | Type synonym for a type-modifying affine traversal.
 type AffineTraversal s t a b = Optic An_AffineTraversal NoIx s t a b

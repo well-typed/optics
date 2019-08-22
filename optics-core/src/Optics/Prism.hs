@@ -64,9 +64,6 @@ module Optics.Prism
   -- * Subtyping
   , A_Prism
   -- | <<diagrams/Prism.png Prism in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
@@ -76,7 +73,6 @@ import Data.Bifunctor
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Optic
 
 -- | Type synonym for a type-modifying prism.
 type Prism s t a b = Optic A_Prism NoIx s t a b

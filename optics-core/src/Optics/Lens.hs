@@ -104,9 +104,6 @@ module Optics.Lens
   , lensVL
   , toLensVL
   , withLensVL
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
@@ -114,7 +111,6 @@ import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
-import Optics.Optic
 
 -- | Type synonym for a type-modifying lens.
 type Lens s t a b = Optic A_Lens NoIx s t a b

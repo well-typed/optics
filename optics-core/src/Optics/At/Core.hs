@@ -57,6 +57,7 @@ import Data.Maybe.Optics
 import Optics.AffineTraversal
 import Optics.Iso
 import Optics.Lens
+import Optics.Optic
 import Optics.Setter
 
 -- | Type family that takes a key-value container type and returns the type of

@@ -55,14 +55,12 @@ module Optics.IxSetter
 
   -- * Re-exports
   , FunctorWithIndex(..)
-  , module Optics.Optic
   ) where
 
 import Optics.Internal.Indexed
 import Optics.Internal.IxSetter
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Optic
 
 -- | Type synonym for a type-modifying indexed setter.
 type IxSetter i s t a b = Optic A_Setter (WithIx i) s t a b

@@ -30,6 +30,7 @@ import Numeric (readInt, showIntAtBase)
 import Data.Tuple.Optics
 import Optics.AffineFold
 import Optics.Iso
+import Optics.Optic
 import Optics.Prism
 import Optics.Review
 import Optics.Setter

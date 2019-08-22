@@ -12,6 +12,7 @@ module Data.Set.Optics
 import Data.Set as Set
 
 import Optics.Fold
+import Optics.Optic
 import Optics.Setter
 
 -- | This 'Setter' can be used to change the type of a 'Set' by mapping the

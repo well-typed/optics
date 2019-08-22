@@ -53,7 +53,6 @@ module Optics.IxFold
 
   -- * Re-exports
   , FoldableWithIndex(..)
-  , module Optics.Optic
   ) where
 
 import Control.Applicative.Backwards
@@ -68,7 +67,6 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 import Optics.IxAffineFold
 import Optics.Fold
-import Optics.Optic
 
 -- | Type synonym for an indexed fold.
 type IxFold i s a = Optic' A_Fold (WithIx i) s a

@@ -8,8 +8,11 @@
 --
 module Optics.Core
   (
+  -- * Basic definitions
+    module Optics.Optic
+
   -- * Kinds of optic
-    module O
+  , module O
 
   -- * Indexed optics
   , module I
@@ -58,6 +61,7 @@ import Optics.Re                               as P
 import Optics.ReadOnly                         as P
 
 import Optics.Label
+import Optics.Optic
 
 import Data.Either.Optics                      as D
 import Data.Maybe.Optics                       as D

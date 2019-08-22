@@ -72,9 +72,6 @@ module Optics.Traversal
   -- @S -> F T@.  Thus 'traverseOf' converts a 'Traversal' to a 'TraversalVL'.
   , TraversalVL
   , TraversalVL'
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
@@ -83,14 +80,12 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.State
 import Data.Functor.Identity
 
-import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Traversal
 import Optics.Internal.Utils
 import Optics.Lens
 import Optics.Fold
-import Optics.Optic
 import Optics.ReadOnly
 
 -- | Type synonym for a type-modifying traversal.

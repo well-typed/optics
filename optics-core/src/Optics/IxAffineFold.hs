@@ -31,9 +31,6 @@ module Optics.IxAffineFold
 
   -- * Subtyping
   , An_AffineFold
-
-  -- * Re-exports
-  , module Optics.Optic
   ) where
 
 import Optics.AffineFold
@@ -41,7 +38,6 @@ import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Profunctor
 import Optics.Internal.Optic
-import Optics.Optic
 
 -- | Type synonym for an indexed affine fold.
 type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a

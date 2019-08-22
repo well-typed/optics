@@ -82,9 +82,6 @@ module Optics.Fold
   -- * Subtyping
   , A_Fold
   -- | <<diagrams/Fold.png Fold in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
@@ -101,7 +98,6 @@ import Optics.Internal.Optic
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 import Optics.AffineFold
-import Optics.Optic
 
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a

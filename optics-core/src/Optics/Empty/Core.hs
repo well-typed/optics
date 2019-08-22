@@ -37,6 +37,7 @@ import Optics.AffineTraversal
 import Optics.Internal.Utils
 import Optics.Iso
 import Optics.Fold
+import Optics.Optic
 import Optics.Prism
 import Optics.Review
 

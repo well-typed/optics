@@ -13,6 +13,7 @@ module Data.IntSet.Optics
 import Data.IntSet as IntSet
 
 import Optics.Fold
+import Optics.Optic
 import Optics.Setter
 
 -- | IntSet isn't Foldable, but this 'Fold' can be used to access the members of

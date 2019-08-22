@@ -36,16 +36,12 @@ module Optics.Getter
   -- * Subtyping
   , A_Getter
   -- | <<diagrams/Getter.png Getter in the optics hierarchy>>
-
-  -- * Re-exports
-  , module Optics.Optic
   )
   where
 
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
-import Optics.Optic
 
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter NoIx s a
