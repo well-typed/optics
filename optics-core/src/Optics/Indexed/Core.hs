@@ -15,6 +15,7 @@ module Optics.Indexed.Core
   , conjoined
 
   -- * Composition of indexed optics
+  , (%)
   , (<%>)
   , (%>)
   , (<%)
@@ -79,7 +80,8 @@ infixl 9 <%>
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
 
--- | Compose two optics and preserve indices of the right one.
+-- | Compose two indexed optics and drop indices of the left one. (If you want
+-- to compose a non-indexed and an indexed optic, you can just use ('%').)
 --
 -- >>> itoListOf (ifolded %> ifolded) ["foo", "bar"]
 -- [(0,'f'),(1,'o'),(2,'o'),(0,'b'),(1,'a'),(2,'r')]
@@ -93,7 +95,8 @@ infixl 9 %>
 o %> o' = noIx o % o'
 {-# INLINE (%>) #-}
 
--- | Compose two optics and preserve indices of the left one.
+-- | Compose two indexed optics and drop indices of the right one. (If you want
+-- to compose an indexed and a non-indexed optic, you can just use ('%').)
 --
 -- >>> itoListOf (ifolded <% ifolded) ["foo", "bar"]
 -- [(0,'f'),(0,'o'),(0,'o'),(1,'b'),(1,'a'),(1,'r')]
