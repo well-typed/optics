@@ -502,7 +502,7 @@ lengthOf o = foldlOf' o (\ n _ -> 1 + n) 0
 -- | Obtain the maximum element (if any) targeted by a 'Fold' safely.
 --
 -- Note: 'maximumOf' on a valid 'Optics.Iso.Iso', 'Optics.Lens.Lens'
--- or 'Getter' will always return 'Just' a value.
+-- or 'Optics.Getter.Getter' will always return 'Just' a value.
 --
 -- >>> maximumOf folded [1..10]
 -- Just 10
@@ -529,7 +529,7 @@ maximumOf o = foldlOf' o mf Nothing where
 -- | Obtain the minimum element (if any) targeted by a 'Fold' safely.
 --
 -- Note: 'minimumOf' on a valid 'Optics.Iso.Iso', 'Optics.Lens.Lens'
--- or 'Getter' will always return 'Just' a value.
+-- or 'Optics.Getter.Getter' will always return 'Just' a value.
 --
 -- >>> minimumOf folded [1..10]
 -- Just 1

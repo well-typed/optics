@@ -115,7 +115,7 @@ o <% o' = o % noIx o'
 -- >>> itoListOf (reindexed succ ifolded) "foo"
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
--- itoListOf (ifolded %& reindexed succ) "foo"
+-- >>> itoListOf (ifolded %& reindexed succ) "foo"
 -- [(1,'f'),(2,'o'),(3,'o')]
 --
 reindexed

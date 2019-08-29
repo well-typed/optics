@@ -94,7 +94,7 @@ type Iso' s a = Optic' An_Iso NoIx s a
 -- | Build an iso from a pair of inverse functions.
 --
 -- If you want to build an 'Iso' from the van Laarhoven representation, use
--- 'isoVL' from the @optics-vl@ package.
+-- @isoVL@ from the @optics-vl@ package.
 iso :: (s -> a) -> (b -> t) -> Iso s t a b
 iso f g = Optic (dimap f g)
 {-# INLINE iso #-}

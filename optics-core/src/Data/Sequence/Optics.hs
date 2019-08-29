@@ -23,7 +23,7 @@ import Optics.Traversal
 
 -- | A 'Seq' is isomorphic to a 'ViewL'
 --
--- @'viewl' m ≡ m '^.' 'viewL'@
+-- @'viewl' m ≡ m 'Optics.Operators.^.' 'viewL'@
 --
 -- >>> Seq.fromList [1,2,3] ^. viewL
 -- 1 :< fromList [2,3]
@@ -44,7 +44,7 @@ viewL = iso viewl $ \xs -> case xs of
 
 -- | A 'Seq' is isomorphic to a 'ViewR'
 --
--- @'viewr' m ≡ m '^.' 'viewR'@
+-- @'viewr' m ≡ m 'Optics.Operators.^.' 'viewR'@
 --
 -- >>> Seq.fromList [1,2,3] ^. viewR
 -- fromList [1,2] :> 3

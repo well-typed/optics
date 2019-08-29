@@ -2,6 +2,10 @@
 -- Module: Optics.State
 -- Description: 'Setter' utilities for working with 'MonadState'.
 --
+-- This module contains utilities for working with 'Setter's in a 'MonadState'
+-- context.  If you prefer operator versions, you may wish to import
+-- "Optics.State.Operators".
+--
 module Optics.State
   ( modifying
   , modifying'

@@ -46,12 +46,12 @@ traversedStrictTree8 :: IxTraversal' Int64 B8.ByteString Char
 traversedStrictTree8 = Optic traversedStrictTree8__
 {-# INLINE traversedStrictTree8 #-}
 
--- | An 'IndexedTraversal' of the individual bytes in a lazy 'BL.ByteString'.
+-- | An 'IxTraversal' of the individual bytes in a lazy 'BL.ByteString'.
 traversedLazy :: IxTraversal' Int64 BL.ByteString Word8
 traversedLazy = Optic traversedLazy__
 {-# INLINE traversedLazy #-}
 
--- | An 'IndexedTraversal' of the individual bytes in a lazy 'BL.ByteString'
+-- | An 'IxTraversal' of the individual bytes in a lazy 'BL.ByteString'
 -- pretending the bytes are chars.
 traversedLazy8 :: IxTraversal' Int64 BL.ByteString Char
 traversedLazy8 = Optic traversedLazy8__

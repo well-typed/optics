@@ -1,9 +1,6 @@
 {-# OPTIONS_HADDOCK not-home #-}
 
--- | Taken from the tagged package.
---
--- We include this here, at least for now, with the goal
--- that we only depend on base.
+-- | Based on the @tagged@ package.
 --
 -- This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
@@ -16,6 +13,8 @@ import Optics.Internal.Bi
 import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
+-- | Tag a value with not one but two phantom type parameters (so that 'Tagged'
+-- can be used as an indexed profunctor).
 newtype Tagged i a b = Tagged { unTagged :: b }
 
 instance Functor (Tagged i a) where

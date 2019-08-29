@@ -23,7 +23,7 @@ import Optics.Core
 --   and 'Fold'.
 --
 -- When in doubt, use specific, flavour restricted versions. This function is
--- mostly useful for things such as 'Passthrough'.
+-- mostly useful for things such as 'Optics.Passthrough.passthrough'.
 --
 class ViewableOptic k r where
   type ViewResult k r :: *
