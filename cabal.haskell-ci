@@ -1,0 +1,6 @@
+branches:       master
+doctest:        True
+jobs-selection: any
+
+-- dependencies
+head-hackage:   >=8.8
