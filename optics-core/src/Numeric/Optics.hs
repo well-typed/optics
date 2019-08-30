@@ -35,8 +35,8 @@ import Optics.Prism
 import Optics.Review
 import Optics.Setter
 
--- | This 'Prism' can be used to model the fact that every 'Integral' type is a
--- subset of 'Integer'.
+-- | This 'Prism' can be used to model the fact that every 'Prelude.Integral'
+-- type is a subset of 'Integer'.
 --
 -- Embedding through the 'Prism' only succeeds if the 'Integer' would pass
 -- through unmodified when re-extracted.
@@ -47,6 +47,8 @@ integral = prism toInteger $ \i -> let a = fromInteger i in
   else Left i
 {-# INLINE integral #-}
 
+-- | Pattern synonym that can be used to construct or pattern match on an
+-- 'Integer' as if it were of any 'Prelude.Integral' type.
 pattern Integral :: forall a. Integral a => a -> Integer
 pattern Integral a <- (preview integral -> Just a) where
   Integral a = review integral a
@@ -148,7 +150,7 @@ adding n = iso (+n) (subtract n)
 
 -- | @
 -- 'subtracting' n = 'iso' (subtract n) ((+n)
--- 'subtracting' n = 're' ('adding' n)
+-- 'subtracting' n = 'Optics.Re.re' ('adding' n)
 -- @
 subtracting :: Num a => a -> Iso' a a
 subtracting n = iso (subtract n) (+n)
@@ -170,7 +172,7 @@ multiplying n = iso (*n) (/n)
 
 -- | @
 -- 'dividing' n = 'iso' (/n) (*n)
--- 'dividing' n = 're' ('multiplying' n)@
+-- 'dividing' n = 'Optics.Re.re' ('multiplying' n)@
 --
 -- Note: This errors for n = 0
 dividing :: (Fractional a, Eq a) => a -> Iso' a a

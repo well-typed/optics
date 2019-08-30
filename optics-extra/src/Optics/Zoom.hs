@@ -201,7 +201,7 @@ instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
 -- this can change the environment of a deeply nested 'Monad' transformer.
 --
 -- Its functions can be used to run a monadic action in a larger environment
--- than it was defined in, using a 'Getter'' or an 'AffineFold''.
+-- than it was defined in, using a 'Getter' or an 'AffineFold'.
 --
 -- They act like 'Control.Monad.Reader.Class.local', but can in many cases
 -- change the type of the environment as well.
@@ -236,7 +236,7 @@ class
     -> m c
     -> n (Maybe c)
 
--- | Extends 'Magnify' with an ability to magnify using a 'Fold'' over multiple
+-- | Extends 'Magnify' with an ability to magnify using a 'Fold' over multiple
 -- targets so that actions for each one are executed sequentially and the
 -- results are aggregated.
 --

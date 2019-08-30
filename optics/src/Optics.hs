@@ -110,9 +110,12 @@ module Optics
   , module Optics.Re
 
   -- ** ReadOnly
+
+  -- | Defines 'getting', which turns a read-write optic into its read-only
+  -- counterpart.
   , module Optics.ReadOnly
 
-  -- ** 'Setter' utilities for working in 'MonadState'.
+  -- ** 'Setter' utilities for working in 'Control.Monad.State.MonadState'.
   , module Optics.State
 
   -- ** View

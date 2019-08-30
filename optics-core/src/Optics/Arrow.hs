@@ -1,3 +1,6 @@
+-- |
+-- Module: Optics.Arrow
+-- Description: Turn optics into arrow transformers.
 module Optics.Arrow
   ( ArrowOptic(..)
   , assignA

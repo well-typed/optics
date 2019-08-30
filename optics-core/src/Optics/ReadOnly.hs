@@ -1,3 +1,10 @@
+-- |
+-- Module: Optics.ReadOnly
+-- Description: Converting read-write optics into their read-only counterparts.
+--
+-- This module defines 'getting', which turns a read-write optic into its
+-- read-only counterpart.
+--
 module Optics.ReadOnly
   ( ToReadOnly(..)
   ) where
@@ -11,7 +18,7 @@ class ToReadOnly k s t a b where
   -- | Turn read-write optic into its read-only counterpart (or leave read-only
   -- optics as-is).
   --
-  -- This is useful when you have an @optic :: Optic k is s t a b@ of read-write
+  -- This is useful when you have an @optic :: 'Optic' k is s t a b@ of read-write
   -- kind @k@ such that @s@, @t@, @a@, @b@ are rigid, there is no evidence that
   -- @s ~ t@ and @a ~ b@ and you want to pass @optic@ to one of the functions
   -- that accept read-only optic kinds.
