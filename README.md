@@ -7,13 +7,8 @@ The `optics` family of Haskell packages make it possible to define and use
 Lenses, Traversals, Prisms and other *optics*, using an abstract interface. They
 are roughly comparable in functionality with the
 [lens](http://hackage.haskell.org/package/lens) package, but explore a different
-part of the design space. For a detailed introduction, see the Haddocks for the
-main `Optics` module.
-
-There is no official Hackage release yet, but you can preview Haddock
-documentation (as of 2019-06-10)
-[here](https://rybczak.net/files/optics/optics-0.1-docs/Optics.html) (or
-[here](https://rybczak.net/files/optics) for other subpackages).
+part of the design space. For a detailed introduction, see the [Haddocks for the
+main `Optics` module](https://hackage.haskell.org/package/optics/docs/Optics.html).
 
 
 ## Authors and contributors
