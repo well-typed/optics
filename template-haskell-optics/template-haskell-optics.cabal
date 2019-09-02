@@ -14,6 +14,12 @@ description:
   .
   See the @optics-th@ package for machinery to construct optics using @TemplateHaskell@.
 
+bug-reports:   https://github.com/well-typed/optics/issues
+source-repository head
+  type:     git
+  location: https://github.com/well-typed/optics.git
+  subdir:   template-haskell-optics
+
 library
   default-language: Haskell2010
   hs-source-dirs:   src
