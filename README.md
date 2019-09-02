@@ -3,12 +3,13 @@
 [![Build Status](https://travis-ci.org/well-typed/optics.svg?branch=master)](https://travis-ci.org/well-typed/optics)
 [![Hackage](https://img.shields.io/hackage/v/optics.svg)](https://hackage.haskell.org/package/optics)
 
-The `optics` family of Haskell packages make it possible to define and use
-Lenses, Traversals, Prisms and other *optics*, using an abstract interface. They
-are roughly comparable in functionality with the
-[lens](http://hackage.haskell.org/package/lens) package, but explore a different
-part of the design space. For a detailed introduction, see the [Haddocks for the
-main `Optics` module](https://hackage.haskell.org/package/optics/docs/Optics.html).
+The [`optics`](https://hackage.haskell.org/package/optics) family of Haskell
+packages make it possible to define and use Lenses, Traversals, Prisms and other
+*optics*, using an abstract interface. They are roughly comparable in
+functionality with the [`lens`](https://hackage.haskell.org/package/lens)
+package, but explore a different part of the design space. For a detailed
+introduction, see the [Haddocks for the main `Optics`
+module](https://hackage.haskell.org/package/optics/docs/Optics.html).
 
 
 ## Authors and contributors
@@ -29,21 +30,24 @@ Edward Kmett and contributors.
 
 ### Offically supported packages
 
- * `optics` is a "batteries-included" package with many dependencies. It
-   incorporates:
+ * [`optics`](https://hackage.haskell.org/package/optics) is a
+   "batteries-included" package with many dependencies. It incorporates:
 
-   * `optics-core`: core definitions with a minimal dependency footprint.
+   * [`optics-core`](https://hackage.haskell.org/package/optics-core): core
+     definitions with a minimal dependency footprint.
 
-   * `optics-extra`: extra definitions and instances that extend `optics-core`,
-     incurring dependencies on various boot library packages.
+   * [`optics-extra`](https://hackage.haskell.org/package/optics-extra): extra
+     definitions and instances that extend `optics-core`, incurring dependencies
+     on various boot library packages.
 
-   * `optics-th`: machinery to construct optics using `TemplateHaskell`.
+   * [`optics-th`](https://hackage.haskell.org/package/optics-th): machinery to
+     construct optics using `TemplateHaskell`.
 
- * `optics-vl`: utilities for compatibility with van Laarhoven isomorphisms and
-   prisms, as defined in the `lens` library.  This package is not included in
-   `optics` as it imposes a dependency on `profunctors`.  Note that
-   `optics-core` already supports conversion for van Laarhoven lenses and
-   various other optics.
+ * [`optics-vl`](https://hackage.haskell.org/package/optics-vl): utilities for
+   compatibility with van Laarhoven isomorphisms and prisms, as defined in the
+   `lens` library.  This package is not included in `optics` as it imposes a
+   dependency on `profunctors`.  Note that `optics-core` already supports
+   conversion for van Laarhoven lenses and various other optics.
 
 ### Work in progress packages
 
