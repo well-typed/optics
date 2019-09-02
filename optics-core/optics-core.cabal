@@ -14,11 +14,17 @@ description:
   and other optics, using an abstract interface.
   .
   This variant provides core definitions with a minimal dependency footprint.
-  See @optics@ package (and its dependencies) for documentation and the
+  See the @optics@ package (and its dependencies) for documentation and the
   "batteries-included" variant.
 
 extra-doc-files:
   diagrams/*.png
+
+bug-reports:   https://github.com/well-typed/optics/issues
+source-repository head
+  type:     git
+  location: https://github.com/well-typed/optics.git
+  subdir:   optics-core
 
 library
   default-language: Haskell2010
