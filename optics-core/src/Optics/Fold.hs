@@ -168,7 +168,7 @@ forOf_
 forOf_ = flip . traverseOf_
 {-# INLINE forOf_ #-}
 
--- | Evaluate each action in observed by a 'Fold' on a structure from left to
+-- | Evaluate each action in a structure observed by a 'Fold' from left to
 -- right, ignoring the results.
 --
 -- @
