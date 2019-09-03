@@ -1,9 +1,9 @@
 {-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.IxTraversal
--- Description: An indexed version of an 'Optics.Traversal.Traversal'.
+-- Description: An indexed version of a 'Optics.Traversal.Traversal'.
 --
--- An 'IxTraversal' is an indexed version of an 'Optics.Traversal.Traversal'.
+-- An 'IxTraversal' is an indexed version of a 'Optics.Traversal.Traversal'.
 -- See the "Indexed optics" section of the overview documentation in the
 -- @Optics@ module of the main @optics@ package for more details on indexed
 -- optics.
@@ -66,7 +66,7 @@ module Optics.IxTraversal
   -- | The van Laarhoven representation of an 'IxTraversal' directly expresses
   -- how it lifts an effectful operation @I -> A -> F B@ on elements and their
   -- indices to act on structures @S -> F T@.  Thus 'itraverseOf' converts an
-  -- 'IxTraversal' to a 'IxTraversalVL'.
+  -- 'IxTraversal' to an 'IxTraversalVL'.
   , IxTraversalVL
   , IxTraversalVL'
 
@@ -113,7 +113,7 @@ itraversalVL t = Optic (iwander t)
 
 ----------------------------------------
 
--- | Map each element of a structure targeted by a 'IxTraversal' (supplying the
+-- | Map each element of a structure targeted by an 'IxTraversal' (supplying the
 -- index), evaluate these actions from left to right, and collect the results.
 --
 -- This yields the van Laarhoven representation of an indexed traversal.
