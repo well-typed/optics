@@ -1,9 +1,9 @@
 {-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.IxSetter
--- Description: An indexed version of an 'Optics.Setter.Setter'.
+-- Description: An indexed version of a 'Optics.Setter.Setter'.
 --
--- An 'IxSetter' is an indexed version of an 'Optics.Setter.Setter'. See the
+-- An 'IxSetter' is an indexed version of a 'Optics.Setter.Setter'. See the
 -- "Indexed optics" section of the overview documentation in the @Optics@ module
 -- of the main @optics@ package for more details on indexed optics.
 --

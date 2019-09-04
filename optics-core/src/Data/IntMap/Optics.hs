@@ -11,7 +11,7 @@
 -- >>> IntMap.empty & at 0 .~ Just "hello"
 -- fromList [(0,"hello")]
 --
--- We can traverse, fold over, and map over key-value pairs in a 'IntMap',
+-- We can traverse, fold over, and map over key-value pairs in an 'IntMap',
 -- thanks to indexed traversals, folds and setters.
 --
 -- >>> iover imapped const $ IntMap.fromList [(1, "Venus")]

@@ -343,7 +343,7 @@ import Data.Either.Optics                    as P
 --   constructors, respectively).  Any lens is a traversal (where the list of
 --   elements is always a singleton list), and any prism is also a traversal
 --   (where there will be zero or one element depending on whether the
---   constructor matches).  This was implicit in the fact that we used that we
+--   constructor matches).  This was implicit in the fact that we
 --   used the same operators in multiple cases: 'view' gives the projection
 --   function of both an isomorphism and a lens, but cannot be applied to a
 --   traversal.

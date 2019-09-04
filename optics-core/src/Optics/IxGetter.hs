@@ -1,8 +1,8 @@
 -- |
 -- Module: Optics.IxGetter
--- Description: An indexed version of an 'Optics.Getter.Getter'.
+-- Description: An indexed version of a 'Optics.Getter.Getter'.
 --
--- An 'IxGetter' is an indexed version of an 'Optics.Getter.Getter'. See the
+-- An 'IxGetter' is an indexed version of a 'Optics.Getter.Getter'. See the
 -- "Indexed optics" section of the overview documentation in the @Optics@ module
 -- of the main @optics@ package for more details on indexed optics.
 --

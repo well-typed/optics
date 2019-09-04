@@ -1,8 +1,8 @@
 -- |
 -- Module: Optics.IxLens
--- Description: An indexed version of an 'Optics.Lens.Lens'.
+-- Description: An indexed version of a 'Optics.Lens.Lens'.
 --
--- An 'IxLens' is an indexed version of an 'Optics.Lens.Lens'. See the "Indexed
+-- An 'IxLens' is an indexed version of a 'Optics.Lens.Lens'. See the "Indexed
 -- optics" section of the overview documentation in the @Optics@ module of the
 -- main @optics@ package for more details on indexed optics.
 --
