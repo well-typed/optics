@@ -126,14 +126,14 @@ install:
   - rm -rf cabal.project cabal.project.local cabal.project.freeze
   - touch cabal.project
   - |
-    if ! $GHCJS ; then echo "packages: optics" >> cabal.project ; fi
+    echo "packages: optics" >> cabal.project
     echo "packages: optics-core" >> cabal.project
-    if ! $GHCJS ; then echo "packages: optics-extra" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: optics-sop" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: optics-th" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: optics-vl" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: generic-optics" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: template-haskell-optics" >> cabal.project ; fi
+    echo "packages: optics-extra" >> cabal.project
+    echo "packages: optics-sop" >> cabal.project
+    echo "packages: optics-th" >> cabal.project
+    echo "packages: optics-vl" >> cabal.project
+    echo "packages: generic-optics" >> cabal.project
+    echo "packages: template-haskell-optics" >> cabal.project
     if ! $GHCJS ; then echo "packages: metametapost" >> cabal.project ; fi
   - |
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
@@ -175,14 +175,14 @@ script:
   - rm -rf cabal.project cabal.project.local cabal.project.freeze
   - touch cabal.project
   - |
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_optics}" >> cabal.project ; fi
+    echo "packages: ${PKGDIR_optics}" >> cabal.project
     echo "packages: ${PKGDIR_optics_core}" >> cabal.project
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_optics_extra}" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_optics_sop}" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_optics_th}" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_optics_vl}" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_generic_optics}" >> cabal.project ; fi
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project ; fi
+    echo "packages: ${PKGDIR_optics_extra}" >> cabal.project
+    echo "packages: ${PKGDIR_optics_sop}" >> cabal.project
+    echo "packages: ${PKGDIR_optics_th}" >> cabal.project
+    echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
+    echo "packages: ${PKGDIR_generic_optics}" >> cabal.project
+    echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
     if ! $GHCJS ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
   - |
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
@@ -206,14 +206,14 @@ script:
   - if ! $GHCJS ; then (cd ${PKGDIR_generic_optics} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_template_haskell_optics} && doctest  src) ; fi
   # cabal check...
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics} && ${CABAL} -vnormal check) ; fi
+  - (cd ${PKGDIR_optics} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_core} && ${CABAL} -vnormal check)
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_extra} && ${CABAL} -vnormal check) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_sop} && ${CABAL} -vnormal check) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_th} && ${CABAL} -vnormal check) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_vl} && ${CABAL} -vnormal check) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_generic_optics} && ${CABAL} -vnormal check) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_template_haskell_optics} && ${CABAL} -vnormal check) ; fi
+  - (cd ${PKGDIR_optics_extra} && ${CABAL} -vnormal check)
+  - (cd ${PKGDIR_optics_sop} && ${CABAL} -vnormal check)
+  - (cd ${PKGDIR_optics_th} && ${CABAL} -vnormal check)
+  - (cd ${PKGDIR_optics_vl} && ${CABAL} -vnormal check)
+  - (cd ${PKGDIR_generic_optics} && ${CABAL} -vnormal check)
+  - (cd ${PKGDIR_template_haskell_optics} && ${CABAL} -vnormal check)
   - if ! $GHCJS ; then (cd ${PKGDIR_metametapost} && ${CABAL} -vnormal check) ; fi
   # haddock...
   - if ! $GHCJS ; then ${CABAL} v2-haddock $WITHCOMPILER --with-haddock $HADDOCK ${TEST} ${BENCH} all | color_cabal_output ; fi
