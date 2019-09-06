@@ -22,8 +22,6 @@ module Optics.Internal.Optic
   , Optic'
   , Optic_
   , Optic__
-  , NoIx
-  , WithIx
   , castOptic
   , (%)
   , (%%)
@@ -53,12 +51,6 @@ import Optics.Internal.Profunctor
 -- to make %% simpler
 import Unsafe.Coerce (unsafeCoerce)
 
--- | An alias for an empty index-list
-type NoIx = '[]
-
--- | Singleton index list
-type WithIx i = '[i]
-
 -- | Wrapper newtype for the whole family of optics.
 --
 -- The first parameter @k@ identifies the particular optic kind (e.g. 'A_Lens'
@@ -72,7 +64,7 @@ type WithIx i = '[i]
 -- The parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
-newtype Optic (k :: OpticKind) (is :: [Type]) s t a b = Optic
+newtype Optic (k :: OpticKind) (is :: Indices) s t a b = Optic
   { getOptic :: forall p i. Profunctor p
              => Optic_ k p i (Curry is i) s t a b
   }
