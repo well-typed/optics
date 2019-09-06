@@ -25,7 +25,7 @@ library
   hs-source-dirs:   src
 
   build-depends: base                   >= 4.9        && <5
-               , optics-core            >= 0.1        && <1
+               , optics-core            >= 0.1        && <0.2
                , profunctors            >= 5.0        && <6.0
 
   ghc-options: -Wall
