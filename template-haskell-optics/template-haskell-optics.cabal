@@ -28,9 +28,6 @@ library
   build-depends: base                   >= 4.9       && <5
                , optics-core            >= 0.1       && <1
                , containers             >= 0.5.7.1   && <0.7
-               , template-haskell       >= 2.11      && <2.15
+               , template-haskell       >= 2.11      && <2.16
 
   exposed-modules: Language.Haskell.TH.Optics
-
-  if impl(ghc >= 8.8)
-    buildable: False
