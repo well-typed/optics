@@ -39,6 +39,9 @@ module Language.Haskell.TH.Optics
   , fieldPatName
   , fieldPatPattern
   -- ** TySynEqn Lenses
+#if MIN_VERSION_template_haskell(2,15,0)
+  , tySynEqnLHS
+#endif
   , tySynEqnPatterns
   , tySynEqnResult
   -- ** InjectivityAnn Lenses
@@ -95,6 +98,9 @@ module Language.Haskell.TH.Optics
   , _PatSynD
   , _PatSynSigD
 #endif
+#if MIN_VERSION_template_haskell(2,15,0)
+  , _ImplicitParamBindD
+#endif
 #if MIN_VERSION_template_haskell(2,12,0)
   -- ** PatSynDir Prisms
   , _Unidir
@@ -113,10 +119,10 @@ module Language.Haskell.TH.Optics
   , _GadtC
   , _RecGadtC
   -- ** Overlap Prisms
-  ,_Overlappable
-  ,_Overlapping
-  ,_Overlaps
-  ,_Incoherent
+  , _Overlappable
+  , _Overlapping
+  , _Overlaps
+  , _Incoherent
   -- ** SourceUnpackedness Prisms
   , _NoSourceUnpackedness
   , _SourceNoUnpack
@@ -215,6 +221,10 @@ module Language.Haskell.TH.Optics
 #if MIN_VERSION_template_haskell(2,13,0)
   , _LabelE
 #endif
+#if MIN_VERSION_template_haskell(2,15,0)
+  , _MDoE
+  , _ImplicitParamVarE
+#endif
   -- ** Body Prisms
   , _GuardedB
   , _NormalB
@@ -226,6 +236,9 @@ module Language.Haskell.TH.Optics
   , _LetS
   , _NoBindS
   , _ParS
+#if MIN_VERSION_template_haskell(2,15,0)
+  , _RecS
+#endif
   -- ** Range Prisms
   , _FromR
   , _FromThenR
@@ -287,6 +300,10 @@ module Language.Haskell.TH.Optics
   , _UInfixT
   , _ParensT
   , _WildCardT
+#if MIN_VERSION_template_haskell(2,15,0)
+  , _AppKindT
+  , _ImplicitParamT
+#endif
   -- ** TyVarBndr Prisms
   , _PlainTV
   , _KindedTV
@@ -320,6 +337,10 @@ import Language.Haskell.TH.Syntax
 import Data.Set.Optics
 import Data.Tuple.Optics
 import Optics.Core
+
+#if MIN_VERSION_template_haskell(2,15,0)
+import qualified Data.Foldable as F
+#endif
 
 -- | Has a 'Name'
 class HasName t where
@@ -393,9 +414,16 @@ instance HasTypes Foreign where
     ExportF cc     str n t -> ExportF cc     str n <$> traverseOf types f t
 
 instance HasTypes TySynEqn where
+#if MIN_VERSION_template_haskell(2,15,0)
+  types = traversalVL $ \f (TySynEqn mtvbs lhs rhs) ->
+    TySynEqn <$> traverseOf (_Just % traversed % _KindedTV % _2) f mtvbs
+             <*> traverseOf types f lhs
+             <*> traverseOf types f rhs
+#else
   types = traversalVL $ \f (TySynEqn lhss rhs) ->
     TySynEqn <$> traverseOf (traversed % types) f lhss
              <*> traverseOf types f rhs
+#endif
 
 instance HasTypes t => HasTypes [t] where
   types = traversed % types
@@ -435,6 +463,11 @@ instance HasTypeVars Type where
                                  <*> pure n
                                  <*> traverseOf (typeVarsEx s) f t2
     ParensT t         -> ParensT <$> traverseOf (typeVarsEx s) f t
+#if MIN_VERSION_template_haskell(2,15,0)
+    AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
+                                   <*> traverseOf (typeVarsEx s) f k
+    ImplicitParamT n t -> ImplicitParamT n <$> traverseOf (typeVarsEx s) f t
+#endif
     t                 -> pure t
 
 instance HasTypeVars Con where
@@ -481,6 +514,10 @@ instance SubstType Type where
   substType m (InfixT  t1 n t2)   = InfixT  (substType m t1) n (substType m t2)
   substType m (UInfixT t1 n t2)   = UInfixT (substType m t1) n (substType m t2)
   substType m (ParensT t)         = ParensT (substType m t)
+#if MIN_VERSION_template_haskell(2,15,0)
+  substType m (AppKindT t k)       = AppKindT (substType m t) (substType m k)
+  substType m (ImplicitParamT n t) = ImplicitParamT n (substType m t)
+#endif
   substType _ t                   = t
 
 instance SubstType t => SubstType [t] where
@@ -817,6 +854,15 @@ _PragmaD
       remitter (PragmaD x) = Just x
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,15,0)
+_TySynInstD :: Prism' Dec TySynEqn
+_TySynInstD
+  = prism' reviewer remitter
+  where
+      reviewer = TySynInstD
+      remitter (TySynInstD x) = Just x
+      remitter _ = Nothing
+#else
 _TySynInstD :: Prism' Dec (Name, TySynEqn)
 _TySynInstD
   = prism' reviewer remitter
@@ -824,6 +870,7 @@ _TySynInstD
       reviewer (x, y) = TySynInstD x y
       remitter (TySynInstD x y) = Just (x, y)
       remitter _ = Nothing
+#endif
 
 _RoleAnnotD :: Prism' Dec (Name, [Role])
 _RoleAnnotD
@@ -889,6 +936,15 @@ _NewtypeD
       remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,15,0)
+_DataInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr], Type, Maybe Kind, [Con], [DerivClause])
+_DataInstD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u, v) = DataInstD x y z w u v
+      remitter (DataInstD x y z w u v) = Just (x, y, z, w, u, v)
+      remitter _ = Nothing
+#else
 _DataInstD :: DataPrism' [Type] [Con]
 _DataInstD
   = prism' reviewer remitter
@@ -896,7 +952,17 @@ _DataInstD
       reviewer (x, y, z, w, u, v) = DataInstD x y z w u v
       remitter (DataInstD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
+#endif
 
+#if MIN_VERSION_template_haskell(2,15,0)
+_NewtypeInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr], Type, Maybe Kind, Con, [DerivClause])
+_NewtypeInstD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u, v) = NewtypeInstD x y z w u v
+      remitter (NewtypeInstD x y z w u v) = Just (x, y, z, w, u, v)
+      remitter _ = Nothing
+#else
 _NewtypeInstD :: DataPrism' [Type] Con
 _NewtypeInstD
   = prism' reviewer remitter
@@ -904,6 +970,7 @@ _NewtypeInstD
       reviewer (x, y, z, w, u, v) = NewtypeInstD x y z w u v
       remitter (NewtypeInstD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
+#endif
 
 _DataFamilyD :: Prism' Dec (Name, [TyVarBndr], Maybe Kind)
 _DataFamilyD
@@ -936,6 +1003,16 @@ _PatSynSigD
   where
       reviewer (x, y) = PatSynSigD x y
       remitter (PatSynSigD x y) = Just (x, y)
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,15,0)
+_ImplicitParamBindD :: Prism' Dec (String, Exp)
+_ImplicitParamBindD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ImplicitParamBindD x y
+      remitter (ImplicitParamBindD x y) = Just (x, y)
       remitter _ = Nothing
 #endif
 
@@ -1215,6 +1292,15 @@ _SpecialiseInstP
       remitter (SpecialiseInstP x) = Just x
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,15,0)
+_RuleP :: Prism' Pragma (String, Maybe [TyVarBndr], [RuleBndr], Exp, Exp, Phases)
+_RuleP
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u, v) = RuleP x y z w u v
+      remitter (RuleP x y z w u v) = Just (x, y, z, w, u, v)
+      remitter _ = Nothing
+#else
 _RuleP :: Prism' Pragma (String, [RuleBndr], Exp, Exp, Phases)
 _RuleP
   = prism' reviewer remitter
@@ -1222,6 +1308,7 @@ _RuleP
       reviewer (x, y, z, w, u) = RuleP x y z w u
       remitter (RuleP x y z w u) = Just (x, y, z, w, u)
       remitter _ = Nothing
+#endif
 
 _AnnP :: Prism' Pragma (AnnTarget, Exp)
 _AnnP
@@ -1378,15 +1465,38 @@ _DataFam
       remitter _ = Nothing
 #endif
 
+#if MIN_VERSION_template_haskell(2,15,0)
+tySynEqnLHS :: Lens' TySynEqn Type
+tySynEqnLHS = lens g s where
+   g (TySynEqn _     lhs _)       = lhs
+   s (TySynEqn mtvbs _   rhs) lhs = TySynEqn mtvbs lhs rhs
+#endif
+
+#if MIN_VERSION_template_haskell(2,15,0)
+tySynEqnPatterns :: Lens' TySynEqn [Type]
+tySynEqnPatterns = lens g s where
+   g (TySynEqn _     lhs _) = pats
+     where (_n, pats) = unfoldType lhs
+   s (TySynEqn mtvbs lhs rhs) pats = TySynEqn mtvbs (F.foldl' AppT n pats) rhs
+     where (n, _pats) = unfoldType lhs
+#else
 tySynEqnPatterns :: Lens' TySynEqn [Type]
 tySynEqnPatterns = lens g s where
    g (TySynEqn xs _)    = xs
    s (TySynEqn _  y) xs = TySynEqn xs y
+#endif
 
+#if MIN_VERSION_template_haskell(2,15,0)
+tySynEqnResult :: Lens' TySynEqn Type
+tySynEqnResult = lens g s where
+   g (TySynEqn _     _   rhs) = rhs
+   s (TySynEqn mtvbs lhs _)   = TySynEqn mtvbs lhs
+#else
 tySynEqnResult :: Lens' TySynEqn Type
 tySynEqnResult = lens g s where
    g (TySynEqn _  x) = x
    s (TySynEqn xs _) = TySynEqn xs
+#endif
 
 _InfixL :: Prism' FixityDirection ()
 _InfixL
@@ -1634,6 +1744,24 @@ _LabelE
       remitter _ = Nothing
 #endif
 
+#if MIN_VERSION_template_haskell(2,15,0)
+_MDoE :: Prism' Exp [Stmt]
+_MDoE
+  = prism' reviewer remitter
+  where
+      reviewer = MDoE
+      remitter (MDoE x) = Just x
+      remitter _ = Nothing
+
+_ImplicitParamVarE :: Prism' Exp String
+_ImplicitParamVarE
+  = prism' reviewer remitter
+  where
+      reviewer = ImplicitParamVarE
+      remitter (ImplicitParamVarE x) = Just x
+      remitter _ = Nothing
+#endif
+
 _GuardedB :: Prism' Body [(Guard, Exp)]
 _GuardedB
   = prism' reviewer remitter
@@ -1697,6 +1825,16 @@ _ParS
       reviewer = ParS
       remitter (ParS x) = Just x
       remitter _ = Nothing
+
+#if MIN_VERSION_template_haskell(2,15,0)
+_RecS :: Prism' Stmt [Stmt]
+_RecS
+  = prism' reviewer remitter
+  where
+      reviewer = RecS
+      remitter (RecS x) = Just x
+      remitter _ = Nothing
+#endif
 
 _FromR :: Prism' Range Exp
 _FromR
@@ -2126,6 +2264,24 @@ _WildCardT
       remitter WildCardT = Just ()
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,15,0)
+_AppKindT :: Prism' Type (Type, Kind)
+_AppKindT
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = AppKindT x y
+      remitter (AppKindT x y) = Just (x, y)
+      remitter _ = Nothing
+
+_ImplicitParamT :: Prism' Type (String, Type)
+_ImplicitParamT
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ImplicitParamT x y
+      remitter (ImplicitParamT x y) = Just (x, y)
+      remitter _ = Nothing
+#endif
+
 _PlainTV :: Prism' TyVarBndr Name
 _PlainTV
   = prism' reviewer remitter
@@ -2238,4 +2394,32 @@ _NewtypeStrategy
       reviewer () = NewtypeStrategy
       remitter NewtypeStrategy = Just ()
       remitter _ = Nothing
+#endif
+
+-- Internal utils
+
+#if MIN_VERSION_template_haskell(2,15,0)
+-- | Decompose an applied type into its individual components. For example, this:
+--
+-- @
+-- Either Int Char
+-- @
+--
+-- would be unfolded to this:
+--
+-- @
+-- ('ConT' ''Either, ['ConT' ''Int, 'ConT' ''Char])
+-- @
+--
+-- This function ignores explicit parentheses and visible kind applications.
+unfoldType :: Type -> (Type, [Type])
+unfoldType = go []
+  where
+    go :: [Type] -> Type -> (Type, [Type])
+    go acc (ForallT _ _ ty) = go acc ty
+    go acc (AppT ty1 ty2)   = go (ty2:acc) ty1
+    go acc (SigT ty _)      = go acc ty
+    go acc (ParensT ty)     = go acc ty
+    go acc (AppKindT ty _)  = go acc ty
+    go acc ty               = (ty, acc)
 #endif
