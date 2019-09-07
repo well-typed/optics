@@ -4,7 +4,7 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.5.20180830
+# version: 0.5.20190907
 #
 language: c
 dist: xenial
@@ -121,7 +121,6 @@ install:
   - rm -fv cabal.project cabal.project.local cabal.project.freeze
   - travis_retry ${CABAL} v2-update -v
   - if ! $GHCJS ; then (cd /tmp && ${CABAL} v2-install $WITHCOMPILER -j2 doctest --constraint='doctest ==0.16.*' | color_cabal_output) ; fi
-  - if $GHCJS ; then (cd /tmp && ${CABAL} v2-install -w ghc-8.4.4 happy | color_cabal_output) ; fi
   # Generate cabal.project
   - rm -rf cabal.project cabal.project.local cabal.project.freeze
   - touch cabal.project
@@ -132,11 +131,12 @@ install:
     echo "packages: optics-sop" >> cabal.project
     echo "packages: optics-th" >> cabal.project
     echo "packages: optics-vl" >> cabal.project
+    echo "packages: indexed-profunctors" >> cabal.project
     echo "packages: generic-optics" >> cabal.project
     echo "packages: template-haskell-optics" >> cabal.project
     if ! $GHCJS ; then echo "packages: metametapost" >> cabal.project ; fi
   - |
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "optics/configure.ac" ]; then (cd "optics" && autoreconf -i); fi
@@ -145,6 +145,7 @@ install:
   - if [ -f "optics-sop/configure.ac" ]; then (cd "optics-sop" && autoreconf -i); fi
   - if [ -f "optics-th/configure.ac" ]; then (cd "optics-th" && autoreconf -i); fi
   - if [ -f "optics-vl/configure.ac" ]; then (cd "optics-vl" && autoreconf -i); fi
+  - if [ -f "indexed-profunctors/configure.ac" ]; then (cd "indexed-profunctors" && autoreconf -i); fi
   - if [ -f "generic-optics/configure.ac" ]; then (cd "generic-optics" && autoreconf -i); fi
   - if [ -f "template-haskell-optics/configure.ac" ]; then (cd "template-haskell-optics" && autoreconf -i); fi
   - if [ -f "metametapost/configure.ac" ]; then (cd "metametapost" && autoreconf -i); fi
@@ -168,6 +169,7 @@ script:
   - PKGDIR_optics_sop="$(find . -maxdepth 1 -type d -regex '.*/optics-sop-[0-9.]*')"
   - PKGDIR_optics_th="$(find . -maxdepth 1 -type d -regex '.*/optics-th-[0-9.]*')"
   - PKGDIR_optics_vl="$(find . -maxdepth 1 -type d -regex '.*/optics-vl-[0-9.]*')"
+  - PKGDIR_indexed_profunctors="$(find . -maxdepth 1 -type d -regex '.*/indexed-profunctors-[0-9.]*')"
   - PKGDIR_generic_optics="$(find . -maxdepth 1 -type d -regex '.*/generic-optics-[0-9.]*')"
   - PKGDIR_template_haskell_optics="$(find . -maxdepth 1 -type d -regex '.*/template-haskell-optics-[0-9.]*')"
   - PKGDIR_metametapost="$(find . -maxdepth 1 -type d -regex '.*/metametapost-[0-9.]*')"
@@ -181,11 +183,12 @@ script:
     echo "packages: ${PKGDIR_optics_sop}" >> cabal.project
     echo "packages: ${PKGDIR_optics_th}" >> cabal.project
     echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
+    echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
     echo "packages: ${PKGDIR_generic_optics}" >> cabal.project
     echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
     if ! $GHCJS ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
   - |
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # Building...
@@ -203,6 +206,7 @@ script:
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_sop} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_th} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_vl} && doctest  src) ; fi
+  - if ! $GHCJS ; then (cd ${PKGDIR_indexed_profunctors} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_generic_optics} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_template_haskell_optics} && doctest  src) ; fi
   # cabal check...
@@ -212,6 +216,7 @@ script:
   - (cd ${PKGDIR_optics_sop} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_th} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_vl} && ${CABAL} -vnormal check)
+  - (cd ${PKGDIR_indexed_profunctors} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_generic_optics} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_template_haskell_optics} && ${CABAL} -vnormal check)
   - if ! $GHCJS ; then (cd ${PKGDIR_metametapost} && ${CABAL} -vnormal check) ; fi
