@@ -881,17 +881,7 @@ import Data.Either.Optics                    as P
 -- +-----------------------------------+---------------------------------------------------+
 -- |'set' / '.~'                       |Replace target(s) with value.                      |
 -- +-----------------------------------+---------------------------------------------------+
--- |'over' / '%~'                      |Replace target(s) by applying a function.          |
--- +-----------------------------------+---------------------------------------------------+
--- |'assign' /                         |'Control.Monad.State.MonadState' version of 'set'; |
--- |'Optics.State.Operators..='        |use 'Optics.State.Operators.<.=' to return the new |
--- |                                   |value or 'Optics.State.Operators.<<.=' to return   |
--- |                                   |the old value.                                     |
--- +-----------------------------------+---------------------------------------------------+
--- |'modifying' /                      |'Control.Monad.State.MonadState' version of 'over';|
--- |'Optics.State.Operators.%='        |use 'Optics.State.Operators.<%=' to return the new |
--- |                                   |value or 'Optics.State.Operators.<<%=' to return   |
--- |                                   |the old value.                                     |
+-- |'over' / '%~'                      |Modify target(s) by applying a function.           |
 -- +-----------------------------------+---------------------------------------------------+
 -- |                                                                                       |
 -- +-----------------------------------+---------------------------------------------------+
@@ -981,6 +971,20 @@ import Data.Either.Optics                    as P
 -- |'itraverseOf'                      |Update target(s) with an 'Applicative', with access|
 -- |                                   |to the index.                                      |
 -- +-----------------------------------+---------------------------------------------------+
+--
+-- For setting/modifying using a 'Setter', a variety of combinators are available
+-- in "Optics.State" and "Optics.State.Operators".  The latter are not exported
+-- by the main "Optics" module, so must be imported explicitly.
+--
+-- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
+-- | Lazy         | Strict          | Stateful                                  | Stateful returning new value | Stateful returning old value  | Notes                                     |
+-- +==============+=================+===========================================+==============================+===============================+===========================================+
+-- |'set' / '.~'  | 'set'' / '!~'   | 'assign' / 'Optics.State.Operators..='    | 'Optics.State.Operators.<.=' | 'Optics.State.Operators.<<.=' | Replace target(s) with value.             |
+-- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
+-- |'over' / '%~' | 'over'' / '%!~' | 'modifying' / 'Optics.State.Operators.%=' | 'Optics.State.Operators.<%=' | 'Optics.State.Operators.<<%=' | Modify target(s) by applying a function.  |
+-- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
+-- | '?~'         | '?!~'           | 'Optics.State.Operators.?='               | 'Optics.State.Operators.<?=' | 'Optics.State.Operators.<<?=' | Replace target(s) with 'Just' a value.    |
+-- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
 
 -- $setup
 -- >>> import Control.Monad.Reader
