@@ -43,10 +43,11 @@ import Data.Type.Equality
 import GHC.OverloadedLabels
 import GHC.TypeLits
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic.Subtyping
 import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Optic.Types
-import Optics.Internal.Profunctor
 
 -- to make %% simpler
 import Unsafe.Coerce (unsafeCoerce)

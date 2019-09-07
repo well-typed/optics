@@ -27,11 +27,12 @@ import qualified Data.ByteString.Lazy.Char8 as BL8
 import qualified Data.ByteString.Internal   as BI
 import qualified Data.ByteString.Unsafe     as BU
 
+import Data.Profunctor.Indexed
+
 import Optics.Core
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Traverse a strict 'B.ByteString' in a relatively balanced fashion, as a
 -- balanced tree with biased runs of elements at the leaves.

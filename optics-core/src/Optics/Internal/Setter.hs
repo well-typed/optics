@@ -6,7 +6,8 @@
 -- in subsequent releases.
 module Optics.Internal.Setter where
 
-import Optics.Internal.Profunctor
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
 
 -- | Internal implementation of 'Optics.Setter.mapped'.

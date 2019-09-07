@@ -5,6 +5,7 @@ packages:
   optics-sop/*.cabal
   optics-th/*.cabal
   optics-vl/*.cabal
+  indexed-profunctors/*.cabal
   generic-optics/*.cabal
   template-haskell-optics/*.cabal
 

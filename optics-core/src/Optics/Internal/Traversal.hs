@@ -6,8 +6,9 @@
 -- in subsequent releases.
 module Optics.Internal.Traversal where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Fold
 import Optics.Internal.Setter
 

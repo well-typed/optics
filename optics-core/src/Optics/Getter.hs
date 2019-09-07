@@ -39,9 +39,10 @@ module Optics.Getter
   )
   where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter NoIx s a

@@ -33,8 +33,9 @@ import qualified Data.IntMap as IntMap
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Show useful error message when a function expects optics without indices.

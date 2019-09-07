@@ -24,8 +24,9 @@ module Optics.Coerce
 
 import Data.Coerce
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Lift 'coerce' to the @s@ parameter of an optic.
 coerceS

@@ -1,16 +1,66 @@
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | Definitions of concrete profunctors and profunctor classes.
---
--- This module is intended for internal use only, and may change without warning
--- in subsequent releases.
-module Optics.Internal.Profunctor where
+module Data.Profunctor.Indexed
+  (
+    -- * Profunctor classes
+    Profunctor(..)
+  , lcoerce
+  , rcoerce
+  , Strong(..)
+  , Costrong(..)
+  , Choice(..)
+  , Cochoice(..)
+  , Visiting(..)
+  , Mapping(..)
+  , Traversing(..)
+
+    -- * Concrete profunctors
+  , Star(..)
+  , reStar
+
+  , Forget(..)
+  , reForget
+
+  , ForgetM(..)
+
+  , FunArrow(..)
+  , reFunArrow
+
+  , IxStar(..)
+
+  , IxForget(..)
+
+  , IxForgetM(..)
+
+  , IxFunArrow(..)
+
+  , StarA(..)
+  , runStarA
+
+  , IxStarA(..)
+  , runIxStarA
+
+  , Exchange(..)
+  , Store(..)
+  , Market(..)
+  , AffineMarket(..)
+  , Tagged(..)
+  , Context(..)
+
+   -- * Utilities
+  , (#.)
+  , (.#)
+  ) where
 
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
 import Data.Functor.Identity
-
-import Optics.Internal.Utils
 
 ----------------------------------------
 -- Concrete profunctors
@@ -41,36 +91,6 @@ newtype IxFunArrow i a b = IxFunArrow { runIxFunArrow :: i -> a -> b }
 
 ----------------------------------------
 -- Utils
-
--- Needed for strict application of (indexed) setters.
---
--- Credit for this goes to Eric Mertens, see
--- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
-data Identity' a = Identity' {-# UNPACK #-} !() a
-  deriving Functor
-
-instance Applicative Identity' where
-  pure a = Identity' () a
-  {-# INLINE pure #-}
-  Identity' () f <*> Identity' () x = Identity' () (f x)
-  {-# INLINE (<*>) #-}
-
--- | Mark a value for evaluation to whnf.
---
--- This allows us to, when applying a setter to a structure, evaluate only the
--- parts that we modify. If an optic focuses on multiple targets, Applicative
--- instance of Identity' makes sure that we force evaluation of all of them, but
--- we leave anything else alone.
---
-wrapIdentity' :: a -> Identity' a
-wrapIdentity' a = Identity' (a `seq` ()) a
-{-# INLINE wrapIdentity' #-}
-
-unwrapIdentity' :: Identity' a -> a
-unwrapIdentity' (Identity' () a) = a
-{-# INLINE unwrapIdentity' #-}
-
-----------------------------------------
 
 -- | Needed for conversion of affine traversal back to its VL representation.
 data StarA f i a b = StarA (forall r. r -> f r) (a -> f b)
@@ -678,23 +698,9 @@ class Traversing p => Mapping p where
     -> p       j  a b
     -> p (i -> j) s t
 
-instance Mapping (Star Identity') where
-  roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
-  iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
-  {-# INLINE roam #-}
-  {-# INLINE iroam #-}
-
 instance Mapping FunArrow where
   roam  f (FunArrow k) = FunArrow $ f k
   iroam f (FunArrow k) = FunArrow $ f (const k)
-  {-# INLINE roam #-}
-  {-# INLINE iroam #-}
-
-instance Mapping (IxStar Identity') where
-  roam  f (IxStar k) =
-    IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
-  iroam f (IxStar k) =
-    IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
   {-# INLINE roam #-}
   {-# INLINE iroam #-}
 
@@ -703,3 +709,157 @@ instance Mapping IxFunArrow where
   iroam f (IxFunArrow k) = IxFunArrow $ \ij -> f $ \i -> k (ij i)
   {-# INLINE roam #-}
   {-# INLINE iroam #-}
+
+
+  -- | Type to represent the components of an isomorphism.
+data Exchange a b i s t =
+  Exchange (s -> a) (b -> t)
+
+instance Profunctor (Exchange a b) where
+  dimap ss tt (Exchange sa bt) = Exchange (sa . ss) (tt . bt)
+  lmap  ss    (Exchange sa bt) = Exchange (sa . ss) bt
+  rmap     tt (Exchange sa bt) = Exchange sa        (tt . bt)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+-- | Type to represent the components of a lens.
+data Store a b i s t = Store (s -> a) (s -> b -> t)
+
+instance Profunctor (Store a b) where
+  dimap f g (Store get set) = Store (get . f) (\s -> g . set (f s))
+  lmap  f   (Store get set) = Store (get . f) (\s -> set (f s))
+  rmap    g (Store get set) = Store get       (\s -> g . set s)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+instance Strong (Store a b) where
+  first' (Store get set) = Store (get . fst) (\(s, c) b -> (set s b, c))
+  second' (Store get set) = Store (get . snd) (\(c, s) b -> (c, set s b))
+  {-# INLINE first' #-}
+  {-# INLINE second' #-}
+
+-- | Type to represent the components of a prism.
+data Market a b i s t = Market (b -> t) (s -> Either t a)
+
+instance Functor (Market a b i s) where
+  fmap f (Market bt seta) = Market (f . bt) (either (Left . f) Right . seta)
+  {-# INLINE fmap #-}
+
+instance Profunctor (Market a b) where
+  dimap f g (Market bt seta) = Market (g . bt) (either (Left . g) Right . seta . f)
+  lmap  f   (Market bt seta) = Market bt (seta . f)
+  rmap    g (Market bt seta) = Market (g . bt) (either (Left . g) Right . seta)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+instance Choice (Market a b) where
+  left' (Market bt seta) = Market (Left . bt) $ \sc -> case sc of
+    Left s -> case seta s of
+      Left t -> Left (Left t)
+      Right a -> Right a
+    Right c -> Left (Right c)
+  right' (Market bt seta) = Market (Right . bt) $ \cs -> case cs of
+    Left c -> Left (Left c)
+    Right s -> case seta s of
+      Left t -> Left (Right t)
+      Right a -> Right a
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
+-- | Type to represent the components of an affine traversal.
+data AffineMarket a b i s t = AffineMarket (s -> b -> t) (s -> Either t a)
+
+instance Profunctor (AffineMarket a b) where
+  dimap f g (AffineMarket sbt seta) = AffineMarket
+    (\s b -> g (sbt (f s) b))
+    (either (Left . g) Right . seta . f)
+  lmap f (AffineMarket sbt seta) = AffineMarket
+    (\s b -> sbt (f s) b)
+    (seta . f)
+  rmap g (AffineMarket sbt seta) = AffineMarket
+    (\s b -> g (sbt s b))
+    (either (Left . g) Right . seta)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+instance Choice (AffineMarket a b) where
+  left' (AffineMarket sbt seta) = AffineMarket
+    (\e b -> bimap (flip sbt b) id e)
+    (\sc -> case sc of
+      Left s -> bimap Left id (seta s)
+      Right c -> Left (Right c))
+  right' (AffineMarket sbt seta) = AffineMarket
+    (\e b -> bimap id (flip sbt b) e)
+    (\sc -> case sc of
+      Left c -> Left (Left c)
+      Right s -> bimap Right id (seta s))
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
+instance Strong (AffineMarket a b) where
+  first' (AffineMarket sbt seta) = AffineMarket
+    (\(a, c) b -> (sbt a b, c))
+    (\(a, c) -> bimap (,c) id (seta a))
+  second' (AffineMarket sbt seta) = AffineMarket
+    (\(c, a) b -> (c, sbt a b))
+    (\(c, a) -> bimap (c,) id (seta a))
+  {-# INLINE first' #-}
+  {-# INLINE second' #-}
+
+bimap :: (a -> b) -> (c -> d) -> Either a c -> Either b d
+bimap f g = either (Left . f) (Right . g)
+
+instance Visiting (AffineMarket a b)
+
+
+-- | Tag a value with not one but two phantom type parameters (so that 'Tagged'
+-- can be used as an indexed profunctor).
+newtype Tagged i a b = Tagged { unTagged :: b }
+
+instance Functor (Tagged i a) where
+  fmap f = Tagged #. f .# unTagged
+  {-# INLINE fmap #-}
+
+instance Profunctor Tagged where
+  dimap _f g = Tagged #. g .# unTagged
+  lmap  _f   = coerce
+  rmap     g = Tagged #. g .# unTagged
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+instance Choice Tagged where
+  left'  = Tagged #. Left  .# unTagged
+  right' = Tagged #. Right .# unTagged
+  {-# INLINE left' #-}
+  {-# INLINE right' #-}
+
+instance Costrong Tagged where
+  unfirst (Tagged bd) = Tagged (fst bd)
+  unsecond (Tagged db) = Tagged (snd db)
+  {-# INLINE unfirst #-}
+  {-# INLINE unsecond #-}
+
+
+data Context a b t = Context (b -> t) a
+  deriving Functor
+
+-- | Composition operator where the first argument must be an identity
+-- function up to representational equivalence (e.g. a newtype wrapper
+-- or unwrapper), and will be ignored at runtime.
+(#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
+(#.) _f = coerce
+infixl 8 .#
+{-# INLINE (#.) #-}
+
+-- | Composition operator where the second argument must be an
+-- identity function up to representational equivalence (e.g. a
+-- newtype wrapper or unwrapper), and will be ignored at runtime.
+(.#) :: Coercible a b => (b -> c) -> (a -> b) -> (a -> c)
+(.#) f _g = coerce f
+infixr 9 #.
+{-# INLINE (.#) #-}

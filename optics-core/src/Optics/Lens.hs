@@ -107,10 +107,9 @@ module Optics.Lens
   )
   where
 
-import Optics.Internal.Concrete
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
-import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying lens.
 type Lens s t a b = Optic A_Lens NoIx s t a b

@@ -92,12 +92,13 @@ import Data.Foldable
 import Data.Function
 import Data.Monoid
 
+import Data.Profunctor.Indexed
+
+import Optics.AffineFold
 import Optics.Internal.Bi
 import Optics.Internal.Fold
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Utils
-import Optics.AffineFold
 
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a

@@ -46,9 +46,10 @@ module Optics.Indexed.Core
   , ifor
   ) where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 import Optics.AffineFold
 import Optics.AffineTraversal

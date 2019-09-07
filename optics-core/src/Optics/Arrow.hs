@@ -10,12 +10,12 @@ import Control.Arrow
 import Data.Coerce
 import qualified Control.Category as C
 
+import Data.Profunctor.Indexed
+
 import Optics.AffineTraversal
 import Optics.Prism
 import Optics.Setter
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
-import Optics.Internal.Utils
 
 newtype WrappedArrow p i a b = WrapArrow { unwrapArrow :: p a b }
 

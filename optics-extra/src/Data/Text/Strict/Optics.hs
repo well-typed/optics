@@ -27,12 +27,13 @@ import Data.Text.Encoding
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Builder
 
+import Data.Profunctor.Indexed
+
 import Optics.Core
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | This isomorphism can be used to 'pack' (or 'unpack') strict 'Strict.Text'.
 --

@@ -34,6 +34,7 @@ library
   build-depends: base                   >= 4.9        && <5
                , array                  >= 0.5.1.1    && <0.6
                , containers             >= 0.5.7.1    && <0.7
+               , indexed-profunctors    >= 0.1        && <0.2
                , transformers           >= 0.5        && <0.6
 
   exposed-modules: Optics.Core
@@ -92,7 +93,6 @@ library
 
                    -- internal modules
                    Optics.Internal.Bi
-                   Optics.Internal.Concrete
                    Optics.Internal.Fold
                    Optics.Internal.Indexed
                    Optics.Internal.IxFold
@@ -102,9 +102,7 @@ library
                    Optics.Internal.Optic.Subtyping
                    Optics.Internal.Optic.TypeLevel
                    Optics.Internal.Optic.Types
-                   Optics.Internal.Profunctor
                    Optics.Internal.Setter
-                   Optics.Internal.Tagged
                    Optics.Internal.Traversal
                    Optics.Internal.Utils
 

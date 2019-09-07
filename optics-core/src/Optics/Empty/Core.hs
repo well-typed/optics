@@ -32,11 +32,12 @@ import Data.Monoid
 import Data.Set as Set
 import qualified Data.Sequence as Seq
 
+import Data.Profunctor.Indexed
+
 import Data.Maybe.Optics
 import Optics.AffineTraversal
-import Optics.Internal.Utils
-import Optics.Iso
 import Optics.Fold
+import Optics.Iso
 import Optics.Optic
 import Optics.Prism
 import Optics.Review

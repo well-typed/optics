@@ -9,9 +9,10 @@ module Optics.ReadOnly
   ( ToReadOnly(..)
   ) where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Class for read-write optics that have their read-only counterparts.
 class ToReadOnly k s t a b where

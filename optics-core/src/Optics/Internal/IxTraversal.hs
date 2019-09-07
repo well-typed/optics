@@ -6,12 +6,13 @@
 -- in subsequent releases.
 module Optics.Internal.IxTraversal where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Fold
 import Optics.Internal.Indexed
 import Optics.Internal.IxFold
 import Optics.Internal.IxSetter
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Setter
 
 -- | Internal implementation of 'Optics.IxTraversal.itraversed'.

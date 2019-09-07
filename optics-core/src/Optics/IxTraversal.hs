@@ -78,9 +78,10 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.State
 import Data.Functor.Identity
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Indexed
 import Optics.Internal.IxTraversal
-import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 import Optics.Internal.Utils
 import Optics.IxLens

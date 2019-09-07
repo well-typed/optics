@@ -85,12 +85,12 @@ import Data.Bifunctor
 import Data.Coerce
 import Data.Maybe
 
+import Data.Profunctor.Indexed
+
 import Optics.AffineFold
 import Optics.Prism
 import Optics.Review
-import Optics.Internal.Concrete
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying iso.
 type Iso s t a b = Optic An_Iso NoIx s t a b

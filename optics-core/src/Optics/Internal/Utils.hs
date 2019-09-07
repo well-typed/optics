@@ -2,29 +2,67 @@
 
 -- | This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
-module Optics.Internal.Utils where
+module Optics.Internal.Utils
+  ( Identity'(..)
+  , wrapIdentity'
+  , unwrapIdentity'
 
-import Data.Coerce
+  , Traversed(..)
+  , runTraversed
+
+  , OrT(..)
+  , wrapOrT
+
+  , (#.)
+  , (.#)
+  ) where
+
 import qualified Data.Semigroup as SG
 
-data Context a b t = Context (b -> t) a
+import Data.Profunctor.Indexed
+
+-- Needed for strict application of (indexed) setters.
+--
+-- Credit for this goes to Eric Mertens, see
+-- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
+data Identity' a = Identity' {-# UNPACK #-} !() a
   deriving Functor
 
--- | Composition operator where the first argument must be an identity
--- function up to representational equivalence (e.g. a newtype wrapper
--- or unwrapper), and will be ignored at runtime.
-(#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
-(#.) _f = coerce
-infixl 8 .#
-{-# INLINE (#.) #-}
+instance Applicative Identity' where
+  pure a = Identity' () a
+  {-# INLINE pure #-}
+  Identity' () f <*> Identity' () x = Identity' () (f x)
+  {-# INLINE (<*>) #-}
 
--- | Composition operator where the second argument must be an
--- identity function up to representational equivalence (e.g. a
--- newtype wrapper or unwrapper), and will be ignored at runtime.
-(.#) :: Coercible a b => (b -> c) -> (a -> b) -> (a -> c)
-(.#) f _g = coerce f
-infixr 9 #.
-{-# INLINE (.#) #-}
+instance Mapping (Star Identity') where
+  roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
+  iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
+  {-# INLINE roam #-}
+  {-# INLINE iroam #-}
+
+instance Mapping (IxStar Identity') where
+  roam  f (IxStar k) =
+    IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
+  iroam f (IxStar k) =
+    IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
+  {-# INLINE roam #-}
+  {-# INLINE iroam #-}
+
+
+-- | Mark a value for evaluation to whnf.
+--
+-- This allows us to, when applying a setter to a structure, evaluate only the
+-- parts that we modify. If an optic focuses on multiple targets, Applicative
+-- instance of Identity' makes sure that we force evaluation of all of them, but
+-- we leave anything else alone.
+--
+wrapIdentity' :: a -> Identity' a
+wrapIdentity' a = Identity' (a `seq` ()) a
+{-# INLINE wrapIdentity' #-}
+
+unwrapIdentity' :: Identity' a -> a
+unwrapIdentity' (Identity' () a) = a
+{-# INLINE unwrapIdentity' #-}
 
 ----------------------------------------
 

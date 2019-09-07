@@ -30,10 +30,11 @@ module Optics.Re
 
 import Data.Coerce
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Class for optics that can be 're'versed.
 class ReversibleOptic k where
