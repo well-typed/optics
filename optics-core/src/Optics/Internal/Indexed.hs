@@ -38,7 +38,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Show useful error message when a function expects optics without indices.
-class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: Indices)
+class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: IxList)
 
 instance
   ( TypeError
@@ -50,7 +50,7 @@ instance AcceptsEmptyIndices f '[]
 
 -- | Check whether a list of indices is not empty and generate sensible error
 -- message if it's not.
-class NonEmptyIndices (is :: Indices)
+class NonEmptyIndices (is :: IxList)
 
 instance
   ( TypeError
@@ -62,7 +62,7 @@ instance NonEmptyIndices (x ': xs)
 -- | Generate sensible error messages in case a user tries to pass either an
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
 -- with a single index is expected.
-class is ~ '[i] => HasSingleIndex (is :: Indices) (i :: Type)
+class is ~ '[i] => HasSingleIndex (is :: IxList) (i :: Type)
 
 instance HasSingleIndex '[i] i
 

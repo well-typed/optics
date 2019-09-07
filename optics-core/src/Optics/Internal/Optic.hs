@@ -64,7 +64,7 @@ import Unsafe.Coerce (unsafeCoerce)
 -- The parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
-newtype Optic (k :: OpticKind) (is :: Indices) s t a b = Optic
+newtype Optic (k :: OpticKind) (is :: IxList) s t a b = Optic
   { getOptic :: forall p i. Profunctor p
              => Optic_ k p i (Curry is i) s t a b
   }

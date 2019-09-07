@@ -11,13 +11,13 @@ import Data.Kind (Type)
 import GHC.TypeLits
 
 -- | A list of index types, used for indexed optics.
-type Indices = [Type]
+type IxList = [Type]
 
 -- | An alias for an empty index-list
-type NoIx = ('[] :: Indices)
+type NoIx = ('[] :: IxList)
 
 -- | Singleton index list
-type WithIx i = ('[i] :: Indices)
+type WithIx i = ('[i] :: IxList)
 
 -- | Show a type surrounded by quote marks.
 type family QuoteType (x :: Type) :: ErrorMessage where
@@ -30,12 +30,12 @@ type family QuoteType (x :: Type) :: ErrorMessage where
 -- @
 -- 'Curry' xs y = 'foldr' (->) y xs
 -- @
-type family Curry (xs :: Indices) (y :: Type) :: Type where
+type family Curry (xs :: IxList) (y :: Type) :: Type where
   Curry '[]       y = y
   Curry (x ': xs) y = x -> Curry xs y
 
 -- | Append two type-level lists together.
-type family Append (xs :: Indices) (ys :: Indices) :: Indices where
+type family Append (xs :: IxList) (ys :: IxList) :: IxList where
   Append '[]       ys  = ys -- needed for (<%>) and (%>)
   Append xs        '[] = xs -- needed for (<%)
   Append (x ': xs) ys  = x ': Append xs ys
