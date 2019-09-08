@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
@@ -96,7 +97,7 @@ instance Is A_Traversal        A_Setter           where implies _ = id
 -- l@. This means in particular that composition of an @Optic k@ and an @Optic
 -- k@ will yield an @Optic (Join k l)@.
 --
-type family Join (k :: *) (l :: *) where
+type family Join (k :: OpticKind) (l :: OpticKind) where
   -- BEGIN GENERATED CONTENT
   -- An_Iso-----
   Join An_Iso             A_ReversedLens     = A_ReversedLens

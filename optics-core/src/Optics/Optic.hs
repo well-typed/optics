@@ -24,7 +24,8 @@
 -- documentation.
 --
 module Optics.Optic
-  ( Optic
+  ( OpticKind
+  , Optic
   , Optic'
 
   -- * Subtyping
@@ -38,6 +39,10 @@ module Optics.Optic
   , (%&)
 
   -- * Indexed optics
+  -- | See the "Indexed optics" section of the overview documentation in the
+  -- @Optics@ module of the main @optics@ package for more details on indexed
+  -- optics.
+  , IxList
   , NoIx
   , WithIx
   , Append

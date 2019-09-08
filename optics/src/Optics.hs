@@ -517,7 +517,7 @@ import Data.Either.Optics                    as P
 -- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
 --
 -- >>> :kind! Join A_Lens A_Prism
--- Join A_Lens A_Prism :: *
+-- Join A_Lens A_Prism :: OpticKind
 -- = An_AffineTraversal
 --
 -- The join does not exist for some pairs of optic kinds, which means that they
@@ -525,7 +525,7 @@ import Data.Either.Optics                    as P
 -- and 'Fold':
 --
 -- >>> :kind! Join A_Setter A_Fold
--- Join A_Setter A_Fold :: *
+-- Join A_Setter A_Fold :: OpticKind
 -- = (TypeError ...)
 --
 -- >>> :t mapped % folded

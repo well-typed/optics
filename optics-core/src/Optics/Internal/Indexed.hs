@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
@@ -19,6 +20,7 @@ import Data.Functor.Product
 import Data.Functor.Reverse
 import Data.Functor.Sum
 import Data.Ix
+import Data.Kind (Type)
 import Data.List.NonEmpty
 import Data.Monoid hiding (Product, Sum)
 import Data.Proxy
@@ -36,7 +38,7 @@ import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 
 -- | Show useful error message when a function expects optics without indices.
-class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: [*])
+class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: IxList)
 
 instance
   ( TypeError
@@ -48,7 +50,7 @@ instance AcceptsEmptyIndices f '[]
 
 -- | Check whether a list of indices is not empty and generate sensible error
 -- message if it's not.
-class NonEmptyIndices (is :: [*])
+class NonEmptyIndices (is :: IxList)
 
 instance
   ( TypeError
@@ -60,7 +62,7 @@ instance NonEmptyIndices (x ': xs)
 -- | Generate sensible error messages in case a user tries to pass either an
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
 -- with a single index is expected.
-class is ~ '[i] => HasSingleIndex (is :: [*]) (i :: *)
+class is ~ '[i] => HasSingleIndex (is :: IxList) (i :: Type)
 
 instance HasSingleIndex '[i] i
 
@@ -113,7 +115,7 @@ instance
 ----------------------------------------
 -- Helpers for HasSingleIndex
 
-type family ShowTypes (types :: [*]) :: ErrorMessage where
+type family ShowTypes (types :: [Type]) :: ErrorMessage where
   ShowTypes '[i]      = QuoteType i
   ShowTypes '[i, j]   = QuoteType i ':<>: 'Text " and " ':<>: QuoteType j
   ShowTypes (i ': is) = QuoteType i ':<>: 'Text ", " ':<>: ShowTypes is
