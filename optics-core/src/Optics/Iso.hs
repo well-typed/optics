@@ -52,6 +52,9 @@ module Optics.Iso
   , coerced
   , coercedTo
   , coerced1
+  , non
+  , non'
+  , anon
   , curried
   , uncurried
   , flipped
@@ -80,7 +83,11 @@ module Optics.Iso
 import Data.Tuple
 import Data.Bifunctor
 import Data.Coerce
+import Data.Maybe
 
+import Optics.AffineFold
+import Optics.Prism
+import Optics.Review
 import Optics.Internal.Concrete
 import Optics.Internal.Optic
 import Optics.Internal.Profunctor
@@ -190,6 +197,90 @@ coerced1
 coerced1 = Optic (lcoerce' . rcoerce')
 {-# INLINE coerced1 #-}
 
+-- | If @v@ is an element of a type @a@, and @a'@ is @a@ sans the element @v@,
+-- then @'non' v@ is an isomorphism from @'Maybe' a'@ to @a@.
+--
+-- @
+-- 'non' ≡ 'non'' '.' 'only'
+-- @
+--
+-- Keep in mind this is only a real isomorphism if you treat the domain as being
+-- @'Maybe' (a sans v)@.
+--
+-- This is practically quite useful when you want to have a 'Data.Map.Map' where
+-- all the entries should have non-zero values.
+--
+-- >>> Map.fromList [("hello",1)] & at "hello" % non 0 %~ (+2)
+-- fromList [("hello",3)]
+--
+-- >>> Map.fromList [("hello",1)] & at "hello" % non 0 %~ (subtract 1)
+-- fromList []
+--
+-- >>> Map.fromList [("hello",1)] ^. at "hello" % non 0
+-- 1
+--
+-- >>> Map.fromList [] ^. at "hello" % non 0
+-- 0
+--
+-- This combinator is also particularly useful when working with nested maps.
+--
+-- /e.g./ When you want to create the nested 'Data.Map.Map' when it is missing:
+--
+-- >>> Map.empty & at "hello" % non Map.empty % at "world" ?~ "!!!"
+-- fromList [("hello",fromList [("world","!!!")])]
+--
+-- and when have deleting the last entry from the nested 'Data.Map.Map' mean
+-- that we should delete its entry from the surrounding one:
+--
+-- >>> Map.fromList [("hello", Map.fromList [("world","!!!")])] & at "hello" % non Map.empty % at "world" .~ Nothing
+-- fromList []
+--
+-- It can also be used in reverse to exclude a given value:
+--
+-- >>> non 0 # rem 10 4
+-- Just 2
+--
+-- >>> non 0 # rem 10 5
+-- Nothing
+non :: Eq a => a -> Iso' (Maybe a) a
+non = non' . only
+{-# INLINE non #-}
+
+-- | @'non'' p@ generalizes @'non' (p # ())@ to take any unit 'Prism'
+--
+-- This function generates an isomorphism between @'Maybe' (a | 'isn't' p a)@
+-- and @a@.
+--
+-- >>> Map.singleton "hello" Map.empty & at "hello" % non' _Empty % at "world" ?~ "!!!"
+-- fromList [("hello",fromList [("world","!!!")])]
+--
+-- >>> Map.fromList [("hello", Map.fromList [("world","!!!")])] & at "hello" % non' _Empty % at "world" .~ Nothing
+-- fromList []
+non' :: Prism' a () -> Iso' (Maybe a) a
+non' p = iso (fromMaybe def) go where
+  def                = review p ()
+  go b | p `isn't` b = Just b
+       | otherwise   = Nothing
+{-# INLINE non' #-}
+
+-- | @'anon' a p@ generalizes @'non' a@ to take any value and a predicate.
+--
+-- @
+-- 'anon' a ≡ 'non'' '.' 'nearly' a
+-- @
+--
+-- This function assumes that @p a@ holds @'True'@ and generates an isomorphism
+-- between @'Maybe' (a | 'not' (p a))@ and @a@.
+--
+-- >>> Map.empty & at "hello" % anon Map.empty Map.null % at "world" ?~ "!!!"
+-- fromList [("hello",fromList [("world","!!!")])]
+--
+-- >>> Map.fromList [("hello", Map.fromList [("world","!!!")])] & at "hello" % anon Map.empty Map.null % at "world" .~ Nothing
+-- fromList []
+anon :: a -> (a -> Bool) -> Iso' (Maybe a) a
+anon a = non' . nearly a
+{-# INLINE anon #-}
+
 -- | The canonical isomorphism for currying and uncurrying a function.
 --
 -- @
@@ -269,6 +360,7 @@ instance Swapped Either where
   {-# INLINE swapped #-}
 
 -- $setup
+-- >>> import qualified Data.Map as Map
 -- >>> import Data.Functor.Identity
 -- >>> import Data.Monoid
 -- >>> import Optics.Core
