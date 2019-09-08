@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.Operators
 -- Description: Definitions of infix operators for optics.
@@ -30,8 +31,8 @@ import Optics.Review
 import Optics.Setter
 
 -- | Flipped infix version of 'view'.
-(^.) :: Is k A_Getter => s -> Optic' k is s a -> a
-(^.) = flip view
+(^.) :: forall k is s a . IsFor "^." k A_Getter => s -> Optic' k is s a -> a
+(^.) = isFor @"^." @"view" @k @A_Getter $ flip view
 {-# INLINE (^.) #-}
 
 infixl 8 ^.

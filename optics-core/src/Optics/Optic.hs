@@ -30,6 +30,8 @@ module Optics.Optic
   -- * Subtyping
   , castOptic
   , Is
+  , IsFor
+  , isFor
   , Join
 
   -- * Composition

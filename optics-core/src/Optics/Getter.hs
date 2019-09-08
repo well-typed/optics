@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.Getter
 -- Description: A function considered as an 'Optic'.
@@ -47,12 +48,12 @@ import Optics.Internal.Profunctor
 type Getter s a = Optic' A_Getter NoIx s a
 
 -- | View the value pointed to by a getter.
-view :: Is k A_Getter => Optic' k is s a -> s -> a
-view o = views o id
+view :: forall k is s a . IsFor "view" k A_Getter => Optic' k is s a -> s -> a
+view o = isFor @"view" @"views" @k @A_Getter $ views o id
 {-# INLINE view #-}
 
 -- | View the function of the value pointed to by a getter.
-views :: Is k A_Getter => Optic' k is s a -> (a -> r) -> s -> r
+views :: IsFor "views" k A_Getter => Optic' k is s a -> (a -> r) -> s -> r
 views o = \f -> runForget $ getOptic (castOptic @A_Getter o) (Forget f)
 {-# INLINE views #-}
 

@@ -1,4 +1,8 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+-- {-# LANGUAGE IncoherentInstances #-}
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
@@ -8,7 +12,9 @@
 -- in subsequent releases.
 module Optics.Internal.Optic.Subtyping where
 
-import GHC.TypeLits (ErrorMessage(..), TypeError)
+import GHC.TypeLits (ErrorMessage(..), TypeError, Symbol)
+import Data.Coerce
+import Unsafe.Coerce
 
 import Optics.Internal.Optic.Types
 
@@ -25,16 +31,45 @@ class Is k l where
   implies ::
     proxy k l p -> (Constraints k p => r) -> (Constraints l p => r)
 
+{-
 -- | Overlappable instance for a custom type error.
 instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
                                          ':<>: 'Text " cannot be used as "
                                          ':<>: 'ShowType l
                                         ) => Is k l where
   implies = error "unreachable"
+-}
 
 -- | Every kind of optic can be used as itself.
 instance Is k k where
   implies _ = id
+
+
+-- type role IsFor phantom nominal nominal
+class Is k l => IsFor (s :: Symbol) k l
+
+instance IsFor s k k
+
+instance {-# OVERLAPPABLE #-} (TypeError ('ShowType k
+                                         ':<>: 'Text " cannot be used as "
+                                         ':<>: 'ShowType l
+                                         ':<>: 'Text "\n        arising from "
+                                         ':<>: 'Text s
+                                        ), Is k l) => IsFor s k l
+
+
+-- TODO: this can be a safe 'coerce', but only if the first parameter of IsFor
+-- is phantom, which requires module-wide IncoherentInstances
+-- (https://gitlab.haskell.org/ghc/ghc/issues/17167)
+isFor :: forall f g k l r . IsFor f k l => (IsFor g k l => r) -> r
+isFor r = bump @(IsFor g k l) r (unsafeCoerce (MkDict @(IsFor f k l)))
+
+data Dict c where
+  MkDict :: c => Dict c
+
+bump :: forall c r . (c => r) -> Dict c -> r
+bump r MkDict = r
+
 
 ----------------------------------------
 
@@ -87,6 +122,53 @@ instance Is A_Traversal        A_Fold             where implies _ = id
 instance Is A_Traversal        A_Setter           where implies _ = id
 
 -- END GENERATED CONTENT
+
+-- An_IsFor so
+instance IsFor s An_Iso            A_ReversedLens
+instance IsFor s An_Iso            A_ReversedPrism
+instance IsFor s An_Iso            A_Prism
+instance IsFor s An_Iso            A_Review
+instance IsFor s An_Iso            A_Lens
+instance IsFor s An_Iso            A_Getter
+instance IsFor s An_Iso            An_AffineTraversal
+instance IsFor s An_Iso            An_AffineFold
+instance IsFor s An_Iso            A_Traversal
+instance IsFor s An_Iso            A_Fold
+instance IsFor s An_Iso            A_Setter
+-- A_ReversedLens
+instance IsFor s A_ReversedLens     A_Review
+-- A_ReversedPrism
+instance IsFor s A_ReversedPrism    A_Getter
+instance IsFor s A_ReversedPrism    An_AffineFold
+instance IsFor s A_ReversedPrism    A_Fold
+-- A_Prism
+instance IsFor s A_Prism            A_Review
+instance IsFor s A_Prism            An_AffineTraversal
+instance IsFor s A_Prism            An_AffineFold
+instance IsFor s A_Prism            A_Traversal
+instance IsFor s A_Prism            A_Fold
+instance IsFor s A_Prism            A_Setter
+-- A_Lens
+instance IsFor s A_Lens             A_Getter
+instance IsFor s A_Lens             An_AffineTraversal
+instance IsFor s A_Lens             An_AffineFold
+instance IsFor s A_Lens             A_Traversal
+instance IsFor s A_Lens             A_Fold
+instance IsFor s A_Lens             A_Setter
+-- A_Getter
+instance IsFor s A_Getter           An_AffineFold
+instance IsFor s A_Getter           A_Fold
+-- An_AffineTraversal
+instance IsFor s An_AffineTraversal An_AffineFold
+instance IsFor s An_AffineTraversal A_Traversal
+instance IsFor s An_AffineTraversal A_Fold
+instance IsFor s An_AffineTraversal A_Setter
+-- An_AffineFold
+instance IsFor s An_AffineFold      A_Fold
+-- A_Traversal
+instance IsFor s A_Traversal        A_Fold
+instance IsFor s A_Traversal        A_Setter
+
 
 ----------------------------------------
 
