@@ -47,6 +47,7 @@ import Data.Complex
 import Data.Functor.Identity
 import Data.IntMap as IntMap
 import Data.IntSet as IntSet
+import Data.Kind (Type)
 import Data.List.NonEmpty as NonEmpty
 import Data.Map as Map
 import Data.Sequence as Seq
@@ -63,7 +64,7 @@ import Optics.Setter
 -- | Type family that takes a key-value container type and returns the type of
 -- keys (indices) into the container, for example @'Index' ('Map' k a) ~ k@.
 -- This is shared by 'Ixed', 'At' and 'Contains'.
-type family Index (s :: *) :: *
+type family Index (s :: Type) :: Type
 type instance Index (e -> a) = e
 type instance Index IntSet = Int
 type instance Index (Set a) = a
@@ -115,7 +116,7 @@ instance Ord a => Contains (Set a) where
 -- | Type family that takes a key-value container type and returns the type of
 -- values stored in the container, for example @'IxValue' ('Map' k a) ~ a@. This
 -- is shared by both 'Ixed' and 'At'.
-type family IxValue (m :: *) :: *
+type family IxValue (m :: Type) :: Type
 
 -- | Provides a simple 'AffineTraversal' lets you traverse the value at a given
 -- key in a 'Map' or element at an ordinal position in a list or 'Seq'.
