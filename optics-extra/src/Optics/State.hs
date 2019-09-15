@@ -11,6 +11,8 @@ module Optics.State
   , modifying'
   , assign
   , assign'
+  , use
+  , preuse
   ) where
 
 import Control.Monad.State
@@ -79,6 +81,33 @@ assign'
   -> m ()
 assign' o = modifying' o . const
 {-# INLINE assign' #-}
+
+-- | Use the target of a 'Lens', 'Iso', or 'Getter' in the current state.
+--
+-- >>> evalState (use _1) ('a','b')
+-- 'a'
+--
+-- >>> evalState (use _2) ("hello","world")
+-- "world"
+--
+use
+  :: (Is k A_Getter, MonadState s m)
+  => Optic' k is s a
+  -> m a
+use o = gets (view o)
+{-# INLINE use #-}
+
+-- | Use the target of a 'AffineTraveral' or 'AffineFold' in the current state.
+--
+-- >>> evalState (preuse $ _1 % _Right) (Right 'a','b')
+-- Just 'a'
+--
+preuse
+  :: (Is k An_AffineFold, MonadState s m)
+  => Optic' k is s a
+  -> m (Maybe a)
+preuse o = gets (preview o)
+{-# INLINE preuse #-}
 
 -- $setup
 -- >>> import Data.Semigroup

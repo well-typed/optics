@@ -103,56 +103,56 @@ instance Monoid r => ViewableOptic A_Fold r where
 -- | Use the target of a 'Lens', 'Iso', or 'Getter' in the current state, or use
 -- a summary of a 'Fold' or 'Traversal' that points to a monoidal value.
 --
--- >>> evalState (use _1) ('a','b')
+-- >>> evalState (guse _1) ('a','b')
 -- 'a'
 --
--- >>> evalState (use _2) ("hello","world")
+-- >>> evalState (guse _2) ("hello","world")
 -- "world"
-use
+guse
   :: (ViewableOptic k a, MonadState s m)
   => Optic' k is s a
   -> m (ViewResult k a)
-use o = gets (gview o)
-{-# INLINE use #-}
+guse o = gets (gview o)
+{-# INLINE guse #-}
 
 -- | Use the target of a 'Lens', 'Iso' or 'Getter' in the current state, or use
 -- a summary of a 'Fold' or 'Traversal' that points to a monoidal value.
 --
--- >>> evalState (uses _1 length) ("hello","world")
+-- >>> evalState (guses _1 length) ("hello","world")
 -- 5
-uses
+guses
   :: (ViewableOptic k r, MonadState s m)
   => Optic' k is s a
   -> (a -> r)
   -> m (ViewResult k r)
-uses o f = gets (gviews o f)
-{-# INLINE uses #-}
+guses o f = gets (gviews o f)
+{-# INLINE guses #-}
 
 -- | This is a generalized form of 'listen' that only extracts the portion of
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
 -- then a monoidal summary of the parts of the log that are visited will be
 -- returned.
-listening
+glistening
   :: (ViewableOptic k r, MonadWriter s m)
   => Optic' k is s r
   -> m a
   -> m (a, ViewResult k r)
-listening o m = do
+glistening o m = do
   (a, w) <- listen m
   return (a, gview o w)
-{-# INLINE listening #-}
+{-# INLINE glistening #-}
 
 -- | This is a generalized form of 'listen' that only extracts the portion of
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
 -- then a monoidal summary of the parts of the log that are visited will be
 -- returned.
-listenings
+glistenings
   :: (ViewableOptic k r, MonadWriter s m)
   => Optic' k is s a
   -> (a -> r)
   -> m b
   -> m (b, ViewResult k r)
-listenings o f m = do
+glistenings o f m = do
   (a, w) <- listen m
   return (a, gviews o f w)
-{-# INLINE listenings #-}
+{-# INLINE glistenings #-}
