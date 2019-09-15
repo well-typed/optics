@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE TypeInType #-}
 -- |
 -- Module: Optics.At.Core
 -- Description: Optics for 'Map' and 'Set'-like containers.
@@ -118,9 +119,17 @@ instance Ord a => Contains (Set a) where
 -- is shared by both 'Ixed' and 'At'.
 type family IxValue (m :: Type) :: Type
 
+
 -- | Provides a simple 'AffineTraversal' lets you traverse the value at a given
 -- key in a 'Map' or element at an ordinal position in a list or 'Seq'.
 class Ixed m where
+  -- | Type family that takes a key-value container type and returns the kind
+  -- of optic to index into it. For most containers, it's 'An_AffineTraversal',
+  -- @Representable@ (Naperian) containers it is 'A_Lens', and multi-maps would
+  -- have 'A_Traversal'.
+  type IxKind (m :: Type) :: OpticKind
+  type IxKind m = An_AffineTraversal
+
   -- | /NB:/ Setting the value of this 'AffineTraversal' will only set the value
   -- in 'at' if it is already present.
   --
@@ -137,8 +146,8 @@ class Ixed m where
   --
   -- >>> [] ^? ix 2
   -- Nothing
-  ix :: Index m -> AffineTraversal' m (IxValue m)
-  default ix :: At m => Index m -> AffineTraversal' m (IxValue m)
+  ix :: Index m -> Optic' (IxKind m) NoIx m (IxValue m)
+  default ix :: (At m, IxKind m ~ An_AffineTraversal) => Index m -> Optic' (IxKind m) NoIx m (IxValue m)
   ix = ixAt
   {-# INLINE ix #-}
 
@@ -150,7 +159,8 @@ ixAt = \i -> at i % _Just
 
 type instance IxValue (e -> a) = a
 instance Eq e => Ixed (e -> a) where
-  ix e = atraversalVL $ \_ p f -> p (f e) <&> \a e' -> if e == e' then a else f e'
+  type IxKind (e -> a) = A_Lens
+  ix e = lensVL $ \p f -> p (f e) <&> \a e' -> if e == e' then a else f e'
   {-# INLINE ix #-}
 
 type instance IxValue (Maybe a) = a
@@ -175,7 +185,8 @@ instance Ixed (NonEmpty a) where
 
 type instance IxValue (Identity a) = a
 instance Ixed (Identity a) where
-  ix () = atraversalVL $ \_ f (Identity a) -> Identity <$> f a
+  type IxKind (Identity a) = An_Iso
+  ix () = coerced
   {-# INLINE ix #-}
 
 type instance IxValue (Tree a) = a
@@ -362,7 +373,7 @@ instance
 -- @
 -- 'ix' k ≡ 'at' k '%' '_Just'
 -- @
-class Ixed m => At m where
+class (Ixed m, IxKind m ~ An_AffineTraversal) => At m where
   -- |
   -- >>> Map.fromList [(1,"world")] ^. at 1
   -- Just "world"
