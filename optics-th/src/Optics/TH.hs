@@ -51,6 +51,7 @@ module Optics.TH
   , lensField
   , lensClass
   -- * Common rules
+  , noPrefixFieldLabels
   , abbreviatedFieldLabels
   , underscoreFields
   , camelCaseFields
@@ -60,6 +61,7 @@ module Optics.TH
   , FieldNamer
   , ClassyNamer
   , DefName(..)
+  , noPrefixNamer
   , underscoreNoPrefixNamer
   , lookingupNamer
   , mappingNamer
@@ -174,14 +176,14 @@ declareFieldLabels :: DecsQ -> DecsQ
 declareFieldLabels
   = declareFieldLabelsWith
   $ fieldLabelsRules
-  & lensField .~ \_ _ n -> [TopName n]
+  & lensField .~ noPrefixNamer
 
 -- | Similar to 'makeFieldLabelsFor', but takes a declaration quote.
 declareFieldLabelsFor :: [(String, String)] -> DecsQ -> DecsQ
 declareFieldLabelsFor fields
   = declareFieldLabelsWith
   $ fieldLabelsRulesFor fields
-  & lensField .~ \_ _ n -> [TopName n]
+  & lensField .~ noPrefixNamer
 
 -- Similar to 'makeFieldLabelsWith', but takes a declaration quote.
 declareFieldLabelsWith :: LensRules -> DecsQ -> DecsQ
@@ -299,14 +301,14 @@ declareLenses :: DecsQ -> DecsQ
 declareLenses
   = declareLensesWith
   $ lensRules
-  & lensField .~ \_ _ n -> [TopName n]
+  & lensField .~ noPrefixNamer
 
 -- | Similar to 'makeLensesFor', but takes a declaration quote.
 declareLensesFor :: [(String, String)] -> DecsQ -> DecsQ
 declareLensesFor fields
   = declareLensesWith
   $ lensRulesFor fields
-  & lensField .~ \_ _ n -> [TopName n]
+  & lensField .~ noPrefixNamer
 
 -- | 'declareLenses' with custom 'LensRules'.
 declareLensesWith :: LensRules -> DecsQ -> DecsQ
@@ -417,7 +419,7 @@ declareClassy :: DecsQ -> DecsQ
 declareClassy
   = declareLensesWith
   $ classyRules
-  & lensField .~ \_ _ n -> [TopName n]
+  & lensField .~ noPrefixNamer
 
 -- | Similar to 'makeClassyFor', but takes a declaration quote.
 declareClassyFor ::
@@ -425,7 +427,7 @@ declareClassyFor ::
 declareClassyFor classes fields
   = declareLensesWith
   $ classyRulesFor (`Prelude.lookup`classes) fields
-  & lensField .~ \_ _ n -> [TopName n]
+  & lensField .~ noPrefixNamer
 
 -- | Rules for making lenses and traversals that precompose another 'Lens'.
 classyRules :: LensRules
@@ -660,6 +662,9 @@ lensClass = lensVL $ \f r ->
 ----------------------------------------
 -- Common sets of rules
 
+noPrefixFieldLabels :: LensRules
+noPrefixFieldLabels = fieldLabelsRules { _fieldToDef = noPrefixNamer }
+
 abbreviatedFieldLabels :: LensRules
 abbreviatedFieldLabels = fieldLabelsRules { _fieldToDef = abbreviatedNamer }
 
@@ -703,6 +708,12 @@ abbreviatedFields = defaultFieldRules { _fieldToDef = abbreviatedNamer }
 
 ----------------------------------------
 -- Namers
+
+-- | A 'FieldNamer' that leaves the field name as-is. Useful for generation of
+-- field labels when paired with @DuplicateRecordFields@ language extension so
+-- that no prefixes for field names are necessary.
+noPrefixNamer :: FieldNamer
+noPrefixNamer _ _ n = [TopName n]
 
 -- | A 'FieldNamer' that strips the _ off of the field name, lowercases the
 -- name, and skips the field if it doesn't start with an '_'.
