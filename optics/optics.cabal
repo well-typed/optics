@@ -154,10 +154,6 @@ benchmark folds
   if impl(ghcjs)
     buildable: False
 
-  -- TODO: remove when deps compile with GHC 8.8
-  if impl(ghc >= 8.8)
-    buildable: False
-
   build-depends: base
                , bytestring
                , containers
@@ -178,10 +174,6 @@ benchmark traversals
 
   -- GHCJS takes forever to compile dependencies
   if impl(ghcjs)
-    buildable: False
-
-  -- TODO: remove when deps compile with GHC 8.8
-  if impl(ghc >= 8.8)
     buildable: False
 
   build-depends: base
