@@ -20,13 +20,21 @@ module Optics.Prism
   -- specialise types to obtain:
   --
   -- @
-  -- 'Optics.AffineFold.preview' :: 'Prism' s t a b -> s -> Maybe a
-  -- 'Optics.Review.review'  :: 'Prism' s t a b -> b -> t
+  -- 'Optics.AffineFold.preview' :: 'Prism'' s a -> s -> Maybe a
+  -- 'Optics.Review.review'  :: 'Prism'' s a -> a -> s
   -- @
   --
   -- @
   -- 'Optics.Setter.over'    :: 'Prism' s t a b -> (a -> b) -> s -> t
   -- 'Optics.Setter.set'     :: 'Prism' s t a b ->       b  -> s -> t
+  -- @
+  --
+  -- If you want to 'Optics.AffineFold.preview' a type-modifying 'Prism' that is
+  -- insufficiently polymorphic to be used as a type-preserving 'Prism'', use
+  -- 'Optics.ReadOnly.getting':
+  --
+  -- @
+  -- 'Optics.AffineFold.preview' . 'Optics.ReadOnly.getting' :: 'Prism' s t a b -> s -> 'Maybe' a
   -- @
 
   -- * Computation

@@ -42,7 +42,7 @@ module Optics.Lens
   -- 'Optics.Setter.Setter', therefore you can specialise types to obtain:
   --
   -- @
-  -- 'Optics.Getter.view' :: 'Lens' s t a b -> s -> a
+  -- 'Optics.Getter.view' :: 'Lens'' s a -> s -> a
   -- @
   --
   -- @
@@ -50,6 +50,13 @@ module Optics.Lens
   -- 'Optics.Setter.set'  :: 'Lens' s t a b ->       b  -> s -> t
   -- @
   --
+  -- If you want to 'Optics.Getter.view' a type-modifying 'Lens' that is
+  -- insufficiently polymorphic to be used as a type-preserving 'Lens'', use
+  -- 'Optics.ReadOnly.getting':
+  --
+  -- @
+  -- 'Optics.Getter.view' . 'Optics.ReadOnly.getting' :: 'Lens' s t a b -> s -> a
+  -- @
 
   -- * Computation
   -- |

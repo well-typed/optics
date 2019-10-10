@@ -47,6 +47,10 @@ import Optics.Internal.Profunctor
 type Getter s a = Optic' A_Getter NoIx s a
 
 -- | View the value pointed to by a getter.
+--
+-- If you want to 'view' a type-modifying optic that is insufficiently
+-- polymorphic to be type-preserving, use 'Optics.ReadOnly.getting'.
+--
 view :: Is k A_Getter => Optic' k is s a -> s -> a
 view o = views o id
 {-# INLINE view #-}

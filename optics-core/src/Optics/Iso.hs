@@ -21,13 +21,21 @@ module Optics.Iso
   -- specialise types to obtain:
   --
   -- @
-  -- 'Optics.Getter.view'   :: 'Iso' s t a b -> s -> a
-  -- 'Optics.Review.review' :: 'Iso' s t a b -> b -> t
+  -- 'Optics.Getter.view'   :: 'Iso'' s a -> s -> a
+  -- 'Optics.Review.review' :: 'Iso'' s a -> a -> s
   -- @
   --
   -- @
   -- 'Optics.Setter.over'   :: 'Iso' s t a b -> (a -> b) -> s -> t
   -- 'Optics.Setter.set'    :: 'Iso' s t a b ->       b  -> s -> t
+  -- @
+  --
+  -- If you want to 'Optics.Getter.view' a type-modifying 'Iso' that is
+  -- insufficiently polymorphic to be used as a type-preserving 'Iso'', use
+  -- 'Optics.ReadOnly.getting':
+  --
+  -- @
+  -- 'Optics.Getter.view' . 'Optics.ReadOnly.getting' :: 'Iso' s t a b -> s -> a
   -- @
 
   -- * Computation
