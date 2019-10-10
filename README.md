@@ -43,6 +43,9 @@ Edward Kmett and contributors.
    * [`optics-th`](https://hackage.haskell.org/package/optics-th): machinery to
      construct optics using `TemplateHaskell`.
 
+   * [`indexed-profunctors`](https://hackage.haskell.org/package/indexed-profunctors):
+     internal definitions of indexed profunctor representation.
+
  * [`optics-vl`](https://hackage.haskell.org/package/optics-vl): utilities for
    compatibility with van Laarhoven isomorphisms and prisms, as defined in the
    `lens` library.  This package is not included in `optics` as it imposes a
