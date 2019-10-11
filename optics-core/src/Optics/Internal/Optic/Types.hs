@@ -8,8 +8,9 @@ module Optics.Internal.Optic.Types where
 
 import Data.Kind (Constraint, Type)
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
-import Optics.Internal.Profunctor
 
 -- | Kind for types used as optic tags, such as 'A_Lens'.
 type OpticKind = Type

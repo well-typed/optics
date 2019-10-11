@@ -26,12 +26,13 @@ import Data.Text.Lazy as Text
 import Data.Text.Lazy.Builder
 import Data.Text.Lazy.Encoding
 
+import Data.Profunctor.Indexed
+
 import Optics.Core
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | This isomorphism can be used to 'pack' (or 'unpack') lazy 'Text.Text'.
 --

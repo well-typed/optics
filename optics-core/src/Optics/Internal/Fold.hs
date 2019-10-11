@@ -11,9 +11,10 @@ import Data.Foldable
 import Data.Maybe
 import qualified Data.Semigroup as SG
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Internal implementation of 'Optics.Fold.foldVL'.
 foldVL__

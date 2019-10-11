@@ -6,15 +6,24 @@
 -- in subsequent releases.
 module Optics.Internal.Bi where
 
+import Data.Coerce
 import Data.Void
 
-import Optics.Internal.Profunctor
+import Data.Profunctor.Indexed
 
 -- | Class for (covariant) bifunctors.
 class Bifunctor p where
   bimap  :: (a -> b) -> (c -> d) -> p i a c -> p i b d
   first  :: (a -> b)             -> p i a c -> p i b c
   second ::             (c -> d) -> p i a c -> p i a d
+
+instance Bifunctor Tagged where
+  bimap  _f g = Tagged #. g .# unTagged
+  first  _f   = coerce
+  second    g = Tagged #. g .# unTagged
+  {-# INLINE bimap #-}
+  {-# INLINE first #-}
+  {-# INLINE second #-}
 
 -- | Class for contravariant bifunctors.
 class Bicontravariant p where

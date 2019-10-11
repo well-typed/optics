@@ -70,9 +70,9 @@ module Optics.Prism
 import Control.Monad
 import Data.Bifunctor
 
-import Optics.Internal.Concrete
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying prism.
 type Prism s t a b = Optic A_Prism NoIx s t a b

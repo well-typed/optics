@@ -47,9 +47,9 @@ module Optics.VL
 import Data.Functor.Identity
 import qualified Data.Profunctor as P
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
-import Optics.Internal.Utils
 import Optics.Core
 
 newtype WrappedProfunctor p i a b =

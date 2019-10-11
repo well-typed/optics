@@ -29,11 +29,10 @@ module Optics.Review
   )
   where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
-import Optics.Internal.Tagged
-import Optics.Internal.Utils
 
 -- | Type synonym for a review.
 type Review t b = Optic' A_Review NoIx t b

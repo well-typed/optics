@@ -60,9 +60,11 @@ module Optics.Setter
   -- | <<diagrams/Setter.png Setter in the optics hierarchy>>
   ) where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Setter
+import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying setter.
 type Setter s t a b = Optic A_Setter NoIx s t a b

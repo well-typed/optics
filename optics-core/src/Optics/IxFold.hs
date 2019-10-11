@@ -58,12 +58,13 @@ module Optics.IxFold
 import Control.Applicative.Backwards
 import Data.Monoid
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Utils
 import Optics.IxAffineFold
 import Optics.Fold

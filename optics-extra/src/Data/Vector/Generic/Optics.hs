@@ -22,11 +22,12 @@ import Data.Vector.Generic as V hiding (zip, filter, indexed)
 import Data.Vector.Generic.New (New)
 import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
 
+import Data.Profunctor.Indexed
+
 import Optics.Core
 import Optics.Extra.Internal.Vector
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
-import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting at

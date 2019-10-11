@@ -33,10 +33,11 @@ module Optics.IxAffineFold
   , An_AffineFold
   ) where
 
+import Data.Profunctor.Indexed
+
 import Optics.AffineFold
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
-import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 
 -- | Type synonym for an indexed affine fold.

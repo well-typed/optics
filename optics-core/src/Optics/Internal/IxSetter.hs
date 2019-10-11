@@ -6,9 +6,10 @@
 -- in subsequent releases.
 module Optics.Internal.IxSetter where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Internal implementation of 'Optics.IxSetter.imapped'.
 imapped__

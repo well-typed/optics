@@ -6,7 +6,7 @@ import Language.Haskell.TH (Name)
 import Test.Tasty.HUnit
 import Test.Inspection
 
-import qualified Optics.Internal.Profunctor as P
+import qualified Data.Profunctor.Indexed as P
 
 hasNoProfunctors :: Name -> Obligation
 hasNoProfunctors name = mkObligation name $ NoUseOf

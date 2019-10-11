@@ -80,12 +80,13 @@ import Control.Applicative.Backwards
 import Control.Monad.Trans.State
 import Data.Functor.Identity
 
+import Data.Profunctor.Indexed
+
+import Optics.Fold
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 import Optics.Internal.Traversal
 import Optics.Internal.Utils
 import Optics.Lens
-import Optics.Fold
 import Optics.ReadOnly
 
 -- | Type synonym for a type-modifying traversal.

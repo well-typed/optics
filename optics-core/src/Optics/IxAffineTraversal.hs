@@ -40,9 +40,10 @@ module Optics.IxAffineTraversal
   , toIxAtraversalVL
   ) where
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
-import Optics.Internal.Profunctor
 
 -- | Type synonym for a type-modifying indexed affine traversal.
 type IxAffineTraversal i s t a b = Optic An_AffineTraversal (WithIx i) s t a b

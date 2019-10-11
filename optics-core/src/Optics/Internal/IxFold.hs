@@ -9,9 +9,10 @@ module Optics.Internal.IxFold where
 import Data.Functor
 import Data.Foldable
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
-import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 import Optics.Internal.Fold
 

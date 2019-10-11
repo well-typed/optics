@@ -41,8 +41,9 @@ module Optics.AffineFold
 
 import Data.Maybe
 
+import Data.Profunctor.Indexed
+
 import Optics.Internal.Bi
-import Optics.Internal.Profunctor
 import Optics.Internal.Optic
 
 -- | Type synonym for an affine fold.
