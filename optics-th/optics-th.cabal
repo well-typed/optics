@@ -15,6 +15,9 @@ description:
   .
   See the @template-haskell-optics@ package for optics to work with @template-haskell@ types.
 
+extra-doc-files:
+  CHANGELOG.md
+
 bug-reports:   https://github.com/well-typed/optics/issues
 source-repository head
   type:     git

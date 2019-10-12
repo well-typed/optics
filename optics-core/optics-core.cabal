@@ -19,6 +19,7 @@ description:
 
 extra-doc-files:
   diagrams/*.png
+  CHANGELOG.md
 
 bug-reports:   https://github.com/well-typed/optics/issues
 source-repository head

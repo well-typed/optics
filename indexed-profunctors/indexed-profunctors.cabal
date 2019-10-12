@@ -14,6 +14,9 @@ description:
   are primarily intended as internal utilities to support the @optics@ and
   @generic-lens@ package families.
 
+extra-doc-files:
+  CHANGELOG.md
+
 bug-reports:   https://github.com/well-typed/optics/issues
 source-repository head
   type:     git
