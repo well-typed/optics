@@ -14,9 +14,14 @@ description:
   and other optics, using an abstract interface. See the main module "Optics"
   for the documentation.
   .
+
   This is the "batteries-included" variant with many dependencies; see the
-  @optics-core@ package and other @optics-*@ dependencies if you need a more
-  limited dependency footprint.
+  @<https://hackage.haskell.org/package/optics-core optics-core>@ package and
+  other @optics-*@ dependencies if you need a more limited dependency footprint.
+  .
+  Note: Hackage does not yet display documentation for reexported-modules,
+  but you can start from the "Optics" module documentation or see the module
+  list in @<https://hackage.haskell.org/package/optics-core optics-core>@.
 
 extra-doc-files:
   diagrams/*.png
