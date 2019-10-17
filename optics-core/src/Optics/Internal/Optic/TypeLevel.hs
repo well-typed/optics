@@ -11,6 +11,8 @@ import Data.Kind (Type)
 import GHC.TypeLits
 
 -- | A list of index types, used for indexed optics.
+--
+-- @since 0.2
 type IxList = [Type]
 
 -- | An alias for an empty index-list

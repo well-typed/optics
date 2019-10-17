@@ -662,6 +662,11 @@ lensClass = lensVL $ \f r ->
 ----------------------------------------
 -- Common sets of rules
 
+-- | Field rules for fields without any prefix. Useful for generation of field
+-- labels when paired with @DuplicateRecordFields@ language extension so that no
+-- prefixes for field names are necessary.
+--
+-- @since 0.2
 noPrefixFieldLabels :: LensRules
 noPrefixFieldLabels = fieldLabelsRules { _fieldToDef = noPrefixNamer }
 
@@ -712,6 +717,8 @@ abbreviatedFields = defaultFieldRules { _fieldToDef = abbreviatedNamer }
 -- | A 'FieldNamer' that leaves the field name as-is. Useful for generation of
 -- field labels when paired with @DuplicateRecordFields@ language extension so
 -- that no prefixes for field names are necessary.
+--
+-- @since 0.2
 noPrefixNamer :: FieldNamer
 noPrefixNamer _ _ n = [TopName n]
 

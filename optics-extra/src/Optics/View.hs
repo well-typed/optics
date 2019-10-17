@@ -108,6 +108,8 @@ instance Monoid r => ViewableOptic A_Fold r where
 --
 -- >>> evalState (guse _2) ("hello","world")
 -- "world"
+--
+-- @since 0.2
 guse
   :: (ViewableOptic k a, MonadState s m)
   => Optic' k is s a
@@ -120,6 +122,8 @@ guse o = gets (gview o)
 --
 -- >>> evalState (guses _1 length) ("hello","world")
 -- 5
+--
+-- @since 0.2
 guses
   :: (ViewableOptic k r, MonadState s m)
   => Optic' k is s a
@@ -132,6 +136,8 @@ guses o f = gets (gviews o f)
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
 -- then a monoidal summary of the parts of the log that are visited will be
 -- returned.
+--
+-- @since 0.2
 glistening
   :: (ViewableOptic k r, MonadWriter s m)
   => Optic' k is s r
@@ -146,6 +152,8 @@ glistening o m = do
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
 -- then a monoidal summary of the parts of the log that are visited will be
 -- returned.
+--
+-- @since 0.2
 glistenings
   :: (ViewableOptic k r, MonadWriter s m)
   => Optic' k is s a
