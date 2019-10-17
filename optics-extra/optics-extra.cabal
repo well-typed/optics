@@ -1,5 +1,5 @@
 name:          optics-extra
-version:       0.1
+version:       0.2
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
@@ -35,7 +35,7 @@ library
                , hashable               >= 1.1.1     && <1.4
                , indexed-profunctors    >= 0.1       && <0.2
                , mtl                    >= 2.2.2     && <2.3
-               , optics-core            >= 0.1       && <0.1.1
+               , optics-core            >= 0.2       && <0.2.1
                , text                   >= 1.2       && <1.3
                , transformers           >= 0.5       && <0.6
                , unordered-containers   >= 0.2.6     && <0.3
