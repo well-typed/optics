@@ -19,10 +19,14 @@ module Data.Profunctor.Indexed
   , Visiting(..)
   , Mapping(..)
   , Traversing(..)
+  , Traversing1(..)
 
     -- * Concrete profunctors
   , Star(..)
   , reStar
+
+  , Star1(..)
+  , reStar1
 
   , Forget(..)
   , reForget
@@ -53,11 +57,16 @@ module Data.Profunctor.Indexed
   , Tagged(..)
   , Context(..)
 
+   -- * Apply
+  , Apply (..)
+  , WrappedApplicative (..)
+
    -- * Utilities
   , (#.)
   , (.#)
   ) where
 
+import Control.Applicative (liftA2)
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
 import Data.Functor.Identity
@@ -67,6 +76,9 @@ import Data.Functor.Identity
 
 -- | Needed for traversals.
 newtype Star f i a b = Star { runStar :: a -> f b }
+
+-- | Needed for traversals1.
+newtype Star1 f i a b = Star1 { runStar1 :: a -> f b }
 
 -- | Needed for getters and folds.
 newtype Forget r i a b = Forget { runForget :: a -> r }
@@ -115,6 +127,11 @@ runIxStarA (IxStarA _ k) = k
 reStar :: Star f i a b -> Star f j a b
 reStar (Star k) = Star k
 {-# INLINE reStar #-}
+
+-- | Repack 'Star1' to change its index type.
+reStar1 :: Star1 f i a b -> Star1 f j a b
+reStar1 (Star1 k) = Star1 k
+{-# INLINE reStar1 #-}
 
 -- | Repack 'Forget' to change its index type.
 reForget :: Forget r i a b -> Forget r j a b
@@ -185,6 +202,17 @@ instance Functor f => Profunctor (StarA f) where
   dimap f g (StarA point k) = StarA point (fmap g . k . f)
   lmap  f   (StarA point k) = StarA point (k . f)
   rmap    g (StarA point k) = StarA point (fmap g . k)
+  {-# INLINE dimap #-}
+  {-# INLINE lmap #-}
+  {-# INLINE rmap #-}
+
+  rcoerce' = rmap coerce
+  {-# INLINE rcoerce' #-}
+
+instance Functor f => Profunctor (Star1 f) where
+  dimap f g (Star1 k) = Star1 (fmap g . k . f)
+  lmap  f   (Star1 k) = Star1 (k . f)
+  rmap    g (Star1 k) = Star1 (fmap g . k)
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
@@ -335,6 +363,15 @@ instance Functor f => Strong (StarA f) where
   {-# INLINE second' #-}
 
   linear f (StarA point k) = StarA point (f k)
+  {-# INLINE linear #-}
+
+instance Functor f => Strong (Star1 f) where
+  first'  (Star1 k) = Star1 $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
+  second' (Star1 k) = Star1 $ \ ~(c, a) -> (,) c <$> k a
+  {-# INLINE first' #-}
+  {-# INLINE second' #-}
+
+  linear f (Star1 k) = Star1 (f k)
   {-# INLINE linear #-}
 
 instance Functor f => Strong (Star f) where
@@ -636,7 +673,65 @@ instance Visiting IxFunArrow where
 
 ----------------------------------------
 
-class Visiting p => Traversing p where
+class Strong p => Traversing1 p where
+  wander1
+    :: (forall f. Apply f => (a -> f b) -> s -> f t)
+    -> p i a b
+    -> p i s t
+  iwander1
+    :: (forall f. Apply f => (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+
+instance Apply f => Traversing1 (Star1 f) where
+  wander1  f (Star1 k) = Star1 $ f k
+  iwander1 f (Star1 k) = Star1 $ f (\_ -> k)
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+instance Applicative f => Traversing1 (Star f) where
+  wander1  f (Star k) = Star $ unwrapApplicative . f (WrapApplicative . k)
+  iwander1 f (Star k) = Star $ unwrapApplicative . f (\_ -> WrapApplicative . k)
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+instance Semigroup r => Traversing1 (Forget r) where
+  wander1  f (Forget k) = Forget $ getConst #. f (Const #. k)
+  iwander1 f (Forget k) = Forget $ getConst #. f (\_ -> Const #. k)
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+instance Traversing1 FunArrow where
+  wander1  f (FunArrow k) = FunArrow $ runIdentity #. f (Identity #. k)
+  iwander1 f (FunArrow k) = FunArrow $ runIdentity #. f (\_ -> Identity #. k)
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+instance Applicative f => Traversing1 (IxStar f) where
+  wander1  f (IxStar k) = IxStar $ \i -> unwrapApplicative . f (WrapApplicative . k i)
+  iwander1 f (IxStar k) = IxStar $ \ij -> unwrapApplicative . f (\i -> WrapApplicative . k (ij i))
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+instance Semigroup r => Traversing1 (IxForget r) where
+  wander1  f (IxForget k) =
+    IxForget $ \i -> getConst #. f (Const #. k i)
+  iwander1 f (IxForget k) =
+    IxForget $ \ij -> getConst #. f (\i -> Const #. k (ij i))
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+instance Traversing1 IxFunArrow where
+  wander1  f (IxFunArrow k) =
+    IxFunArrow $ \i -> runIdentity #. f (Identity #. k i)
+  iwander1 f (IxFunArrow k) =
+    IxFunArrow $ \ij -> runIdentity #. f (\i -> Identity #. k (ij i))
+  {-# INLINE wander1 #-}
+  {-# INLINE iwander1 #-}
+
+----------------------------------------
+
+class (Visiting p, Traversing1 p) => Traversing p where
   wander
     :: (forall f. Applicative f => (a -> f b) -> s -> f t)
     -> p i a b
@@ -847,6 +942,61 @@ instance Costrong Tagged where
 
 data Context a b t = Context (b -> t) a
   deriving Functor
+
+
+----------------------------------------
+
+-- | This is equivalent to an 'Applicative' without 'pure'.
+--
+-- An own version to avoid dependency on @semigroupoids@.
+class Functor f => Apply f where
+  (<.>) :: f (a -> b) -> f a -> f b
+  (<.>) = liftF2 ($)
+  {-# INLINE (<.>) #-}
+
+  (.>) :: f a -> f b -> f b
+  (.>) = liftF2 (\_ b -> b)  
+
+  (<.) :: f a -> f b -> f a
+  (<.) = liftF2 (\a _ -> a)  
+
+  liftF2 :: (a -> b -> c) -> f a -> f b -> f c
+  liftF2 f x y = f <$> x <.> y
+  {-# INLINE liftF2 #-}
+
+  {-# MINIMAL (<.>) | liftF2 #-}
+
+infixl 4 <.>
+
+instance Apply Identity where
+  (<.>) = (<*>)
+  liftF2 = liftA2
+
+instance Semigroup b => Apply (Const b) where
+  Const x <.> Const y = Const (x <> y)
+
+-- | Wrap an 'Applicative' to be used as a member of 'Apply'
+newtype WrappedApplicative f a = WrapApplicative { unwrapApplicative :: f a }
+
+instance Functor f => Functor (WrappedApplicative f) where
+  fmap f (WrapApplicative a) = WrapApplicative (f <$> a)
+
+instance Applicative f => Apply (WrappedApplicative f) where
+  WrapApplicative f <.> WrapApplicative a = WrapApplicative (f <*> a)
+  WrapApplicative a <.  WrapApplicative b = WrapApplicative (a <*  b)
+  WrapApplicative a  .> WrapApplicative b = WrapApplicative (a  *> b)
+
+instance Applicative f => Applicative (WrappedApplicative f) where
+  pure = WrapApplicative . pure
+  WrapApplicative f <*> WrapApplicative a = WrapApplicative (f <*> a)
+  WrapApplicative a <*  WrapApplicative b = WrapApplicative (a <*  b)
+  WrapApplicative a  *> WrapApplicative b = WrapApplicative (a  *> b)
+
+-------------------------------------------------------------------------------
+-- Utilities
+-------------------------------------------------------------------------------
+
+----------------------------------------
 
 -- | Composition operator where the first argument must be an identity
 -- function up to representational equivalence (e.g. a newtype wrapper

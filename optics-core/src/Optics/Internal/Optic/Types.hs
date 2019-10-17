@@ -23,6 +23,8 @@ data A_Lens :: OpticKind
 data A_Prism :: OpticKind
 -- | Tag for an affine traversal.
 data An_AffineTraversal :: OpticKind
+-- | Tag for a non-empty traversal.
+data A_Traversal1 :: OpticKind
 -- | Tag for a traversal.
 data A_Traversal :: OpticKind
 -- | Tag for a setter.
@@ -33,6 +35,8 @@ data A_ReversedPrism :: OpticKind
 data A_Getter :: OpticKind
 -- | Tag for an affine fold.
 data An_AffineFold :: OpticKind
+-- | Tag for a non-empty fold.
+data A_Fold1 :: OpticKind
 -- | Tag for a fold.
 data A_Fold :: OpticKind
 -- | Tag for a reversed lens.
@@ -52,9 +56,11 @@ type family Constraints (k :: OpticKind) (p :: Type -> Type -> Type -> Type) :: 
   Constraints A_Prism            p = Choice p
   Constraints A_ReversedPrism    p = Cochoice p
   Constraints An_AffineTraversal p = Visiting p
+  Constraints A_Traversal1       p = Traversing1 p
   Constraints A_Traversal        p = Traversing p
   Constraints A_Setter           p = Mapping p
   Constraints A_Getter           p = (Bicontravariant p, Cochoice p, Strong p)
   Constraints An_AffineFold      p = (Bicontravariant p, Cochoice p, Visiting p)
+  Constraints A_Fold1            p = (Bicontravariant p, Cochoice p, Traversing1 p)
   Constraints A_Fold             p = (Bicontravariant p, Cochoice p, Traversing p)
   Constraints A_Review           p = (Bifunctor p, Choice p, Costrong p)

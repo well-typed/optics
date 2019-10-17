@@ -32,6 +32,8 @@ data OpticKind
   |  An_AffineTraversal
   -- | Tag for a traversal.
   |  A_Traversal
+  -- | Tag for a non empty traversal
+  |  A_Traversal1
   -- | Tag for a setter.
   |  A_Setter
   -- | Tag for a reversed prism.
@@ -40,6 +42,8 @@ data OpticKind
   |  A_Getter
   -- | Tag for an affine fold.
   |  An_AffineFold
+  -- | Tag for a nonempty fold.
+  |  A_Fold1
   -- | Tag for a fold.
   |  A_Fold
   -- | Tag for a reversed lens.
@@ -60,15 +64,20 @@ opticsKind = mkProper $ Map.fromListWith (<>)
     , A_Prism            ~> A_Review
     , A_Prism            ~> An_AffineTraversal
     , A_Lens             ~> An_AffineTraversal
+    , A_Lens             ~> A_Traversal1
     , An_AffineTraversal ~> A_Traversal
+    , A_Traversal1       ~> A_Traversal
     , A_Traversal        ~> A_Setter
 
     -- folds
     , A_Lens             ~> A_Getter
     , An_AffineTraversal ~> An_AffineFold
+    , A_Traversal1       ~> A_Fold1
     , A_Traversal        ~> A_Fold
 
     , A_Getter           ~> An_AffineFold
+    , A_Getter           ~> A_Fold1
+    , A_Fold1            ~> A_Fold
     , An_AffineFold      ~> A_Fold
     ]
   where

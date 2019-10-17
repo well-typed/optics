@@ -46,6 +46,7 @@ library
                    Optics.AffineFold
                    Optics.AffineTraversal
                    Optics.Fold
+                   Optics.Fold1
                    Optics.Getter
                    Optics.Iso
                    Optics.IxAffineFold
@@ -62,6 +63,7 @@ library
                    Optics.Review
                    Optics.Setter
                    Optics.Traversal
+                   Optics.Traversal1
 
                    -- optic utilities
                    Optics.Arrow
