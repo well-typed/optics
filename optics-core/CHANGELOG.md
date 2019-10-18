@@ -1,4 +1,4 @@
-# optics-core-0.2 (????-??-??)
+# optics-core-0.2 (2019-10-18)
 * Add `non`, `non'` and `anon` to `Optics.Iso`
 * `ix` can produce optic kinds other than `AffineTraversal`
 * Generalise type of `generic1`

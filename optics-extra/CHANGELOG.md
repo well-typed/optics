@@ -1,4 +1,4 @@
-# optics-extra-0.1 (????-??-??)
+# optics-extra-0.1 (2019-10-18)
 * Move `use` from `Optics.View` to `Optics.State` and restrict its type
 * Add `preuse` to `Optics.State`
 * Rename `use`, `uses`, `listening` and `listenings` to reflect the fact that
