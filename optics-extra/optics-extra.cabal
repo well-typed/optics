@@ -11,8 +11,10 @@ synopsis:      Extra utilities and instances for optics-core
 category:      Data, Optics, Lenses
 description:
   This package provides extra definitions and instances that extend the
-  @optics-core@ package, without incurring too many dependencies.  See the
-  @optics@ package for more documentation.
+  @<https://hackage.haskell.org/package/optics-core optics-core>@ package,
+  without incurring too many dependencies.  See the
+  @<https://hackage.haskell.org/package/optics optics>@ package for more
+  documentation.
 
 extra-doc-files:
   CHANGELOG.md
