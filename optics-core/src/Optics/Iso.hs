@@ -250,6 +250,8 @@ coerced1 = Optic (lcoerce' . rcoerce')
 --
 -- >>> non 0 # rem 10 5
 -- Nothing
+--
+-- @since 0.2
 non :: Eq a => a -> Iso' (Maybe a) a
 non = non' . only
 {-# INLINE non #-}
@@ -264,6 +266,8 @@ non = non' . only
 --
 -- >>> Map.fromList [("hello", Map.fromList [("world","!!!")])] & at "hello" % non' _Empty % at "world" .~ Nothing
 -- fromList []
+--
+-- @since 0.2
 non' :: Prism' a () -> Iso' (Maybe a) a
 non' p = iso (fromMaybe def) go where
   def                = review p ()
@@ -285,6 +289,8 @@ non' p = iso (fromMaybe def) go where
 --
 -- >>> Map.fromList [("hello", Map.fromList [("world","!!!")])] & at "hello" % anon Map.empty Map.null % at "world" .~ Nothing
 -- fromList []
+--
+-- @since 0.2
 anon :: a -> (a -> Bool) -> Iso' (Maybe a) a
 anon a = non' . nearly a
 {-# INLINE anon #-}

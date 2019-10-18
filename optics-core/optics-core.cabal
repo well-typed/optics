@@ -1,5 +1,5 @@
 name:          optics-core
-version:       0.1
+version:       0.2
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
@@ -14,11 +14,12 @@ description:
   and other optics, using an abstract interface.
   .
   This variant provides core definitions with a minimal dependency footprint.
-  See the @optics@ package (and its dependencies) for documentation and the
-  "batteries-included" variant.
+  See the @<https://hackage.haskell.org/package/optics optics>@ package (and its
+  dependencies) for documentation and the "batteries-included" variant.
 
 extra-doc-files:
   diagrams/*.png
+  CHANGELOG.md
 
 bug-reports:   https://github.com/well-typed/optics/issues
 source-repository head

@@ -13,6 +13,8 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Bi
 
 -- | Kind for types used as optic tags, such as 'A_Lens'.
+--
+-- @since 0.2
 type OpticKind = Type
 
 -- | Tag for an iso.

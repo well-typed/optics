@@ -1,19 +1,22 @@
 name:          optics-th
-version:       0.1
+version:       0.2
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
-cabal-version: >=1.10
+cabal-version: 1.24
 tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1, GHCJS ==8.4
 synopsis:      Optics construction using TemplateHaskell
 category:      Data, Optics, Lenses
 description:
-  This package is part of the @optics@ package family.  It provides machinery to
-  construct optics using @TemplateHaskell@.
+  This package is part of the @<https://hackage.haskell.org/package/optics optics>@
+  package family.  It provides machinery to construct optics using @TemplateHaskell@.
   .
   See the @template-haskell-optics@ package for optics to work with @template-haskell@ types.
+
+extra-doc-files:
+  CHANGELOG.md
 
 bug-reports:   https://github.com/well-typed/optics/issues
 source-repository head
@@ -29,7 +32,7 @@ library
   build-depends: base                   >= 4.9       && <5
                , containers             >= 0.5.7.1   && <0.7
                , mtl                    >= 2.2.2     && <2.3
-               , optics-core            >= 0.1       && <0.2
+               , optics-core            >= 0.2       && <0.3
                , template-haskell       >= 2.11      && <2.16
                , th-abstraction         >= 0.2.1     && <0.4
                , transformers           >= 0.5       && <0.6

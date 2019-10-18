@@ -102,6 +102,7 @@ use o = gets (view o)
 -- >>> evalState (preuse $ _1 % _Right) (Right 'a','b')
 -- Just 'a'
 --
+-- @since 0.2
 preuse
   :: (Is k An_AffineFold, MonadState s m)
   => Optic' k is s a

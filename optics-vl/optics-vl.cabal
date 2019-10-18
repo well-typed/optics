@@ -1,18 +1,23 @@
 name:          optics-vl
-version:       0.1
+version:       0.2
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
-cabal-version: >=1.10
+cabal-version: 1.24
 tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1, GHCJS ==8.4
 synopsis:      Utilities for compatibility with van Laarhoven optics
 category:      Data, Optics, Lenses
 description:
-  This package is part of the @optics@ package family.  It provides utilities
-  for converting between the 'Optic' type defined by @optics@ and the van
-  Laarhoven representations of optics (in particular isomorphisms and prisms).
+  This package is part of the @<https://hackage.haskell.org/package/optics optics>@
+  package family.  It provides utilities for converting between the 'Optic' type
+  defined by @<https://hackage.haskell.org/package/optics optics>@ and the van
+  Laarhoven representations of optics that require definitions outside of @base@
+  (in particular isomorphisms and prisms).
+
+extra-doc-files:
+  CHANGELOG.md
 
 bug-reports:   https://github.com/well-typed/optics/issues
 source-repository head
@@ -26,7 +31,7 @@ library
 
   build-depends: base                   >= 4.9        && <5
                , indexed-profunctors    >= 0.1        && <0.2
-               , optics-core            >= 0.1        && <0.2
+               , optics-core            >= 0.2        && <0.3
                , profunctors            >= 5.0        && <6.0
 
   ghc-options: -Wall
