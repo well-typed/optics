@@ -307,8 +307,13 @@ instance FoldableWithIndex Int Seq.Seq where
   {-# INLINE ifoldr #-}
 
 instance TraversableWithIndex Int Seq.Seq where
-  -- This is much faster than Seq.traverseWithIndex. wut?
+#if MIN_VERSION_containers(0,6,0)
+  itraverse = Seq.traverseWithIndex
+#else
+  -- Much faster than Seq.traverseWithIndex for containers < 0.6.0, see
+  -- https://github.com/haskell/containers/issues/603.
   itraverse f = sequenceA . Seq.mapWithIndex f
+#endif
   {-# INLINE itraverse #-}
 
 -- IntMap
