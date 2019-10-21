@@ -4,7 +4,7 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.5.20190907
+# version: 0.5.20191020
 #
 language: c
 dist: xenial
@@ -102,21 +102,32 @@ install:
   - HEADHACKAGE=false
   - rm -f $CABALHOME/config
   - |
-    echo "verbose: normal +nowrap +markoutput"          >> $CABALHOME/config
-    echo "remote-build-reporting: anonymous"            >> $CABALHOME/config
-    echo "write-ghc-environment-files: always"          >> $CABALHOME/config
-    echo "remote-repo-cache: $CABALHOME/packages"       >> $CABALHOME/config
-    echo "logs-dir:          $CABALHOME/logs"           >> $CABALHOME/config
-    echo "world-file:        $CABALHOME/world"          >> $CABALHOME/config
-    echo "extra-prog-path:   $CABALHOME/bin"            >> $CABALHOME/config
-    echo "symlink-bindir:    $CABALHOME/bin"            >> $CABALHOME/config
-    echo "installdir:        $CABALHOME/bin"            >> $CABALHOME/config
-    echo "build-summary:     $CABALHOME/logs/build.log" >> $CABALHOME/config
-    echo "store-dir:         $CABALHOME/store"          >> $CABALHOME/config
-    echo "install-dirs user"                            >> $CABALHOME/config
-    echo "  prefix: $CABALHOME"                         >> $CABALHOME/config
-    echo "repository hackage.haskell.org"               >> $CABALHOME/config
-    echo "  url: http://hackage.haskell.org/"           >> $CABALHOME/config
+    echo "verbose: normal +nowrap +markoutput"                                  >> $CABALHOME/config
+    echo "remote-build-reporting: anonymous"                                    >> $CABALHOME/config
+    echo "write-ghc-environment-files: always"                                  >> $CABALHOME/config
+    echo "remote-repo-cache: $CABALHOME/packages"                               >> $CABALHOME/config
+    echo "logs-dir:          $CABALHOME/logs"                                   >> $CABALHOME/config
+    echo "world-file:        $CABALHOME/world"                                  >> $CABALHOME/config
+    echo "extra-prog-path:   $CABALHOME/bin"                                    >> $CABALHOME/config
+    echo "symlink-bindir:    $CABALHOME/bin"                                    >> $CABALHOME/config
+    echo "installdir:        $CABALHOME/bin"                                    >> $CABALHOME/config
+    echo "build-summary:     $CABALHOME/logs/build.log"                         >> $CABALHOME/config
+    echo "store-dir:         $CABALHOME/store"                                  >> $CABALHOME/config
+    echo "install-dirs user"                                                    >> $CABALHOME/config
+    echo "  prefix: $CABALHOME"                                                 >> $CABALHOME/config
+    echo "repository hackage.haskell.org"                                       >> $CABALHOME/config
+    echo "  url: http://hackage.haskell.org/"                                   >> $CABALHOME/config
+    echo "  secure: True"                                                       >> $CABALHOME/config
+    echo "  key-threshold: 3"                                                   >> $CABALHOME/config
+    echo "  root-keys:"                                                         >> $CABALHOME/config
+    echo "    fe331502606802feac15e514d9b9ea83fee8b6ffef71335479a2e68d84adc6b0" >> $CABALHOME/config
+    echo "    1ea9ba32c526d1cc91ab5e5bd364ec5e9e8cb67179a471872f6e26f0ae773d42" >> $CABALHOME/config
+    echo "    2c6c3627bd6c982990239487f1abd02e08a02e6cf16edb105a8012d444d870c3" >> $CABALHOME/config
+    echo "    0a5c7ea47cd1b15f01f5f51a33adda7e655bc0f0b0615baa8e271f4c3351e21d" >> $CABALHOME/config
+    echo "    51f0161b906011b52c6613376b1ae937670da69322113a246a09f807c62f6921" >> $CABALHOME/config
+  - |
+    echo "program-default-options"                >> $CABALHOME/config
+    echo "  ghc-options: $GHCJOBS +RTS -M6G -RTS" >> $CABALHOME/config
   - cat $CABALHOME/config
   - rm -fv cabal.project cabal.project.local cabal.project.freeze
   - travis_retry ${CABAL} v2-update -v
@@ -132,11 +143,10 @@ install:
     echo "packages: optics-th" >> cabal.project
     echo "packages: optics-vl" >> cabal.project
     echo "packages: indexed-profunctors" >> cabal.project
-    echo "packages: generic-optics" >> cabal.project
     echo "packages: template-haskell-optics" >> cabal.project
     if ! $GHCJS ; then echo "packages: metametapost" >> cabal.project ; fi
   - |
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "optics/configure.ac" ]; then (cd "optics" && autoreconf -i); fi
@@ -146,7 +156,6 @@ install:
   - if [ -f "optics-th/configure.ac" ]; then (cd "optics-th" && autoreconf -i); fi
   - if [ -f "optics-vl/configure.ac" ]; then (cd "optics-vl" && autoreconf -i); fi
   - if [ -f "indexed-profunctors/configure.ac" ]; then (cd "indexed-profunctors" && autoreconf -i); fi
-  - if [ -f "generic-optics/configure.ac" ]; then (cd "generic-optics" && autoreconf -i); fi
   - if [ -f "template-haskell-optics/configure.ac" ]; then (cd "template-haskell-optics" && autoreconf -i); fi
   - if [ -f "metametapost/configure.ac" ]; then (cd "metametapost" && autoreconf -i); fi
   - ${CABAL} v2-freeze $WITHCOMPILER ${TEST} ${BENCH} | color_cabal_output
@@ -170,7 +179,6 @@ script:
   - PKGDIR_optics_th="$(find . -maxdepth 1 -type d -regex '.*/optics-th-[0-9.]*')"
   - PKGDIR_optics_vl="$(find . -maxdepth 1 -type d -regex '.*/optics-vl-[0-9.]*')"
   - PKGDIR_indexed_profunctors="$(find . -maxdepth 1 -type d -regex '.*/indexed-profunctors-[0-9.]*')"
-  - PKGDIR_generic_optics="$(find . -maxdepth 1 -type d -regex '.*/generic-optics-[0-9.]*')"
   - PKGDIR_template_haskell_optics="$(find . -maxdepth 1 -type d -regex '.*/template-haskell-optics-[0-9.]*')"
   - PKGDIR_metametapost="$(find . -maxdepth 1 -type d -regex '.*/metametapost-[0-9.]*')"
   # Generate cabal.project
@@ -184,11 +192,10 @@ script:
     echo "packages: ${PKGDIR_optics_th}" >> cabal.project
     echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
     echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
-    echo "packages: ${PKGDIR_generic_optics}" >> cabal.project
     echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
     if ! $GHCJS ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
   - |
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(generic-optics|indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # Building...
@@ -207,7 +214,6 @@ script:
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_th} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_vl} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_indexed_profunctors} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_generic_optics} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_template_haskell_optics} && doctest  src) ; fi
   # cabal check...
   - (cd ${PKGDIR_optics} && ${CABAL} -vnormal check)
@@ -217,7 +223,6 @@ script:
   - (cd ${PKGDIR_optics_th} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_vl} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_indexed_profunctors} && ${CABAL} -vnormal check)
-  - (cd ${PKGDIR_generic_optics} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_template_haskell_optics} && ${CABAL} -vnormal check)
   - if ! $GHCJS ; then (cd ${PKGDIR_metametapost} && ${CABAL} -vnormal check) ; fi
   # haddock...
@@ -226,5 +231,5 @@ script:
   - rm -f cabal.project.local
   - ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks all | color_cabal_output
 
-# REGENDATA ["--config=cabal.haskell-ci","cabal.project"]
+# REGENDATA ("0.5.20191020",["--config=cabal.haskell-ci","cabal.project"])
 # EOF

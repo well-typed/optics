@@ -57,9 +57,6 @@ Edward Kmett and contributors.
 These packages have not (yet) been officially released. If you find them
 useful, we would welcome offers to maintain these packages.
 
- * `generic-optics`: generic construction of optics using the `generic-lens`
-   package.
-
  * `optics-sop`: generic construction of optics using the `generics-sop`
    package, and optics for `generics-sop` types.
 
