@@ -322,9 +322,9 @@ makeReviewer conName fields =
 -- | Construct the remit portion of a prism.
 -- Pattern match only target constructor, no type changing
 --
--- (\x -> case s of
+-- (\s -> case s of
 --          Con x y z -> Right (x,y,z)
---          _         -> Left x
+--          _         -> Left s
 -- ) :: s -> Either s a
 makeSimpleRemitter :: Name -> Int -> ExpQ
 makeSimpleRemitter conName fields =
@@ -341,7 +341,7 @@ makeSimpleRemitter conName fields =
 
 -- | Pattern match all constructors to enable type-changing
 --
--- (\x -> case s of
+-- (\s -> case s of
 --          Con x y z -> Right (x,y,z)
 --          Other_n w   -> Left (Other_n w)
 -- ) :: s -> Either t a
