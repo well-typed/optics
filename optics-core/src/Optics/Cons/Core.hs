@@ -38,6 +38,7 @@ import Data.Tuple.Optics
 import Optics.AffineFold
 import Optics.AffineTraversal
 import Optics.Coerce
+import Optics.Internal.Utils
 import Optics.Optic
 import Optics.Prism
 import Optics.Review
@@ -86,7 +87,7 @@ class Cons s t a b | s -> a, t -> b, s b -> t, t a -> s where
   _Cons :: Prism s t (a, s) (b, t)
 
 instance Cons [a] [b] a b where
-  _Cons = prism (uncurry (:)) $ \ aas -> case aas of
+  _Cons = prism (uncurry' (:)) $ \aas -> case aas of
     (a:as) -> Right (a, as)
     []     -> Left  []
   {-# INLINE _Cons #-}
@@ -100,7 +101,7 @@ instance Cons (ZipList a) (ZipList b) a b where
   {-# INLINE _Cons #-}
 
 instance Cons (Seq a) (Seq b) a b where
-  _Cons = prism (uncurry (Seq.<|)) $ \aas -> case viewl aas of
+  _Cons = prism (uncurry' (Seq.<|)) $ \aas -> case viewl aas of
     a Seq.:< as -> Right (a, as)
     EmptyL  -> Left mempty
   {-# INLINE _Cons #-}
@@ -238,7 +239,7 @@ instance Snoc (ZipList a) (ZipList b) a b where
   {-# INLINE _Snoc #-}
 
 instance Snoc (Seq a) (Seq b) a b where
-  _Snoc = prism (uncurry (Seq.|>)) $ \aas -> case viewr aas of
+  _Snoc = prism (uncurry' (Seq.|>)) $ \aas -> case viewr aas of
     as Seq.:> a -> Right (as, a)
     EmptyR  -> Left mempty
   {-# INLINE _Snoc #-}

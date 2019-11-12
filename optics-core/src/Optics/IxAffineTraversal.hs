@@ -44,6 +44,7 @@ import Data.Profunctor.Indexed
 
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed affine traversal.
 type IxAffineTraversal i s t a b = Optic An_AffineTraversal (WithIx i) s t a b
@@ -71,7 +72,7 @@ type IxAffineTraversalVL' i s a = IxAffineTraversalVL i s s a a
 -- representation, use 'iatraversalVL'.
 iatraversal :: (s -> Either t (i, a)) -> (s -> b -> t) -> IxAffineTraversal i s t a b
 iatraversal match update = iatraversalVL $ \point f s ->
-  either point (\a -> update s <$> uncurry f a) (match s)
+  either point (\a -> update s <$> uncurry' f a) (match s)
 {-# INLINE iatraversal #-}
 
 -- | Build an indexed affine traversal from the van Laarhoven representation.

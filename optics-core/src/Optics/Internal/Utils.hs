@@ -15,6 +15,7 @@ module Optics.Internal.Utils
 
   , (#.)
   , (.#)
+  , uncurry'
   ) where
 
 import qualified Data.Semigroup as SG
@@ -103,3 +104,8 @@ instance Applicative f => Applicative (OrT f) where
 wrapOrT :: f a -> OrT f a
 wrapOrT = OrT True
 {-# INLINE wrapOrT #-}
+
+-- | 'uncurry' with no lazy pattern matching for more efficient code.
+uncurry' :: (a -> b -> c) -> (a, b) -> c
+uncurry' f (a, b) = f a b
+{-# INLINE uncurry' #-}

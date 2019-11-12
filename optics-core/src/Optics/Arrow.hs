@@ -16,6 +16,7 @@ import Optics.AffineTraversal
 import Optics.Prism
 import Optics.Setter
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 newtype WrappedArrow p i a b = WrapArrow { unwrapArrow :: p a b }
 
@@ -105,7 +106,7 @@ assignA
   :: (Is k A_Setter, Arrow arr)
   => Optic k is s t a b
   -> arr s b -> arr s t
-assignA o p = arr (flip $ set o) &&& p >>> arr (uncurry id)
+assignA o p = arr (flip $ set o) &&& p >>> arr (uncurry' id)
 {-# INLINE assignA #-}
 
 ----------------------------------------

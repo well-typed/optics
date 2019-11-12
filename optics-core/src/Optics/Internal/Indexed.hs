@@ -238,7 +238,7 @@ instance FunctorWithIndex k ((,) k) where
   {-# INLINE imap #-}
 
 instance FoldableWithIndex k ((,) k) where
-  ifoldMap = uncurry
+  ifoldMap = uncurry'
   {-# INLINE ifoldMap #-}
 
 instance TraversableWithIndex k ((,) k) where
@@ -257,7 +257,7 @@ instance FunctorWithIndex Int []
 instance FoldableWithIndex Int []
 instance TraversableWithIndex Int [] where
   -- Faster than @indexing traverse@, also best for folds and setters.
-  itraverse f = traverse (uncurry f) . Prelude.zip [0..]
+  itraverse f = traverse (uncurry' f) . Prelude.zip [0..]
   {-# INLINE itraverse #-}
 
 -- ZipList
@@ -274,7 +274,7 @@ instance FunctorWithIndex Int NonEmpty
 instance FoldableWithIndex Int NonEmpty
 instance TraversableWithIndex Int NonEmpty where
   itraverse f ~(a :| as) =
-    (:|) <$> f 0 a <*> traverse (uncurry f) (Prelude.zip [1..] as)
+    (:|) <$> f 0 a <*> traverse (uncurry' f) (Prelude.zip [1..] as)
   {-# INLINE itraverse #-}
 
 -- Maybe
@@ -352,16 +352,16 @@ instance TraversableWithIndex k (Map.Map k) where
 
 instance Ix i => FunctorWithIndex i (Array.Array i) where
   imap f arr = Array.listArray (Array.bounds arr)
-    . fmap (uncurry f) $ Array.assocs arr
+    . fmap (uncurry' f) $ Array.assocs arr
   {-# INLINE imap #-}
 
 instance Ix i => FoldableWithIndex i (Array.Array i) where
-  ifoldMap f = foldMap (uncurry f) . Array.assocs
+  ifoldMap f = foldMap (uncurry' f) . Array.assocs
   {-# INLINE ifoldMap #-}
 
 instance Ix i => TraversableWithIndex i (Array.Array i) where
   itraverse f arr = Array.listArray (Array.bounds arr)
-    <$> traverse (uncurry f) (Array.assocs arr)
+    <$> traverse (uncurry' f) (Array.assocs arr)
   {-# INLINE itraverse #-}
 
 -- Compose
