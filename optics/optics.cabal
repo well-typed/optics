@@ -84,6 +84,7 @@ library
                     , Optics.Indexed
                     , Optics.Label
                     , Optics.Operators
+                    , Optics.Operators.Unsafe
                     , Optics.Passthrough
                     , Optics.Re
                     , Optics.ReadOnly

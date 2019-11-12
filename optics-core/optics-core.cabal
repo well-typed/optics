@@ -74,6 +74,7 @@ library
                    Optics.Indexed.Core
                    Optics.Label
                    Optics.Operators
+                   Optics.Operators.Unsafe
                    Optics.Re
                    Optics.ReadOnly
 
