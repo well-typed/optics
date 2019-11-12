@@ -21,6 +21,10 @@ miscTests = testGroup "Miscellaneous"
     assertSuccess $(inspectTest $ hasNoProfunctors 'seqIx)
   , testCase "optimized itoList" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkitoListOf)
+  , testCase "optimized partsOf" $
+    ghc80failure $(inspectTest $ hasNoProfunctors 'checkPartsOf)
+  , testCase "optimized singular" $
+    ghc80failure $(inspectTest $ hasNoProfunctors 'checkSingular)
   ]
 
 simpleMapIx
@@ -37,3 +41,15 @@ seqIx i = toListOf (folded % ix i)
 
 checkitoListOf :: Int -> [S.Seq a] -> [(Int, a)]
 checkitoListOf i = itoListOf (ifolded % ix i)
+
+checkPartsOf
+  :: Traversable f
+  => (f (Either a b), c)
+  -> (f (Either a b), c)
+checkPartsOf = partsOf (_1 % traversed % _Right) %~ reverse
+
+checkSingular
+  :: Traversable f
+  => Either (f (a, Char)) b
+  -> Either (f (a, Char)) b
+checkSingular = singular (_Left % traversed % _2) .~ 'x'
