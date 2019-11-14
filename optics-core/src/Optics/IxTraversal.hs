@@ -58,6 +58,7 @@ module Optics.IxTraversal
   , indices
   , ibackwards
   , ipartsOf
+  , isingular
 
   -- * Subtyping
   , A_Traversal
@@ -84,6 +85,7 @@ import Optics.Internal.Indexed
 import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
 import Optics.Internal.Utils
+import Optics.IxAffineTraversal
 import Optics.IxLens
 import Optics.IxFold
 import Optics.ReadOnly
@@ -288,14 +290,12 @@ elements = elementsOf traversed
 {-# INLINE elements #-}
 
 -- | Traverse the /nth/ element of a 'Traversal' if it exists.
---
--- TODO: the result ideally should be an indexed affine traversal.
 elementOf
   :: Is k A_Traversal
-  => Optic k is s t a a
+  => Optic' k is s a
   -> Int
-  -> IxTraversal Int s t a a
-elementOf o = \i -> elementsOf o (== i)
+  -> IxAffineTraversal' Int s a
+elementOf o = \i -> isingular $ elementsOf o (== i)
 {-# INLINE elementOf #-}
 
 -- | Traverse the /nth/ element of a 'Traversable' container.
@@ -303,7 +303,7 @@ elementOf o = \i -> elementsOf o (== i)
 -- @
 -- 'element' ≡ 'elementOf' 'traversed'
 -- @
-element :: Traversable f => Int -> IxTraversal' Int (f a) a
+element :: Traversable f => Int -> IxAffineTraversal' Int (f a) a
 element = elementOf traversed
 {-# INLINE element #-}
 
@@ -321,6 +321,29 @@ ipartsOf o = conjoined (partsOf o) $ ilensVL $ \f s ->
       []       ->            pure a
       a' : as' -> put as' >> pure a'
 {-# INLINE ipartsOf #-}
+
+-- | Convert an indexed traversal to an 'IxAffineTraversal' that visits the
+-- first element of the original traversal.
+--
+-- For the fold version see 'Optics.IxFold.ipre'.
+--
+-- >>> [1,2,3] & iover (isingular itraversed) (-)
+-- [-1,2,3]
+--
+-- @since 0.2.1
+isingular
+  :: forall k is i s a. (Is k A_Traversal, is `HasSingleIndex` i)
+  => Optic' k is s a
+  -> IxAffineTraversal' i s a
+isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
+  case iheadOf (castOptic @A_Traversal o) s of
+    Nothing     -> point s
+    Just (i, a) -> evalState (traverseOf o update s) . Just <$> f i a
+  where
+    update a = get >>= \case
+      Just a' -> put Nothing >> pure a'
+      Nothing ->                pure a
+{-# INLINE isingular #-}
 
 -- $setup
 -- >>> import Data.Void

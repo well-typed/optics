@@ -61,6 +61,7 @@ module Optics.Traversal
     -- * Combinators
   , backwards
   , partsOf
+  , singular
 
   -- * Subtyping
   , A_Traversal
@@ -82,6 +83,7 @@ import Data.Functor.Identity
 
 import Data.Profunctor.Indexed
 
+import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Traversal
@@ -317,6 +319,29 @@ partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
       a' : as' -> put as' >> pure a'
       []       ->            pure a
 {-# INLINE partsOf #-}
+
+-- | Convert a traversal to an 'AffineTraversal' that visits the first element
+-- of the original traversal.
+--
+-- For the fold version see 'Optics.Fold.pre'.
+--
+-- >>> "foo" & singular traversed .~ 'z'
+-- "zoo"
+--
+-- @since 0.2.1
+singular
+  :: forall k is s a. Is k A_Traversal
+  => Optic' k is s a
+  -> AffineTraversal' s a
+singular o = atraversalVL $ \point f s ->
+  case headOf (castOptic @A_Traversal o) s of
+    Nothing -> point s
+    Just a  -> evalState (traverseOf o update s) . Just <$> f a
+  where
+    update a = get >>= \case
+      Just a' -> put Nothing >> pure a'
+      Nothing ->                pure a
+{-# INLINE singular #-}
 
 -- $setup
 -- >>> import Data.List

@@ -187,6 +187,8 @@ ifoldring fr = Optic (ifoldring__ fr)
 
 -- | Convert an indexed fold to an 'IxAffineFold' that visits the first element
 -- of the original fold.
+--
+-- For the traversal version see 'Optics.IxTraversal.isingular'.
 ipre
   :: (Is k A_Fold, is `HasSingleIndex` i)
   => Optic' k is s a

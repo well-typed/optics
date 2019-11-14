@@ -707,6 +707,9 @@ import Data.Either.Optics                    as P
 --   of the input 'Iso', for example 'Review' reverses to 'Getter' while a
 --   reversed 'Iso' is still an 'Iso'.  Thus there is no separate @from@
 --   combinator for reversing 'Iso's.
+--
+-- * 'singular' ('isingular' for indexed optics) doesn't produce a partial lens
+--   that might fail with a runtime error, but an affine traversal.
 
 
 -- $otherresources

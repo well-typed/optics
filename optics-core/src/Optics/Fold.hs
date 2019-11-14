@@ -231,6 +231,8 @@ unfolded step = foldVL $ \f -> fix $ \loop b ->
 
 -- | Convert a fold to an 'AffineFold' that visits the first element of the
 -- original fold.
+--
+-- For the traversal version see 'Optics.Traversal.singular'.
 pre :: Is k A_Fold => Optic' k is s a -> AffineFold s a
 pre = afolding . headOf
 {-# INLINE pre #-}
