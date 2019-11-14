@@ -49,6 +49,8 @@ module Optics.Optic
   , NonEmptyIndices
   , HasSingleIndex
   , AcceptsEmptyIndices
+  , Curry
+  , CurryCompose
 
     -- * Base re-exports
   , (&)
