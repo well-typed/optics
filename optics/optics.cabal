@@ -136,9 +136,11 @@ test-suite optics-tests
                , mtl
                , optics
                , optics-core
+               , QuickCheck
                , random
                , tasty
                , tasty-hunit
+               , tasty-quickcheck
                , template-haskell
 
   type:    exitcode-stdio-1.0
@@ -149,6 +151,7 @@ test-suite optics-tests
                  Optics.Tests.Eta
                  Optics.Tests.Labels
                  Optics.Tests.Misc
+                 Optics.Tests.Properties
                  Optics.Tests.Utils
 
 -- Benchmarking folds
