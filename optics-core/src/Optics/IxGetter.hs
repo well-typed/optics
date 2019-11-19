@@ -28,6 +28,7 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- | Type synonym for an indexed getter.
 type IxGetter i s a = Optic' A_Getter (WithIx i) s a
@@ -37,7 +38,7 @@ type IxGetter i s a = Optic' A_Getter (WithIx i) s a
 -- >>> iview (ito id) ('i', 'x')
 -- ('i','x')
 ito :: (s -> (i, a)) -> IxGetter i s a
-ito f = Optic (lmap f . ilinear uncurry . rphantom)
+ito f = Optic (lmap f . ilinear uncurry' . rphantom)
 {-# INLINE ito #-}
 
 -- | Use a value itself as its own index. This is essentially an indexed version

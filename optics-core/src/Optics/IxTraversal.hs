@@ -315,7 +315,7 @@ ipartsOf
   -> IxLens [i] s t [a] [a]
 ipartsOf o = conjoined (partsOf o) $ ilensVL $ \f s ->
   evalState (traverseOf o update s)
-    <$> uncurry f (unzip $ itoListOf (getting $ castOptic @A_Traversal o) s)
+    <$> uncurry' f (unzip $ itoListOf (getting $ castOptic @A_Traversal o) s)
   where
     update a = get >>= \case
       []       ->            pure a

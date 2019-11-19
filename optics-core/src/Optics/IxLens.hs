@@ -48,6 +48,7 @@ import Data.Profunctor.Indexed
 
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed lens.
 type IxLens i s t a b = Optic A_Lens (WithIx i) s t a b
@@ -67,7 +68,7 @@ type IxLensVL' i s a = IxLensVL i s s a a
 -- If you want to build an 'IxLens' from the van Laarhoven representation, use
 -- 'ilensVL'.
 ilens :: (s -> (i, a)) -> (s -> b -> t) -> IxLens i s t a b
-ilens get set = ilensVL $ \f s -> set s <$> uncurry f (get s)
+ilens get set = ilensVL $ \f s -> set s <$> uncurry' f (get s)
 {-# INLINE ilens #-}
 
 -- | Build an indexed lens from the van Laarhoven representation.

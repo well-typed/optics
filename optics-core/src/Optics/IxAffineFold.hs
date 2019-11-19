@@ -39,6 +39,7 @@ import Optics.AffineFold
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- | Type synonym for an indexed affine fold.
 type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
@@ -65,7 +66,7 @@ ipreviews o = \f -> runIxForgetM
 -- | Create an 'IxAffineFold' from a partial function.
 iafolding :: (s -> Maybe (i, a)) -> IxAffineFold i s a
 iafolding g = Optic
-  $ ivisit (\point f s -> maybe (point s) (uncurry f) $ g s)
+  $ ivisit (\point f s -> maybe (point s) (uncurry' f) $ g s)
   . rphantom
 {-# INLINE iafolding #-}
 
