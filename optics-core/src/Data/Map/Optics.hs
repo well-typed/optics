@@ -59,7 +59,7 @@ import Optics.Optic
 -- | Construct a map from an 'IxFold'.
 --
 -- The construction is left-biased (see 'Map.union'), i.e. the first
--- occurences of keys in the fold or traversal order are preferred.
+-- occurrences of keys in the fold or traversal order are preferred.
 --
 -- >>> toMapOf ifolded ["hello", "world"]
 -- fromList [(0,"hello"),(1,"world")]
