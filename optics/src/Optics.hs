@@ -838,7 +838,7 @@ import Data.Either.Optics                    as P
 -- >>> itoListOf (ifolded <%> ifolded) [['a','b'], ['c', 'd']]
 -- [((0,0),'a'),((0,1),'b'),((1,0),'c'),((1,1),'d')]
 --
--- In the diagram below, the optics hierachy is amended with these (singly) indexed variants (in blue).
+-- In the diagram below, the optics hierarchy is amended with these (singly) indexed variants (in blue).
 -- Orange arrows mean
 -- "can be used as one, assuming it's composed with any optic below the
 -- orange arrow first". For example. '_1' is not an indexed fold, but
