@@ -31,7 +31,7 @@ instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
                                          ':<>: 'Text " cannot be used as "
                                          ':<>: 'ShowType l
                                         ) => Is k l where
-  implies = error "unreachable"
+  implies _ _ = error "unreachable"
 
 -- | Every kind of optic can be used as itself.
 instance Is k k where
