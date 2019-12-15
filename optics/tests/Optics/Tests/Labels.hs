@@ -22,6 +22,30 @@ import qualified System.Random as R
 import Optics
 import Optics.Tests.Utils
 
+data Mammal
+  = Dog { mammalName :: String, mammalAge :: Int }
+  | Cat { mammalName :: String, mammalAge :: Int, mammalLazy :: Bool }
+  deriving Show
+
+data Fish = GoldFish { fishName :: String } | Herring { fishName :: String }
+  deriving Show
+
+data Human a = Human
+  { humanName :: String
+  , humanAge :: Int
+  , humanFish :: Fish
+  , humanPets :: [a]
+  }
+  deriving Show
+
+makeFieldLabels ''Mammal
+makePrismLabels ''Mammal
+makeFieldLabels ''Fish
+makePrismLabels ''Fish
+makeFieldLabels ''Human
+
+----------------------------------------
+
 labelsTests :: TestTree
 labelsTests = testGroup "Labels"
   [
@@ -67,23 +91,7 @@ label5rhs s name_ age_ fishName_ pets_ = s
   }
 
 ----------------------------------------
--- Data definitions
-
-data Mammal
-  = Dog { mammalName :: String, mammalAge :: Int }
-  | Cat { mammalName :: String, mammalAge :: Int, mammalLazy :: Bool }
-  deriving Show
-
-data Fish = GoldFish { fishName :: String } | Herring { fishName :: String }
-  deriving Show
-
-data Human a = Human
-  { humanName :: String
-  , humanAge :: Int
-  , humanFish :: Fish
-  , humanPets :: [a]
-  }
-  deriving Show
+-- Basic data manipulation
 
 human :: Human Mammal
 human = Human
@@ -92,15 +100,6 @@ human = Human
   , humanFish = GoldFish "Goldie"
   , humanPets = [Dog "Rocky" 3, Cat "Pickle" 4 True, Cat "Max" 1 False]
   }
-
-makeFieldLabels ''Mammal
-makePrismLabels ''Mammal
-makeFieldLabels ''Fish
-makePrismLabels ''Fish
-makeFieldLabels ''Human
-
-----------------------------------------
--- Basic data manipulation
 
 petNames :: [String]
 petNames = toListOf (#pets % folded % #name) human
