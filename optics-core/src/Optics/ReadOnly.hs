@@ -26,19 +26,15 @@ class ToReadOnly k s t a b where
   --
   -- Example:
   --
-  -- @
-  -- λ> let fstIntToChar = _1 :: Lens (Int, r) (Char, r) Int Char
-  -- λ> :t view fstIntToChar
+  -- >>> let fstIntToChar = _1 :: Lens (Int, r) (Char, r) Int Char
   --
-  -- <interactive>:1:6: error:
-  --     • Couldn't match type ‘Char’ with ‘Int’
-  --       Expected type: Optic' A_Lens NoIx (Int, r) Int
-  --         Actual type: Lens (Int, r) (Char, r) Int Char
-  --     • In the first argument of ‘view’, namely ‘fstIntToChar’
-  --       In the expression: view fstIntToChar
-  -- λ> :t view (getting fstIntToChar)
+  -- >>> :t view fstIntToChar
+  -- ...
+  -- ...Couldn't match type ‘Char’ with ‘Int’
+  -- ...
+  --
+  -- >>> :t view (getting fstIntToChar)
   -- view (getting fstIntToChar) :: (Int, r) -> Int
-  -- @
   getting :: Optic k is s t a b -> Optic' (Join A_Getter k) is s a
 
 instance ToReadOnly An_Iso s t a b where
@@ -84,3 +80,6 @@ getting__
   -> Optic__ p i (Curry is i) s s a a
 getting__ (Optic o) = rphantom . o . rphantom
 {-# INLINE getting__ #-}
+
+-- $setup
+-- >>> import Optics.Core

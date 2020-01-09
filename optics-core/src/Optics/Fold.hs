@@ -136,6 +136,9 @@ foldlOf' o = \rar r0 s -> foldrOf o (\a rr r -> rr $! rar r a) id s r0
 {-# INLINE foldlOf' #-}
 
 -- | Fold to a list.
+--
+-- >>> toListOf (_1 % folded % _Right) ([Right 'h', Left 5, Right 'i'], "bye")
+-- "hi"
 toListOf :: Is k A_Fold => Optic' k is s a -> s -> [a]
 toListOf o = foldrOf o (:) []
 {-# INLINE toListOf #-}
