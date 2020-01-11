@@ -6,7 +6,7 @@ build-type:      Simple
 maintainer:      optics@well-typed.com
 author:          Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
 cabal-version:   1.24
-tested-with:     ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1, GHCJS ==8.4
+tested-with:     ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.1 || ==8.10.1, GHCJS ==8.4
 synopsis:        Optics as an abstract interface
 category:        Data, Optics, Lenses
 description:

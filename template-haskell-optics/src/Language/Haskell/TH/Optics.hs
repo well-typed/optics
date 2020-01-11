@@ -1604,7 +1604,16 @@ _LamCaseE
       remitter (LamCaseE x) = Just x
       remitter _ = Nothing
 
+-- |
+-- @
+-- _TupE :: 'Prism'' 'Exp' ['Maybe' 'Exp'] -- template-haskell-2.16+
+-- _TupE :: 'Prism'' 'Exp' ['Exp']       -- Earlier versions
+-- @
+#if MIN_VERSION_template_haskell(2,16,0)
+_TupE :: Prism' Exp [Maybe Exp]
+#else
 _TupE :: Prism' Exp [Exp]
+#endif
 _TupE
   = prism' reviewer remitter
   where
@@ -1612,7 +1621,16 @@ _TupE
       remitter (TupE x) = Just x
       remitter _ = Nothing
 
+-- |
+-- @
+-- _UnboxedTupE :: 'Prism'' 'Exp' ['Maybe' 'Exp'] -- template-haskell-2.16+
+-- _UnboxedTupE :: 'Prism'' 'Exp' ['Exp']       -- Earlier versions
+-- @
+#if MIN_VERSION_template_haskell(2,16,0)
+_UnboxedTupE :: Prism' Exp [Maybe Exp]
+#else
 _UnboxedTupE :: Prism' Exp [Exp]
+#endif
 _UnboxedTupE
   = prism' reviewer remitter
   where
