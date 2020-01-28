@@ -75,12 +75,14 @@ module Optics.Iso
   , under
 
   -- * Combinators
-  -- | The 'Optics.Re.re' combinator can be used to reverse an 'Iso':
+  -- | The 'Optics.Re.re' combinator can be used to reverse an 'Iso', and the
+  -- 'Optics.Mapping.mapping' combinator to lift an 'Iso' to an 'Iso' on
+  -- functorial values.
   --
   -- @
-  -- 'Optics.Re.re' :: 'Iso' s t a b -> 'Iso' b a t s
+  -- 'Optics.Re.re'      ::                           'Iso' s t a b -> 'Iso' b a t s
+  -- 'Optics.Mapping.mapping' :: (Functor f, Functor g) => 'Iso' s t a b -> 'Iso' (f s) (g t) (f a) (g b)
   -- @
-  , mapping
 
   -- * Subtyping
   , An_Iso
@@ -149,14 +151,6 @@ under k = withIso k $ \sa bt ts -> sa . ts . bt
 
 ----------------------------------------
 -- Isomorphisms
-
--- | This can be used to lift any 'Iso' into an arbitrary 'Functor'.
-mapping
-  :: (Functor f, Functor g)
-  => Iso    s     t     a     b
-  -> Iso (f s) (g t) (f a) (g b)
-mapping k = withIso k $ \sa bt -> iso (fmap sa) (fmap bt)
-{-# INLINE mapping #-}
 
 -- | Capture type constraints as an isomorphism.
 --

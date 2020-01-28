@@ -115,6 +115,11 @@ module Optics
   -- counterpart.
   , module Optics.ReadOnly
 
+  -- ** Mapping
+
+  -- | Defines 'mapping' through 'Functor's
+  , module Optics.Mapping
+
   -- ** 'Setter' utilities for working in 'Control.Monad.State.MonadState'.
   , module Optics.State
 
@@ -204,6 +209,7 @@ import Optics.Cons
 import Optics.Each
 import Optics.Empty
 import Optics.Indexed
+import Optics.Mapping
 import Optics.Operators
 import Optics.Re
 import Optics.ReadOnly

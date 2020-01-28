@@ -83,6 +83,7 @@ library
                     , Optics.Empty
                     , Optics.Indexed
                     , Optics.Label
+                    , Optics.Mapping
                     , Optics.Operators
                     , Optics.Operators.Unsafe
                     , Optics.Passthrough
