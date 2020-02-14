@@ -10,6 +10,7 @@ import Optics.Tests.Core
 import Optics.Tests.Eta
 import Optics.Tests.Labels
 import Optics.Tests.Misc
+import Optics.Tests.Properties
 
 -- | Composing a lens and a traversal yields a traversal
 _comp1 :: Traversable t => Optic A_Traversal NoIx (t a, y) (t b, y) a b
@@ -48,4 +49,5 @@ main = defaultMain $ testGroup "Tests"
     , miscTests
     ]
   , computationTests
+  , propertiesTests
   ]
