@@ -28,7 +28,7 @@ Edward Kmett and contributors.
 
 ## Package structure
 
-### Offically supported packages
+### Officially supported packages
 
  * [`optics`](https://hackage.haskell.org/package/optics) is a
    "batteries-included" package with many dependencies. It incorporates:
