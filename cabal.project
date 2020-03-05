@@ -7,6 +7,7 @@ packages:
   optics-vl/*.cabal
   indexed-profunctors/*.cabal
   template-haskell-optics/*.cabal
+  generic-optics-labels/*.cabal
 
 -- An example, using optics to generate optics diagrams
 packages:

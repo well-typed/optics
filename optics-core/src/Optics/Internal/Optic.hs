@@ -30,6 +30,7 @@ module Optics.Internal.Optic
   -- * Labels
   , LabelOptic(..)
   , LabelOptic'
+  , GeneralLabelOptic(..)
   -- * Re-exports
   , module Optics.Internal.Optic.Subtyping
   , module Optics.Internal.Optic.Types
@@ -40,6 +41,7 @@ import Data.Function ((&))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 import Data.Type.Equality
+import GHC.Generics (Rep)
 import GHC.OverloadedLabels
 import GHC.TypeLits
 
@@ -225,13 +227,41 @@ instance
   ) => LabelOptic name k Void0 Void0 a b where
   labelOptic = Optic id
 
+-- | Type synonym for a type-preserving optic as overloaded label.
+type LabelOptic' name k s a = LabelOptic name k s s a a
+
+-- | Implements fallback behaviour in case there is no explicit 'LabelOptic'
+-- instance. This has a catch-all incoherent instance that merely yields an
+-- error message.  However, a downstream module can give a more specific
+-- instance that uses 'Generic' to construct an optic automatically.
+--
+-- To support this, the last parameter will be instantiated to 'True' if at
+-- least one of @s@ or @t@ has a 'Generic' instance.
+class GeneralLabelOptic (name :: Symbol) k s t a b (has_rep :: Bool) where
+  -- | Used to interpret overloaded label syntax in the absence of an explicit
+  -- 'LabelOptic' instance.
+  generalLabelOptic :: Optic k NoIx s t a b
+
+-- | If no instance matches, fall back on 'GeneralLabelOptic'.
+instance {-# OVERLAPPABLE #-}
+  (LabelOptic name k s t a b,  -- Needed to satisfy functional dependecy
+  GeneralLabelOptic name k s t a b (HasRep (Rep s) (Rep t))
+  ) => LabelOptic name k s t a b where
+  labelOptic = generalLabelOptic @name @k @s @t @a @b @(HasRep (Rep s) (Rep t))
+
+-- | This type family should be called with applications of 'Rep' on both sides,
+-- and will reduce to 'True' if at least one of them is defined; otherwise it is
+-- stuck.
+type family HasRep (s :: Type -> Type) (t :: Type -> Type) :: Bool
+type instance HasRep (s x) t = 'True
+type instance HasRep s (t x) = 'True
+
 -- | If no instance matches, GHC tends to bury error messages "No instance for
 -- LabelOptic..." within a ton of other error messages about ambiguous type
 -- variables and overlapping instances which are irrelevant and confusing. Use
--- overlappable instance providing a custom type error to cut its efforts short.
-instance {-# OVERLAPPABLE #-}
-  (LabelOptic name k s t a b,
-   TypeError
+-- incoherent instance providing a custom type error to cut its efforts short.
+instance {-# INCOHERENT #-}
+  TypeError
    ('Text "No instance for LabelOptic " ':<>: 'ShowType name
     ':<>: 'Text " " ':<>: QuoteType k
     ':<>: 'Text " " ':<>: QuoteType s
@@ -239,11 +269,8 @@ instance {-# OVERLAPPABLE #-}
     ':<>: 'Text " " ':<>: QuoteType a
     ':<>: 'Text " " ':<>: QuoteType b
     ':$$: 'Text "  (maybe you forgot to define it or misspelled a name?)")
-  ) => LabelOptic name k s t a b where
-  labelOptic = error "unreachable"
-
--- | Type synonym for a type-preserving optic as overloaded label.
-type LabelOptic' name k s a = LabelOptic name k s s a a
+   => GeneralLabelOptic name k s t a b has_rep where
+  generalLabelOptic = error "unreachable"
 
 instance
   (LabelOptic name k s t a b, is ~ NoIx

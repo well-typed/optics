@@ -1,0 +1,51 @@
+name:          generic-optics-labels
+version:       0.2
+license:       BSD3
+license-file:  LICENSE
+build-type:    Simple
+cabal-version: 1.24
+maintainer:    optics@well-typed.com
+author:        Adam Gundry
+tested-with:   GHC ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.2 || ==8.10.1, GHCJS ==8.4
+synopsis:      TODO
+category:      Data, Optics, Lenses
+description:
+  TODO
+
+extra-doc-files:
+  CHANGELOG.md
+
+bug-reports:   https://github.com/well-typed/optics/issues
+source-repository head
+  type:     git
+  location: https://github.com/well-typed/optics.git
+  subdir:   generic-optics-labels
+
+library
+  default-language: Haskell2010
+  hs-source-dirs:   src
+  ghc-options:      -Wall
+
+  build-depends: base >= 4.9 && <5
+               , optics-core == 0.2
+               , generic-optics == 2.0.*
+
+  exposed-modules: Optics.Label.Test
+                   Optics.Label.Generic
+
+  default-extensions: BangPatterns
+                      DefaultSignatures
+                      DeriveFunctor
+                      FlexibleContexts
+                      FlexibleInstances
+                      FunctionalDependencies
+                      GADTs
+                      InstanceSigs
+                      LambdaCase
+                      MultiParamTypeClasses
+                      RankNTypes
+                      ScopedTypeVariables
+                      TupleSections
+                      TypeApplications
+                      TypeFamilies
+                      TypeOperators
