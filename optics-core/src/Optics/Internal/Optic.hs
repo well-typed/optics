@@ -145,11 +145,13 @@ infixl 9 %%
 Optic o %% Optic o' = Optic oo
   where
     -- unsafeCoerce to the rescue, for a proof see below.
-    oo :: forall p i. Profunctor p => Optic_ k p i (Curry ks i) s t a b
+    oo :: forall p i. (Profunctor p, Constraints k p) => Optic__ p i (Curry ks i) s t a b
     oo = (unsafeCoerce
-           :: Optic_ k p i (Curry is (Curry js i)) s t a b
-           -> Optic_ k p i (Curry ks i           ) s t a b)
-      (o . o')
+           :: Optic__ p i (Curry is (Curry js i)) s t a b
+           -> Optic__ p i (Curry ks i           ) s t a b)
+      ( (o  :: Optic__ p (Curry js i) (Curry is (Curry js i)) s t u v)
+      . (o' :: Optic__ p i            (Curry js i)            u v a b)
+      )
 {-# INLINE (%%) #-}
 
 -- | Flipped function application, specialised to optics and binding tightly.

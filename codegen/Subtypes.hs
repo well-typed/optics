@@ -146,7 +146,7 @@ genSubtypes = either (fail . show) id $ runG opticsKind $ \g -> do
                     [ "instance Is"
                     , leftpad (show k)
                     , leftpad (show k')
-                    , "where implies _ = id"
+                    , "where implies _ r = r"
                     ]
 
 -------------------------------------------------------------------------------

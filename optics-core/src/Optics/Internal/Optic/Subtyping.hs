@@ -24,7 +24,10 @@ import Optics.Internal.Optic.Types
 class Is k l where
   -- | Witness of the subtyping relationship.
   implies ::
-    proxy k l p -> (Constraints k p => r) -> (Constraints l p => r)
+    -- morally:
+    --   proxy k l p -> (Constraints k p => r) -> (Constraints l p => r)
+    -- but we make the type less "RankN".
+    Constraints l p => proxy k l p -> (Constraints k p => r) -> r
 
 -- | Overlappable instance for a custom type error.
 instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
@@ -35,57 +38,57 @@ instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
 
 -- | Every kind of optic can be used as itself.
 instance Is k k where
-  implies _ = id
+  implies _ r = r
 
 ----------------------------------------
 
 -- BEGIN GENERATED CONTENT
 
 -- An_Iso
-instance Is An_Iso             A_ReversedLens     where implies _ = id
-instance Is An_Iso             A_ReversedPrism    where implies _ = id
-instance Is An_Iso             A_Prism            where implies _ = id
-instance Is An_Iso             A_Review           where implies _ = id
-instance Is An_Iso             A_Lens             where implies _ = id
-instance Is An_Iso             A_Getter           where implies _ = id
-instance Is An_Iso             An_AffineTraversal where implies _ = id
-instance Is An_Iso             An_AffineFold      where implies _ = id
-instance Is An_Iso             A_Traversal        where implies _ = id
-instance Is An_Iso             A_Fold             where implies _ = id
-instance Is An_Iso             A_Setter           where implies _ = id
+instance Is An_Iso             A_ReversedLens     where implies _ r = r
+instance Is An_Iso             A_ReversedPrism    where implies _ r = r
+instance Is An_Iso             A_Prism            where implies _ r = r
+instance Is An_Iso             A_Review           where implies _ r = r
+instance Is An_Iso             A_Lens             where implies _ r = r
+instance Is An_Iso             A_Getter           where implies _ r = r
+instance Is An_Iso             An_AffineTraversal where implies _ r = r
+instance Is An_Iso             An_AffineFold      where implies _ r = r
+instance Is An_Iso             A_Traversal        where implies _ r = r
+instance Is An_Iso             A_Fold             where implies _ r = r
+instance Is An_Iso             A_Setter           where implies _ r = r
 -- A_ReversedLens
-instance Is A_ReversedLens     A_Review           where implies _ = id
+instance Is A_ReversedLens     A_Review           where implies _ r = r
 -- A_ReversedPrism
-instance Is A_ReversedPrism    A_Getter           where implies _ = id
-instance Is A_ReversedPrism    An_AffineFold      where implies _ = id
-instance Is A_ReversedPrism    A_Fold             where implies _ = id
+instance Is A_ReversedPrism    A_Getter           where implies _ r = r
+instance Is A_ReversedPrism    An_AffineFold      where implies _ r = r
+instance Is A_ReversedPrism    A_Fold             where implies _ r = r
 -- A_Prism
-instance Is A_Prism            A_Review           where implies _ = id
-instance Is A_Prism            An_AffineTraversal where implies _ = id
-instance Is A_Prism            An_AffineFold      where implies _ = id
-instance Is A_Prism            A_Traversal        where implies _ = id
-instance Is A_Prism            A_Fold             where implies _ = id
-instance Is A_Prism            A_Setter           where implies _ = id
+instance Is A_Prism            A_Review           where implies _ r = r
+instance Is A_Prism            An_AffineTraversal where implies _ r = r
+instance Is A_Prism            An_AffineFold      where implies _ r = r
+instance Is A_Prism            A_Traversal        where implies _ r = r
+instance Is A_Prism            A_Fold             where implies _ r = r
+instance Is A_Prism            A_Setter           where implies _ r = r
 -- A_Lens
-instance Is A_Lens             A_Getter           where implies _ = id
-instance Is A_Lens             An_AffineTraversal where implies _ = id
-instance Is A_Lens             An_AffineFold      where implies _ = id
-instance Is A_Lens             A_Traversal        where implies _ = id
-instance Is A_Lens             A_Fold             where implies _ = id
-instance Is A_Lens             A_Setter           where implies _ = id
+instance Is A_Lens             A_Getter           where implies _ r = r
+instance Is A_Lens             An_AffineTraversal where implies _ r = r
+instance Is A_Lens             An_AffineFold      where implies _ r = r
+instance Is A_Lens             A_Traversal        where implies _ r = r
+instance Is A_Lens             A_Fold             where implies _ r = r
+instance Is A_Lens             A_Setter           where implies _ r = r
 -- A_Getter
-instance Is A_Getter           An_AffineFold      where implies _ = id
-instance Is A_Getter           A_Fold             where implies _ = id
+instance Is A_Getter           An_AffineFold      where implies _ r = r
+instance Is A_Getter           A_Fold             where implies _ r = r
 -- An_AffineTraversal
-instance Is An_AffineTraversal An_AffineFold      where implies _ = id
-instance Is An_AffineTraversal A_Traversal        where implies _ = id
-instance Is An_AffineTraversal A_Fold             where implies _ = id
-instance Is An_AffineTraversal A_Setter           where implies _ = id
+instance Is An_AffineTraversal An_AffineFold      where implies _ r = r
+instance Is An_AffineTraversal A_Traversal        where implies _ r = r
+instance Is An_AffineTraversal A_Fold             where implies _ r = r
+instance Is An_AffineTraversal A_Setter           where implies _ r = r
 -- An_AffineFold
-instance Is An_AffineFold      A_Fold             where implies _ = id
+instance Is An_AffineFold      A_Fold             where implies _ r = r
 -- A_Traversal
-instance Is A_Traversal        A_Fold             where implies _ = id
-instance Is A_Traversal        A_Setter           where implies _ = id
+instance Is A_Traversal        A_Fold             where implies _ r = r
+instance Is A_Traversal        A_Setter           where implies _ r = r
 
 -- END GENERATED CONTENT
 
