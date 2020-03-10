@@ -39,6 +39,8 @@ e6 = view #foo
 -- e7 :: Int
 e7 = e6 (MkT 3)
 
+-- e8 :: Maybe Int
+e8 = preview #_MkT (MkT 1)
 
 {-
 *Optics.Label.Test> :set -XOverloadedLabels
