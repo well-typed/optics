@@ -25,6 +25,10 @@ miscTests = testGroup "Miscellaneous"
     ghc80failure $(inspectTest $ hasNoProfunctors 'checkPartsOf)
   , testCase "optimized singular" $
     ghc80failure $(inspectTest $ hasNoProfunctors 'checkSingular)
+  , testCase "optimized filteredBy" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkFilteredBy)
+  , testCase "optimized unsafeFilteredBy" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkUnsafeFilteredBy)
   ]
 
 simpleMapIx
@@ -53,3 +57,17 @@ checkSingular
   => Either (f (a, Char)) b
   -> Either (f (a, Char)) b
 checkSingular = singular (_Left % traversed % _2) .~ 'x'
+
+checkFilteredBy
+  :: Applicative f
+  => ((Maybe i, b) -> f r)
+  -> (Maybe i, b)
+  -> f ()
+checkFilteredBy = atraverseOf_ (filteredBy (_1 % _Just)) pure
+
+checkUnsafeFilteredBy
+  :: Applicative f
+  => (i -> Either a1 (a, Maybe i) -> f (Either a1 (a, Maybe i)))
+  -> Either a1 (a, Maybe i)
+  -> f (Either a1 (a, Maybe i))
+checkUnsafeFilteredBy = iatraverseOf (unsafeFilteredBy (_Right % _2 % _Just)) pure

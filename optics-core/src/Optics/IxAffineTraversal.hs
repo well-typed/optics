@@ -30,6 +30,9 @@ module Optics.IxAffineTraversal
   -- 'Optics.IxSetter.iset'     :: 'IxAffineTraversal' i s t a b -> (i      -> b) -> s -> t
   -- @
 
+  -- * Combinators
+  , unsafeFilteredBy
+
   -- * Subtyping
   , An_AffineTraversal
 
@@ -42,6 +45,7 @@ module Optics.IxAffineTraversal
 
 import Data.Profunctor.Indexed
 
+import Optics.AffineFold
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Utils
@@ -89,3 +93,18 @@ iatraverseOf
 iatraverseOf o point = \f ->
   runIxStarA (getOptic (castOptic @An_AffineTraversal o) (IxStarA point f)) id
 {-# INLINE iatraverseOf #-}
+
+-- | Obtain a potentially empty 'IxAffineTraversal' by taking the element from
+-- another 'AffineFold' and using it as an index.
+--
+-- -- /Note:/ This is /not/ a legal 'Optics.IxTraversal.IxTraversal', unless you
+-- are very careful not to invalidate the predicate on the target (see
+-- 'Optics.AffineTraversal.unsafeFiltered' for more details).
+unsafeFilteredBy
+  :: Is k An_AffineFold
+  => Optic' k is a i
+  -> IxAffineTraversal' i a a
+unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
+  Just i  -> f i s
+  Nothing -> point s
+{-# INLINE unsafeFilteredBy #-}

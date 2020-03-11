@@ -32,6 +32,9 @@ module Optics.IxAffineFold
   -- * Additional elimination forms
   , iatraverseOf_
 
+  -- * Combinators
+  , filteredBy
+
   -- * Semigroup structure
   , iafailing
 
@@ -96,6 +99,14 @@ iatraverseOf_ o point f s = case ipreview o s of
 iafolding :: (s -> Maybe (i, a)) -> IxAffineFold i s a
 iafolding g = iafoldVL (\point f s -> maybe (point s) (uncurry' f) $ g s)
 {-# INLINE iafolding #-}
+
+-- | Obtain a potentially empty 'IxAffineFold' by taking the element from
+-- another 'AffineFold' and using it as an index.
+filteredBy :: Is k An_AffineFold  => Optic' k is a i -> IxAffineFold i a a
+filteredBy p = iafoldVL $ \point f s -> case preview p s of
+  Just i  -> f i s
+  Nothing -> point s
+{-# INLINE filteredBy #-}
 
 -- | Try the first 'IxAffineFold'. If it returns no entry, try the second one.
 --
