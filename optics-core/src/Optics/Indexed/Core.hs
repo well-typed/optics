@@ -197,7 +197,7 @@ instance IxOptic A_Lens s t a b where
   {-# INLINE noIx #-}
 
 instance IxOptic An_AffineTraversal s t a b where
-  noIx o = atraversalVL (toAtraversalVL o)
+  noIx o = atraversalVL (atraverseOf o)
   {-# INLINE noIx #-}
 
 instance (s ~ t, a ~ b) => IxOptic An_AffineFold s t a b where

@@ -37,7 +37,7 @@ module Optics.IxAffineTraversal
   , IxAffineTraversalVL
   , IxAffineTraversalVL'
   , iatraversalVL
-  , toIxAtraversalVL
+  , iatraverseOf
   ) where
 
 import Data.Profunctor.Indexed
@@ -80,11 +80,12 @@ iatraversalVL :: IxAffineTraversalVL i s t a b -> IxAffineTraversal i s t a b
 iatraversalVL f = Optic (ivisit f)
 {-# INLINE iatraversalVL #-}
 
--- | Convert an indexed affine traversal to its van Laarhoven representation.
-toIxAtraversalVL
-  :: (Is k An_AffineTraversal, is `HasSingleIndex` i)
+-- | Traverse over the target of an 'IxAffineTraversal' and compute a
+-- 'Functor'-based answer.
+iatraverseOf
+  :: (Is k An_AffineTraversal, Functor f, is `HasSingleIndex` i)
   => Optic k is s t a b
-  -> IxAffineTraversalVL i s t a b
-toIxAtraversalVL o point = \f ->
+  -> (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t
+iatraverseOf o point = \f ->
   runIxStarA (getOptic (castOptic @An_AffineTraversal o) (IxStarA point f)) id
-{-# INLINE toIxAtraversalVL #-}
+{-# INLINE iatraverseOf #-}

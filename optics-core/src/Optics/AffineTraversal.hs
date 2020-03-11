@@ -56,7 +56,7 @@ module Optics.AffineTraversal
   , AffineTraversalVL
   , AffineTraversalVL'
   , atraversalVL
-  , toAtraversalVL
+  , atraverseOf
   )
   where
 
@@ -143,14 +143,15 @@ atraversalVL :: AffineTraversalVL s t a b -> AffineTraversal s t a b
 atraversalVL f = Optic (visit f)
 {-# INLINE atraversalVL #-}
 
--- | Convert an affine traversal to its van Laarhoven representation.
-toAtraversalVL
-  :: Is k An_AffineTraversal
+-- | Traverse over the target of an 'AffineTraversal' and compute a
+-- 'Functor'-based answer.
+atraverseOf
+  :: (Is k An_AffineTraversal, Functor f)
   => Optic k is s t a b
-  -> AffineTraversalVL s t a b
-toAtraversalVL o point =
+  -> (forall r. r -> f r) -> (a -> f b) -> s -> f t
+atraverseOf o point =
   runStarA . getOptic (castOptic @An_AffineTraversal o) . StarA point
-{-# INLINE toAtraversalVL #-}
+{-# INLINE atraverseOf #-}
 
 -- | Retrieve the value targeted by an 'AffineTraversal' or return the original
 -- value while allowing the type to change if it does not match.
