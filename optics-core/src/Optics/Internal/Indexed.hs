@@ -14,6 +14,7 @@ import Control.Applicative
 import Control.Applicative.Backwards
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Reader
+import Data.Functor.Constant
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Functor.Product
@@ -229,6 +230,34 @@ instance FoldableWithIndex () Identity where
 
 instance TraversableWithIndex () Identity where
   itraverse f (Identity a) = Identity <$> f () a
+  {-# INLINE itraverse #-}
+
+-- Const
+
+instance FunctorWithIndex Void (Const e) where
+  imap _ (Const a) = Const a
+  {-# INLINE imap #-}
+
+instance FoldableWithIndex Void (Const e) where
+  ifoldMap _ _ = mempty
+  {-# INLINE ifoldMap #-}
+
+instance TraversableWithIndex Void (Const e) where
+  itraverse _ (Const a) = pure (Const a)
+  {-# INLINE itraverse #-}
+
+-- Constant
+
+instance FunctorWithIndex Void (Constant e) where
+  imap _ (Constant a) = Constant a
+  {-# INLINE imap #-}
+
+instance FoldableWithIndex Void (Constant e) where
+  ifoldMap _ _ = mempty
+  {-# INLINE ifoldMap #-}
+
+instance TraversableWithIndex Void (Constant e) where
+  itraverse _ (Constant a) = pure (Constant a)
   {-# INLINE itraverse #-}
 
 -- (,) k
