@@ -55,7 +55,10 @@ class Field name s t a b where
 instance {-# INCOHERENT #-} HasField name s t a b => Field name s t a b where
   fieldLens = field @name @s @t @a @b
 
-instance HasField' name s a => Field name s s a a where
+-- Use field' when appropriate for faster compile times. Note that if a ~ b,
+-- then necessarily s ~ t. This doesn't apply in general because of phantom type
+-- variables, but 'LabelOptic' doesn't support them.
+instance (HasField' name s a, s ~ t) => Field name s t a a where
   fieldLens = field' @name @s @a
 
 ----------------------------------------
@@ -70,5 +73,8 @@ class Constructor name s t a b where
 instance {-# INCOHERENT #-} AsConstructor name s t a b => Constructor name s t a b where
   constructorPrism = _Ctor @name @s @t @a @b
 
-instance AsConstructor' name s a => Constructor name s s a a where
+-- Use Ctor' when appropriate for faster compile times. Note that if a ~ b, then
+-- necessarily s ~ t. This doesn't apply in general because of phantom type
+-- variables, but 'LabelOptic' doesn't support them.
+instance (AsConstructor' name s a, s ~ t) => Constructor name s t a a where
   constructorPrism = _Ctor' @name @s @a
