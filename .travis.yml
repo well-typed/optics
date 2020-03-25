@@ -4,7 +4,7 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.9.20200306
+# version: 0.9.20200325
 #
 version: ~> 1.0
 language: c
@@ -53,8 +53,6 @@ jobs:
     - compiler: ghc-8.0.2
       addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.0.2","cabal-install-3.0"]}}
       os: linux
-  allow_failures:
-    - compiler: ghc-8.10.1
 before_install:
   - |
     if echo $CC | grep -q ghcjs; then
@@ -79,9 +77,9 @@ before_install:
   - CABAL="$CABAL -vnormal+nowrap"
   - set -o pipefail
   - TEST=--enable-tests
+  - if ! $GHCJS && [ $HCNUMVER -ge 81000 ] ; then TEST=--disable-tests ; fi
   - BENCH=--enable-benchmarks
   - HEADHACKAGE=false
-  - if ! $GHCJS && [ $HCNUMVER -ge 81000 ] ; then HEADHACKAGE=true ; fi
   - rm -f $CABALHOME/config
   - |
     echo "verbose: normal +nowrap +markoutput"          >> $CABALHOME/config
@@ -99,17 +97,6 @@ before_install:
     echo "  prefix: $CABALHOME"                         >> $CABALHOME/config
     echo "repository hackage.haskell.org"               >> $CABALHOME/config
     echo "  url: http://hackage.haskell.org/"           >> $CABALHOME/config
-  - |
-    if $HEADHACKAGE; then
-    echo "allow-newer: $($HCPKG list --simple-output | sed -E 's/([a-zA-Z-]+)-[0-9.]+/*:\1/g')" >> $CABALHOME/config
-    echo "repository head.hackage.ghc.haskell.org"                                        >> $CABALHOME/config
-    echo "   url: https://ghc.gitlab.haskell.org/head.hackage/"                           >> $CABALHOME/config
-    echo "   secure: True"                                                                >> $CABALHOME/config
-    echo "   root-keys: 7541f32a4ccca4f97aea3b22f5e593ba2c0267546016b992dfadcd2fe944e55d" >> $CABALHOME/config
-    echo "              26021a13b401500c8eb2761ca95c61f2d625bfef951b939a8124ed12ecf07329" >> $CABALHOME/config
-    echo "              f76d08be13e9a61a377a85e2fb63f4c5435d40f8feb3e12eb05905edb8cdea89" >> $CABALHOME/config
-    echo "   key-threshold: 3"                                                            >> $CABALHOME/config
-    fi
 install:
   - ${CABAL} --version
   - echo "$(${HC} --version) [$(${HC} --print-project-git-commit-id 2> /dev/null || echo '?')]"
@@ -121,7 +108,7 @@ install:
   - cat $CABALHOME/config
   - rm -fv cabal.project cabal.project.local cabal.project.freeze
   - travis_retry ${CABAL} v2-update -v
-  - if ! $GHCJS ; then (cd /tmp && ${CABAL} v2-install $WITHCOMPILER -j2 doctest --constraint='doctest ==0.16.2.*') ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd /tmp && ${CABAL} v2-install $WITHCOMPILER -j2 doctest --constraint='doctest ==0.16.2.*') ; fi
   # Generate cabal.project
   - rm -rf cabal.project cabal.project.local cabal.project.freeze
   - touch cabal.project
@@ -129,12 +116,12 @@ install:
     echo "packages: optics" >> cabal.project
     echo "packages: optics-core" >> cabal.project
     echo "packages: optics-extra" >> cabal.project
-    echo "packages: optics-sop" >> cabal.project
+    if $GHCJS || ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then echo "packages: optics-sop" >> cabal.project ; fi
     echo "packages: optics-th" >> cabal.project
     echo "packages: optics-vl" >> cabal.project
     echo "packages: indexed-profunctors" >> cabal.project
     echo "packages: template-haskell-optics" >> cabal.project
-    if ! $GHCJS ; then echo "packages: metametapost" >> cabal.project ; fi
+    if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then echo "packages: metametapost" >> cabal.project ; fi
   - |
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
@@ -178,12 +165,12 @@ script:
     echo "packages: ${PKGDIR_optics}" >> cabal.project
     echo "packages: ${PKGDIR_optics_core}" >> cabal.project
     echo "packages: ${PKGDIR_optics_extra}" >> cabal.project
-    echo "packages: ${PKGDIR_optics_sop}" >> cabal.project
+    if $GHCJS || ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then echo "packages: ${PKGDIR_optics_sop}" >> cabal.project ; fi
     echo "packages: ${PKGDIR_optics_th}" >> cabal.project
     echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
     echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
     echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
-    if ! $GHCJS ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
+    if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
   - |
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
@@ -195,31 +182,31 @@ script:
   # build & run tests, build benchmarks
   - ${CABAL} v2-build $WITHCOMPILER ${TEST} ${BENCH} all
   # Testing...
-  - if ! $GHCJS ; then ${CABAL} v2-test $WITHCOMPILER ${TEST} ${BENCH} all ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then ${CABAL} v2-test $WITHCOMPILER ${TEST} ${BENCH} all ; fi
   # Doctest...
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_core} && doctest  -XBangPatterns -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_extra} && doctest  -XBangPatterns -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_sop} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_th} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_vl} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_indexed_profunctors} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_template_haskell_optics} && doctest  src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics} && doctest  src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics_core} && doctest  -XBangPatterns -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics_extra} && doctest  -XBangPatterns -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics_sop} && doctest  src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics_th} && doctest  src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics_vl} && doctest  src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_indexed_profunctors} && doctest  src) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_template_haskell_optics} && doctest  src) ; fi
   # cabal check...
   - (cd ${PKGDIR_optics} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_core} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_extra} && ${CABAL} -vnormal check)
-  - (cd ${PKGDIR_optics_sop} && ${CABAL} -vnormal check)
+  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_optics_sop} && ${CABAL} -vnormal check) ; fi
   - (cd ${PKGDIR_optics_th} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_optics_vl} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_indexed_profunctors} && ${CABAL} -vnormal check)
   - (cd ${PKGDIR_template_haskell_optics} && ${CABAL} -vnormal check)
-  - if ! $GHCJS ; then (cd ${PKGDIR_metametapost} && ${CABAL} -vnormal check) ; fi
+  - if ! $GHCJS && [ $HCNUMVER -lt 81000 ] ; then (cd ${PKGDIR_metametapost} && ${CABAL} -vnormal check) ; fi
   # haddock...
   - if ! $GHCJS ; then ${CABAL} v2-haddock $WITHCOMPILER --with-haddock $HADDOCK ${TEST} ${BENCH} all ; fi
   # Building without installed constraints for packages in global-db...
   - rm -f cabal.project.local
   - ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks all
 
-# REGENDATA ("0.9.20200306",["--config=cabal.haskell-ci","cabal.project"])
+# REGENDATA ("0.9.20200325",["--config=cabal.haskell-ci","cabal.project"])
 # EOF
