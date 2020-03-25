@@ -30,6 +30,9 @@ module Optics.IxAffineTraversal
   -- 'Optics.IxSetter.iset'     :: 'IxAffineTraversal' i s t a b -> (i      -> b) -> s -> t
   -- @
 
+  -- * Combinators
+  , unsafeFilteredBy
+
   -- * Subtyping
   , An_AffineTraversal
 
@@ -37,11 +40,12 @@ module Optics.IxAffineTraversal
   , IxAffineTraversalVL
   , IxAffineTraversalVL'
   , iatraversalVL
-  , toIxAtraversalVL
+  , iatraverseOf
   ) where
 
 import Data.Profunctor.Indexed
 
+import Optics.AffineFold
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Utils
@@ -80,11 +84,27 @@ iatraversalVL :: IxAffineTraversalVL i s t a b -> IxAffineTraversal i s t a b
 iatraversalVL f = Optic (ivisit f)
 {-# INLINE iatraversalVL #-}
 
--- | Convert an indexed affine traversal to its van Laarhoven representation.
-toIxAtraversalVL
-  :: (Is k An_AffineTraversal, is `HasSingleIndex` i)
+-- | Traverse over the target of an 'IxAffineTraversal' and compute a
+-- 'Functor'-based answer.
+iatraverseOf
+  :: (Is k An_AffineTraversal, Functor f, is `HasSingleIndex` i)
   => Optic k is s t a b
-  -> IxAffineTraversalVL i s t a b
-toIxAtraversalVL o point = \f ->
+  -> (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t
+iatraverseOf o point = \f ->
   runIxStarA (getOptic (castOptic @An_AffineTraversal o) (IxStarA point f)) id
-{-# INLINE toIxAtraversalVL #-}
+{-# INLINE iatraverseOf #-}
+
+-- | Obtain a potentially empty 'IxAffineTraversal' by taking the element from
+-- another 'AffineFold' and using it as an index.
+--
+-- -- /Note:/ This is /not/ a legal 'Optics.IxTraversal.IxTraversal', unless you
+-- are very careful not to invalidate the predicate on the target (see
+-- 'Optics.AffineTraversal.unsafeFiltered' for more details).
+unsafeFilteredBy
+  :: Is k An_AffineFold
+  => Optic' k is a i
+  -> IxAffineTraversal' i a a
+unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
+  Just i  -> f i s
+  Nothing -> point s
+{-# INLINE unsafeFilteredBy #-}

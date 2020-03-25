@@ -26,6 +26,15 @@ module Optics.IxAffineFold
   -- 'ipreview' ('iafolding' f) ≡ f
   -- @
 
+  -- * Additional introduction forms
+  , iafoldVL
+
+  -- * Additional elimination forms
+  , iatraverseOf_
+
+  -- * Combinators
+  , filteredBy
+
   -- * Semigroup structure
   , iafailing
 
@@ -43,6 +52,18 @@ import Optics.Internal.Utils
 
 -- | Type synonym for an indexed affine fold.
 type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
+
+-- | Obtain an 'IxAffineFold' by lifting 'itraverse_' like function.
+--
+-- @
+-- 'aifoldVL' '.' 'iatraverseOf_' ≡ 'id'
+-- 'aitraverseOf_' '.' 'iafoldVL' ≡ 'id'
+-- @
+iafoldVL
+  :: (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f u) -> s -> f v)
+  -> IxAffineFold i s a
+iafoldVL f = Optic (rphantom . ivisit f . rphantom)
+{-# INLINE iafoldVL #-}
 
 -- | Retrieve the value along with its index targeted by an 'IxAffineFold'.
 ipreview
@@ -63,12 +84,29 @@ ipreviews o = \f -> runIxForgetM
   id
 {-# INLINE ipreviews #-}
 
+-- | Traverse over the target of an 'IxAffineFold', computing a 'Functor'-based
+-- answer, but unlike 'Optics.IxAffineTraversal.iatraverseOf' do not construct a
+-- new structure.
+iatraverseOf_
+  :: (Is k An_AffineFold, Functor f, is `HasSingleIndex` i)
+  => Optic' k is s a
+  -> (forall r. r -> f r) -> (i -> a -> f u) -> s -> f ()
+iatraverseOf_ o point f s = case ipreview o s of
+  Just (i, a) -> () <$ f i a
+  Nothing     -> point ()
+
 -- | Create an 'IxAffineFold' from a partial function.
 iafolding :: (s -> Maybe (i, a)) -> IxAffineFold i s a
-iafolding g = Optic
-  $ ivisit (\point f s -> maybe (point s) (uncurry' f) $ g s)
-  . rphantom
+iafolding g = iafoldVL (\point f s -> maybe (point s) (uncurry' f) $ g s)
 {-# INLINE iafolding #-}
+
+-- | Obtain a potentially empty 'IxAffineFold' by taking the element from
+-- another 'AffineFold' and using it as an index.
+filteredBy :: Is k An_AffineFold  => Optic' k is a i -> IxAffineFold i a a
+filteredBy p = iafoldVL $ \point f s -> case preview p s of
+  Just i  -> f i s
+  Nothing -> point s
+{-# INLINE filteredBy #-}
 
 -- | Try the first 'IxAffineFold'. If it returns no entry, try the second one.
 --

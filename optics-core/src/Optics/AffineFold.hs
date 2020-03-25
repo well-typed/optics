@@ -26,9 +26,11 @@ module Optics.AffineFold
   -- @
 
   -- * Additional introduction forms
+  , afoldVL
   , filtered
 
   -- * Additional elimination forms
+  , atraverseOf_
   , isn't
 
     -- * Semigroup structure
@@ -48,6 +50,18 @@ import Optics.Internal.Optic
 
 -- | Type synonym for an affine fold.
 type AffineFold s a = Optic' An_AffineFold NoIx s a
+
+-- | Obtain an 'AffineFold' by lifting 'traverse_' like function.
+--
+-- @
+-- 'afoldVL' '.' 'atraverseOf_' ≡ 'id'
+-- 'atraverseOf_' '.' 'afoldVL' ≡ 'id'
+-- @
+afoldVL
+  :: (forall f. Functor f => (forall r. r -> f r) -> (a -> f u) -> s -> f v)
+  -> AffineFold s a
+afoldVL f = Optic (rphantom . visit f . rphantom)
+{-# INLINE afoldVL #-}
 
 -- | Retrieve the value targeted by an 'AffineFold'.
 --
@@ -69,6 +83,17 @@ previews o = \f -> runForgetM $
   getOptic (castOptic @An_AffineFold o) $ ForgetM (Just . f)
 {-# INLINE previews #-}
 
+-- | Traverse over the target of an 'AffineFold', computing a 'Functor'-based
+-- answer, but unlike 'Optics.AffineTraversal.atraverseOf' do not construct a
+-- new structure.
+atraverseOf_
+  :: (Is k An_AffineFold, Functor f)
+  => Optic' k is s a
+  -> (forall r. r -> f r) -> (a -> f u) -> s -> f ()
+atraverseOf_ o point f s = case preview o s of
+  Just a  -> () <$ f a
+  Nothing -> point ()
+
 -- | Create an 'AffineFold' from a partial function.
 --
 -- >>> preview (afolding listToMaybe) "foo"
@@ -80,7 +105,7 @@ afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right'
 
 -- | Filter result(s) of a fold that don't satisfy a predicate.
 filtered :: (a -> Bool) -> AffineFold a a
-filtered p = Optic (visit (\point f a -> if p a then f a else point a))
+filtered p = afoldVL (\point f a -> if p a then f a else point a)
 {-# INLINE filtered #-}
 
 -- | Try the first 'AffineFold'. If it returns no entry, try the second one.
