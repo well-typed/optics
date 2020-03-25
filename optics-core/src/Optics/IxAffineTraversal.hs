@@ -89,6 +89,8 @@ iatraversalVL f = Optic (ivisit f)
 
 -- | Traverse over the target of an 'IxAffineTraversal' and compute a
 -- 'Functor'-based answer.
+--
+-- @since 0.3
 iatraverseOf
   :: (Is k An_AffineTraversal, Functor f, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -103,6 +105,8 @@ iatraverseOf o point = \f ->
 -- -- /Note:/ This is /not/ a legal 'Optics.IxTraversal.IxTraversal', unless you
 -- are very careful not to invalidate the predicate on the target (see
 -- 'Optics.AffineTraversal.unsafeFiltered' for more details).
+--
+-- @since 0.3
 unsafeFilteredBy
   :: Is k An_AffineFold
   => Optic' k is a i

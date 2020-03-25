@@ -106,6 +106,8 @@ wrapOrT = OrT True
 {-# INLINE wrapOrT #-}
 
 -- | 'uncurry' with no lazy pattern matching for more efficient code.
+--
+-- @since 0.3
 uncurry' :: (a -> b -> c) -> (a, b) -> c
 uncurry' f (a, b) = f a b
 {-# INLINE uncurry' #-}

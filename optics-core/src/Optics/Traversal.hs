@@ -328,7 +328,7 @@ partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
 -- >>> "foo" & singular traversed .~ 'z'
 -- "zoo"
 --
--- @since 0.2.1
+-- @since 0.3
 singular
   :: forall k is s a. Is k A_Traversal
   => Optic' k is s a

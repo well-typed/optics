@@ -29,7 +29,7 @@ library
 
   build-depends: base          >=4.9     && <5
                , generics-sop  >=0.3.1.0 && <0.6
-               , optics-core   >=0.2     && <0.3
+               , optics-core   >=0.3     && <0.4
 
   exposed-modules: Optics.SOP
                    Optics.SOP.ToTuple

@@ -1,3 +1,7 @@
+# optics-th-0.3 (TBD)
+* `optics-core-0.3` compatible release
+* GHC-8.10 support
+
 # optics-th-0.2 (2019-10-18)
 * Add `noPrefixFieldLabels` and `noPrefixNamer` to `Optics.TH`
 

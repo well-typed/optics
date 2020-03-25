@@ -323,7 +323,7 @@ ipartsOf o = conjoined (partsOf o) $ ilensVL $ \f s ->
 -- >>> [1,2,3] & iover (isingular itraversed) (-)
 -- [-1,2,3]
 --
--- @since 0.2.1
+-- @since 0.3
 isingular
   :: forall k is i s a. (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic' k is s a

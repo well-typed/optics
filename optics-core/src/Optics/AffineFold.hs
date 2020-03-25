@@ -69,6 +69,8 @@ type AffineFold s a = Optic' An_AffineFold NoIx s a
 -- 'afoldVL' '.' 'atraverseOf_' ≡ 'id'
 -- 'atraverseOf_' '.' 'afoldVL' ≡ 'id'
 -- @
+--
+-- @since 0.3
 afoldVL
   :: (forall f. Functor f => (forall r. r -> f r) -> (a -> f u) -> s -> f v)
   -> AffineFold s a
@@ -98,6 +100,8 @@ previews o = \f -> runForgetM $
 -- | Traverse over the target of an 'AffineFold', computing a 'Functor'-based
 -- answer, but unlike 'Optics.AffineTraversal.atraverseOf' do not construct a
 -- new structure.
+--
+-- @since 0.3
 atraverseOf_
   :: (Is k An_AffineFold, Functor f)
   => Optic' k is s a
