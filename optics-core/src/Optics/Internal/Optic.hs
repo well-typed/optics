@@ -212,6 +212,19 @@ class LabelOptic (name :: Symbol) k s t a b | name s -> k a
   -- corresponds to @'labelOptic' \@"foo"@.
   labelOptic :: Optic k NoIx s t a b
 
+data Void0
+-- | If for an overloaded label @#label@ there is no instance starting with
+-- @LabelOptic "label"@, using it in the context of optics makes GHC immediately
+-- pick the overlappable instance defined below (since no other instance could
+-- match), which triggers custom type error. Prevent that (if only to be able to
+-- inspect most polymorphic types of @#foo % #bar@ or @view #foo@ in GHCi), by
+-- defining a dummy instance that matches all names, thus postponing the
+-- reduction.
+instance
+  ( k ~ An_Iso, a ~ Void0, b ~ Void0
+  ) => LabelOptic name k Void0 Void0 a b where
+  labelOptic = Optic id
+
 -- | If no instance matches, GHC tends to bury error messages "No instance for
 -- LabelOptic..." within a ton of other error messages about ambiguous type
 -- variables and overlapping instances which are irrelevant and confusing. Use
