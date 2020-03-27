@@ -33,7 +33,16 @@ module Optics.AffineFold
   , atraverseOf_
   , isn't
 
-    -- * Semigroup structure
+  -- * Monoid structure
+  -- | 'AffineFold' admits a monoid structure where 'afailing' combines folds
+  -- (returning a result from the second fold only if the first returns none)
+  -- and the identity element is 'Optics.IxAffineTraversal.ignored' (which
+  -- returns no results).
+  --
+  -- /Note:/ There is no 'Optics.Fold.summing' equivalent that returns an
+  -- 'AffineFold', because it would not need to return more than one result.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'AffineFold'.
   , afailing
 
   -- * Subtyping
@@ -115,8 +124,6 @@ filtered p = afoldVL (\point f a -> if p a then f a else point a)
 --
 -- >>> preview (ix 42 % re _Left `afailing` ix 2 % re _Right) [0,1,2,3]
 -- Just (Right 2)
---
--- /Note:/ There is no 'Optics.Fold.summing' equivalent, because @asumming = afailing@.
 --
 afailing
   :: (Is k An_AffineFold, Is l An_AffineFold)

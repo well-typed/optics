@@ -716,6 +716,9 @@ import Data.Either.Optics                    as P
 --
 -- * 'singular' ('isingular' for indexed optics) doesn't produce a partial lens
 --   that might fail with a runtime error, but an affine traversal.
+--
+-- * '<>' cannot be used to combine 'Fold's, so 'summing' should be used
+--   instead.
 
 
 -- $otherresources

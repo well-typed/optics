@@ -112,7 +112,12 @@ unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
   Nothing -> point s
 {-# INLINE unsafeFilteredBy #-}
 
--- | This is the trivial empty 'IxAffineTraversal'.
+-- | This is the trivial empty 'IxAffineTraversal', i.e. the optic that targets
+-- no substructures.
+--
+-- This is the identity element when a 'Optics.Fold.Fold',
+-- 'Optics.AffineFold.AffineFold', 'Optics.IxFold.IxFold' or
+-- 'Optics.IxAffineFold.IxAffineFold' is viewed as a monoid.
 --
 -- >>> 6 & ignored %~ absurd
 -- 6
