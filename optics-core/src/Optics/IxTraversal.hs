@@ -233,13 +233,6 @@ itraversed
 itraversed = Optic itraversed__
 {-# INLINE itraversed #-}
 
--- | This is the trivial empty 'IxTraversal'.
---
--- >>> 6 & ignored %~ absurd
--- 6
-ignored :: IxTraversal i s s a b
-ignored = itraversalVL $ \_ -> pure
-
 ----------------------------------------
 -- Traversal combinators
 
