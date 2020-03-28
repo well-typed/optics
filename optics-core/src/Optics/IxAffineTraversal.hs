@@ -33,6 +33,9 @@ module Optics.IxAffineTraversal
   -- * Combinators
   , unsafeFilteredBy
 
+  -- * Additional introduction forms
+  , ignored
+
   -- * Subtyping
   , An_AffineTraversal
 
@@ -108,3 +111,14 @@ unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
   Just i  -> f i s
   Nothing -> point s
 {-# INLINE unsafeFilteredBy #-}
+
+-- | This is the trivial empty 'IxAffineTraversal'.
+--
+-- >>> 6 & ignored %~ absurd
+-- 6
+ignored :: IxAffineTraversal i s s a b
+ignored = iatraversalVL $ \point _ -> point
+
+-- $setup
+-- >>> import Optics.Core
+-- >>> import Data.Void (absurd)
