@@ -1,4 +1,4 @@
 branches:       master
-doctest:        <8.10
+doctest:        True
 tests:          <8.10
 jobs-selection: any
