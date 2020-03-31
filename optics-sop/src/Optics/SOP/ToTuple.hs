@@ -7,13 +7,14 @@
 --
 module Optics.SOP.ToTuple where
 
+import Data.Kind
 import Generics.SOP hiding (from, to)
 import Optics.Core
 
 import Generics.SOP.Optics
 
 -- | Convert a list of types into a tuple of those types.
-type family ToTuple (xs :: [*]) :: * where
+type family ToTuple (xs :: [Type]) :: Type where
   ToTuple '[]                                                                      = ()
   ToTuple '[x1]                                                                    = x1
   ToTuple '[x1, x2]                                                                = (x1, x2)
