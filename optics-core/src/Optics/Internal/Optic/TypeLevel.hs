@@ -61,6 +61,14 @@ type family ShowEliminations forms :: ErrorMessage where
 
 ----------------------------------------
 
+data RepDefined = RepDefined
+-- | This type family should be called with applications of 'Rep' on both sides,
+-- and will reduce to 'RepDefined' if at least one of them is defined; otherwise
+-- it is stuck.
+type family AnyHasRep (s :: Type -> Type) (t :: Type -> Type) :: RepDefined
+type instance AnyHasRep (s x) t = 'RepDefined
+type instance AnyHasRep s (t x) = 'RepDefined
+
 -- | Curry a type-level list.
 --
 -- In pseudo (dependent-)Haskell:
