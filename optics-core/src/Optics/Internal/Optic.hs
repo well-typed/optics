@@ -30,6 +30,7 @@ module Optics.Internal.Optic
   -- * Labels
   , LabelOptic(..)
   , LabelOptic'
+  , GeneralLabelOptic(..)
   -- * Re-exports
   , module Optics.Internal.Optic.Subtyping
   , module Optics.Internal.Optic.Types
@@ -40,6 +41,7 @@ import Data.Function ((&))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 import Data.Type.Equality
+import GHC.Generics (Rep)
 import GHC.OverloadedLabels
 import GHC.TypeLits
 
@@ -212,26 +214,48 @@ class LabelOptic (name :: Symbol) k s t a b | name s -> k a
   -- corresponds to @'labelOptic' \@"foo"@.
   labelOptic :: Optic k NoIx s t a b
 
+-- | Type synonym for a type-preserving optic as overloaded label.
+type LabelOptic' name k s a = LabelOptic name k s s a a
+
+-- | Implements fallback behaviour in case there is no explicit 'LabelOptic'
+-- instance. This has a catch-all incoherent instance that merely yields an
+-- error message.  However, a downstream module can give a more specific
+-- instance that uses 'Generic' to construct an optic automatically.
+--
+-- To support this, the last parameter will be instantiated to 'RepDefined' if
+-- at least one of @s@ or @t@ has a 'Generic' instance.
+class GeneralLabelOptic (name :: Symbol) k s t a b (repDefined :: RepDefined) where
+  -- | Used to interpret overloaded label syntax in the absence of an explicit
+  -- 'LabelOptic' instance.
+  generalLabelOptic :: Optic k NoIx s t a b
+
 data Void0
 -- | If for an overloaded label @#label@ there is no instance starting with
 -- @LabelOptic "label"@, using it in the context of optics makes GHC immediately
 -- pick the overlappable instance defined below (since no other instance could
--- match), which triggers custom type error. Prevent that (if only to be able to
--- inspect most polymorphic types of @#foo % #bar@ or @view #foo@ in GHCi), by
--- defining a dummy instance that matches all names, thus postponing the
--- reduction.
+-- match). If at this point GHC has no information about @s@ or @t@, it ends up
+-- picking incoherent instance of GeneralLabelOptic defined below. Prevent that
+-- (if only to be able to inspect most polymorphic types of @#foo % #bar@ or
+-- @view #foo@ in GHCi) by defining a dummy instance that matches all names,
+-- thus postponing instance resolution.
 instance
   ( k ~ An_Iso, a ~ Void0, b ~ Void0
   ) => LabelOptic name k Void0 Void0 a b where
   labelOptic = Optic id
 
+-- | If no instance matches, fall back on 'GeneralLabelOptic'.
+instance {-# OVERLAPPABLE #-}
+  ( LabelOptic name k s t a b -- Needed to satisfy functional dependencies
+  , GeneralLabelOptic name k s t a b (AnyHasRep (Rep s) (Rep t))
+  ) => LabelOptic name k s t a b where
+  labelOptic = generalLabelOptic @name @k @s @t @a @b @(AnyHasRep (Rep s) (Rep t))
+
 -- | If no instance matches, GHC tends to bury error messages "No instance for
 -- LabelOptic..." within a ton of other error messages about ambiguous type
 -- variables and overlapping instances which are irrelevant and confusing. Use
--- overlappable instance providing a custom type error to cut its efforts short.
-instance {-# OVERLAPPABLE #-}
-  (LabelOptic name k s t a b,
-   TypeError
+-- incoherent instance providing a custom type error to cut its efforts short.
+instance {-# INCOHERENT #-}
+  TypeError
    ('Text "No instance for LabelOptic " ':<>: 'ShowType name
     ':<>: 'Text " " ':<>: QuoteType k
     ':<>: 'Text " " ':<>: QuoteType s
@@ -239,11 +263,8 @@ instance {-# OVERLAPPABLE #-}
     ':<>: 'Text " " ':<>: QuoteType a
     ':<>: 'Text " " ':<>: QuoteType b
     ':$$: 'Text "  (maybe you forgot to define it or misspelled a name?)")
-  ) => LabelOptic name k s t a b where
-  labelOptic = error "unreachable"
-
--- | Type synonym for a type-preserving optic as overloaded label.
-type LabelOptic' name k s a = LabelOptic name k s s a a
+   => GeneralLabelOptic name k s t a b repDefined where
+  generalLabelOptic = error "unreachable"
 
 instance
   (LabelOptic name k s t a b, is ~ NoIx
