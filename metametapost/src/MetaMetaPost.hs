@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE DefaultSignatures          #-}
 {-# LANGUAGE DeriveFoldable             #-}
@@ -19,14 +18,14 @@
 {-# LANGUAGE UndecidableInstances       #-}
 module MetaMetaPost where
 
+import           Prelude ()
+import           Prelude.Compat
+
 import           Control.Applicative    (liftA2)
 import           Control.Monad.State
 import           Data.Foldable          (traverse_)
 import           Data.Kind              (Type)
 import           Data.List              (intercalate)
-#if __GLASGOW_HASKELL__ <= 802
-import           Data.Semigroup         (Semigroup (..))
-#endif
 import           Generics.SOP
 import           Generics.SOP.NP        (collapse_NP)
 import           Generics.SOP.Optics    (productRep, rep, sop)
