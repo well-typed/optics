@@ -42,6 +42,7 @@ module Optics.SOP
   where
 
 import Data.Coerce
+import Data.Kind
 import Generics.SOP
 import Optics.Core
 
@@ -100,7 +101,7 @@ type family Unpack f xs where
   Unpack f (x ': xs) = ApplyWrapped f x ': Unpack f xs
 
 -- | Type-level function that unwraps a wrapped optic.
-type family ApplyWrapped (f :: k -> *) (x :: k) :: *
+type family ApplyWrapped (f :: k -> Type) (x :: k) :: Type
 type instance ApplyWrapped (WrappedLens s)    a  = Lens' s a
 type instance ApplyWrapped (WrappedNPPrism s) xs = Prism' s (NP I xs)
 type instance ApplyWrapped (WrappedPrism s)   xs = Prism' s (ToTuple xs)

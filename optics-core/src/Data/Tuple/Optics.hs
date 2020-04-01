@@ -43,6 +43,7 @@ module Data.Tuple.Optics
 
 import Data.Functor.Identity
 import Data.Functor.Product
+import Data.Kind
 import Data.Proxy
 import GHC.Generics ((:*:)(..), Generic(..), K1, M1, U1)
 
@@ -404,7 +405,7 @@ ix n = generic % gix n
 {-# INLINE ix #-}
 
 -- TODO: this can be replaced by generic-optics position
-type family GSize (f :: * -> *)
+type family GSize (f :: Type -> Type)
 type instance GSize U1 = Z
 type instance GSize (K1 i c) = S Z
 type instance GSize (M1 i c f) = GSize f

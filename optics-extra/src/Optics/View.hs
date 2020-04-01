@@ -4,6 +4,7 @@ module Optics.View where
 import Control.Monad.Reader.Class
 import Control.Monad.State
 import Control.Monad.Writer
+import Data.Kind
 
 import Optics.Core
 
@@ -26,7 +27,7 @@ import Optics.Core
 -- mostly useful for things such as 'Optics.Passthrough.passthrough'.
 --
 class ViewableOptic k r where
-  type ViewResult k r :: *
+  type ViewResult k r :: Type
   gview
     :: MonadReader s m
     => Optic' k is s r
