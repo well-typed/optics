@@ -26,7 +26,6 @@ module Optics.Internal.Optic
   , (%)
   , (%%)
   , (%&)
-  , IsProxy(..)
   -- * Labels
   , LabelOptic(..)
   , LabelOptic'
@@ -87,11 +86,6 @@ type Optic_ k p i j s t a b = Constraints k p => Optic__ p i j s t a b
 -- | Optic internally as a profunctor transformation.
 type Optic__ p i j s t a b = p i a b -> p j s t
 
--- | Proxy type for use as an argument to 'implies'.
---
-data IsProxy (k :: Type) (l :: Type) (p :: Type -> Type -> Type -> Type) =
-  IsProxy
-
 -- | Explicit cast from one optic flavour to another.
 --
 -- The resulting optic kind is given in the first type argument, so you can use
@@ -110,13 +104,13 @@ castOptic
   .  Is srcKind destKind
   => Optic srcKind  is s t a b
   -> Optic destKind is s t a b
-castOptic (Optic o) = Optic (implies' o)
+castOptic (Optic o) = Optic (cast o)
   where
-    implies'
+    cast
       :: forall p i
       .  Optic_ srcKind  p i (Curry is i) s t a b
       -> Optic_ destKind p i (Curry is i) s t a b
-    implies' x = implies (IsProxy :: IsProxy srcKind destKind p) x
+    cast x = implies @srcKind @destKind @p x
 {-# INLINE castOptic #-}
 
 -- | Compose two optics of compatible flavours.
