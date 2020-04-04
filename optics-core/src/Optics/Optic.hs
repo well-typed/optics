@@ -34,6 +34,14 @@ module Optics.Optic
   , Join
 
   -- * Composition
+  -- | The usual operator for composing optics is ('%'), which allows different
+  -- optic kinds to be composed, automatically calculating the resulting optic
+  -- kind using 'Join'.
+  --
+  -- The ('.') function composition operator cannot be used to compose optics,
+  -- because /optics are not functions/.  The ('Control.Category..') operator
+  -- from "Control.Category" cannot be used either, because it would not support
+  -- type-changing optics or composing optics of different kinds.
   , (%)
   , (%%)
   , (%&)

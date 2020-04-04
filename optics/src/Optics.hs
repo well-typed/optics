@@ -541,6 +541,10 @@ import Data.Either.Optics                    as P
 -- ...
 -- ...A_Setter cannot be composed with A_Fold
 -- ...
+--
+-- The ('Control.Category..') operator from "Control.Category" cannot be used to
+-- compose optics either, because it would not support type-changing optics or
+-- composing optics of different kinds.
 
 -- $lens_comparison
 --
