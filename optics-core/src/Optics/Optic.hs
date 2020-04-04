@@ -38,6 +38,13 @@ module Optics.Optic
   , (%%)
   , (%&)
 
+  -- * Monoid structures
+  -- | 'Optics.Fold.Fold'-like optics admit various monoid structures (e.g. see
+  -- "Optics.Fold#monoids").  There is no 'Semigroup' or 'Monoid' instance for
+  -- 'Optic', however, because there is not a unique choice of monoid to use,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
+
   -- * Indexed optics
   -- | See the "Indexed optics" section of the overview documentation in the
   -- @Optics@ module of the main @optics@ package for more details on indexed

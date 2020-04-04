@@ -42,7 +42,10 @@ module Optics.AffineFold
   -- /Note:/ There is no 'Optics.Fold.summing' equivalent that returns an
   -- 'AffineFold', because it would not need to return more than one result.
   --
-  -- There is no 'Semigroup' or 'Monoid' instance for 'AffineFold'.
+  -- There is no 'Semigroup' or 'Monoid' instance for 'AffineFold', because
+  -- there is not a unique choice of monoid to use that works for all optics,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
   , afailing
 
   -- * Subtyping

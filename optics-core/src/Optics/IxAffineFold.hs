@@ -44,7 +44,10 @@ module Optics.IxAffineFold
   -- /Note:/ There is no 'Optics.IxFold.isumming' equivalent that returns an
   -- 'IxAffineFold', because it would not need to return more than one result.
   --
-  -- There is no 'Semigroup' or 'Monoid' instance for 'IxAffineFold'.
+  -- There is no 'Semigroup' or 'Monoid' instance for 'IxAffineFold', because
+  -- there is not a unique choice of monoid to use that works for all optics,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
   , iafailing
 
   -- * Subtyping

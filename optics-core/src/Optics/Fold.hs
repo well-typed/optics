@@ -76,7 +76,7 @@ module Optics.Fold
   , backwards_
 
   -- * Monoid structures
-  -- | 'Fold' admits (at least) two monoid structures:
+  -- | 'Fold' admits (at least) two monoid structures: #monoids#
   --
   -- * 'summing' concatenates results from both folds.
   --
@@ -86,8 +86,10 @@ module Optics.Fold
   -- In both cases, the identity element of the monoid is
   -- `Optics.IxAffineTraversal.ignored`, which returns no results.
   --
-  -- There is no 'Semigroup' or 'Monoid' instance for 'Fold'.  When porting code
-  -- from @lens@ that uses '<>' to combine folds, use 'summing' instead.
+  -- There is no 'Semigroup' or 'Monoid' instance for 'Fold', because there is
+  -- not a unique choice of monoid to use, and the ('<>') operator could not be
+  -- used to combine optics of different kinds.  When porting code from @lens@
+  -- that uses '<>' to combine folds, use 'summing' instead.
   , summing
   , failing
 

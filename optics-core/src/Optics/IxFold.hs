@@ -55,7 +55,9 @@ module Optics.IxFold
   -- In both cases, the identity element of the monoid is
   -- `Optics.IxAffineTraversal.ignored`, which returns no results.
   --
-  -- There is no 'Semigroup' or 'Monoid' instance for 'IxFold'.
+  -- There is no 'Semigroup' or 'Monoid' instance for 'IxFold', because there is
+  -- not a unique choice of monoid to use, and the ('<>') operator could not be
+  -- used to combine optics of different kinds.
   , isumming
   , ifailing
 
