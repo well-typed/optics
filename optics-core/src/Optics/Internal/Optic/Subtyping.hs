@@ -12,6 +12,7 @@ module Optics.Internal.Optic.Subtyping where
 
 import GHC.TypeLits (ErrorMessage(..), TypeError)
 
+import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Optic.Types
 
 -- | Subtyping relationship between kinds of optics.
@@ -26,16 +27,69 @@ class Is k l where
   -- | Witness of the subtyping relationship.
   implies :: (Constraints k p => r) -> (Constraints l p => r)
 
--- | Overlappable instance for a custom type error.
-instance {-# OVERLAPPABLE #-} TypeError ('ShowType k
-                                         ':<>: 'Text " cannot be used as "
-                                         ':<>: 'ShowType l
-                                        ) => Is k l where
-  implies _ = error "unreachable"
-
 -- | Every kind of optic can be used as itself.
 instance Is k k where
   implies r = r
+
+-- | Overlappable instance for a custom type error.
+instance {-# OVERLAPPABLE #-} TypeError
+  ('ShowType k ':<>: 'Text " cannot be used as " ':<>: 'ShowType l
+   ':$$: 'Text "Perhaps you meant one of these:"
+   ':$$: ShowEliminations (EliminationForms k)
+  ) => Is k l where
+  implies _ = error "unreachable"
+
+type family EliminationForms (k :: OpticKind) where
+  EliminationForms An_AffineFold      = AffineFoldEliminations
+  EliminationForms An_AffineTraversal = AffineTraversalEliminations
+  EliminationForms A_Fold             = FoldEliminations
+  EliminationForms A_Getter           = GetterEliminations
+  EliminationForms An_Iso             = IsoEliminations
+  EliminationForms A_Lens             = LensEliminations
+  EliminationForms A_Prism            = PrismEliminations
+  EliminationForms A_ReversedLens     = ReviewEliminations
+  EliminationForms A_ReversedPrism    = GetterEliminations
+  EliminationForms A_Review           = ReviewEliminations
+  EliminationForms A_Setter           = SetterEliminations
+  EliminationForms A_Traversal        = TraversalEliminations
+
+type AffineFoldEliminations = '( '[ '("preview", "Optics.AffineFold") ]
+                               , '[ "(^?)" ])
+
+type AffineTraversalEliminations = AffineFoldEliminations
+              `AppendEliminations` SetterEliminations
+
+type FoldEliminations = '( '[ '("traverseOf_", "Optics.Fold")
+                            , '("foldMapOf",   "Optics.Fold")
+                            , '("toListOf",    "Optics.Fold")
+                            ]
+                         , '[ "(^..)" ])
+
+type GetterEliminations = '( '[ '("view", "Optics.Getter") ]
+                           , '[ "(^.)" ])
+
+type IsoEliminations = GetterEliminations
+  `AppendEliminations` ReviewEliminations
+  `AppendEliminations` SetterEliminations
+
+type LensEliminations = GetterEliminations
+   `AppendEliminations` SetterEliminations
+
+type PrismEliminations = AffineFoldEliminations
+    `AppendEliminations` ReviewEliminations
+    `AppendEliminations` SetterEliminations
+
+type ReviewEliminations = '( '[ '("review", "Optics.Review") ]
+                           , '[ "(#)" ])
+
+type SetterEliminations = '( '[ '("over", "Optics.Setter")
+                              , '("set",  "Optics.Setter")
+                              ]
+                           , '[ "(%~)", "(.~)" ])
+
+type TraversalEliminations = '( '[ '("traverseOf", "Optics.Traversal") ]
+                              , '[]) `AppendEliminations` FoldEliminations
+                                     `AppendEliminations` SetterEliminations
 
 ----------------------------------------
 

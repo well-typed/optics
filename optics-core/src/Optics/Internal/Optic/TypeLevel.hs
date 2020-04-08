@@ -25,6 +25,42 @@ type WithIx i = ('[i] :: IxList)
 type family QuoteType (x :: Type) :: ErrorMessage where
   QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
 
+-- | Show a symbol surrounded by quote marks.
+type family QuoteSymbol (x :: Symbol) :: ErrorMessage where
+  QuoteSymbol x = 'Text "‘" ':<>: 'Text x ':<>: 'Text "’"
+
+----------------------------------------
+-- Elimination forms in error messages
+
+type family ShowSymbolWithOrigin symbol origin :: ErrorMessage where
+  ShowSymbolWithOrigin symbol origin = 'Text "  "
+                                 ':<>: QuoteSymbol symbol
+                                 ':<>: 'Text " (from "
+                                 ':<>: 'Text origin
+                                 ':<>: 'Text ")"
+
+type family ShowSymbolsWithOrigin (fs :: [(Symbol, Symbol)]) :: ErrorMessage where
+  ShowSymbolsWithOrigin '[ '(symbol, origin) ] =
+    ShowSymbolWithOrigin symbol origin
+  ShowSymbolsWithOrigin ('(symbol, origin) ': rest) =
+    ShowSymbolWithOrigin symbol origin ':$$: ShowSymbolsWithOrigin rest
+
+type family ShowOperators (ops :: [Symbol]) :: ErrorMessage where
+  ShowOperators '[op] =
+    QuoteSymbol op ':<>: 'Text " (from Optics.Operators)"
+  ShowOperators (op ': rest) =
+    QuoteSymbol op ':<>: 'Text " " ':<>: ShowOperators rest
+
+type family AppendEliminations a b where
+  AppendEliminations '(fs1, ops1) '(fs2, ops2) =
+    '(Append fs1 fs2, Append ops1 ops2)
+
+type family ShowEliminations forms :: ErrorMessage where
+  ShowEliminations '(fs, ops) =
+    ShowSymbolsWithOrigin fs ':$$: 'Text "  " ':<>: ShowOperators ops
+
+----------------------------------------
+
 -- | Curry a type-level list.
 --
 -- In pseudo (dependent-)Haskell:
@@ -37,7 +73,7 @@ type family Curry (xs :: IxList) (y :: Type) :: Type where
   Curry (x ': xs) y = x -> Curry xs y
 
 -- | Append two type-level lists together.
-type family Append (xs :: IxList) (ys :: IxList) :: IxList where
+type family Append (xs :: [k]) (ys :: [k]) :: [k] where
   Append '[]       ys  = ys -- needed for (<%>) and (%>)
   Append xs        '[] = xs -- needed for (<%)
   Append (x ': xs) ys  = x ': Append xs ys
