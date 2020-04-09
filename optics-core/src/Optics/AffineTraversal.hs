@@ -145,6 +145,8 @@ atraversalVL f = Optic (visit f)
 
 -- | Traverse over the target of an 'AffineTraversal' and compute a
 -- 'Functor'-based answer.
+--
+-- @since 0.3
 atraverseOf
   :: (Is k An_AffineTraversal, Functor f)
   => Optic k is s t a b

@@ -1,5 +1,5 @@
 name:          optics-vl
-version:       0.2
+version:       0.2.1
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
@@ -31,7 +31,7 @@ library
 
   build-depends: base                   >= 4.9        && <5
                , indexed-profunctors    >= 0.1        && <0.2
-               , optics-core            >= 0.2        && <0.3
+               , optics-core            >= 0.2        && <0.4
                , profunctors            >= 5.0        && <6.0
 
   ghc-options: -Wall

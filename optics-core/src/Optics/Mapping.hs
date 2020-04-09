@@ -22,6 +22,8 @@ import Optics.Review
 -- >>> import Optics.Operators
 
 -- | Class for optics supporting 'mapping' through a 'Functor'.
+--
+-- @since 0.3
 class MappingOptic k f g s t a b where
   -- | Type family that maps an optic to the optic kind produced by
   -- 'mapping' using it.

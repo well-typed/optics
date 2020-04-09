@@ -1,5 +1,5 @@
 name:          optics-th
-version:       0.2
+version:       0.3
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
@@ -32,7 +32,7 @@ library
   build-depends: base                   >= 4.9       && <5
                , containers             >= 0.5.7.1   && <0.7
                , mtl                    >= 2.2.2     && <2.3
-               , optics-core            >= 0.2       && <0.3
+               , optics-core            >= 0.3       && <0.4
                , template-haskell       >= 2.11      && <2.17
                , th-abstraction         >= 0.2.1     && <0.4
                , transformers           >= 0.5       && <0.6

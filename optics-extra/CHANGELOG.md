@@ -1,3 +1,11 @@
+# optics-extra-0.3 (TBD)
+* `optics-core-0.3` compatible release
+* GHC-8.10 support
+* Use stricter uncurry for better performance
+
+# optics-extra-0.2
+* `optics-core-0.2` compatible release
+
 # optics-extra-0.1 (2019-10-18)
 * Move `use` from `Optics.View` to `Optics.State` and restrict its type
 * Add `preuse` to `Optics.State`

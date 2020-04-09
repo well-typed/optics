@@ -234,28 +234,34 @@ instance TraversableWithIndex () Identity where
 
 -- Const
 
+-- | @since 0.3
 instance FunctorWithIndex Void (Const e) where
   imap _ (Const a) = Const a
   {-# INLINE imap #-}
 
+-- | @since 0.3
 instance FoldableWithIndex Void (Const e) where
   ifoldMap _ _ = mempty
   {-# INLINE ifoldMap #-}
 
+-- | @since 0.3
 instance TraversableWithIndex Void (Const e) where
   itraverse _ (Const a) = pure (Const a)
   {-# INLINE itraverse #-}
 
 -- Constant
 
+-- | @since 0.3
 instance FunctorWithIndex Void (Constant e) where
   imap _ (Constant a) = Constant a
   {-# INLINE imap #-}
 
+-- | @since 0.3
 instance FoldableWithIndex Void (Constant e) where
   ifoldMap _ _ = mempty
   {-# INLINE ifoldMap #-}
 
+-- | @since 0.3
 instance TraversableWithIndex Void (Constant e) where
   itraverse _ (Constant a) = pure (Constant a)
   {-# INLINE itraverse #-}

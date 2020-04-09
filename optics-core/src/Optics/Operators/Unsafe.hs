@@ -26,7 +26,7 @@ import Optics.Operators
 -- *** Exception: (^?!): empty affine fold
 -- ...
 --
--- @since 0.2.1
+-- @since 0.3
 (^?!) :: (HasCallStack, Is k An_AffineFold) => s -> Optic' k is s a -> a
 s ^?! o = fromMaybe (error "(^?!): empty affine fold") (s ^? o)
 {-# INLINE (^?!) #-}

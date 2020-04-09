@@ -71,6 +71,8 @@ type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
 -- 'aifoldVL' '.' 'iatraverseOf_' ≡ 'id'
 -- 'aitraverseOf_' '.' 'iafoldVL' ≡ 'id'
 -- @
+--
+-- @since 0.3
 iafoldVL
   :: (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f u) -> s -> f v)
   -> IxAffineFold i s a
@@ -99,6 +101,8 @@ ipreviews o = \f -> runIxForgetM
 -- | Traverse over the target of an 'IxAffineFold', computing a 'Functor'-based
 -- answer, but unlike 'Optics.IxAffineTraversal.iatraverseOf' do not construct a
 -- new structure.
+--
+-- @since 0.3
 iatraverseOf_
   :: (Is k An_AffineFold, Functor f, is `HasSingleIndex` i)
   => Optic' k is s a
