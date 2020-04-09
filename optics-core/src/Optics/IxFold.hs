@@ -44,7 +44,20 @@ module Optics.IxFold
   , ifiltered
   , ibackwards_
 
-  -- * Semigroup structure
+  -- * Monoid structures
+  -- | 'IxFold' admits (at least) two monoid structures:
+  --
+  -- * 'isumming' concatenates results from both folds.
+  --
+  -- * 'ifailing' returns results from the second fold only if the first returns
+  --   no results.
+  --
+  -- In both cases, the identity element of the monoid is
+  -- `Optics.IxAffineTraversal.ignored`, which returns no results.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'IxFold', because there is
+  -- not a unique choice of monoid to use, and the ('<>') operator could not be
+  -- used to combine optics of different kinds.
   , isumming
   , ifailing
 
@@ -228,6 +241,10 @@ ibackwards_ o = conjoined (backwards_ o) $ ifoldVL $ \f ->
 {-# INLINE ibackwards_ #-}
 
 -- | Return entries of the first 'IxFold', then the second one.
+--
+-- >>> itoListOf (ifolded `isumming` ibackwards_ ifolded) ["a","b"]
+-- [(0,"a"),(1,"b"),(1,"b"),(0,"a")]
+--
 isumming
   :: (Is k A_Fold, Is l A_Fold,
       is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
@@ -240,6 +257,12 @@ infixr 6 `isumming` -- Same as (<>)
 {-# INLINE isumming #-}
 
 -- | Try the first 'IxFold'. If it returns no entries, try the second one.
+--
+-- >>> itoListOf (_1 % ifolded `ifailing` _2 % ifolded) (["a"], ["b","c"])
+-- [(0,"a")]
+-- >>> itoListOf (_1 % ifolded `ifailing` _2 % ifolded) ([], ["b","c"])
+-- [(0,"b"),(1,"c")]
+--
 ifailing
   :: (Is k A_Fold, Is l A_Fold, is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
   => Optic' k is1 s a

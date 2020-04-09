@@ -35,7 +35,19 @@ module Optics.IxAffineFold
   -- * Combinators
   , filteredBy
 
-  -- * Semigroup structure
+  -- * Monoid structure
+  -- | 'IxAffineFold' admits a monoid structure where 'iafailing' combines folds
+  -- (returning a result from the second fold only if the first returns none)
+  -- and the identity element is 'Optics.IxAffineTraversal.ignored' (which
+  -- returns no results).
+  --
+  -- /Note:/ There is no 'Optics.IxFold.isumming' equivalent that returns an
+  -- 'IxAffineFold', because it would not need to return more than one result.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'IxAffineFold', because
+  -- there is not a unique choice of monoid to use that works for all optics,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
   , iafailing
 
   -- * Subtyping
@@ -110,7 +122,6 @@ filteredBy p = iafoldVL $ \point f s -> case preview p s of
 
 -- | Try the first 'IxAffineFold'. If it returns no entry, try the second one.
 --
--- /Note:/ There is no 'Optics.IxFold.isumming' equivalent, because @iasumming = iafailing@.
 iafailing
   :: (Is k An_AffineFold, Is l An_AffineFold,
       is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)

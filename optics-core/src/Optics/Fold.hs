@@ -75,7 +75,21 @@ module Optics.Fold
   , pre
   , backwards_
 
-  -- * Semigroup structure
+  -- * Monoid structures
+  -- | 'Fold' admits (at least) two monoid structures: #monoids#
+  --
+  -- * 'summing' concatenates results from both folds.
+  --
+  -- * 'failing' returns results from the second fold only if the first returns
+  --   no results.
+  --
+  -- In both cases, the identity element of the monoid is
+  -- `Optics.IxAffineTraversal.ignored`, which returns no results.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'Fold', because there is
+  -- not a unique choice of monoid to use, and the ('<>') operator could not be
+  -- used to combine optics of different kinds.  When porting code from @lens@
+  -- that uses '<>' to combine folds, use 'summing' instead.
   , summing
   , failing
 
@@ -263,6 +277,12 @@ infixr 6 `summing` -- Same as (<>)
 {-# INLINE summing #-}
 
 -- | Try the first 'Fold'. If it returns no entries, try the second one.
+--
+-- >>> toListOf (ix 1 `failing` ix 0) [4,7]
+-- [7]
+-- >>> toListOf (ix 1 `failing` ix 0) [4]
+-- [4]
+--
 failing
   :: (Is k A_Fold, Is l A_Fold)
   => Optic' k is s a

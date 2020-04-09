@@ -34,9 +34,24 @@ module Optics.Optic
   , Join
 
   -- * Composition
+  -- | The usual operator for composing optics is ('%'), which allows different
+  -- optic kinds to be composed, automatically calculating the resulting optic
+  -- kind using 'Join'.
+  --
+  -- The ('.') function composition operator cannot be used to compose optics,
+  -- because /optics are not functions/.  The ('Control.Category..') operator
+  -- from "Control.Category" cannot be used either, because it would not support
+  -- type-changing optics or composing optics of different kinds.
   , (%)
   , (%%)
   , (%&)
+
+  -- * Monoid structures
+  -- | 'Optics.Fold.Fold'-like optics admit various monoid structures (e.g. see
+  -- "Optics.Fold#monoids").  There is no 'Semigroup' or 'Monoid' instance for
+  -- 'Optic', however, because there is not a unique choice of monoid to use,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
 
   -- * Indexed optics
   -- | See the "Indexed optics" section of the overview documentation in the
