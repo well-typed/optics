@@ -45,6 +45,7 @@ module Optics.Indexed
   , FoldableWithIndex (..)
   , itraverse_
   , ifor_
+  , itoList
   -- ** Traversable with index
   , TraversableWithIndex (..)
   , ifor

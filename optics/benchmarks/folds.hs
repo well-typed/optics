@@ -17,9 +17,6 @@ import qualified Data.Vector.Unboxed as U
 import Data.ByteString.Optics
 import Optics
 
-itoList :: FoldableWithIndex i f => f a -> [(i, a)]
-itoList = ifoldr (\i c -> ((i, c) :)) []
-
 main :: IO ()
 main = defaultMainWith config
   [ bgroup "vector"

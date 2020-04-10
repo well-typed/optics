@@ -60,6 +60,7 @@ module Optics.IxSetter
 import Data.Profunctor.Indexed
 
 import Optics.Internal.Indexed
+import Optics.Internal.Indexed.Classes
 import Optics.Internal.IxSetter
 import Optics.Internal.Optic
 import Optics.Internal.Utils
