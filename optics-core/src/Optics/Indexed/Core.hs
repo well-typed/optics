@@ -41,6 +41,7 @@ module Optics.Indexed.Core
   , FoldableWithIndex (..)
   , itraverse_
   , ifor_
+  , itoList
   -- ** Traversable with index
   , TraversableWithIndex (..)
   , ifor
@@ -49,6 +50,7 @@ module Optics.Indexed.Core
 import Data.Profunctor.Indexed
 
 import Optics.Internal.Indexed
+import Optics.Internal.Indexed.Classes
 import Optics.Internal.Optic
 
 import Optics.AffineFold

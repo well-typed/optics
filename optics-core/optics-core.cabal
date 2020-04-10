@@ -98,6 +98,7 @@ library
                    Optics.Internal.Bi
                    Optics.Internal.Fold
                    Optics.Internal.Indexed
+                   Optics.Internal.Indexed.Classes
                    Optics.Internal.IxFold
                    Optics.Internal.IxSetter
                    Optics.Internal.IxTraversal

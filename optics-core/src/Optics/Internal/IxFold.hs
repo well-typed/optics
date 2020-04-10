@@ -12,7 +12,7 @@ import Data.Foldable
 import Data.Profunctor.Indexed
 
 import Optics.Internal.Bi
-import Optics.Internal.Indexed
+import Optics.Internal.Indexed.Classes
 import Optics.Internal.Optic
 import Optics.Internal.Fold
 

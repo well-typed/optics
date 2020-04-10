@@ -75,6 +75,7 @@ import Data.Profunctor.Indexed
 
 import Optics.Internal.Bi
 import Optics.Internal.Indexed
+import Optics.Internal.Indexed.Classes
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.Optic

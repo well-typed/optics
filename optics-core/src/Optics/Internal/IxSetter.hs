@@ -8,7 +8,7 @@ module Optics.Internal.IxSetter where
 
 import Data.Profunctor.Indexed
 
-import Optics.Internal.Indexed
+import Optics.Internal.Indexed.Classes
 import Optics.Internal.Optic
 
 -- | Internal implementation of 'Optics.IxSetter.imapped'.
