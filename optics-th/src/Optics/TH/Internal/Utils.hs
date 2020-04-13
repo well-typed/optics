@@ -1,7 +1,12 @@
 module Optics.TH.Internal.Utils where
 
+import Data.Maybe
 import Language.Haskell.TH
+import qualified Data.Map as M
 import qualified Language.Haskell.TH.Datatype as D
+
+import Language.Haskell.TH.Optics.Internal
+import Optics.Core
 
 -- | Apply arguments to a type constructor
 appsT :: TypeQ -> [TypeQ] -> TypeQ
@@ -48,6 +53,14 @@ eqSubst ty n = do
   placeholder <- VarT <$> newName n
   pure (placeholder, D.equalPred placeholder ty)
 
+-- | Fill in kind variables using info from datatype type parameters.
+addKindVars :: D.DatatypeInfo -> Type -> Type
+addKindVars = substType . M.fromList . mapMaybe var . D.datatypeInstTypes
+  where
+    var t@(SigT (VarT n) k)
+      | has typeVars k = Just (n, t)
+      | otherwise      = Nothing
+    var _              = Nothing
 
 ------------------------------------------------------------------------
 -- Support for generating inline pragmas

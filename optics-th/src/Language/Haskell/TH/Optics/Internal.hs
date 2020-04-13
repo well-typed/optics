@@ -1,10 +1,13 @@
-{-# LANGUAGE LambdaCase       #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE LambdaCase #-}
 module Language.Haskell.TH.Optics.Internal
   (
   -- * Traversals
     HasTypeVars(..)
   , typeVars      -- :: HasTypeVars t => Traversal' t Name
+  , typeVarBndrs
   , substTypeVars -- :: HasTypeVars t => Map Name Name -> t -> t
+  , SubstType(..)
 
   -- * Prisms
   , _FamilyI
@@ -15,6 +18,7 @@ module Language.Haskell.TH.Optics.Internal
 
 import Data.Map as Map hiding (map, toList)
 import Data.Maybe (fromMaybe)
+import Data.Foldable (traverse_)
 import Data.Set as Set hiding (map, toList)
 import Language.Haskell.TH
 
@@ -67,6 +71,11 @@ instance HasTypeVars Type where
                                  <*> pure n
                                  <*> traverseOf (typeVarsEx s) f t2
     ParensT t         -> ParensT <$> traverseOf (typeVarsEx s) f t
+#if MIN_VERSION_template_haskell(2,15,0)
+    AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
+                                   <*> traverseOf (typeVarsEx s) f k
+    ImplicitParamT n t -> ImplicitParamT n <$> traverseOf (typeVarsEx s) f t
+#endif
     t                 -> pure t
 
 instance HasTypeVars t => HasTypeVars [t] where
@@ -76,6 +85,27 @@ instance HasTypeVars t => HasTypeVars [t] where
 -- | Traverse /free/ type variables
 typeVars :: HasTypeVars t => Traversal' t Name
 typeVars = typeVarsEx mempty
+
+-- | Traverse /free/ type variables paired with their kinds if applicable.
+typeVarBndrs :: Fold Type Type
+typeVarBndrs = foldVL $ go mempty
+  where
+    go s f = \case
+      var@(VarT n)          -> if n `Set.member` s then pure () else f var
+      var@(SigT (VarT n) _) -> if n `Set.member` s then pure () else f var
+
+      AppT l r           -> go s f l *> go s f r
+      SigT t k           -> go s f t *> go s f k
+      ForallT bs ctx ty  -> let s' = s `Set.union` setOf typeVars bs
+                            in traverse_ (go s' f) ctx *> go s' f ty
+      InfixT  t1 _ t2    -> go s f t1 *> go s f t2
+      UInfixT t1 _ t2    -> go s f t1 *> go s f t2
+      ParensT t          -> go s f t
+#if MIN_VERSION_template_haskell(2,15,0)
+      AppKindT t k       -> go s f t *> go s f k
+      ImplicitParamT _ t -> go s f t
+#endif
+      _                 -> pure ()
 
 -- | Substitute using a map of names in for /free/ type variables
 substTypeVars :: HasTypeVars t => Map Name Name -> t -> t
@@ -90,11 +120,15 @@ instance SubstType Type where
   substType m t@(VarT n)          = fromMaybe t (n `Map.lookup` m)
   substType m (ForallT bs ctx ty) = ForallT bs (substType m' ctx) (substType m' ty)
     where m' = foldrOf typeVars Map.delete m bs
-  substType m (SigT t k)          = SigT (substType m t) k
+  substType m (SigT t k)          = SigT (substType m t) (substType m k)
   substType m (AppT l r)          = AppT (substType m l) (substType m r)
   substType m (InfixT  t1 n t2)   = InfixT  (substType m t1) n (substType m t2)
   substType m (UInfixT t1 n t2)   = UInfixT (substType m t1) n (substType m t2)
   substType m (ParensT t)         = ParensT (substType m t)
+#if MIN_VERSION_template_haskell(2,15,0)
+  substType m (AppKindT t k)       = AppKindT (substType m t) (substType m k)
+  substType m (ImplicitParamT n t) = ImplicitParamT n (substType m t)
+#endif
   substType _ t                   = t
 
 instance SubstType t => SubstType [t] where

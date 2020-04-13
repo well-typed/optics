@@ -73,7 +73,7 @@ makeFieldOpticsForDec' rules = makeFieldOpticsForDatatype rules <=< lift . D.nor
 makeFieldOpticsForDatatype :: LensRules -> D.DatatypeInfo -> HasFieldClasses [Dec]
 makeFieldOpticsForDatatype rules info =
   do perDef <- lift $ do
-       fieldCons <- traverse normalizeConstructor cons
+       fieldCons <- traverse (normalizeConstructor info) cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
        let defCons    = over normFieldLabels (expandName allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
@@ -88,7 +88,7 @@ makeFieldOpticsForDatatype rules info =
 
   where
   tyName = D.datatypeName info
-  s      = D.datatypeType info
+  s      = addKindVars info $ D.datatypeType info
   cons   = D.datatypeCons info
 
   -- Traverse the field labels of a normalized constructor
@@ -111,7 +111,7 @@ makeFieldLabelsWith rules = D.reifyDatatype >=> makeFieldLabelsForDatatype rules
 makeFieldLabelsForDatatype :: LensRules -> D.DatatypeInfo -> Q [Dec]
 makeFieldLabelsForDatatype rules info =
   do perDef <- do
-       fieldCons <- traverse normalizeConstructor cons
+       fieldCons <- traverse (normalizeConstructor info) cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
        let defCons    = over normFieldLabels (expandName allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
@@ -128,7 +128,7 @@ makeFieldLabelsForDatatype rules info =
       _                               -> True
 
     tyName = D.datatypeName info
-    s      = D.datatypeType info
+    s      = addKindVars info $ D.datatypeType info
     cons   = D.datatypeCons info
 
     -- Traverse the field labels of a normalized constructor
@@ -181,10 +181,11 @@ makeFieldLabel rules (defName, (defType, cons)) = do
 -- eliminating the variance between records, infix constructors, and normal
 -- constructors.
 normalizeConstructor ::
+  D.DatatypeInfo    ->
   D.ConstructorInfo ->
   Q (Name, [(Maybe Name, Type)]) -- ^ constructor name, field name, field type
 
-normalizeConstructor con =
+normalizeConstructor info con =
   return (D.constructorName con,
           zipWith checkForExistentials fieldNames (D.constructorFields con))
   where
@@ -198,11 +199,11 @@ normalizeConstructor con =
     -- elligible for TH generated optics.
     checkForExistentials _ fieldtype
       | any (\tv -> D.tvName tv `S.member` used) unallowable
-      = (Nothing, fieldtype)
+      = (Nothing, addKindVars info fieldtype)
       where
         used        = setOf typeVars fieldtype
         unallowable = D.constructorVars con
-    checkForExistentials fieldname fieldtype = (fieldname, fieldtype)
+    checkForExistentials fieldname fieldtype = (fieldname, addKindVars info fieldtype)
 
 -- | Compute the positional location of the fields involved in
 -- each constructor for a given optic definition as well as the
@@ -375,8 +376,7 @@ buildStab forClassInstance s categorizedFields = do
                               S.\\ ambiguousTypeVars
       | otherwise = pure $ freeTypeVars S.\\ fixedTypeVars
       where
-        -- A might reference free kind variables S doesn't
-        freeTypeVars  = setOf typeVars s `S.union` setOf typeVars a
+        freeTypeVars  = setOf typeVars s
         fixedTypeVars = setOf typeVars fixedFields
 
     getAmbiguousTypeFamilyTypeVars = do
@@ -428,9 +428,6 @@ buildStab forClassInstance s categorizedFields = do
               when (var `S.member` insSet) . void $ go arg
           _ -> pure ()
           where
-            varName (PlainTV nm)    = nm
-            varName (KindedTV nm _) = nm
-
             sameLenZip (x : xs) (y : ys) = (x, y) : sameLenZip xs ys
             sameLenZip []        []      = []
             sameLenZip _         _       = error "sameLenZip: different lengths"
@@ -874,7 +871,11 @@ addFieldClassName n = modify $ S.insert n
 -- Miscellaneous utility functions
 ------------------------------------------------------------------------
 
- -- We want to catch type families, but not *data* families. See #799.
+varName :: TyVarBndr -> Name
+varName (PlainTV nm)    = nm
+varName (KindedTV nm _) = nm
+
+-- We want to catch type families, but not *data* families. See #799.
 typeFamilyHead :: AffineFold Dec TypeFamilyHead
 typeFamilyHead = _OpenTypeFamilyD `afailing` _ClosedTypeFamilyD % _1
 
@@ -888,7 +889,7 @@ quantifyType = quantifyType' S.empty
 quantifyType' :: S.Set Name -> Cxt -> Type -> Type
 quantifyType' exclude c t = ForallT vs c t
   where
-  vs = map PlainTV
-     $ filter (`S.notMember` exclude)
-     $ nub -- stable order
-     $ toListOf typeVars t
+    vs = filter (\v -> varName v `S.notMember` exclude)
+       . D.freeVariablesWellScoped
+       . S.toList
+       $ setOf typeVarBndrs t

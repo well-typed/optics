@@ -510,7 +510,7 @@ instance SubstType Type where
   substType m t@(VarT n)          = fromMaybe t (n `Map.lookup` m)
   substType m (ForallT bs ctx ty) = ForallT bs (substType m' ctx) (substType m' ty)
     where m' = foldrOf typeVars Map.delete m bs
-  substType m (SigT t k)          = SigT (substType m t) k
+  substType m (SigT t k)          = SigT (substType m t) (substType m k)
   substType m (AppT l r)          = AppT (substType m l) (substType m r)
   substType m (InfixT  t1 n t2)   = InfixT  (substType m t1) n (substType m t2)
   substType m (UInfixT t1 n t2)   = UInfixT (substType m t1) n (substType m t2)

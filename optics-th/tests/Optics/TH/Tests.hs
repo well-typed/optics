@@ -8,11 +8,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Main where
 
+import Data.Functor.Const
+import Data.Kind (Type)
 import Data.Tagged
 import Data.Typeable
 
@@ -138,6 +141,14 @@ checkClassyT2 = _ClassyT2
 
 checkClassyT3 :: AsClassyTest r => Prism' r Char
 checkClassyT3 = _ClassyT3
+
+data Weird1 (a :: k -> Type) (b :: k -> Type) = Weird1
+data WeirdThing a b = WeirdThing (Weird1 a (Const b))
+makePrisms ''WeirdThing
+
+--data FooZ (a :: k -> Type) (b :: k -> Type) where
+--  FooZ :: FooZ (a :: Type -> Type) b
+--makePrisms ''FooZ
 
 ----------------------------------------
 
@@ -453,16 +464,27 @@ checkThing2 = thing
 checkThing2_ :: Lens (Lebowski a) (Lebowski b) (Maybe a) (Maybe b)
 checkThing2_ = #thing
 
-data Kinded (a :: k1) (b :: k2) = Kinded
-  { _kindedThing :: Tagged '(a, b) Int
+data Kinded1 (a :: k1) (b :: k2) = Kinded
+  { _kinded1Thing :: Tagged '(a, b) Int
   }
-makeFieldLabels ''Kinded
+makeFieldLabels ''Kinded1
 
-checkKindedThing :: Iso (Kinded (a  :: k1 ) (b  :: k2 ))
-                        (Kinded (a' :: k1') (b' :: k2'))
-                        (Tagged '(a , b ) Int)
-                        (Tagged '(a', b') Int)
-checkKindedThing = #thing
+checkKinded1Thing :: Iso (Kinded1 (a  :: k1 ) (b  :: k2 ))
+                         (Kinded1 (a' :: k1') (b' :: k2'))
+                         (Tagged '(a , b ) Int)
+                         (Tagged '(a', b') Int)
+checkKinded1Thing = #thing
+
+data Kinded2 k a = Kinded2
+  { _kinded2Thing :: Proxy (a :: k)
+  }
+makeFieldLabels ''Kinded2
+
+checkKinded2Thing :: Iso (Kinded2 k  a )
+                         (Kinded2 k' a')
+                         (Proxy (a  :: k ))
+                         (Proxy (a' :: k'))
+checkKinded2Thing = #thing
 
 type family Fam (a :: k)
 type instance Fam Int = String
