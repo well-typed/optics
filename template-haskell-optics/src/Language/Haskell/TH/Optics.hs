@@ -452,7 +452,8 @@ instance HasTypeVars Type where
     VarT n            -> VarT <$> traverseOf (typeVarsEx s) f n
     AppT l r          -> AppT <$> traverseOf (typeVarsEx s) f l
                               <*> traverseOf (typeVarsEx s) f r
-    SigT t k          -> (`SigT` k) <$> traverseOf (typeVarsEx s) f t
+    SigT t k          -> SigT <$> traverseOf (typeVarsEx s) f t
+                              <*> traverseOf (typeVarsEx s) f k
     ForallT bs ctx ty -> let s' = s `Set.union` setOf typeVars bs
                          in ForallT bs <$> traverseOf (typeVarsEx s') f ctx
                                        <*> traverseOf (typeVarsEx s') f ty

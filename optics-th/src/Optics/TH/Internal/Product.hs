@@ -363,12 +363,20 @@ buildStab forClassInstance s categorizedFields = do
     unfixedTypeVars
       | forClassInstance = do
           ambiguousTypeVars <- getAmbiguousTypeFamilyTypeVars
-          pure $ sTypeVars S.\\ fixedTypeVars
-                           S.\\ phantomTypeVars
-                           S.\\ ambiguousTypeVars
-      | otherwise = pure $ sTypeVars S.\\ fixedTypeVars
+          --runIO $ do
+          --  putStrLn $ "S:         " ++ show s
+          --  putStrLn $ "A:         " ++ show a
+          --  putStrLn $ "FREE:      " ++ show freeTypeVars
+          --  putStrLn $ "FIXED:     " ++ show fixedTypeVars
+          --  putStrLn $ "PHANTOM:   " ++ show phantomTypeVars
+          --  putStrLn $ "AMBIGUOUS: " ++ show ambiguousTypeVars
+          pure $ freeTypeVars S.\\ fixedTypeVars
+                              S.\\ phantomTypeVars
+                              S.\\ ambiguousTypeVars
+      | otherwise = pure $ freeTypeVars S.\\ fixedTypeVars
       where
-        sTypeVars     = setOf typeVars s
+        -- A might reference free kind variables S doesn't
+        freeTypeVars  = setOf typeVars s `S.union` setOf typeVars a
         fixedTypeVars = setOf typeVars fixedFields
 
     getAmbiguousTypeFamilyTypeVars = do
@@ -378,6 +386,7 @@ buildStab forClassInstance s categorizedFields = do
         go :: Type -> StateT (S.Set Name) Q (Maybe (Int, TypeFamilyHead, [Type]))
         go (ForallT _ _ ty)     = go ty
         go (ParensT ty)         = go ty
+        go (SigT ty kind)       = go ty *> go kind
         go (InfixT ty1 nm ty2)  = procInfix ty1 nm ty2 *> pure Nothing
         go (UInfixT ty1 nm ty2) = procInfix ty1 nm ty2 *> pure Nothing
 
@@ -411,6 +420,10 @@ buildStab forClassInstance s categorizedFields = do
           TypeFamilyHead _ varBndrs _ (Just (InjectivityAnn _ ins)) -> do
             let insSet = S.fromList ins
                 vars   = map varName varBndrs
+            --lift . runIO $ do
+            --  putStrLn $ "INS:  " ++ show ins
+            --  putStrLn $ "VARS: " ++ show vars
+            --  putStrLn $ "ARGS: " ++ show args
             forM_ (sameLenZip vars args) $ \(var, arg) ->
               when (var `S.member` insSet) . void $ go arg
           _ -> pure ()

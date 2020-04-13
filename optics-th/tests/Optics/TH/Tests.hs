@@ -453,7 +453,18 @@ checkThing2 = thing
 checkThing2_ :: Lens (Lebowski a) (Lebowski b) (Maybe a) (Maybe b)
 checkThing2_ = #thing
 
-type family Fam a
+data Kinded (a :: k1) (b :: k2) = Kinded
+  { _kindedThing :: Tagged '(a, b) Int
+  }
+makeFieldLabels ''Kinded
+
+checkKindedThing :: Iso (Kinded (a  :: k1 ) (b  :: k2 ))
+                        (Kinded (a' :: k1') (b' :: k2'))
+                        (Tagged '(a , b ) Int)
+                        (Tagged '(a', b') Int)
+checkKindedThing = #thing
+
+type family Fam (a :: k)
 type instance Fam Int = String
 
 -- unambiguous type family application
@@ -463,7 +474,7 @@ makeFieldLabels ''FamRec1
 checkFamRec1Thing :: Iso (FamRec1 a) (FamRec1 b) (a -> Fam a) (b -> Fam b)
 checkFamRec1Thing = #thing
 
-type family FamInj1 a b = r | r -> a
+type family FamInj1 (a :: k) b = r | r -> a
 
 -- type family injective in its first parameter
 data FamRec2 a b = FamRec2 { _famRec2Thing :: FamInj1 a b }
@@ -495,8 +506,9 @@ type family FamInj2 a b (c :: k) = r | r -> a b c
 data FamRec5 a b (c :: k) = FamRec5 { _famRec5Thing :: FamInj2 a b '[c] }
 makeFieldLabels ''FamRec5
 
-checkFamRec5Thing :: Iso (FamRec5 a  b  (c  :: k))
-                         (FamRec5 a' b' (c' :: k))
+-- type-changing, kind-changing optic
+checkFamRec5Thing :: Iso (FamRec5 a  b  (c  :: k ))
+                         (FamRec5 a' b' (c' :: k'))
                          (FamInj2 a  b  '[c ])
                          (FamInj2 a' b' '[c'])
 checkFamRec5Thing = #thing
@@ -509,16 +521,16 @@ checkFamRec6Thing
   :: Iso (FamRec6 a) (FamRec6 b) (Tagged a (Fam a)) (Tagged b (Fam b))
 checkFamRec6Thing = #thing
 
--- nested injective type family application
-data FamRec7 a b = FamRec7
-  { _famRec7Thing :: FamInj1 (Int :#: (a -> FamInj1 b (Fam a))) b
+-- nested injective type family application + kind polymorphism
+data FamRec7 a b (c :: [k]) = FamRec7
+  { _famRec7Thing :: FamInj1 (b :#: (a -> FamInj1 c b)) b
   }
 makeFieldLabels ''FamRec7
 
-checkFamRec7Thing :: Iso (FamRec7 a b)
-                         (FamRec7 a' b')
-                         (FamInj1 (Int :#: (a -> FamInj1 b (Fam a))) b)
-                         (FamInj1 (Int :#: (a' -> FamInj1 b' (Fam a'))) b')
+checkFamRec7Thing :: Iso (FamRec7 a b  (c  :: [k ]))
+                         (FamRec7 a' b (c' :: [k']))
+                         (FamInj1 (b :#: (a -> FamInj1 c b)) b)
+                         (FamInj1 (b :#: (a' -> FamInj1 c' b)) b)
 checkFamRec7Thing = #thing
 
 data FamRec a = FamRec
