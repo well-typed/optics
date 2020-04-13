@@ -54,6 +54,7 @@ test-suite optics-th-tests
   build-depends: base
                , optics-core
                , optics-th
+               , tagged
 
   type:    exitcode-stdio-1.0
   main-is: Optics/TH/Tests.hs
