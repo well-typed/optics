@@ -464,6 +464,14 @@ checkThing2 = thing
 checkThing2_ :: Lens (Lebowski a) (Lebowski b) (Maybe a) (Maybe b)
 checkThing2_ = #thing
 
+data Kinded0 k = Kinded0
+  { _kinded0Thing :: forall a. Proxy (a :: k)
+  }
+makeLenses ''Kinded0
+
+checkKinded0Thing :: Getter (Kinded0 k) (Proxy (a :: k))
+checkKinded0Thing = kinded0Thing
+
 data Kinded1 (a :: k1) (b :: k2) = Kinded
   { _kinded1Thing :: Tagged '(a, b) Int
   }

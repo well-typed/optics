@@ -124,8 +124,8 @@ makeFieldLabelsForDatatype rules info =
     -- LabelOptic doesn't support higher rank fields because of functional
     -- dependencies (s -> a, t -> b), so just skip them.
     isRank1 = \case
-      (_, (OpticSa rank1 _ _ _ _, _)) -> rank1
-      _                               -> True
+      (_, (OpticSa vs _ _ _ _, _)) -> null vs
+      _                            -> True
 
     tyName = D.datatypeName info
     s      = addKindVars info $ D.datatypeType info
@@ -222,18 +222,18 @@ buildScaffold forClassInstance rules s cons defName =
   do (s',t,a,b) <- buildStab forClassInstance s (concatMap snd consForDef)
 
      let defType
-           | Just (tyvars,cx,a') <- preview _ForallT a =
+           | Just (tyvars, cx, a') <- preview _ForallT a =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa (null tyvars) cx optic s' a'
+               in OpticSa tyvars cx optic s' a'
 
            -- Getter and Fold are always simple
            | not (_allowUpdates rules) =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa True [] optic s' a
+               in OpticSa [] [] optic s' a
 
            -- Generate simple Lens and Traversal where possible
            | _simpleLenses rules || s' == t && a == b =
@@ -241,7 +241,7 @@ buildScaffold forClassInstance rules s cons defName =
                          | lensCase                    = LensType
                          | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
-               in OpticSa True [] optic s' a
+               in OpticSa [] [] optic s' a
 
            -- Generate type-changing Lens and Traversal otherwise
            | otherwise =
@@ -310,14 +310,16 @@ opticTypeName typeChanging  TraversalType       = if typeChanging
                                                   then ''Traversal
                                                   else ''Traversal'
 
-data OpticStab = OpticStab        OpticType Type Type Type Type
-               | OpticSa Bool Cxt OpticType Type Type
+data OpticStab
+  = OpticStab               OpticType Type Type Type Type
+  | OpticSa [TyVarBndr] Cxt OpticType Type Type
+  deriving Show
 
 stabToType :: OpticStab -> Type
-stabToType (OpticStab  c s t a b) =
-  quantifyType [] (opticTypeName True c `conAppsT` [s,t,a,b])
-stabToType (OpticSa _ cx c s   a  ) =
-  quantifyType cx (opticTypeName False c `conAppsT` [s,a])
+stabToType (OpticStab c s t a b) =
+  quantifyType [] [] (opticTypeName True c `conAppsT` [s,t,a,b])
+stabToType (OpticSa vs cx c s a) =
+  quantifyType vs cx (opticTypeName False c `conAppsT` [s,a])
 
 stabToContext :: OpticStab -> Cxt
 stabToContext OpticStab{}          = []
@@ -419,7 +421,7 @@ buildStab forClassInstance s categorizedFields = do
         procTF tf args = case tf of
           TypeFamilyHead _ varBndrs _ (Just (InjectivityAnn _ ins)) -> do
             let insSet = S.fromList ins
-                vars   = map varName varBndrs
+                vars   = map bndrName varBndrs
             --lift . runIO $ do
             --  putStrLn $ "INS:  " ++ show ins
             --  putStrLn $ "VARS: " ++ show vars
@@ -513,6 +515,7 @@ makeClassyClass className methodName s defs = do
       | (TopName defName, (stab, _)) <- defs
       , let body = infixApp (varE methodName) (varE '(%)) (varE defName)
       , let ty   = quantifyType' (S.fromList (c:vars))
+                                 []
                                  (stabToContext stab)
                  $ stabToOptic stab `conAppsT`
                        [VarT c, stabToA stab]
@@ -550,6 +553,7 @@ makeFieldClass defType className methodName =
          [sigD methodName (return methodType)]
   where
   methodType = quantifyType' (S.fromList [s,a])
+                             []
                              (stabToContext defType)
              $ stabToOptic defType `conAppsT` [VarT s,VarT a]
   s = mkName "s"
@@ -871,25 +875,25 @@ addFieldClassName n = modify $ S.insert n
 -- Miscellaneous utility functions
 ------------------------------------------------------------------------
 
-varName :: TyVarBndr -> Name
-varName (PlainTV nm)    = nm
-varName (KindedTV nm _) = nm
-
 -- We want to catch type families, but not *data* families. See #799.
 typeFamilyHead :: AffineFold Dec TypeFamilyHead
 typeFamilyHead = _OpenTypeFamilyD `afailing` _ClosedTypeFamilyD % _1
 
 -- | Template Haskell wants type variables declared in a forall, so
 -- we find all free type variables in a given type and declare them.
-quantifyType :: Cxt -> Type -> Type
+quantifyType :: [TyVarBndr] -> Cxt -> Type -> Type
 quantifyType = quantifyType' S.empty
 
 -- | This function works like 'quantifyType' except that it takes
 -- a list of variables to exclude from quantification.
-quantifyType' :: S.Set Name -> Cxt -> Type -> Type
-quantifyType' exclude c t = ForallT vs c t
+quantifyType' :: S.Set Name -> [TyVarBndr] -> Cxt -> Type -> Type
+quantifyType' exclude vars cx t = ForallT vs cx t
   where
-    vs = filter (\v -> varName v `S.notMember` exclude)
+    vs = filter (\v -> bndrName v `S.notMember` exclude)
        . D.freeVariablesWellScoped
+       . (map bndrToType vars ++)
        . S.toList
        $ setOf typeVarBndrs t
+
+    bndrToType (PlainTV n)    = VarT n
+    bndrToType (KindedTV n k) = SigT (VarT n) k
