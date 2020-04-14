@@ -37,17 +37,17 @@
 -- @Optics.TH@ in the @optics-th@ package:
 --
 -- >>> :{
--- instance (a ~ String, b ~ String) => LabelOptic "name" A_Lens Human Human a b where
+-- instance (k ~ A_Lens, a ~ String, b ~ String) => LabelOptic "name" k Human Human a b where
 --   labelOptic = lensVL $ \f s -> (\v -> s { humanName = v }) <$> f (humanName s)
--- instance (a ~ Integer, b ~ Integer) => LabelOptic "age" A_Lens Human Human a b where
+-- instance (k ~ A_Lens, a ~ Integer, b ~ Integer) => LabelOptic "age" k Human Human a b where
 --   labelOptic = lensVL $ \f s -> (\v -> s { humanAge = v }) <$> f (humanAge s)
--- instance (a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" A_Lens Human Human a b where
+-- instance (k ~ A_Lens, a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" k Human Human a b where
 --   labelOptic = lensVL $ \f s -> (\v -> s { humanPets = v }) <$> f (humanPets s)
--- instance (a ~ String, b ~ String) => LabelOptic "name" A_Lens Pet Pet a b where
+-- instance (k ~ A_Lens, a ~ String, b ~ String) => LabelOptic "name" k Pet Pet a b where
 --   labelOptic = lensVL $ \f s -> (\v -> s { petName = v }) <$> f (petName s)
--- instance (a ~ Int, b ~ Int) => LabelOptic "age" A_Lens Pet Pet a b where
+-- instance (k ~ A_Lens, a ~ Int, b ~ Int) => LabelOptic "age" k Pet Pet a b where
 --   labelOptic = lensVL $ \f s -> (\v -> s { petAge = v }) <$> f (petAge s)
--- instance (a ~ Bool, b ~ Bool) => LabelOptic "lazy" An_AffineTraversal Pet Pet a b where
+-- instance (k ~ An_AffineTraversal, a ~ Bool, b ~ Bool) => LabelOptic "lazy" k Pet Pet a b where
 --   labelOptic = atraversalVL $ \point f s -> case s of
 --     Cat name age lazy -> (\lazy' -> Cat name age lazy') <$> f lazy
 --     _                 -> point s
@@ -94,7 +94,7 @@
 -- You might wonder why instances above are written in form
 --
 -- @
--- instance (a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" A_Lens Human Human a b where
+-- instance (k ~ A_Lens, a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" k Human Human a b where
 -- @
 --
 -- instead of
@@ -103,10 +103,10 @@
 -- instance LabelOptic "pets" A_Lens Human Human [Pet] [Pet] where
 -- @
 --
--- The reason is that using the first form ensures that GHC always matches on
--- the instance if either @s@ or @t@ is known and verifies type equalities
--- later, which not only makes type inference better, but also allows it to
--- generate good error messages.
+-- The reason is that using the first form ensures that it is enough for GHC to
+-- match on the instance if either @s@ or @t@ is known (as type equalities are
+-- verified after the instance matches), which not only makes type inference
+-- better, but also allows it to generate better error messages.
 --
 -- For example, if you try to write @peter & set #pets []@ with the appropriate
 -- LabelOptic instance in the second form, you get the following:
@@ -144,6 +144,14 @@
 --         (maybe you forgot to define it or misspelled a name?)
 --     • When checking the inferred type
 --         it :: forall k b a. ((TypeError ...), Is k A_Setter) => b
+--
+-- λ> age = #age :: Iso' Human Int
+--
+-- <interactive>:7:7: error:
+--     • No instance for LabelOptic "age" ‘An_Iso’ ‘Human’ ‘Human’ ‘Int’ ‘Int’
+--         (maybe you forgot to define it or misspelled a name?)
+--     • In the expression: #age :: Iso' Human Int
+--       In an equation for ‘age’: age = #age :: Iso' Human Int
 -- @
 --
 -- If we use the first form, error messages become more accurate:
@@ -164,6 +172,13 @@
 --     • In the first argument of ‘set’, namely ‘#age’
 --       In the second argument of ‘(&)’, namely ‘set #age "hi"’
 --       In the expression: peter & set #age "hi"
+-- λ> age = #age :: Iso' Human Int
+--
+-- <interactive>:9:7: error:
+--     • Couldn't match type ‘An_Iso’ with ‘A_Lens’
+--         arising from the overloaded label ‘#age’
+--     • In the expression: #age :: Iso' Human Int
+--       In an equation for ‘age’: age = #age :: Iso' Human Int
 -- @
 --
 -- == Limitations arising from functional dependencies
