@@ -878,22 +878,3 @@ addFieldClassName n = modify $ S.insert n
 -- We want to catch type families, but not *data* families. See #799.
 typeFamilyHead :: AffineFold Dec TypeFamilyHead
 typeFamilyHead = _OpenTypeFamilyD `afailing` _ClosedTypeFamilyD % _1
-
--- | Template Haskell wants type variables declared in a forall, so
--- we find all free type variables in a given type and declare them.
-quantifyType :: [TyVarBndr] -> Cxt -> Type -> Type
-quantifyType = quantifyType' S.empty
-
--- | This function works like 'quantifyType' except that it takes
--- a list of variables to exclude from quantification.
-quantifyType' :: S.Set Name -> [TyVarBndr] -> Cxt -> Type -> Type
-quantifyType' exclude vars cx t = ForallT vs cx t
-  where
-    vs = filter (\v -> bndrName v `S.notMember` exclude)
-       . D.freeVariablesWellScoped
-       . (map bndrToType vars ++)
-       . S.toList
-       $ setOf typeVarsKinded t
-
-    bndrToType (PlainTV n)    = VarT n
-    bndrToType (KindedTV n k) = SigT (VarT n) k

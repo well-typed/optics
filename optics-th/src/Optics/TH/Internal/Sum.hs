@@ -10,6 +10,7 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import Data.Traversable
+import Data.Type.Equality
 import Language.Haskell.TH
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -152,7 +153,7 @@ makeConsPrisms info cons Nothing = fmap concat . for cons $ \con -> do
              then varE 'coerced
              else makeConOpticExp stab cons con
   sequenceA $
-    [ sigD n (close (stabToType stab))
+    [ sigD n . pure . close $ stabToType stab
     , valD (varP n) (normalB body) []
     ] ++ inlinePragma n
   where
@@ -239,27 +240,36 @@ computeReviewType t cx tys = do
 -- | Compute the full type-changing Prism type given an outer type, list of
 -- constructors, and target constructor name.
 computePrismType :: StabConfig -> Type -> Cxt -> [NCon] -> NCon -> Q Stab
-computePrismType conf t cx cons con = do
+computePrismType conf s cx cons con = do
   let ts       = view nconTypes con
+      free     = setOf typeVars s
       fixed    = setOf typeVars cons
-      phantoms = setOf typeVars t S.\\ (setOf typeVars con `S.union` fixed)
-      unbound  = if scAllowPhantomsChange conf
-                 then setOf typeVars t S.\\ fixed
-                 else setOf typeVars t S.\\ fixed S.\\ phantoms
+      unbound  = free S.\\  fixed
+      phantoms = free S.\\ (fixed `S.union` setOf typeVars con)
   sub <- sequenceA (M.fromSet (newName . nameBase) unbound)
-  b   <- toTupleT (map return ts)
-  a   <- toTupleT (map return (substTypeVars sub ts))
+  a   <- toTupleT (map return ts)
+  b   <- toTupleT (map return (substTypeVars sub ts))
   --runIO $ do
-  --  putStrLn $ "T:        " ++ show t
-  --  putStrLn $ "B:        " ++ show b
+  --  putStrLn $ "S:        " ++ show s
+  --  putStrLn $ "A:        " ++ show a
+  --  putStrLn $ "FREE:     " ++ show free
   --  putStrLn $ "FIXED:    " ++ show fixed
-  --  putStrLn $ "PHANTOMS: " ++ show phantoms
   --  putStrLn $ "UNBOUND:  " ++ show unbound
-  let s = substTypeVars sub t
+  --  putStrLn $ "PHANTOMS: " ++ show phantoms
+  let t = substTypeVars sub s
+      cx' = substTypeVars sub cx
+        ++ if not $ scAllowPhantomsChange conf
+           then map (\v -> heteroEq v (fromJust $ v `M.lookup` sub))
+                    (S.toList phantoms)
+           else []
       otype = if null cons && scAllowIsos conf
               then IsoType
               else PrismType
-  return (Stab cx otype s t a b)
+  return (Stab cx' otype s t a b)
+  where
+    -- Generate heterogenous equality constraints for phantom types as naive
+    -- unification breaks down with contrived types using PolyKinds + GADTs.
+    heteroEq v v' = InfixT (VarT v) ''(~~) (VarT v')
 
 -- | Construct either a Review or Prism as appropriate
 makeConOpticExp :: Stab -> [NCon] -> NCon -> ExpQ
@@ -500,9 +510,6 @@ prismName n = case nameBase n of
 
 
 -- | Quantify all the free variables in a type.
-close :: Type -> TypeQ
-close t = forallT vs (cxt[]) (return t)
-  where
-    vs = D.freeVariablesWellScoped
-       . S.toList
-       $ setOf typeVarsKinded t
+close :: Type -> Type
+close (ForallT vars cx ty) = quantifyType vars cx ty
+close ty                   = quantifyType []   [] ty

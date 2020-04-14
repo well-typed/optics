@@ -142,13 +142,52 @@ checkClassyT2 = _ClassyT2
 checkClassyT3 :: AsClassyTest r => Prism' r Char
 checkClassyT3 = _ClassyT3
 
-data Weird1 (a :: k -> Type) (b :: k -> Type) = Weird1
-data WeirdThing a b = WeirdThing (Weird1 a (Const b))
-makePrisms ''WeirdThing
+data WeirdThing (a :: k -> Type) (b :: k -> Type) = WeirdThing
+data Weird1 a b = Weird1 (WeirdThing a (Const b))
+makePrisms ''Weird1
+makePrismLabels ''Weird1
 
---data FooZ (a :: k -> Type) (b :: k -> Type) where
---  FooZ :: FooZ (a :: Type -> Type) b
---makePrisms ''FooZ
+checkWeird1 :: Iso (Weird1 a  b )
+                   (Weird1 a' b')
+                   (WeirdThing a  (Const b))
+                   (WeirdThing a' (Const b'))
+checkWeird1 = _Weird1
+
+checkWeird1_ :: Iso (Weird1 a  b )
+                    (Weird1 a' b')
+                    (WeirdThing a  (Const b))
+                    (WeirdThing a' (Const b'))
+checkWeird1_ = #_Weird1
+
+data Weird2 (a :: k -> Type) (b :: k -> Type) where
+  Weird2 :: Weird2 (a :: Type -> Type) b
+makePrisms ''Weird2
+makePrismLabels ''Weird2
+
+checkWeird2
+  :: forall k (a  :: k    -> Type)
+              (b  :: k    -> Type)
+              (a' :: Type -> Type)
+              (b' :: Type -> Type)
+   . Iso (Weird2 a b) (Weird2 a' b') () ()
+checkWeird2 = _Weird2
+
+checkWeird2_
+  :: forall (a  :: Type -> Type)
+            (b  :: Type -> Type)
+   . Iso (Weird2 a b) (Weird2 a b) () ()
+checkWeird2_ = #_Weird2
+
+data Weird3 (a :: k) where
+  Weird3 :: Weird3 (a :: Type)
+makePrisms ''Weird3
+makePrismLabels ''Weird3
+
+checkWeird3 :: forall k (a :: k) (b :: Type). Iso (Weird3 a) (Weird3 b) () ()
+checkWeird3 = _Weird3
+
+checkWeird3_ :: forall (a :: Type). Iso (Weird3 a) (Weird3 a) () ()
+checkWeird3_ = #_Weird3
 
 ----------------------------------------
 
