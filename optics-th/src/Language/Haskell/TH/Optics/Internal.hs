@@ -5,7 +5,7 @@ module Language.Haskell.TH.Optics.Internal
   -- * Traversals
     HasTypeVars(..)
   , typeVars      -- :: HasTypeVars t => Traversal' t Name
-  , typeVarBndrs
+  , typeVarsKinded
   , substTypeVars -- :: HasTypeVars t => Map Name Name -> t -> t
   , SubstType(..)
 
@@ -87,8 +87,8 @@ typeVars :: HasTypeVars t => Traversal' t Name
 typeVars = typeVarsEx mempty
 
 -- | Traverse /free/ type variables paired with their kinds if applicable.
-typeVarBndrs :: Fold Type Type
-typeVarBndrs = foldVL $ go mempty
+typeVarsKinded :: Fold Type Type
+typeVarsKinded = foldVL $ go mempty
   where
     go s f = \case
       var@(VarT n)          -> if n `Set.member` s then pure () else f var

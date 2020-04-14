@@ -893,7 +893,7 @@ quantifyType' exclude vars cx t = ForallT vs cx t
        . D.freeVariablesWellScoped
        . (map bndrToType vars ++)
        . S.toList
-       $ setOf typeVarBndrs t
+       $ setOf typeVarsKinded t
 
     bndrToType (PlainTV n)    = VarT n
     bndrToType (KindedTV n k) = SigT (VarT n) k

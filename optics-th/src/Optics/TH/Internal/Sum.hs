@@ -218,7 +218,7 @@ stabToType stab@(Stab cx ty s t a b) = ForallT vs cx $
   where
     vs = D.freeVariablesWellScoped
        . S.toList
-       $ setOf (folded % typeVarBndrs) cx
+       $ setOf (folded % typeVarsKinded) cx
 
 stabType :: Stab -> OpticType
 stabType (Stab _ o _ _ _ _) = o
@@ -505,4 +505,4 @@ close t = forallT vs (cxt[]) (return t)
   where
     vs = D.freeVariablesWellScoped
        . S.toList
-       $ setOf typeVarBndrs t
+       $ setOf typeVarsKinded t
