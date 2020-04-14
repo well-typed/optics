@@ -110,15 +110,15 @@ import Optics.TH.Internal.Sum
 --
 -- @
 -- instance
---   (a ~ Int, b ~ Int
---   ) => LabelOptic "age" A_Lens Animal Animal a b where
+--   (k ~ A_Lens, a ~ Int, b ~ Int
+--   ) => LabelOptic "age" k Animal Animal a b where
 --   labelOptic = lensVL $ \\f s -> case s of
 --     Cat x1 x2 -> fmap (\\y -> Cat y x2) (f x1)
 --     Dog x1 x2 -> fmap (\\y -> Dog y x2) (f x1)
 --
 -- instance
---   (a ~ String, b ~ String
---   ) => LabelOptic "name" An_AffineTraversal Animal Animal a b where
+--   (k ~ An_AffineTraversal, a ~ String, b ~ String
+--   ) => LabelOptic "name" k Animal Animal a b where
 --   labelOptic = atraversalVL $ \\point f s -> case s of
 --     Cat x1 x2 -> fmap (\\y -> Cat x1 y) (f x2)
 --     Dog x1 x2 -> point (Dog x1 x2)
@@ -169,8 +169,8 @@ makeFieldLabelsFor fields = makeFieldLabelsWith (fieldLabelsRulesFor fields)
 -- @
 -- data Dog = Dog String Int
 --   deriving Show
--- instance LabelOptic "name" A_Lens Dog Dog ...
--- instance LabelOptic "age" A_Lens Dog Dog ...
+-- instance (k ~ A_Lens, ...) => LabelOptic "name" k Dog Dog ...
+-- instance (k ~ A_Lens, ...) => LabelOptic "age" k Dog Dog ...
 -- @
 declareFieldLabels :: DecsQ -> DecsQ
 declareFieldLabels

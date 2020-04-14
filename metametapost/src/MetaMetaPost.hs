@@ -267,10 +267,14 @@ data St s = St
     , stVars  :: PerTy Int
     }
 
-instance (a ~ b, s ~ s', a ~ ([Stmt s] -> [Stmt s])) => LabelOptic "stmts" A_Lens (St s) (St s') a b where
+instance
+  (k ~ A_Lens, s ~ s', a ~ ([Stmt s] -> [Stmt s]), a ~ b
+  ) => LabelOptic "stmts" k (St s) (St s') a b where
     labelOptic = lens stStmts $ \s x -> s { stStmts = x }
 
-instance (a ~ b, s ~ s', a ~ PerTy Int) => LabelOptic "vars" A_Lens (St s) (St s') a b where
+instance
+  (k ~ A_Lens, s ~ s', a ~ PerTy Int, a ~ b
+  ) => LabelOptic "vars" k (St s) (St s') a b where
     labelOptic = lens stVars $ \s x -> s { stVars = x }
 
 emptyS :: St s

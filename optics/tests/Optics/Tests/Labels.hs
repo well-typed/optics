@@ -135,8 +135,8 @@ type HasConfig k s = (LabelOptic' "config" k s Config, Is k A_Getter)
 
 data Config = Config
 instance
-  (a ~ Config, b ~ Config
-  ) => LabelOptic "config" An_Iso Config Config a b where
+  (k ~ An_Iso, a ~ Config, b ~ Config
+  ) => LabelOptic "config" k Config Config a b where
   labelOptic = equality
 
 data Env = Env { envConfig :: Config, envRng :: R.StdGen }
@@ -146,8 +146,8 @@ data Nested = Nested { nestedName :: String, nestedEnv :: Env }
 makeFieldLabels ''Nested
 
 instance
-  (a ~ Config, b ~ Config
-  ) => LabelOptic "config" A_Lens Nested Nested a b where
+  (k ~ A_Lens, a ~ Config, b ~ Config
+  ) => LabelOptic "config" k Nested Nested a b where
   labelOptic = #env % #config
 
 doStuff :: (MonadReader r m, HasConfig k r) => m ()

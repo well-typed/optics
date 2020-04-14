@@ -145,21 +145,23 @@ makeFieldLabel
 makeFieldLabel rules (defName, (defType, cons)) = do
   (context, instHead) <- case defType of
     OpticSa _ _ otype s a -> do
+      (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
       (a', cxtA) <- eqSubst a "a"
       (b', cxtB) <- eqSubst a "b"
-      pure (pure [cxtA, cxtB], pure $ conAppsT ''LabelOptic
-        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, s, a', b'])
+      pure (pure [cxtK, cxtA, cxtB], pure $ conAppsT ''LabelOptic
+        [LitT (StrTyLit fieldName), k, s, s, a', b'])
     OpticStab otype s t a b -> do
       ambiguousTypeFamilies <- containsAmbiguousTypeFamilyApplications s a
       -- If 'a' contains ambiguous type family applications, generate type
       -- preserving version as functional dependencies on LabelOptic demand it.
       let t' = if ambiguousTypeFamilies then s else t
+      (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
       (a', cxtA) <- eqSubst a "a"
       (b', cxtB) <- if ambiguousTypeFamilies
                     then eqSubst a "b"
                     else eqSubst b "b"
-      pure (pure [cxtA, cxtB], pure $ conAppsT ''LabelOptic
-        [LitT (StrTyLit fieldName), ConT $ opticTypeToTag otype, s, t', a', b'])
+      pure (pure [cxtK, cxtA, cxtB], pure $ conAppsT ''LabelOptic
+        [LitT (StrTyLit fieldName), k, s, t', a', b'])
   instanceD context instHead (fun 'labelOptic)
   where
     opticTypeToTag AffineFoldType      = ''An_AffineFold

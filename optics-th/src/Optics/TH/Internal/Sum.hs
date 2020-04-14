@@ -94,12 +94,15 @@ makePrismLabels typeName = do
         -- into OpticLabel because of functional dependencies, just skip them.
         ReviewType -> pure Nothing
         _ -> do
+          (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
           (a', cxtA) <- eqSubst a "a"
           (b', cxtB) <- eqSubst b "b"
           let label = nameBase . prismName $ view nconName con
               instHead = pure $ conAppsT ''LabelOptic
-                [LitT (StrTyLit label), ConT $ opticTypeToTag otype, s, t, a', b']
-          Just <$> instanceD (pure $ cx ++ [cxtA, cxtB]) instHead (fun stab 'labelOptic)
+                [LitT (StrTyLit label), k, s, t, a', b']
+          Just <$> instanceD (pure $ cx ++ [cxtK, cxtA, cxtB])
+                             instHead
+                             (fun stab 'labelOptic)
       where
         ty        = D.datatypeType info
         isNewtype = D.datatypeVariant info == D.Newtype
