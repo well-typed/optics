@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
@@ -72,11 +73,11 @@ makeFieldOpticsForDec' rules = makeFieldOpticsForDatatype rules <=< lift . D.nor
 makeFieldOpticsForDatatype :: LensRules -> D.DatatypeInfo -> HasFieldClasses [Dec]
 makeFieldOpticsForDatatype rules info =
   do perDef <- lift $ do
-       fieldCons <- traverse normalizeConstructor cons
+       fieldCons <- traverse (normalizeConstructor info) cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
        let defCons    = over normFieldLabels (expandName allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
-       T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
+       T.sequenceA (M.fromSet (buildScaffold False rules s defCons) allDefs)
 
      let defs = M.toList perDef
      case _classyLenses rules tyName of
@@ -87,7 +88,7 @@ makeFieldOpticsForDatatype rules info =
 
   where
   tyName = D.datatypeName info
-  s      = D.datatypeType info
+  s      = addKindVars info $ D.datatypeType info
   cons   = D.datatypeCons info
 
   -- Traverse the field labels of a normalized constructor
@@ -110,11 +111,11 @@ makeFieldLabelsWith rules = D.reifyDatatype >=> makeFieldLabelsForDatatype rules
 makeFieldLabelsForDatatype :: LensRules -> D.DatatypeInfo -> Q [Dec]
 makeFieldLabelsForDatatype rules info =
   do perDef <- do
-       fieldCons <- traverse normalizeConstructor cons
+       fieldCons <- traverse (normalizeConstructor info) cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
        let defCons    = over normFieldLabels (expandName allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
-       T.sequenceA (M.fromSet (buildScaffold False rules s defCons) allDefs)
+       T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
 
      let defs = filter isRank1 $ M.toList perDef
      traverse (makeFieldLabel rules) defs
@@ -123,11 +124,11 @@ makeFieldLabelsForDatatype rules info =
     -- LabelOptic doesn't support higher rank fields because of functional
     -- dependencies (s -> a, t -> b), so just skip them.
     isRank1 = \case
-      (_, (OpticSa rank1 _ _ _ _, _)) -> rank1
-      _                               -> True
+      (_, (OpticSa vs _ _ _ _, _)) -> null vs
+      _                            -> True
 
     tyName = D.datatypeName info
-    s      = D.datatypeType info
+    s      = addKindVars info $ D.datatypeType info
     cons   = D.datatypeCons info
 
     -- Traverse the field labels of a normalized constructor
@@ -151,17 +152,11 @@ makeFieldLabel rules (defName, (defType, cons)) = do
       pure (pure [cxtK, cxtA, cxtB], pure $ conAppsT ''LabelOptic
         [LitT (StrTyLit fieldName), k, s, s, a', b'])
     OpticStab otype s t a b -> do
-      ambiguousTypeFamilies <- containsAmbiguousTypeFamilyApplications s a
-      -- If 'a' contains ambiguous type family applications, generate type
-      -- preserving version as functional dependencies on LabelOptic demand it.
-      let t' = if ambiguousTypeFamilies then s else t
       (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
       (a', cxtA) <- eqSubst a "a"
-      (b', cxtB) <- if ambiguousTypeFamilies
-                    then eqSubst a "b"
-                    else eqSubst b "b"
+      (b', cxtB) <- eqSubst b "b"
       pure (pure [cxtK, cxtA, cxtB], pure $ conAppsT ''LabelOptic
-        [LitT (StrTyLit fieldName), k, s, t', a', b'])
+        [LitT (StrTyLit fieldName), k, s, t, a', b'])
   instanceD context instHead (fun 'labelOptic)
   where
     opticTypeToTag AffineFoldType      = ''An_AffineFold
@@ -171,18 +166,6 @@ makeFieldLabel rules (defName, (defType, cons)) = do
     opticTypeToTag IsoType             = ''An_Iso
     opticTypeToTag LensType            = ''A_Lens
     opticTypeToTag TraversalType       = ''A_Traversal
-
-    -- TODO: check for injectivity of encountered type families.
-    containsAmbiguousTypeFamilyApplications s a = do
-      -- We consider type family application ambiguous only if it's applied to a
-      -- type variable not referenced anywhere else.
-      (hasTypeFamilies, bareVars) <- (`runStateT` setOf typeVars s) $
-        go =<< lift (D.resolveTypeSynonyms a)
-      pure $ hasTypeFamilies && not (S.null bareVars)
-      where
-        go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> lift (reify nm)
-        go (VarT n)  = modify' (S.delete n) *> pure False
-        go ty        = or <$> traverse go (toListOf typeSelf ty)
 
     fieldName = case defName of
       TopName fname      -> nameBase fname
@@ -198,10 +181,11 @@ makeFieldLabel rules (defName, (defType, cons)) = do
 -- eliminating the variance between records, infix constructors, and normal
 -- constructors.
 normalizeConstructor ::
+  D.DatatypeInfo    ->
   D.ConstructorInfo ->
   Q (Name, [(Maybe Name, Type)]) -- ^ constructor name, field name, field type
 
-normalizeConstructor con =
+normalizeConstructor info con =
   return (D.constructorName con,
           zipWith checkForExistentials fieldNames (D.constructorFields con))
   where
@@ -215,41 +199,41 @@ normalizeConstructor con =
     -- elligible for TH generated optics.
     checkForExistentials _ fieldtype
       | any (\tv -> D.tvName tv `S.member` used) unallowable
-      = (Nothing, fieldtype)
+      = (Nothing, addKindVars info fieldtype)
       where
         used        = setOf typeVars fieldtype
         unallowable = D.constructorVars con
-    checkForExistentials fieldname fieldtype = (fieldname, fieldtype)
+    checkForExistentials fieldname fieldtype = (fieldname, addKindVars info fieldtype)
 
 -- | Compute the positional location of the fields involved in
 -- each constructor for a given optic definition as well as the
 -- type of clauses to generate and the type to annotate the declaration
 -- with.
 buildScaffold ::
-  Bool                       {- ^ allow change of phantom type parameters -} ->
+  Bool                              {- ^ for class instance?              -} ->
   LensRules                                                                  ->
   Type                              {- ^ outer type                       -} ->
   [(Name, [([DefName], Type)])]     {- ^ normalized constructors          -} ->
   DefName                           {- ^ target definition                -} ->
   Q (OpticStab, [(Name, Int, [Int])])
               {- ^ optic type, definition type, field count, target fields -}
-buildScaffold allowPhantomsChange rules s cons defName =
+buildScaffold forClassInstance rules s cons defName =
 
-  do (s',t,a,b) <- buildStab allowPhantomsChange s (concatMap snd consForDef)
+  do (s',t,a,b) <- buildStab forClassInstance s (concatMap snd consForDef)
 
      let defType
-           | Just (tyvars,cx,a') <- preview _ForallT a =
+           | Just (tyvars, cx, a') <- preview _ForallT a =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa (null tyvars) cx optic s' a'
+               in OpticSa tyvars cx optic s' a'
 
            -- Getter and Fold are always simple
            | not (_allowUpdates rules) =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa True [] optic s' a
+               in OpticSa [] [] optic s' a
 
            -- Generate simple Lens and Traversal where possible
            | _simpleLenses rules || s' == t && a == b =
@@ -257,7 +241,7 @@ buildScaffold allowPhantomsChange rules s cons defName =
                          | lensCase                    = LensType
                          | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
-               in OpticSa True [] optic s' a
+               in OpticSa [] [] optic s' a
 
            -- Generate type-changing Lens and Traversal otherwise
            | otherwise =
@@ -326,14 +310,16 @@ opticTypeName typeChanging  TraversalType       = if typeChanging
                                                   then ''Traversal
                                                   else ''Traversal'
 
-data OpticStab = OpticStab        OpticType Type Type Type Type
-               | OpticSa Bool Cxt OpticType Type Type
+data OpticStab
+  = OpticStab               OpticType Type Type Type Type
+  | OpticSa [TyVarBndr] Cxt OpticType Type Type
+  deriving Show
 
 stabToType :: OpticStab -> Type
-stabToType (OpticStab  c s t a b) =
-  quantifyType [] (opticTypeName True c `conAppsT` [s,t,a,b])
-stabToType (OpticSa _ cx c s   a  ) =
-  quantifyType cx (opticTypeName False c `conAppsT` [s,a])
+stabToType (OpticStab c s t a b) =
+  quantifyType [] [] (opticTypeName True c `conAppsT` [s,t,a,b])
+stabToType (OpticSa vs cx c s a) =
+  quantifyType vs cx (opticTypeName False c `conAppsT` [s,a])
 
 stabToContext :: OpticStab -> Cxt
 stabToContext OpticStab{}          = []
@@ -360,9 +346,9 @@ stabToA (OpticSa _ _ _ _ a) = a
 -- These types are "raw" and will be packaged into an 'OpticStab'
 -- shortly after creation.
 buildStab :: Bool -> Type -> [Either Type Type] -> Q (Type,Type,Type,Type)
-buildStab allowPhantomsChange s categorizedFields = do
+buildStab forClassInstance s categorizedFields = do
   -- compute possible type changes
-  sub <- T.sequenceA (M.fromSet (newName . nameBase) unfixedTypeVars)
+  sub <- T.sequenceA . M.fromSet (newName . nameBase) =<< unfixedTypeVars
   let (t, b) = over each (substTypeVars sub) (s, a)
   pure (s, t, a, b)
   where
@@ -376,11 +362,78 @@ buildStab allowPhantomsChange s categorizedFields = do
       in setOf typeVars s S.\\ setOf allTypeVars categorizedFields
 
     (fixedFields, targetFields) = partitionEithers categorizedFields
-    unfixedTypeVars =
-      let fixedTypeVars = setOf typeVars fixedFields
-      in if allowPhantomsChange
-         then setOf typeVars s S.\\ fixedTypeVars
-         else setOf typeVars s S.\\ fixedTypeVars S.\\ phantomTypeVars
+
+    unfixedTypeVars
+      | forClassInstance = do
+          ambiguousTypeVars <- getAmbiguousTypeFamilyTypeVars
+          --runIO $ do
+          --  putStrLn $ "S:         " ++ show s
+          --  putStrLn $ "A:         " ++ show a
+          --  putStrLn $ "FREE:      " ++ show freeTypeVars
+          --  putStrLn $ "FIXED:     " ++ show fixedTypeVars
+          --  putStrLn $ "PHANTOM:   " ++ show phantomTypeVars
+          --  putStrLn $ "AMBIGUOUS: " ++ show ambiguousTypeVars
+          pure $ freeTypeVars S.\\ fixedTypeVars
+                              S.\\ phantomTypeVars
+                              S.\\ ambiguousTypeVars
+      | otherwise = pure $ freeTypeVars S.\\ fixedTypeVars
+      where
+        freeTypeVars  = setOf typeVars s
+        fixedTypeVars = setOf typeVars fixedFields
+
+    getAmbiguousTypeFamilyTypeVars = do
+      a' <- D.resolveTypeSynonyms a
+      execStateT (go a') $ setOf typeVars a'
+      where
+        go :: Type -> StateT (S.Set Name) Q (Maybe (Int, TypeFamilyHead, [Type]))
+        go (ForallT _ _ ty)     = go ty
+        go (ParensT ty)         = go ty
+        go (SigT ty kind)       = go ty *> go kind
+        go (InfixT ty1 nm ty2)  = procInfix ty1 nm ty2 *> pure Nothing
+        go (UInfixT ty1 nm ty2) = procInfix ty1 nm ty2 *> pure Nothing
+
+        go (VarT n) = modify' (S.delete n) *> pure Nothing
+
+        -- If type family is encountered, descend down and collect all of its
+        -- arguments for processing.
+        go (ConT nm) = do
+          let getVarLen tf@(TypeFamilyHead _ varBndrs _ _) = (length varBndrs, tf, [])
+          preview (_FamilyI % _1 % typeFamilyHead % to getVarLen) <$> lift (reify nm)
+
+        go (AppT ty1 ty2) = go ty1 >>= \case
+          Just (n, tf, !args)
+            | n > 1     -> pure $ Just (n - 1, tf, ty2 : args)
+            | n == 1    -> procTF tf (reverse $ ty2 : args) *> pure Nothing
+            | otherwise -> error "go: unreachable"
+          Nothing -> go ty2
+
+        go _ = pure Nothing
+
+        procInfix ty1 nm ty2 = do
+          mtf <- preview (_FamilyI % _1 % typeFamilyHead) <$> lift (reify nm)
+          case mtf of
+            Just tf -> procTF tf [ty1, ty2]
+            Nothing -> go ty1 *> go ty2 *> pure ()
+
+        -- Once fully applied type family is collected, the only arguments that
+        -- should be traversed further are these with injectivity annotation.
+        procTF :: TypeFamilyHead -> [Type] -> StateT (S.Set Name) Q ()
+        procTF tf args = case tf of
+          TypeFamilyHead _ varBndrs _ (Just (InjectivityAnn _ ins)) -> do
+            let insSet = S.fromList ins
+                vars   = map bndrName varBndrs
+            --lift . runIO $ do
+            --  putStrLn $ "INS:  " ++ show ins
+            --  putStrLn $ "VARS: " ++ show vars
+            --  putStrLn $ "ARGS: " ++ show args
+            forM_ (sameLenZip vars args) $ \(var, arg) ->
+              when (var `S.member` insSet) . void $ go arg
+          _ -> pure ()
+          where
+            sameLenZip (x : xs) (y : ys) = (x, y) : sameLenZip xs ys
+            sameLenZip []        []      = []
+            sameLenZip _         _       = error "sameLenZip: different lengths"
+
 
 -- | Build the signature and definition for a single field optic.
 -- In the case of a singleton constructor irrefutable matches are
@@ -462,6 +515,7 @@ makeClassyClass className methodName s defs = do
       | (TopName defName, (stab, _)) <- defs
       , let body = infixApp (varE methodName) (varE '(%)) (varE defName)
       , let ty   = quantifyType' (S.fromList (c:vars))
+                                 []
                                  (stabToContext stab)
                  $ stabToOptic stab `conAppsT`
                        [VarT c, stabToA stab]
@@ -499,6 +553,7 @@ makeFieldClass defType className methodName =
          [sigD methodName (return methodType)]
   where
   methodType = quantifyType' (S.fromList [s,a])
+                             []
                              (stabToContext defType)
              $ stabToOptic defType `conAppsT` [VarT s,VarT a]
   s = mkName "s"
@@ -516,7 +571,7 @@ makeFieldInstance defType className decs =
 
   containsTypeFamilies = go <=< D.resolveTypeSynonyms
     where
-    go (ConT nm) = has (_FamilyI % _1 % _TypeFamilyD) <$> reify nm
+    go (ConT nm) = has (_FamilyI % _1 % typeFamilyHead) <$> reify nm
     go ty = or <$> traverse go (toListOf typeSelf ty)
 
   pickInstanceDec hasFamilies
@@ -820,21 +875,6 @@ addFieldClassName n = modify $ S.insert n
 -- Miscellaneous utility functions
 ------------------------------------------------------------------------
 
- -- We want to catch type families, but not *data* families. See #799.
-_TypeFamilyD :: AffineFold Dec ()
-_TypeFamilyD = _OpenTypeFamilyD % united `afailing` _ClosedTypeFamilyD % united
-
--- | Template Haskell wants type variables declared in a forall, so
--- we find all free type variables in a given type and declare them.
-quantifyType :: Cxt -> Type -> Type
-quantifyType = quantifyType' S.empty
-
--- | This function works like 'quantifyType' except that it takes
--- a list of variables to exclude from quantification.
-quantifyType' :: S.Set Name -> Cxt -> Type -> Type
-quantifyType' exclude c t = ForallT vs c t
-  where
-  vs = map PlainTV
-     $ filter (`S.notMember` exclude)
-     $ nub -- stable order
-     $ toListOf typeVars t
+-- We want to catch type families, but not *data* families. See #799.
+typeFamilyHead :: AffineFold Dec TypeFamilyHead
+typeFamilyHead = _OpenTypeFamilyD `afailing` _ClosedTypeFamilyD % _1

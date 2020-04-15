@@ -3,13 +3,20 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Main where
 
+import Data.Functor.Const
+import Data.Kind (Type)
+import Data.Tagged
 import Data.Typeable
 
 import Optics.Core
@@ -134,6 +141,53 @@ checkClassyT2 = _ClassyT2
 
 checkClassyT3 :: AsClassyTest r => Prism' r Char
 checkClassyT3 = _ClassyT3
+
+data WeirdThing (a :: k -> Type) (b :: k -> Type) = WeirdThing
+data Weird1 a b = Weird1 (WeirdThing a (Const b))
+makePrisms ''Weird1
+makePrismLabels ''Weird1
+
+checkWeird1 :: Iso (Weird1 a  b )
+                   (Weird1 a' b')
+                   (WeirdThing a  (Const b))
+                   (WeirdThing a' (Const b'))
+checkWeird1 = _Weird1
+
+checkWeird1_ :: Iso (Weird1 a  b )
+                    (Weird1 a' b')
+                    (WeirdThing a  (Const b))
+                    (WeirdThing a' (Const b'))
+checkWeird1_ = #_Weird1
+
+data Weird2 (a :: k -> Type) (b :: k -> Type) where
+  Weird2 :: Weird2 (a :: Type -> Type) b
+makePrisms ''Weird2
+makePrismLabels ''Weird2
+
+checkWeird2
+  :: forall k (a  :: k    -> Type)
+              (b  :: k    -> Type)
+              (a' :: Type -> Type)
+              (b' :: Type -> Type)
+   . Iso (Weird2 a b) (Weird2 a' b') () ()
+checkWeird2 = _Weird2
+
+checkWeird2_
+  :: forall (a  :: Type -> Type)
+            (b  :: Type -> Type)
+   . Iso (Weird2 a b) (Weird2 a b) () ()
+checkWeird2_ = #_Weird2
+
+data Weird3 (a :: k) where
+  Weird3 :: Weird3 (a :: Type)
+makePrisms ''Weird3
+makePrismLabels ''Weird3
+
+checkWeird3 :: forall k (a :: k) (b :: Type). Iso (Weird3 a) (Weird3 b) () ()
+checkWeird3 = _Weird3
+
+checkWeird3_ :: forall (a :: Type). Iso (Weird3 a) (Weird3 a) () ()
+checkWeird3_ = #_Weird3
 
 ----------------------------------------
 
@@ -449,14 +503,104 @@ checkThing2 = thing
 checkThing2_ :: Lens (Lebowski a) (Lebowski b) (Maybe a) (Maybe b)
 checkThing2_ = #thing
 
-type family Fam a
+data Kinded0 k = Kinded0
+  { _kinded0Thing :: forall a. Proxy (a :: k)
+  }
+makeLenses ''Kinded0
+
+checkKinded0Thing :: Getter (Kinded0 k) (Proxy (a :: k))
+checkKinded0Thing = kinded0Thing
+
+data Kinded1 (a :: k1) (b :: k2) = Kinded
+  { _kinded1Thing :: Tagged '(a, b) Int
+  }
+makeFieldLabels ''Kinded1
+
+checkKinded1Thing :: Iso (Kinded1 (a  :: k1 ) (b  :: k2 ))
+                         (Kinded1 (a' :: k1') (b' :: k2'))
+                         (Tagged '(a , b ) Int)
+                         (Tagged '(a', b') Int)
+checkKinded1Thing = #thing
+
+data Kinded2 k a = Kinded2
+  { _kinded2Thing :: Proxy (a :: k)
+  }
+makeFieldLabels ''Kinded2
+
+checkKinded2Thing :: Iso (Kinded2 k  a )
+                         (Kinded2 k' a')
+                         (Proxy (a  :: k ))
+                         (Proxy (a' :: k'))
+checkKinded2Thing = #thing
+
+type family Fam (a :: k)
 type instance Fam Int = String
 
+-- unambiguous type family application
 data FamRec1 a = FamRec1 { _famRec1Thing :: a -> Fam a }
 makeFieldLabels ''FamRec1
 
 checkFamRec1Thing :: Iso (FamRec1 a) (FamRec1 b) (a -> Fam a) (b -> Fam b)
 checkFamRec1Thing = #thing
+
+type family FamInj1 (a :: k) b = r | r -> a
+
+-- type family injective in its first parameter
+data FamRec2 a b = FamRec2 { _famRec2Thing :: FamInj1 a b }
+makeFieldLabels ''FamRec2
+
+checkFamRec2Thing :: Iso (FamRec2 a b) (FamRec2 a' b) (FamInj1 a b) (FamInj1 a' b)
+checkFamRec2Thing = #thing
+
+type family a :#: b = r | r -> b
+
+-- infix type family injective in its second parameter
+data FamRec3 a b = FamRec3 { _famRec3Thing :: a :#: b }
+makeFieldLabels ''FamRec3
+
+checkFamRec3Thing :: Iso (FamRec3 a b) (FamRec3 a b') (a :#: b) (a :#: b')
+checkFamRec3Thing = #thing
+
+-- ambiguous type family application, type-preserving optic
+data FamRec4 a = FamRec4 { _famRec4Thing :: FamInj1 (Fam a) a }
+makeFieldLabels ''FamRec4 -- no error
+
+-- no type changing optic here
+checkFamRec4Thing :: Iso' (FamRec4 a) (FamInj1 (Fam a) a)
+checkFamRec4Thing = #thing
+
+type family FamInj2 a b (c :: k) = r | r -> a b c
+
+-- poly kinded shenenigans
+data FamRec5 a b (c :: k) = FamRec5 { _famRec5Thing :: FamInj2 a b '[c] }
+makeFieldLabels ''FamRec5
+
+-- type-changing, kind-changing optic
+checkFamRec5Thing :: Iso (FamRec5 a  b  (c  :: k ))
+                         (FamRec5 a' b' (c' :: k'))
+                         (FamInj2 a  b  '[c ])
+                         (FamInj2 a' b' '[c'])
+checkFamRec5Thing = #thing
+
+-- ambiguous type family application + Tagged = type-changing optic
+data FamRec6 a = FamRec6 { _famRec6Thing :: Tagged a (Fam a) }
+makeFieldLabels ''FamRec6
+
+checkFamRec6Thing
+  :: Iso (FamRec6 a) (FamRec6 b) (Tagged a (Fam a)) (Tagged b (Fam b))
+checkFamRec6Thing = #thing
+
+-- nested injective type family application + kind polymorphism
+data FamRec7 a b (c :: [k]) = FamRec7
+  { _famRec7Thing :: FamInj1 (b :#: (a -> FamInj1 c b)) b
+  }
+makeFieldLabels ''FamRec7
+
+checkFamRec7Thing :: Iso (FamRec7 a b  (c  :: [k ]))
+                         (FamRec7 a' b (c' :: [k']))
+                         (FamInj1 (b :#: (a -> FamInj1 c b)) b)
+                         (FamInj1 (b :#: (a' -> FamInj1 c' b)) b)
+checkFamRec7Thing = #thing
 
 data FamRec a = FamRec
   { _famRecThing :: Fam a

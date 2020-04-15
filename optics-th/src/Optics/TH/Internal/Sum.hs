@@ -83,7 +83,7 @@ makeClassyPrisms = makePrisms' False
 makePrismLabels :: Name -> DecsQ
 makePrismLabels typeName = do
   info <- D.reifyDatatype typeName
-  let cons = map normalizeCon $ D.datatypeCons info
+  let cons = map (normalizeCon info) $ D.datatypeCons info
   catMaybes <$> traverse (makeLabel info cons) cons
   where
     makeLabel :: D.DatatypeInfo -> [NCon] -> NCon -> Q (Maybe Dec)
@@ -104,7 +104,7 @@ makePrismLabels typeName = do
                              instHead
                              (fun stab 'labelOptic)
       where
-        ty        = D.datatypeType info
+        ty        = addKindVars info $ D.datatypeType info
         isNewtype = D.datatypeVariant info == D.Newtype
 
         opticTypeToTag IsoType    = ''An_Iso
@@ -126,7 +126,7 @@ makePrisms' normal typeName =
      let cls | normal    = Nothing
              | otherwise = Just (D.datatypeName info)
          cons = D.datatypeCons info
-     makeConsPrisms info (map normalizeCon cons) cls
+     makeConsPrisms info (map (normalizeCon info) cons) cls
 
 
 -- | Generate prisms for the given 'Dec'
@@ -136,7 +136,7 @@ makeDecPrisms normal dec =
      let cls | normal    = Nothing
              | otherwise = Just (D.datatypeName info)
          cons = D.datatypeCons info
-     makeConsPrisms info (map normalizeCon cons) cls
+     makeConsPrisms info (map (normalizeCon info) cons) cls
 
 -- | Generate prisms for the given type, normalized constructors, and an
 -- optional name to be used for generating a prism class. This function
@@ -152,11 +152,11 @@ makeConsPrisms info cons Nothing = fmap concat . for cons $ \con -> do
              then varE 'coerced
              else makeConOpticExp stab cons con
   sequenceA $
-    [ sigD n (close (stabToType stab))
+    [ sigD n . pure . close $ stabToType stab
     , valD (varP n) (normalB body) []
     ] ++ inlinePragma n
   where
-    ty        = D.datatypeType info
+    ty        = addKindVars info $ D.datatypeType info
     isNewtype = D.datatypeVariant info == D.Newtype
 
 -- classy prism class and instance
@@ -216,9 +216,9 @@ stabToType stab@(Stab cx ty s t a b) = ForallT vs cx $
     ReviewType                   -> ''Review  `conAppsT` [t,b]
 
   where
-  vs = map PlainTV
-     $ nub -- stable order
-     $ toListOf typeVars cx
+    vs = D.freeVariablesWellScoped
+       . S.toList
+       $ setOf (folded % typeVarsKinded) cx
 
 stabType :: Stab -> OpticType
 stabType (Stab _ o _ _ _ _) = o
@@ -239,21 +239,30 @@ computeReviewType t cx tys = do
 -- | Compute the full type-changing Prism type given an outer type, list of
 -- constructors, and target constructor name.
 computePrismType :: StabConfig -> Type -> Cxt -> [NCon] -> NCon -> Q Stab
-computePrismType conf t cx cons con = do
+computePrismType conf s cx cons con = do
   let ts       = view nconTypes con
+      free     = setOf typeVars s
       fixed    = setOf typeVars cons
-      phantoms = setOf typeVars t S.\\ (setOf typeVars con `S.union` fixed)
+      phantoms = free S.\\ setOf (folded % nconTypes % typeVars) (con : cons)
       unbound  = if scAllowPhantomsChange conf
-                 then setOf typeVars t S.\\ fixed
-                 else setOf typeVars t S.\\ fixed S.\\ phantoms
+                 then free S.\\ fixed
+                 else free S.\\ fixed S.\\ phantoms
   sub <- sequenceA (M.fromSet (newName . nameBase) unbound)
-  b   <- toTupleT (map return ts)
-  a   <- toTupleT (map return (substTypeVars sub ts))
-  let s = substTypeVars sub t
+  a   <- toTupleT (map return ts)
+  b   <- toTupleT (map return (substTypeVars sub ts))
+  --runIO $ do
+  --  putStrLn $ "S:        " ++ show s
+  --  putStrLn $ "A:        " ++ show a
+  --  putStrLn $ "FREE:     " ++ show free
+  --  putStrLn $ "FIXED:    " ++ show fixed
+  --  putStrLn $ "PHANTOMS: " ++ show phantoms
+  --  putStrLn $ "UNBOUND:  " ++ show unbound
+  let t = substTypeVars sub s
+      cx' = substTypeVars sub cx
       otype = if null cons && scAllowIsos conf
               then IsoType
               else PrismType
-  return (Stab cx otype s t a b)
+  return (Stab cx' otype s t a b)
 
 -- | Construct either a Review or Prism as appropriate
 makeConOpticExp :: Stab -> [NCon] -> NCon -> ExpQ
@@ -477,11 +486,11 @@ nconTypes = lensVL $ \f x -> fmap (\y -> x {_nconTypes = y}) (f (_nconTypes x))
 
 
 -- | Normalize a single 'Con' to its constructor name and field types.
-normalizeCon :: D.ConstructorInfo -> NCon
-normalizeCon info = NCon (D.constructorName info)
-                         (D.tvName <$> D.constructorVars info)
-                         (D.constructorContext info)
-                         (D.constructorFields info)
+normalizeCon :: D.DatatypeInfo -> D.ConstructorInfo -> NCon
+normalizeCon di info = NCon (D.constructorName info)
+                            (D.tvName <$> D.constructorVars info)
+                            (D.constructorContext info)
+                            (map (addKindVars di) $ D.constructorFields info)
 
 
 -- | Compute a prism's name by prefixing an underscore for normal
@@ -494,7 +503,6 @@ prismName n = case nameBase n of
 
 
 -- | Quantify all the free variables in a type.
-close :: Type -> TypeQ
-close t = forallT (map PlainTV (S.toList vs)) (cxt[]) (return t)
-  where
-  vs = setOf typeVars t
+close :: Type -> Type
+close (ForallT vars cx ty) = quantifyType vars cx ty
+close ty                   = quantifyType []   [] ty
