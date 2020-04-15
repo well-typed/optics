@@ -118,6 +118,8 @@ iafolding g = iafoldVL (\point f s -> maybe (point s) (uncurry' f) $ g s)
 
 -- | Obtain a potentially empty 'IxAffineFold' by taking the element from
 -- another 'AffineFold' and using it as an index.
+--
+-- @since 0.3
 filteredBy :: Is k An_AffineFold  => Optic' k is a i -> IxAffineFold i a a
 filteredBy p = iafoldVL $ \point f s -> case preview p s of
   Just i  -> f i s
