@@ -10,7 +10,6 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import Data.Traversable
-import Data.Type.Equality
 import Language.Haskell.TH
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -244,8 +243,10 @@ computePrismType conf s cx cons con = do
   let ts       = view nconTypes con
       free     = setOf typeVars s
       fixed    = setOf typeVars cons
-      unbound  = free S.\\  fixed
-      phantoms = free S.\\ (fixed `S.union` setOf typeVars con)
+      phantoms = free S.\\ setOf (folded % nconTypes % typeVars) (con : cons)
+      unbound  = if scAllowPhantomsChange conf
+                 then free S.\\ fixed
+                 else free S.\\ fixed S.\\ phantoms
   sub <- sequenceA (M.fromSet (newName . nameBase) unbound)
   a   <- toTupleT (map return ts)
   b   <- toTupleT (map return (substTypeVars sub ts))
@@ -254,22 +255,14 @@ computePrismType conf s cx cons con = do
   --  putStrLn $ "A:        " ++ show a
   --  putStrLn $ "FREE:     " ++ show free
   --  putStrLn $ "FIXED:    " ++ show fixed
-  --  putStrLn $ "UNBOUND:  " ++ show unbound
   --  putStrLn $ "PHANTOMS: " ++ show phantoms
+  --  putStrLn $ "UNBOUND:  " ++ show unbound
   let t = substTypeVars sub s
       cx' = substTypeVars sub cx
-        ++ if not $ scAllowPhantomsChange conf
-           then map (\v -> heteroEq v (fromJust $ v `M.lookup` sub))
-                    (S.toList phantoms)
-           else []
       otype = if null cons && scAllowIsos conf
               then IsoType
               else PrismType
   return (Stab cx' otype s t a b)
-  where
-    -- Generate heterogenous equality constraints for phantom types as naive
-    -- unification breaks down with contrived types using PolyKinds + GADTs.
-    heteroEq v v' = InfixT (VarT v) ''(~~) (VarT v')
 
 -- | Construct either a Review or Prism as appropriate
 makeConOpticExp :: Stab -> [NCon] -> NCon -> ExpQ
