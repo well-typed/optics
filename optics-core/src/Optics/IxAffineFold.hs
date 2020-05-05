@@ -110,6 +110,7 @@ iatraverseOf_
 iatraverseOf_ o point f s = case ipreview o s of
   Just (i, a) -> () <$ f i a
   Nothing     -> point ()
+{-# INLINE iatraverseOf_ #-}
 
 -- | Create an 'IxAffineFold' from a partial function.
 iafolding :: (s -> Maybe (i, a)) -> IxAffineFold i s a

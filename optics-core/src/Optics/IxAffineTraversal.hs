@@ -127,6 +127,7 @@ unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
 -- 6
 ignored :: IxAffineTraversal i s s a b
 ignored = iatraversalVL $ \point _ -> point
+{-# INLINE ignored #-}
 
 -- $setup
 -- >>> import Optics.Core
