@@ -533,14 +533,19 @@ checkKinded2Thing :: Iso (Kinded2 k  a )
                          (Proxy (a' :: k'))
 checkKinded2Thing = #thing
 
+type family Fam0
+
 type family Fam (a :: k)
 type instance Fam Int = String
 
--- unambiguous type family application
-data FamRec1 a = FamRec1 { _famRec1Thing :: a -> Fam a }
+-- nullary type family + unambiguous type family application
+data FamRec1 a = FamRec1 { _famRec1Thing :: Fam0 -> a -> Fam a }
 makeFieldLabels ''FamRec1
 
-checkFamRec1Thing :: Iso (FamRec1 a) (FamRec1 b) (a -> Fam a) (b -> Fam b)
+checkFamRec1Thing :: Iso (FamRec1 a)
+                         (FamRec1 b)
+                         (Fam0 -> a -> Fam a)
+                         (Fam0 -> b -> Fam b)
 checkFamRec1Thing = #thing
 
 type family FamInj1 (a :: k) b = r | r -> a

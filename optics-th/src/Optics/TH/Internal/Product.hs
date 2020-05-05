@@ -394,11 +394,12 @@ buildStab forClassInstance s categorizedFields = do
 
         go (VarT n) = modify' (S.delete n) *> pure Nothing
 
-        -- If type family is encountered, descend down and collect all of its
-        -- arguments for processing.
+        -- If a non-nullary type family is encountered, descend down and collect
+        -- all of its arguments for processing.
         go (ConT nm) = do
-          let getVarLen tf@(TypeFamilyHead _ varBndrs _ _) = (length varBndrs, tf, [])
-          preview (_FamilyI % _1 % typeFamilyHead % to getVarLen) <$> lift (reify nm)
+          let getVarLen = afolding $ \tf@(TypeFamilyHead _ varBndrs _ _) ->
+                if null varBndrs then Nothing else Just (length varBndrs, tf, [])
+          preview (_FamilyI % _1 % typeFamilyHead % getVarLen) <$> lift (reify nm)
 
         go (AppT ty1 ty2) = go ty1 >>= \case
           Just (n, tf, !args)
