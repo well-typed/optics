@@ -109,6 +109,7 @@ atraverseOf_
 atraverseOf_ o point f s = case preview o s of
   Just a  -> () <$ f a
   Nothing -> point ()
+{-# INLINE atraverseOf_ #-}
 
 -- | Create an 'AffineFold' from a partial function.
 --
