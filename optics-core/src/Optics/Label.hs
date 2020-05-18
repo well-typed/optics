@@ -183,22 +183,28 @@
 --
 -- == Limitations arising from functional dependencies
 --
--- Functional dependencies guarantee good type inference, but also
--- create limitations. We can split them into two groups:
+-- 'LabelOptic' uses the following functional dependencies to guarantee good
+-- type inference:
 --
--- - @name s -> k a@, @name t -> k b@
+-- 1. @name s -> k a@ (the optic for the field @name@ in @s@ is of type @k@ and
+-- focuses on @a@)
 --
--- - @name s b -> t@, @name t a -> s@
+-- 2. @name t -> k b@ (the optic for the field @name@ in @t@ is of type @k@ and
+-- focuses on @b@)
 --
--- The first group ensures that when we compose two optics, the middle type is
--- unambiguous. The consequence is that it's not possible to create label optics
--- with @a@ or @b@ referencing type variables not referenced in @s@ or @t@,
--- i.e. getters for fields of rank 2 type or reviews for constructors with
--- existentially quantified types inside.
+-- 3. @name s b -> t@ (replacing the field @name@ in @s@ with @b@ yields @t@)
 --
--- The second group ensures that when we perform a chain of updates, the middle
--- type is unambiguous. The consequence is that it's not possible to define
--- label optics that:
+-- 4. @name t a -> s@ (replacing the field @name@ in @t@ with @a@ yields @s@)
+--
+-- Dependencies (1) and (2) ensure that when we compose two optics, the middle
+-- type is unambiguous. The consequence is that it's not possible to create
+-- label optics with @a@ or @b@ referencing type variables not referenced in @s@
+-- or @t@, i.e. getters for fields of rank 2 type or reviews for constructors
+-- with existentially quantified types inside.
+--
+-- Dependencies (3) and (4) ensure that when we perform a chain of updates, the
+-- middle type is unambiguous. The consequence is that it's not possible to
+-- define label optics that:
 --
 -- - Modify phantom type parameters of type @s@ or @t@.
 --
