@@ -92,8 +92,8 @@ import Optics.TH.Internal.Sum
 ----------------------------------------
 -- Labels
 
--- | Build field optics as instances of 'LabelOptic' class for use as overloaded
--- labels.
+-- | Build field optics as instances of the 'LabelOptic' class for use with
+-- overloaded labels.  See "Optics.Label" for how to use this pattern.
 --
 -- /e.g./
 --
@@ -126,11 +126,11 @@ import Optics.TH.Internal.Sum
 --     Dog x1 x2 -> point (Dog x1 x2)
 -- @
 --
--- which can be used as @#age@ and @#name@ with language extension
--- OverloadedLabels.
+-- which can be used as @#age@ and @#name@ with the @OverloadedLabels@ language
+-- extension.
 --
 -- /Note:/ if you wonder about the form of instances or why there is no label for
--- @animalAbsurd@, check documentation for 'LabelOptic'.
+-- @animalAbsurd@, see "Optics.Label#limitations".
 --
 -- @
 -- 'makeFieldOptics' = 'makeFieldLabelsWith' 'fieldLabelsRules'
@@ -350,6 +350,8 @@ lensRulesFor fields = lensRules & lensField .~ lookingupNamer fields
 -- - Doesn't support prefixless fields.
 --
 -- - Doesn't support type changing updates.
+--
+-- See "Optics.Label" for our recommended pattern.
 
 -- | Make lenses and traversals for a type, and create a class when the type has
 -- no arguments.
@@ -493,6 +495,8 @@ classyRulesFor classFun fields = classyRules
 --   classes written by hand that is imported by all the other
 --   libraries. Otherwise for a given @field@ independent libraries would
 --   provide multiple @HasField@ classes incompatible with each other.
+--
+-- See "Optics.Label" for our recommended pattern.
 
 -- | Generate overloaded field accessors.
 --
