@@ -256,7 +256,7 @@ instance {-# INCOHERENT #-}
     ':<>: 'Text " " ':<>: QuoteType t
     ':<>: 'Text " " ':<>: QuoteType a
     ':<>: 'Text " " ':<>: QuoteType b
-    ':$$: 'Text "  (maybe you forgot to define it or misspelled a name?)")
+    ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
    => GeneralLabelOptic name k s t a b repDefined where
   generalLabelOptic = error "unreachable"
 
