@@ -22,6 +22,7 @@ module Optics.Internal.Optic
   , Optic'
   , Optic_
   , Optic__
+  , getOptic
   , castOptic
   , (%)
   , (%%)
@@ -66,10 +67,19 @@ import Unsafe.Coerce (unsafeCoerce)
 -- The parameters @s@ and @t@ represent the "big" structure,
 -- whereas @a@ and @b@ represent the "small" structure.
 --
-newtype Optic (k :: OpticKind) (is :: IxList) s t a b = Optic
-  { getOptic :: forall p i. Profunctor p
-             => Optic_ k p i (Curry is i) s t a b
-  }
+newtype Optic (k :: OpticKind) (is :: IxList) s t a b
+  = Optic (forall p i. Profunctor p => Optic_ k p i (Curry is i) s t a b)
+
+-- | Strip the newtype wrapper off.
+getOptic
+  :: Profunctor p
+  => Optic k is s t a b
+  -> Optic_ k p i (Curry is i) s t a b
+-- Note: This is not part of the definition of 'Optic' because it needs to be
+-- marked INLINE for GHC to optimize away profunctor classes when profiling.
+-- See https://github.com/well-typed/optics/issues/324 for more details.
+getOptic (Optic o) = o
+{-# INLINE getOptic #-}
 
 -- | Common special case of 'Optic' where source and target types are equal.
 --
