@@ -73,6 +73,7 @@ library
                    Optics.Empty.Core
                    Optics.Indexed.Core
                    Optics.Mapping
+                   Optics.Monoidal
                    Optics.Label
                    Optics.Operators
                    Optics.Operators.Unsafe
