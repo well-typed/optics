@@ -28,6 +28,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Traversable as T
 import qualified Language.Haskell.TH.Datatype as D
+import qualified Language.Haskell.TH.Syntax as TH
 
 import Data.Either.Optics
 import Data.Tuple.Optics
@@ -75,7 +76,7 @@ makeFieldOpticsForDatatype rules info =
   do perDef <- lift $ do
        fieldCons <- traverse (normalizeConstructor info) cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
-       let defCons    = over normFieldLabels (expandName allFields) fieldCons
+       let defCons    = over normFieldLabels (expandName rules tyName cons allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
        T.sequenceA (M.fromSet (buildScaffold False rules s defCons) allDefs)
 
@@ -95,9 +96,34 @@ makeFieldOpticsForDatatype rules info =
   normFieldLabels :: Traversal [(Name,[(a,Type)])] [(Name,[(b,Type)])] a b
   normFieldLabels = traversed % _2 % traversed % _1
 
-  -- Map a (possibly missing) field's name to zero-to-many optic definitions
-  expandName :: [Name] -> Maybe Name -> [DefName]
-  expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
+-- | Map a (possibly missing) field's name to zero-to-many optic definitions
+expandName :: LensRules -> Name -> [D.ConstructorInfo] -> [Name] -> Maybe Name -> [DefName]
+expandName rules tyName cons allFields =
+    concatMap (_fieldToDef rules tyName allFields . over nameString stripSel) . maybeToList
+  where
+    -- When DuplicateRecordFields is enabled, reified datatypes contain
+    -- "mangled" field names that look like $sel:foo:MkT where foo is the field
+    -- name and MkT is the first data constructor of the type (regardless of
+    -- whether that constructor contains the field or not).  If they are both
+    -- present, we strip off the prefix and suffix to get back to the underlying
+    -- field name.  See #323.
+    stripSel :: String -> String
+    stripSel n = fromMaybe n $ stripSuffix (':':first_con_name)
+                           =<< stripPrefix "$sel:" n
+
+    stripSuffix :: Eq a => [a] -> [a] -> Maybe [a]
+    stripSuffix suffix = fmap reverse . stripPrefix (reverse suffix) . reverse
+
+    -- We have to look up the actual name of the first constructor, rather than
+    -- trying to split the string on colons, because either the field name or
+    -- the constructor name might themselves contain colons.
+    first_con_name = case cons of
+      con:_ -> view nameString (D.constructorName con)
+      []    -> error "expandName: impossible for a record type with fields to have no constructors!"
+
+nameString :: Lens' Name String
+nameString = lens (\ (TH.Name (TH.OccName s) _) -> s)
+                  (\ (TH.Name _ f) s -> TH.Name (TH.OccName s) f)
 
 makeFieldLabelsForDec :: LensRules -> Dec -> DecsQ
 makeFieldLabelsForDec rules = makeFieldLabelsForDatatype rules <=< D.normalizeDec
@@ -113,7 +139,7 @@ makeFieldLabelsForDatatype rules info =
   do perDef <- do
        fieldCons <- traverse (normalizeConstructor info) cons
        let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
-       let defCons    = over normFieldLabels (expandName allFields) fieldCons
+       let defCons    = over normFieldLabels (expandName rules tyName cons allFields) fieldCons
            allDefs    = setOf (normFieldLabels % folded) defCons
        T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
 
@@ -134,10 +160,6 @@ makeFieldLabelsForDatatype rules info =
     -- Traverse the field labels of a normalized constructor
     normFieldLabels :: Traversal [(Name,[(a,Type)])] [(Name,[(b,Type)])] a b
     normFieldLabels = traversed % _2 % traversed % _1
-
-    -- Map a (possibly missing) field's name to zero-to-many optic definitions
-    expandName :: [Name] -> Maybe Name -> [DefName]
-    expandName allFields = concatMap (_fieldToDef rules tyName allFields) . maybeToList
 
 makeFieldLabel
   :: LensRules
