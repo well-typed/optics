@@ -232,7 +232,7 @@ split
 split l r = withLens l $ \getl setl ->
                 withLens r $ \getr setr ->
   lens (\s -> (getl s, getr s))
-       (\s (l, r) -> setr (setl s l) r)
+       (\s (a, b) -> setr (setl s a) b)
 {-# INLINE split #-}
 
 -- | We can always retrieve a @()@ from any type.

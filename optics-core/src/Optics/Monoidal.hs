@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Optics.Monoidal (
   After(..)

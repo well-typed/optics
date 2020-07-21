@@ -13,6 +13,7 @@ module Data.Tree.Optics
 
 import Data.Tree
 
+import Optics.Indexed.Core
 import Optics.Lens
 import Optics.Monoidal
 import Optics.Optic
@@ -36,7 +37,7 @@ branches = lensVL $ \f (Node a as) -> Node a <$> f as
 -- | A 'Traversal' which returns the elements on a level.
 level :: Int -> Traversal' (Tree a) a
 level n
-  | n <  0    = nothing
+  | n <  0    = castOptic (noIx ignored)
   | n == 0    = castOptic root
   | otherwise = branches % traversed % level (n-1)
 
@@ -44,7 +45,7 @@ level n
 --   on increasing order of level, up to sum cut-off.
 incrLevels :: Int -> Traversal' (Tree a) a
 incrLevels cut = go 0
-  where go n | n > cut   = nothing
+  where go n | n > cut   = castOptic (noIx ignored)
              | otherwise = level n <++> go (n+1)
 
 -- $setup
