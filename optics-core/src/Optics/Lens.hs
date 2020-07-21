@@ -93,6 +93,7 @@ module Optics.Lens
   , equality'
   , chosen
   , alongside
+  , split
   , united
 
   -- * Additional elimination forms
@@ -216,6 +217,23 @@ alongside l r = withLens l $ \getl setl ->
   lens (\(s, s')         -> (getl s,   getr s'   ))
        (\(s, s') (b, b') -> (setl s b, setr s' b'))
 {-# INLINE alongside #-}
+
+-- | Make a 'Lens' from two other lenses by executing them on
+-- the same value. The lenses should focus on different parts
+-- of the value to be well-behaved.
+--
+-- >>> ('a', 'b') ^. split _1 _2
+-- ('a','b')
+split
+  :: (Is k A_Lens, Is l A_Lens)
+  => Optic k is s s a  b
+  -> Optic l js s s a' b'
+  -> Lens s s (a, a') (b, b')
+split l r = withLens l $ \getl setl ->
+                withLens r $ \getr setr ->
+  lens (\s -> (getl s, getr s))
+       (\s (l, r) -> setr (setl s l) r)
+{-# INLINE split #-}
 
 -- | We can always retrieve a @()@ from any type.
 --
