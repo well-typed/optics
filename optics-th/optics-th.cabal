@@ -59,4 +59,5 @@ test-suite optics-th-tests
   type:    exitcode-stdio-1.0
   main-is: Optics/TH/Tests.hs
 
-  other-modules: Optics.TH.Tests.T799
+  other-modules: Optics.TH.Tests.DuplicateRecordFields
+                 Optics.TH.Tests.T799
