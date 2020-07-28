@@ -5,6 +5,7 @@ import Criterion.Main
 import Criterion.Types
 import Data.Char
 import qualified Control.Lens as L
+import qualified Control.Lens.Unsound as L
 import qualified Control.Monad.Trans.State as S
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS8
@@ -456,16 +457,47 @@ main = defaultMainWith config
       , bench "indices/lens"    $ nf (L.iover (L.itraversed . L.indices even) (+)) h
       ]
     ]
+  , bgroup "misc"
+    [ bgroup "adjoin"
+      [ bench "hand-written" $ nf (over adjoinHandWritten (+1)) tuple
+      , bench "adjoin" $ nf (over adjoinOptics (+1)) tuple
+      , bench "adjoin/lens" $ nf (L.over adjoinLens (+1)) tuple
+      ]
+    ]
   ]
   where
     config = defaultConfig { timeLimit = 1 }
+
     l  = [0..10000] :: [Int]
+    {-# NOINLINE l #-}
     xl = [0..100000] :: [Int]
+    {-# NOINLINE xl #-}
     b  = BS.pack $ map fromIntegral xl
+    {-# NOINLINE b #-}
     bl = BSL.pack $ map fromIntegral [0..1000000::Int]
+    {-# NOINLINE bl #-}
     h  = HM.fromList $ zip l l
+    {-# NOINLINE h #-}
     m  = M.fromList $ zip l l
+    {-# NOINLINE m #-}
     im = IM.fromList $ zip l l
+    {-# NOINLINE im #-}
     s  = S.fromList l
+    {-# NOINLINE s #-}
     u  = U.fromList xl
+    {-# NOINLINE u #-}
     v  = V.fromList l
+    {-# NOINLINE v #-}
+    tuple :: (Maybe Int, Either Int Int, Int)
+    tuple = (Just 67, Right 567, 23)
+    {-# NOINLINE tuple #-}
+
+adjoinHandWritten :: Traversal' (Maybe a, Either a a, a) a
+adjoinHandWritten = traversalVL $ \f (a, b, c) ->
+  (,,) <$> traverseOf _Just f a <*> traverseOf chosen f b <*> f c
+
+adjoinOptics :: Traversal' (Maybe a, Either a a, a) a
+adjoinOptics = _1 % _Just `adjoin` _2 % chosen `adjoin` _3
+
+adjoinLens :: L.Traversal' (Maybe a, Either a a, a) a
+adjoinLens = (L._1 . L._Just) `L.adjoin` (L._2 . L.chosen) `L.adjoin` L._3

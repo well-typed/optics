@@ -62,6 +62,7 @@ module Optics.Traversal
   , backwards
   , partsOf
   , singular
+  , adjoin
 
   -- * Subtyping
   , A_Traversal
@@ -342,6 +343,107 @@ singular o = atraversalVL $ \point f s ->
       Just a' -> put Nothing >> pure a'
       Nothing ->                pure a
 {-# INLINE singular #-}
+
+-- | Adjoin two disjoint traversals together.
+--
+-- /Note:/ traversing the same entry twice is illegal.
+--
+-- >>> over (_1 % _Just `adjoin` _2 % _Right) (+1) (Just 0, Right 0)
+-- (Just 1,Right 1)
+--
+-- For the fold version see 'Optics.Fold.summing'.
+adjoin
+  :: (Is k A_Traversal, Is l A_Traversal)
+  => Optic' k is s a
+  -> Optic' l js s a
+  -> Traversal' s a
+adjoin o1 o2 = combined % traversed
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+         in s2
+      )
+      <$> f (toListOf (castOptic @A_Traversal o1) s0)
+      <*> f (toListOf (castOptic @A_Traversal o2) s0)
+
+    update a = get >>= \case
+      a' : as' -> put as' >> pure a'
+      []       ->            pure a
+infixr 6 `adjoin` -- Same as (<>)
+{-# INLINE [1] adjoin #-}
+
+{-# RULES
+
+"adjoin_12_3" forall o1 o2 o3. adjoin o1 (adjoin o2 o3) = adjoin3 o1 o2 o3
+"adjoin_21_3" forall o1 o2 o3. adjoin (adjoin o1 o2) o3 = adjoin3 o1 o2 o3
+
+"adjoin_13_4" forall o1 o2 o3 o4. adjoin o1 (adjoin3 o2 o3 o4) = adjoin4 o1 o2 o3 o4
+"adjoin_31_4" forall o1 o2 o3 o4. adjoin (adjoin3 o1 o2 o3) o4 = adjoin4 o1 o2 o3 o4
+
+#-}
+
+-- | Triple 'adjoin' for optimizing multiple 'adjoin's with rewrite rules.
+adjoin3
+  :: (Is k1 A_Traversal, Is k2 A_Traversal, Is k3 A_Traversal)
+  => Optic' k1 is1 s a
+  -> Optic' k2 is2 s a
+  -> Optic' k3 is3 s a
+  -> Traversal' s a
+adjoin3 o1 o2 o3 = combined % traversed
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 r3 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+             s3 = evalState (traverseOf o3 update s2) r3
+         in s3
+      )
+      <$> f (toListOf (castOptic @A_Traversal o1) s0)
+      <*> f (toListOf (castOptic @A_Traversal o2) s0)
+      <*> f (toListOf (castOptic @A_Traversal o3) s0)
+
+    update a = get >>= \case
+      a' : as' -> put as' >> pure a'
+      []       ->            pure a
+{-# INLINE [1] adjoin3 #-}
+
+{-# RULES
+
+"adjoin_211_4" forall o1 o2 o3 o4. adjoin3 (adjoin o1 o2) o3 o4 = adjoin4 o1 o2 o3 o4
+"adjoin_121_4" forall o1 o2 o3 o4. adjoin3 o1 (adjoin o2 o3) o4 = adjoin4 o1 o2 o3 o4
+"adjoin_112_4" forall o1 o2 o3 o4. adjoin3 o1 o2 (adjoin o3 o4) = adjoin4 o1 o2 o3 o4
+
+#-}
+
+-- | Quadruple 'adjoin' for optimizing multiple 'adjoin's with rewrite rules.
+adjoin4
+  :: (Is k1 A_Traversal, Is k2 A_Traversal, Is k3 A_Traversal, Is k4 A_Traversal)
+  => Optic' k1 is1 s a
+  -> Optic' k2 is2 s a
+  -> Optic' k3 is3 s a
+  -> Optic' k4 is4 s a
+  -> Traversal' s a
+adjoin4 o1 o2 o3 o4 = combined % traversed
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 r3 r4 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+             s3 = evalState (traverseOf o3 update s2) r3
+             s4 = evalState (traverseOf o4 update s3) r4
+         in s4
+      )
+      <$> f (toListOf (castOptic @A_Traversal o1) s0)
+      <*> f (toListOf (castOptic @A_Traversal o2) s0)
+      <*> f (toListOf (castOptic @A_Traversal o3) s0)
+      <*> f (toListOf (castOptic @A_Traversal o4) s0)
+
+    update a = get >>= \case
+      a' : as' -> put as' >> pure a'
+      []       ->            pure a
+{-# INLINE [1] adjoin4 #-}
 
 -- $setup
 -- >>> import Data.List

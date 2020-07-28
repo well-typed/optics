@@ -29,6 +29,12 @@ miscTests = testGroup "Miscellaneous"
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkFilteredBy)
   , testCase "optimized unsafeFilteredBy" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkUnsafeFilteredBy)
+    -- GHC <= 8.4 doesn't optimize away profunctor classes
+  , testCase "optimized adjoin" $
+    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkAdjoin)
+    -- GHC <= 8.4 doesn't optimize away profunctor classes
+  , testCase "optimized iadjoin" $
+    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
   ]
 
 simpleMapIx
@@ -71,3 +77,9 @@ checkUnsafeFilteredBy
   -> Either a1 (a, Maybe i)
   -> f (Either a1 (a, Maybe i))
 checkUnsafeFilteredBy = iatraverseOf (unsafeFilteredBy (_Right % _2 % _Just)) pure
+
+checkAdjoin :: (a -> a) -> (Maybe a, Either a a, [a]) -> (Maybe a, Either a a, [a])
+checkAdjoin = over (_1 % _Just `adjoin` _2 % chosen `adjoin` _3 % traversed)
+
+checkIxAdjoin :: (Int -> a -> a) -> ((Int, a), [a], (Int, Maybe a)) -> ((Int, a), [a], (Int, Maybe a))
+checkIxAdjoin = iover (_1 % itraversed `iadjoin` _2 % itraversed `iadjoin` _3 % itraversed % _Just)

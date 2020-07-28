@@ -246,6 +246,7 @@ ibackwards_ o = conjoined (backwards_ o) $ ifoldVL $ \f ->
 -- >>> itoListOf (ifolded `isumming` ibackwards_ ifolded) ["a","b"]
 -- [(0,"a"),(1,"b"),(1,"b"),(0,"a")]
 --
+-- For the traversal version see 'Optics.IxTraversal.iadjoin'.
 isumming
   :: (Is k A_Fold, Is l A_Fold,
       is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)

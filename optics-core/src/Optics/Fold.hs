@@ -267,6 +267,7 @@ backwards_ o = foldVL $ \f -> forwards #. traverseOf_ o (Backwards #. f)
 -- >>> toListOf (_1 % ix 0 `summing` _2 % ix 1) ([1,2], [4,7,1])
 -- [1,7]
 --
+-- For the traversal version see 'Optics.Traversal.adjoin'.
 summing
   :: (Is k A_Fold, Is l A_Fold)
   => Optic' k is s a
