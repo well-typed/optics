@@ -59,6 +59,8 @@ labelsTests = testGroup "Labels"
     assertSuccess $(inspectTest $ 'label4lhs ==- 'label4rhs)
   , testCase "multiple set with labels = multiple set with record syntax" $
     assertSuccess $(inspectTest $ 'label5lhs ==- 'label5rhs)
+  , testCase "generic getter = field accessor" $
+    assertSuccess $(inspectTest $ 'name === 'getName)
   ]
 
 label1lhs, label1rhs :: Human a -> String
@@ -127,6 +129,13 @@ oldestPet = maximumByOf (#pets % folded) (comparing $ view #age) human
 
 luckyDog :: Human Mammal
 luckyDog = human & set (#pets % mapped % #_Dog % _1) "Lucky"
+
+----------------------------------------
+
+data User = User { name :: String }
+
+getName :: User -> String
+getName user = user ^. #name
 
 ----------------------------------------
 -- Generalization of Has* classes

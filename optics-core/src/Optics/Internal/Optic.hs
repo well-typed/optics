@@ -43,10 +43,12 @@ import Data.Proxy (Proxy (..))
 import Data.Type.Equality
 import GHC.Generics (Rep)
 import GHC.OverloadedLabels
+import GHC.Records
 import GHC.TypeLits
 
 import Data.Profunctor.Indexed
 
+import Optics.Internal.Bi
 import Optics.Internal.Optic.Subtyping
 import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Optic.Types
@@ -254,21 +256,16 @@ instance {-# OVERLAPPABLE #-}
   ) => LabelOptic name k s t a b where
   labelOptic = generalLabelOptic @name @k @s @t @a @b @(AnyHasRep (Rep s) (Rep t))
 
--- | If no instance matches, GHC tends to bury error messages "No instance for
--- LabelOptic..." within a ton of other error messages about ambiguous type
--- variables and overlapping instances which are irrelevant and confusing. Use
--- incoherent instance providing a custom type error to cut its efforts short.
+-- | If no other instances are available, leverage 'HasField' type class to
+-- obtain field getters.
 instance {-# INCOHERENT #-}
-  TypeError
-   ('Text "No instance for LabelOptic " ':<>: 'ShowType name
-    ':<>: 'Text " " ':<>: QuoteType k
-    ':<>: 'Text " " ':<>: QuoteType s
-    ':<>: 'Text " " ':<>: QuoteType t
-    ':<>: 'Text " " ':<>: QuoteType a
-    ':<>: 'Text " " ':<>: QuoteType b
-    ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
-   => GeneralLabelOptic name k s t a b repDefined where
-  generalLabelOptic = error "unreachable"
+  ( k ~ A_Getter
+  , s ~ t
+  , a ~ b
+  , HasField name s a
+  ) => GeneralLabelOptic name k s t a b repDefined where
+  generalLabelOptic = Optic (lmap (getField @name @s @a) . rphantom)
+  {-# INLINE generalLabelOptic #-}
 
 instance
   (LabelOptic name k s t a b, is ~ NoIx
