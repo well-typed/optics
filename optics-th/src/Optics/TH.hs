@@ -20,6 +20,7 @@ module Optics.TH
   , lensRules
   , lensRulesFor
   -- ** Single class per data type
+  -- $deprecatedClassy
   , makeClassy
   , makeClassy_
   , makeClassyFor
@@ -29,6 +30,7 @@ module Optics.TH
   , classyRules_
   , classyRulesFor
   -- ** Multiple classes per data type
+  -- $deprecatedFields
   , makeFields
   , makeFieldsNoPrefix
   , declareFields
@@ -90,8 +92,8 @@ import Optics.TH.Internal.Sum
 ----------------------------------------
 -- Labels
 
--- | Build field optics as instances of 'LabelOptic' class for use as overloaded
--- labels.
+-- | Build field optics as instances of the 'LabelOptic' class for use with
+-- overloaded labels.  See "Optics.Label" for how to use this pattern.
 --
 -- /e.g./
 --
@@ -124,11 +126,11 @@ import Optics.TH.Internal.Sum
 --     Dog x1 x2 -> point (Dog x1 x2)
 -- @
 --
--- which can be used as @#age@ and @#name@ with language extension
--- OverloadedLabels.
+-- which can be used as @#age@ and @#name@ with the @OverloadedLabels@ language
+-- extension.
 --
 -- /Note:/ if you wonder about the form of instances or why there is no label for
--- @animalAbsurd@, check documentation for 'LabelOptic'.
+-- @animalAbsurd@, see "Optics.Label#limitations".
 --
 -- @
 -- 'makeFieldOptics' = 'makeFieldLabelsWith' 'fieldLabelsRules'
@@ -340,6 +342,17 @@ lensRulesFor fields = lensRules & lensField .~ lookingupNamer fields
 ----------------------------------------
 -- Classy
 
+-- $deprecatedClassy
+--
+-- This method of optics generation should only be used when migrating an
+-- existing codebase from the @lens@ library to @optics@ as it:
+--
+-- - Doesn't support prefixless fields.
+--
+-- - Doesn't support type changing updates.
+--
+-- See "Optics.Label" for our recommended pattern.
+
 -- | Make lenses and traversals for a type, and create a class when the type has
 -- no arguments.
 --
@@ -463,6 +476,27 @@ classyRulesFor classFun fields = classyRules
 
 ----------------------------------------
 -- Fields
+
+-- $deprecatedFields
+--
+-- This method of optics generation should only be used when migrating an
+-- existing codebase from the @lens@ library to @optics@ as it:
+--
+-- - Doesn't support type changing updates.
+--
+-- - Introduces tight coupling between types in your application as either all
+--   types need to be put in a single module (for @HasX@ class generation to
+--   work properly) or there needs to be a single, written by hand module with
+--   all the @HasX@ classes the application will use. Both approaches don't
+--   scale.
+--
+-- - Can't be leveraged by libraries because of the above problem lifted to the
+--   library level: there would have to exist a library with all possible @HasX@
+--   classes written by hand that is imported by all the other
+--   libraries. Otherwise for a given @field@ independent libraries would
+--   provide multiple @HasField@ classes incompatible with each other.
+--
+-- See "Optics.Label" for our recommended pattern.
 
 -- | Generate overloaded field accessors.
 --

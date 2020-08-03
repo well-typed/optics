@@ -207,9 +207,6 @@ instance
 
 -- | Support for overloaded labels as optics. An overloaded label @#foo@ can be
 -- used as an optic if there is an instance of @'LabelOptic' "foo" k s t a b@.
---
--- See "Optics.Label" for examples and further details.
---
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b
                                             , name s b -> t

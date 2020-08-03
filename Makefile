@@ -29,7 +29,7 @@ doctest : build
 	doctest --fast $$(find generic-optics/src  optics/src optics-core/src optics-extra/src optics-sop/src optics-th/src optics-vl/src -name '*.hs') -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs
 
 doctest-optics-core : build
-	doctest --fast optics-core/src -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs
+	doctest --fast indexed-profunctors/src optics-core/src -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs
 
 doctest-optics-extra : build
 	doctest --fast optics-extra/src -XBangPatterns -XDefaultSignatures -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XDeriveFunctor -XGADTs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeFamilies -XTypeOperators -XDataKinds -XTypeApplications -XInstanceSigs
