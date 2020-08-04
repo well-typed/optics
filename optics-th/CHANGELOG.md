@@ -1,3 +1,8 @@
+# optics-th-0.3.0.1 (2020-08-05)
+* Fix handling of nullary type families
+* Fix `declareFieldLabels` and `declareLenses` with DuplicateRecordFields
+* Improve documentation of `Optics.TH`
+
 # optics-th-0.3 (2020-04-15)
 * `optics-core-0.3` compatible release
 * GHC-8.10 support

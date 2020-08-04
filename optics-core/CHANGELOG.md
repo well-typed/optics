@@ -1,3 +1,11 @@
+# optics-core-0.3.0.1 (2020-08-05)
+* Add INLINE pragmas to `atraverseOf_`, `iaTraverseOf_` and `ignored`
+* Improve error message in catch-all `GeneralLabelOptic` instance
+* Make GHC optimize away profunctor type classes when profiling is enabled
+* Improve documentation of `Optics.Label`:
+  - Add guide on how to effectively use labels as optics
+  - Restructure existing sections
+
 # optics-core-0.3 (2020-04-15)
 * GHC-8.10 support
 * Add `filteredBy` and `unsafeFilteredBy`
