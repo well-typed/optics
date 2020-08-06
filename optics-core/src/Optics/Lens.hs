@@ -91,7 +91,6 @@ module Optics.Lens
   -- * Additional introduction forms
   -- | See "Data.Tuple.Optics" for 'Lens'es for tuples.
   , equality'
-  , chosen
   , alongside
   , united
 
@@ -192,11 +191,6 @@ withLensVL o k = k (toLensVL o)
 equality' :: Lens a b a b
 equality' = lensVL ($!)
 {-# INLINE equality' #-}
-
--- | Focus on both sides of an 'Either'.
-chosen :: Lens (Either a a) (Either b b) a b
-chosen = lensVL $ \f -> either (fmap Left . f) (fmap Right . f)
-{-# INLINE chosen #-}
 
 -- | Make a 'Lens' from two other lenses by executing them on their respective
 -- halves of a product.

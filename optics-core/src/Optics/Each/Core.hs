@@ -25,7 +25,9 @@ import Data.Map as Map
 import Data.Sequence as Seq
 import Data.Tree as Tree
 
+import Optics.IxLens
 import Optics.IxTraversal
+import Optics.Optic
 
 -- | Extract 'each' element of a (potentially monomorphic) container.
 --
@@ -148,9 +150,7 @@ instance
 instance
   (a ~ a', b ~ b'
   ) => Each (Either () ()) (Either a a') (Either b b') a b where
-  each = itraversalVL $ \f -> \case
-    Left  a -> Left  <$> f (Left ())  a
-    Right a -> Right <$> f (Right ()) a
+  each = castOptic chosen
   {-# INLINE[1] each #-}
 
 -- | @'each' :: ('RealFloat' a, 'RealFloat' b) => 'IxTraversal' (Either () ())
