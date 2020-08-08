@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableSuperClasses #-}
+
 module Optics.Passthrough where
 
 import Optics.Internal.Optic
