@@ -62,6 +62,21 @@ module Optics.Traversal
   , backwards
   , partsOf
   , singular
+
+  -- * Monoid structure
+  -- | 'Traversal' admits a (partial) monoid structure where 'adjoin' combines
+  -- non-overlapping traversals, and the identity element is
+  -- 'Optics.IxAffineTraversal.ignored' (which traverses no elements).
+  --
+  -- If you merely need a 'Fold', you can use traversals as folds and combine
+  -- them with one of the monoid structures on folds (see
+  -- "Optics.Fold#monoids"). In particular, 'summing' can be used to concatenate
+  -- results from two traversals, and 'failing' will returns results from the
+  -- second traversal only if the first returns no results.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'Traversal', because there
+  -- is not a unique choice of monoid to use that works for all optics, and the
+  -- ('<>') operator could not be used to combine optics of different kinds.
   , adjoin
 
   -- * Subtyping
@@ -344,14 +359,24 @@ singular o = atraversalVL $ \point f s ->
       Nothing ->                pure a
 {-# INLINE singular #-}
 
--- | Adjoin two disjoint traversals together.
+-- | Combine two disjoint traversals into one.
 --
--- /Note:/ traversing the same entry twice is illegal.
+-- >>> over (_1 % _Just `adjoin` _2 % _Right) not (Just True, Right False)
+-- (Just False,Right True)
 --
--- >>> over (_1 % _Just `adjoin` _2 % _Right) (+1) (Just 0, Right 0)
--- (Just 1,Right 1)
+-- /Note:/ if the argument traversals are not disjoint, the result will not
+-- respect the 'Traversal' laws, because it will visit the same element multiple
+-- times.  See section 7 of
+-- <https://www.cs.ox.ac.uk/jeremy.gibbons/publications/uitbaf.pdf Understanding Idiomatic Traversals Backwards and Forwards>
+-- by Bird et al. for why this is illegal.
 --
--- For the fold version see 'Optics.Fold.summing'.
+-- >>> view (partsOf (each `adjoin` _1)) ('x','y')
+-- "xyx"
+-- >>> set (partsOf (each `adjoin` _1)) "abc" ('x','y')
+-- ('c','b')
+--
+-- For the 'Fold' version see 'Optics.Fold.summing'.
+--
 adjoin
   :: (Is k A_Traversal, Is l A_Traversal)
   => Optic' k is s a

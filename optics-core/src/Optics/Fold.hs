@@ -75,8 +75,8 @@ module Optics.Fold
   , pre
   , backwards_
 
-  -- * Monoid structures
-  -- | 'Fold' admits (at least) two monoid structures: #monoids#
+  -- * Monoid structures #monoids#
+  -- | 'Fold' admits (at least) two monoid structures:
   --
   -- * 'summing' concatenates results from both folds.
   --

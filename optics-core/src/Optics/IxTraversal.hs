@@ -59,6 +59,22 @@ module Optics.IxTraversal
   , ibackwards
   , ipartsOf
   , isingular
+
+  -- * Monoid structure
+  -- | 'IxTraversal' admits a (partial) monoid structure where 'iadjoin'
+  -- combines non-overlapping indexed traversals, and the identity element is
+  -- 'ignored' (which traverses no elements).
+  --
+  -- If you merely need an 'IxFold', you can use indexed traversals as indexed
+  -- folds and combine them with one of the monoid structures on indexed folds
+  -- (see "Optics.IxFold#monoids"). In particular, 'isumming' can be used to
+  -- concatenate results from two traversals, and 'ifailing' will returns
+  -- results from the second traversal only if the first returns no results.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'IxTraversal', because
+  -- there is not a unique choice of monoid to use that works for all optics,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
   , iadjoin
 
   -- * Subtyping
@@ -340,14 +356,24 @@ isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
       Nothing ->                pure a
 {-# INLINE isingular #-}
 
--- | Adjoin two disjoint indexed traversals together.
---
--- /Note:/ traversing the same entry twice is illegal.
+-- | Combine two disjoint indexed traversals into one.
 --
 -- >>> iover (_1 % itraversed `iadjoin` _2 % itraversed) (+) ([0, 0, 0], (3, 5))
 -- ([0,1,2],(3,8))
 --
--- For the fold version see 'Optics.IxFold.isumming'.
+-- /Note:/ if the argument traversals are not disjoint, the result will not
+-- respect the 'IxTraversal' laws, because it will visit the same element multiple
+-- times.  See section 7 of
+-- <https://www.cs.ox.ac.uk/jeremy.gibbons/publications/uitbaf.pdf Understanding Idiomatic Traversals Backwards and Forwards>
+-- by Bird et al. for why this is illegal.
+--
+-- >>> iview (ipartsOf (each `iadjoin` each)) ("x","y")
+-- ([0,1,0,1],["x","y","x","y"])
+-- >>> iset (ipartsOf (each `iadjoin` each)) (const ["a","b","c","d"]) ("x","y")
+-- ("c","d")
+--
+-- For the 'IxFold' version see 'Optics.IxFold.isumming'.
+--
 iadjoin
   :: (Is k A_Traversal, Is l A_Traversal, is `HasSingleIndex` i)
   => Optic' k is s a

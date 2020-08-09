@@ -120,8 +120,9 @@ unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
 -- no substructures.
 --
 -- This is the identity element when a 'Optics.Fold.Fold',
--- 'Optics.AffineFold.AffineFold', 'Optics.IxFold.IxFold' or
--- 'Optics.IxAffineFold.IxAffineFold' is viewed as a monoid.
+-- 'Optics.AffineFold.AffineFold', 'Optics.IxFold.IxFold',
+-- 'Optics.IxAffineFold.IxAffineFold', 'Optics.Traversal.Traversal' or
+-- 'Optics.IxTraversal.IxTraversal' is viewed as a monoid.
 --
 -- >>> 6 & ignored %~ absurd
 -- 6

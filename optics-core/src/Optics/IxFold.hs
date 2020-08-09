@@ -44,7 +44,7 @@ module Optics.IxFold
   , ifiltered
   , ibackwards_
 
-  -- * Monoid structures
+  -- * Monoid structures #monoids#
   -- | 'IxFold' admits (at least) two monoid structures:
   --
   -- * 'isumming' concatenates results from both folds.
