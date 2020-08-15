@@ -60,6 +60,23 @@ module Optics.IxTraversal
   , ipartsOf
   , isingular
 
+  -- * Monoid structure
+  -- | 'IxTraversal' admits a (partial) monoid structure where 'iadjoin'
+  -- combines non-overlapping indexed traversals, and the identity element is
+  -- 'ignored' (which traverses no elements).
+  --
+  -- If you merely need an 'IxFold', you can use indexed traversals as indexed
+  -- folds and combine them with one of the monoid structures on indexed folds
+  -- (see "Optics.IxFold#monoids"). In particular, 'isumming' can be used to
+  -- concatenate results from two traversals, and 'ifailing' will returns
+  -- results from the second traversal only if the first returns no results.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'IxTraversal', because
+  -- there is not a unique choice of monoid to use that works for all optics,
+  -- and the ('<>') operator could not be used to combine optics of different
+  -- kinds.
+  , iadjoin
+
   -- * Subtyping
   , A_Traversal
 
@@ -338,6 +355,120 @@ isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
       Just a' -> put Nothing >> pure a'
       Nothing ->                pure a
 {-# INLINE isingular #-}
+
+-- | Combine two disjoint indexed traversals into one.
+--
+-- >>> iover (_1 % itraversed `iadjoin` _2 % itraversed) (+) ([0, 0, 0], (3, 5))
+-- ([0,1,2],(3,8))
+--
+-- /Note:/ if the argument traversals are not disjoint, the result will not
+-- respect the 'IxTraversal' laws, because it will visit the same element multiple
+-- times.  See section 7 of
+-- <https://www.cs.ox.ac.uk/jeremy.gibbons/publications/uitbaf.pdf Understanding Idiomatic Traversals Backwards and Forwards>
+-- by Bird et al. for why this is illegal.
+--
+-- >>> iview (ipartsOf (each `iadjoin` each)) ("x","y")
+-- ([0,1,0,1],["x","y","x","y"])
+-- >>> iset (ipartsOf (each `iadjoin` each)) (const ["a","b","c","d"]) ("x","y")
+-- ("c","d")
+--
+-- For the 'IxFold' version see 'Optics.IxFold.isumming'.
+--
+iadjoin
+  :: (Is k A_Traversal, Is l A_Traversal, is `HasSingleIndex` i)
+  => Optic' k is s a
+  -> Optic' l is s a
+  -> IxTraversal' i s a
+iadjoin o1 o2 = conjoined (adjoin o1 o2) (combined % traversed % itraversed)
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+         in s2
+      )
+      <$> f (itoListOf (castOptic @A_Traversal o1) s0)
+      <*> f (itoListOf (castOptic @A_Traversal o2) s0)
+
+    update a = get >>= \case
+      (_, a') : as' -> put as' >> pure a'
+      []            ->            pure a
+infixr 6 `iadjoin` -- Same as (<>)
+{-# INLINE [1] iadjoin #-}
+
+{-# RULES
+
+"iadjoin_12_3" forall o1 o2 o3. iadjoin o1 (iadjoin o2 o3) = iadjoin3 o1 o2 o3
+"iadjoin_21_3" forall o1 o2 o3. iadjoin (iadjoin o1 o2) o3 = iadjoin3 o1 o2 o3
+
+"iadjoin_13_4" forall o1 o2 o3 o4. iadjoin o1 (iadjoin3 o2 o3 o4) = iadjoin4 o1 o2 o3 o4
+"iadjoin_31_4" forall o1 o2 o3 o4. iadjoin (iadjoin3 o1 o2 o3) o4 = iadjoin4 o1 o2 o3 o4
+
+#-}
+
+-- | Triple 'iadjoin' for optimizing multiple 'iadjoin's with rewrite rules.
+iadjoin3
+  :: (Is k1 A_Traversal, Is k2 A_Traversal, Is k3 A_Traversal, is `HasSingleIndex` i )
+  => Optic' k1 is s a
+  -> Optic' k2 is s a
+  -> Optic' k3 is s a
+  -> IxTraversal' i s a
+iadjoin3 o1 o2 o3 = conjoined (o1 `adjoin` o2 `adjoin` o3)
+                              (combined % traversed % itraversed)
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 r3 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+             s3 = evalState (traverseOf o3 update s2) r3
+         in s3
+      )
+      <$> f (itoListOf (castOptic @A_Traversal o1) s0)
+      <*> f (itoListOf (castOptic @A_Traversal o2) s0)
+      <*> f (itoListOf (castOptic @A_Traversal o3) s0)
+
+    update a = get >>= \case
+      (_, a') : as' -> put as' >> pure a'
+      []            ->            pure a
+{-# INLINE [1] iadjoin3 #-}
+
+{-# RULES
+
+"iadjoin_211_4" forall o1 o2 o3 o4. iadjoin3 (iadjoin o1 o2) o3 o4 = iadjoin4 o1 o2 o3 o4
+"iadjoin_121_4" forall o1 o2 o3 o4. iadjoin3 o1 (iadjoin o2 o3) o4 = iadjoin4 o1 o2 o3 o4
+"iadjoin_112_4" forall o1 o2 o3 o4. iadjoin3 o1 o2 (iadjoin o3 o4) = iadjoin4 o1 o2 o3 o4
+
+#-}
+
+-- | Quadruple 'iadjoin' for optimizing multiple 'iadjoin's with rewrite rules.
+iadjoin4
+  :: ( Is k1 A_Traversal, Is k2 A_Traversal, Is k3 A_Traversal, Is k4 A_Traversal
+     , is `HasSingleIndex` i)
+  => Optic' k1 is s a
+  -> Optic' k2 is s a
+  -> Optic' k3 is s a
+  -> Optic' k4 is s a
+  -> IxTraversal' i s a
+iadjoin4 o1 o2 o3 o4 = conjoined (o1 `adjoin` o2 `adjoin` o3 `adjoin` o4)
+                                 (combined % traversed % itraversed)
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 r3 r4 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+             s3 = evalState (traverseOf o3 update s2) r3
+             s4 = evalState (traverseOf o4 update s3) r4
+         in s4
+      )
+      <$> f (itoListOf (castOptic @A_Traversal o1) s0)
+      <*> f (itoListOf (castOptic @A_Traversal o2) s0)
+      <*> f (itoListOf (castOptic @A_Traversal o3) s0)
+      <*> f (itoListOf (castOptic @A_Traversal o4) s0)
+
+    update a = get >>= \case
+      (_, a') : as' -> put as' >> pure a'
+      []            ->            pure a
+{-# INLINE [1] iadjoin4 #-}
 
 -- $setup
 -- >>> import Data.Void

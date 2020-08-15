@@ -63,6 +63,22 @@ module Optics.Traversal
   , partsOf
   , singular
 
+  -- * Monoid structure
+  -- | 'Traversal' admits a (partial) monoid structure where 'adjoin' combines
+  -- non-overlapping traversals, and the identity element is
+  -- 'Optics.IxAffineTraversal.ignored' (which traverses no elements).
+  --
+  -- If you merely need a 'Fold', you can use traversals as folds and combine
+  -- them with one of the monoid structures on folds (see
+  -- "Optics.Fold#monoids"). In particular, 'summing' can be used to concatenate
+  -- results from two traversals, and 'failing' will returns results from the
+  -- second traversal only if the first returns no results.
+  --
+  -- There is no 'Semigroup' or 'Monoid' instance for 'Traversal', because there
+  -- is not a unique choice of monoid to use that works for all optics, and the
+  -- ('<>') operator could not be used to combine optics of different kinds.
+  , adjoin
+
   -- * Subtyping
   , A_Traversal
   -- | <<diagrams/Traversal.png Traversal in the optics hierarchy>>
@@ -342,6 +358,117 @@ singular o = atraversalVL $ \point f s ->
       Just a' -> put Nothing >> pure a'
       Nothing ->                pure a
 {-# INLINE singular #-}
+
+-- | Combine two disjoint traversals into one.
+--
+-- >>> over (_1 % _Just `adjoin` _2 % _Right) not (Just True, Right False)
+-- (Just False,Right True)
+--
+-- /Note:/ if the argument traversals are not disjoint, the result will not
+-- respect the 'Traversal' laws, because it will visit the same element multiple
+-- times.  See section 7 of
+-- <https://www.cs.ox.ac.uk/jeremy.gibbons/publications/uitbaf.pdf Understanding Idiomatic Traversals Backwards and Forwards>
+-- by Bird et al. for why this is illegal.
+--
+-- >>> view (partsOf (each `adjoin` _1)) ('x','y')
+-- "xyx"
+-- >>> set (partsOf (each `adjoin` _1)) "abc" ('x','y')
+-- ('c','b')
+--
+-- For the 'Fold' version see 'Optics.Fold.summing'.
+--
+adjoin
+  :: (Is k A_Traversal, Is l A_Traversal)
+  => Optic' k is s a
+  -> Optic' l js s a
+  -> Traversal' s a
+adjoin o1 o2 = combined % traversed
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+         in s2
+      )
+      <$> f (toListOf (castOptic @A_Traversal o1) s0)
+      <*> f (toListOf (castOptic @A_Traversal o2) s0)
+
+    update a = get >>= \case
+      a' : as' -> put as' >> pure a'
+      []       ->            pure a
+infixr 6 `adjoin` -- Same as (<>)
+{-# INLINE [1] adjoin #-}
+
+{-# RULES
+
+"adjoin_12_3" forall o1 o2 o3. adjoin o1 (adjoin o2 o3) = adjoin3 o1 o2 o3
+"adjoin_21_3" forall o1 o2 o3. adjoin (adjoin o1 o2) o3 = adjoin3 o1 o2 o3
+
+"adjoin_13_4" forall o1 o2 o3 o4. adjoin o1 (adjoin3 o2 o3 o4) = adjoin4 o1 o2 o3 o4
+"adjoin_31_4" forall o1 o2 o3 o4. adjoin (adjoin3 o1 o2 o3) o4 = adjoin4 o1 o2 o3 o4
+
+#-}
+
+-- | Triple 'adjoin' for optimizing multiple 'adjoin's with rewrite rules.
+adjoin3
+  :: (Is k1 A_Traversal, Is k2 A_Traversal, Is k3 A_Traversal)
+  => Optic' k1 is1 s a
+  -> Optic' k2 is2 s a
+  -> Optic' k3 is3 s a
+  -> Traversal' s a
+adjoin3 o1 o2 o3 = combined % traversed
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 r3 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+             s3 = evalState (traverseOf o3 update s2) r3
+         in s3
+      )
+      <$> f (toListOf (castOptic @A_Traversal o1) s0)
+      <*> f (toListOf (castOptic @A_Traversal o2) s0)
+      <*> f (toListOf (castOptic @A_Traversal o3) s0)
+
+    update a = get >>= \case
+      a' : as' -> put as' >> pure a'
+      []       ->            pure a
+{-# INLINE [1] adjoin3 #-}
+
+{-# RULES
+
+"adjoin_211_4" forall o1 o2 o3 o4. adjoin3 (adjoin o1 o2) o3 o4 = adjoin4 o1 o2 o3 o4
+"adjoin_121_4" forall o1 o2 o3 o4. adjoin3 o1 (adjoin o2 o3) o4 = adjoin4 o1 o2 o3 o4
+"adjoin_112_4" forall o1 o2 o3 o4. adjoin3 o1 o2 (adjoin o3 o4) = adjoin4 o1 o2 o3 o4
+
+#-}
+
+-- | Quadruple 'adjoin' for optimizing multiple 'adjoin's with rewrite rules.
+adjoin4
+  :: (Is k1 A_Traversal, Is k2 A_Traversal, Is k3 A_Traversal, Is k4 A_Traversal)
+  => Optic' k1 is1 s a
+  -> Optic' k2 is2 s a
+  -> Optic' k3 is3 s a
+  -> Optic' k4 is4 s a
+  -> Traversal' s a
+adjoin4 o1 o2 o3 o4 = combined % traversed
+  where
+    combined = traversalVL $ \f s0 ->
+      (\r1 r2 r3 r4 ->
+         let s1 = evalState (traverseOf o1 update s0) r1
+             s2 = evalState (traverseOf o2 update s1) r2
+             s3 = evalState (traverseOf o3 update s2) r3
+             s4 = evalState (traverseOf o4 update s3) r4
+         in s4
+      )
+      <$> f (toListOf (castOptic @A_Traversal o1) s0)
+      <*> f (toListOf (castOptic @A_Traversal o2) s0)
+      <*> f (toListOf (castOptic @A_Traversal o3) s0)
+      <*> f (toListOf (castOptic @A_Traversal o4) s0)
+
+    update a = get >>= \case
+      a' : as' -> put as' >> pure a'
+      []       ->            pure a
+{-# INLINE [1] adjoin4 #-}
 
 -- $setup
 -- >>> import Data.List

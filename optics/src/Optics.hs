@@ -163,6 +163,9 @@ module Optics
   -- $indexed
   , module Optics.Indexed
 
+  -- * Monoid structures #monoids#
+  -- $monoids
+
   -- * Generation of optics
   -- ** ...with Template Haskell
   , module Optics.TH
@@ -721,8 +724,8 @@ import Data.Either.Optics                    as P
 -- * 'singular' ('isingular' for indexed optics) doesn't produce a partial lens
 --   that might fail with a runtime error, but an affine traversal.
 --
--- * '<>' cannot be used to combine 'Fold's, so 'summing' should be used
---   instead.
+-- * '<>' cannot be used to combine 'Fold's, so 'summing' should be used instead
+--   (see the "Monoid structures" section below in "Optics#monoids").
 
 
 -- $otherresources
@@ -870,6 +873,30 @@ import Data.Either.Optics                    as P
 --      Optic A_Traversal '[i] (f a, c) (f b, c) a b
 --
 -- <<diagrams/indexedoptics.png Indexed Optics>>
+
+
+-- $monoids
+--
+-- There are two ways to combine (possibly indexed) folds, traversals and
+-- related optics with the same outer and inner types:
+--
+-- * Visit all the targets of the first optic, then all the targets of the
+--   second optic.  This makes sense for folds ('summing' or 'isumming') and
+--   traversals ('adjoin' or 'iadjoin'), provided in the latter case that the
+--   targets are disjoint.
+--
+-- * Visit the targets of the first optic if there are any, or if not, visit the
+--   targets of the second optic.  This makes sense for folds ('failing' or
+--   'ifailing') and affine folds ('afailing' or 'iafailing').
+--
+-- These operations form monoid structures on the appropriate optic kinds, with
+-- the identity element 'ignored', which visits no targets.
+--
+-- There is no 'Semigroup' or 'Monoid' instance for 'Optic', because there is
+-- not a unique choice of monoid to use, and the ('<>') operator could not be
+-- used to combine optics of different kinds. When porting code from @lens@ that
+-- uses ('<>') to combine folds, use 'summing' instead.
+
 
 -- $cheatsheet
 --
