@@ -731,11 +731,16 @@ import Data.Either.Optics                    as P
 --
 -- * <https://skillsmatter.com/skillscasts/12360-profunctors-and-data-accessors Profunctors and Data Accessors> a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
 --
+-- * <https://www.youtube.com/watch?v=geV8F59q48E Basic optics: lenses, prisms, and traversals> an introductory talk about this library by Alejandro Serrano
+--
 -- * <https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/poptics.pdf Profunctor Optics: Modular Data Accessors> a paper by Matthew Pickering, Jeremy Gibbons and Nicolas Wu
 --
--- * <https://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery> and <https://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics>, blog posts by Oleg Grenrus
+-- * <https://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery> and <https://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics>, blog posts by Oleg Grenrus on the internal representations used by this library
+--
+-- * <https://oleg.fi/gists/posts/2020-01-25-case-study-migration-from-lens-to-optics.html Case study: migrating from lens to optics>, another blog post by Oleg Grenrus, potentially useful if you wish to migrate an existing codebase to @optics@ from @lens@
 --
 -- * The <https://hackage.haskell.org/package/lens lens> package by Edward Kmett and contributors
+--
 
 
 -- $basicusage
