@@ -32,15 +32,17 @@ foo'' = view foo
 (>::) :: (:::) -> Int -> Int
 (>::) = view (>:)
 
+-- NB we cannot use the field name 'foo' here, because there is already a
+-- definition of 'foo' as a lens in scope (#338).
 $(declareFieldLabels
   [d|data family F x
-     data instance F Int = MkF { foo :: Int }|])
+     data instance F Int = MkF { woo :: Int }|])
 $(declareLenses
   [d|data family G x
      data instance G Int = MkG { bar :: Int }|])
 
 foo''' :: F Int -> Int
-foo''' = view #foo
+foo''' = view #woo
 
 bar' :: G Int -> Int
 bar' = view bar
