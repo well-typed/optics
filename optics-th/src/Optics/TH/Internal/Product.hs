@@ -444,7 +444,7 @@ buildStab forClassInstance s categorizedFields = do
         procTF tf args = case tf of
           TypeFamilyHead _ varBndrs _ (Just (InjectivityAnn _ ins)) -> do
             let insSet = S.fromList ins
-                vars   = map bndrName varBndrs
+                vars   = map D.tvName varBndrs
             --lift . runIO $ do
             --  putStrLn $ "INS:  " ++ show ins
             --  putStrLn $ "VARS: " ++ show vars

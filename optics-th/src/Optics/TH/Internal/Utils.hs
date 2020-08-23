@@ -37,11 +37,6 @@ toTupleP xs = tupP xs
 conAppsT :: Name -> [Type] -> Type
 conAppsT conName = foldl AppT (ConT conName)
 
--- | Return 'Name' contained in a 'TyVarBndr'.
-bndrName :: TyVarBndr -> Name
-bndrName (PlainTV  n  ) = n
-bndrName (KindedTV n _) = n
-
 -- | Generate many new names from a given base name.
 newNames :: String {- ^ base name -} -> Int {- ^ count -} -> Q [Name]
 newNames base n = sequence [ newName (base++show i) | i <- [1..n] ]
@@ -74,7 +69,7 @@ quantifyType = quantifyType' S.empty
 quantifyType' :: S.Set Name -> [TyVarBndr] -> Cxt -> Type -> Type
 quantifyType' exclude vars cx t = ForallT vs cx t
   where
-    vs = filter (\v -> bndrName v `S.notMember` exclude)
+    vs = filter (\v -> D.tvName v `S.notMember` exclude)
        . D.freeVariablesWellScoped
        $ map bndrToType vars ++ S.toList (setOf typeVarsKinded t)
 
