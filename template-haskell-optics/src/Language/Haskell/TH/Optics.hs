@@ -941,7 +941,7 @@ _ClosedTypeFamilyD
 -- @
 -- -- template-haskell-2.12+:
 -- type DataPrism' tys cons = 'Prism'' 'Dec' ('Cxt', 'Name', 'tys', 'Maybe' 'Kind', cons, ['DerivClause'])
--- Earlier versions:
+-- -- Earlier versions:
 -- type DataPrism' tys cons = 'Prism'' 'Dec' ('Cxt', 'Name', tys, 'Maybe' 'Kind', cons, 'Cxt')
 -- @
 #if MIN_VERSION_template_haskell(2,12,0)
