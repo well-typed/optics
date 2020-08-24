@@ -112,6 +112,7 @@ module Language.Haskell.TH.Optics
 #if MIN_VERSION_template_haskell(2,15,0)
   , _ImplicitParamBindD
 #endif
+  , DataPrism'
 #if MIN_VERSION_template_haskell(2,12,0)
   -- ** PatSynDir Prisms
   , _Unidir
