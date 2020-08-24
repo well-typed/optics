@@ -868,7 +868,7 @@ _PragmaD
 
 -- |
 -- @
--- _TySynInstD :: 'Prism'' 'Dec' 'TySynEqn'           -- template-haskell 2.15+
+-- _TySynInstD :: 'Prism'' 'Dec' 'TySynEqn'         -- template-haskell 2.15+
 -- _TySynInstD :: 'Prism'' 'Dec' ('Name', 'TySynEqn') -- Earlier versions
 -- @
 #if MIN_VERSION_template_haskell(2,15,0)
@@ -965,9 +965,9 @@ _NewtypeD
 
 -- |
 -- @
--- template-haskell-2.15+:
+-- -- template-haskell-2.15+:
 -- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause'])
--- Earlier versions:
+-- -- Earlier versions:
 -- _DataInstD :: 'DataPrism'' ['Type'] ['Con']
 -- @
 #if MIN_VERSION_template_haskell(2,15,0)
@@ -990,9 +990,9 @@ _DataInstD
 
 -- |
 -- @
--- template-haskell-2.15+:
+-- -- template-haskell-2.15+:
 -- _NewtypeInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause'])
--- Earlier versions:
+-- -- Earlier versions:
 -- _NewtypeInstD :: 'DataPrism'' ['Type'] 'Con'
 -- @
 #if MIN_VERSION_template_haskell(2,15,0)
@@ -1340,7 +1340,7 @@ _SpecialiseInstP
 
 -- |
 -- @
--- -- template-haskell >= 2.15:
+-- -- template-haskell 2.15+:
 -- _RuleP :: 'Prism'' 'Pragma' ('String', 'Maybe' ['TyVarBndr'], ['RuleBndr'], 'Exp', 'Exp', 'Phases')
 -- -- Earlier versions:
 -- _RuleP :: 'Prism'' 'Pragma' ('String', ['RuleBndr'], 'Exp', 'Exp', 'Phases') -- Earlier versions
