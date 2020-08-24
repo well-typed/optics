@@ -1,5 +1,16 @@
 {-# LANGUAGE CPP              #-}
 {-# LANGUAGE LambdaCase       #-}
+-- |
+-- Module: Language.Haskell.TH.Optics
+-- Description: Optics for types defined in "Language.Haskell.TH".
+--
+-- Note: the API offered in this module is subject to change, as
+-- it mirrors the API provided by the @template-haskell@ package,
+-- which changes between different releases of GHC. This module
+-- makes an effort to identify the functions that have different
+-- type signatures when compiled with different versions  of
+-- @template-haskell@.
+--
 module Language.Haskell.TH.Optics
   (
   -- * Traversals
