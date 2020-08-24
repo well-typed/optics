@@ -90,6 +90,8 @@ module Optics.Lens
 
   -- * Additional introduction forms
   -- | See "Data.Tuple.Optics" for 'Lens'es for tuples.
+  --
+  -- If you're looking for 'Optics.IxLens.chosen', it was moved to "Optics.IxLens".
   , equality'
   , alongside
   , united
