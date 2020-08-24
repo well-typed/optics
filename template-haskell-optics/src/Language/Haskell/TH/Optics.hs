@@ -900,7 +900,7 @@ _RoleAnnotD
 
 -- |
 -- @
--- _StandaloneDerivD :: 'Prism'' 'Dec' ('Maybe' 'DerivStrategy', 'Cxt', 'Type') -- template-haskell 2.15+
+-- _StandaloneDerivD :: 'Prism'' 'Dec' ('Maybe' 'DerivStrategy', 'Cxt', 'Type') -- template-haskell 2.12+
 -- _StandaloneDerivD :: 'Prism'' 'Dec' ('Cxt', 'Type')                      -- Earlier versions
 -- @
 #if MIN_VERSION_template_haskell(2,12,0)
@@ -1034,7 +1034,7 @@ _OpenTypeFamilyD
 
 -- |
 -- @
--- _PatSynD :: 'Prism'' 'Dec' ('Name', 'PatSynArgs', 'PatSynDir', 'Pat') -- template-haskell-2.15+
+-- _PatSynD :: 'Prism'' 'Dec' ('Name', 'PatSynArgs', 'PatSynDir', 'Pat') -- template-haskell-2.12+
 -- _PatSynD :: 'Prism'' 'Dec' ('Name', 'PatSynType')                 -- Earlier versions
 -- @
 #if MIN_VERSION_template_haskell(2,12,0)
