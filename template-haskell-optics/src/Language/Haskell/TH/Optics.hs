@@ -1,6 +1,5 @@
 {-# LANGUAGE CPP              #-}
 {-# LANGUAGE LambdaCase       #-}
-{-# OPTIONS_GHC -Werror #-}
 module Language.Haskell.TH.Optics
   (
   -- * Traversals
