@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP              #-}
 {-# LANGUAGE LambdaCase       #-}
+{-# OPTIONS_GHC -Werror #-}
 module Language.Haskell.TH.Optics
   (
   -- * Traversals
@@ -455,21 +456,36 @@ instance HasTypeVars Name where
 
 instance HasTypeVars Type where
   typeVarsEx s = traversalVL $ \f -> \case
-    VarT n            -> VarT <$> traverseOf (typeVarsEx s) f n
-    AppT l r          -> AppT <$> traverseOf (typeVarsEx s) f l
+    VarT n             -> VarT <$> traverseOf (typeVarsEx s) f n
+    AppT l r           -> AppT <$> traverseOf (typeVarsEx s) f l
                               <*> traverseOf (typeVarsEx s) f r
-    SigT t k          -> SigT <$> traverseOf (typeVarsEx s) f t
-                              <*> traverseOf (typeVarsEx s) f k
-    ForallT bs ctx ty -> let s' = s `Set.union` setOf typeVars bs
-                         in ForallT bs <$> traverseOf (typeVarsEx s') f ctx
-                                       <*> traverseOf (typeVarsEx s') f ty
-    InfixT  t1 n t2   -> InfixT <$> traverseOf (typeVarsEx s) f t1
-                                <*> pure n
-                                <*> traverseOf (typeVarsEx s) f t2
-    UInfixT t1 n t2   -> UInfixT <$> traverseOf (typeVarsEx s) f t1
+    SigT t k           -> SigT <$> traverseOf (typeVarsEx s) f t
+                               <*> traverseOf (typeVarsEx s) f k
+    ForallT bs ctx ty  -> let s' = s `Set.union` setOf typeVars bs
+                          in ForallT bs <$> traverseOf (typeVarsEx s') f ctx
+                                        <*> traverseOf (typeVarsEx s') f ty
+    InfixT  t1 n t2    -> InfixT <$> traverseOf (typeVarsEx s) f t1
                                  <*> pure n
                                  <*> traverseOf (typeVarsEx s) f t2
-    ParensT t         -> ParensT <$> traverseOf (typeVarsEx s) f t
+    UInfixT t1 n t2    -> UInfixT <$> traverseOf (typeVarsEx s) f t1
+                                  <*> pure n
+                                  <*> traverseOf (typeVarsEx s) f t2
+    ParensT t          -> ParensT <$> traverseOf (typeVarsEx s) f t
+    t@ArrowT{}         -> pure t
+    t@ConT{}           -> pure t
+    t@ConstraintT{}    -> pure t
+    t@EqualityT{}      -> pure t
+    t@ListT{}          -> pure t
+    t@LitT{}           -> pure t
+    t@PromotedConsT{}  -> pure t
+    t@PromotedNilT{}   -> pure t
+    t@PromotedTupleT{} -> pure t
+    t@PromotedT{}      -> pure t
+    t@StarT{}          -> pure t
+    t@TupleT{}         -> pure t
+    t@UnboxedSumT{}    -> pure t
+    t@UnboxedTupleT{}  -> pure t
+    t@WildCardT{}      -> pure t
 #if MIN_VERSION_template_haskell(2,15,0)
     AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
                                    <*> traverseOf (typeVarsEx s) f k
@@ -479,7 +495,7 @@ instance HasTypeVars Type where
     ForallVisT bs ty -> let s' = s `Set.union` setOf typeVars bs
                         in ForallVisT bs <$> traverseOf (typeVarsEx s') f ty
 #endif
-    t                 -> pure t
+
 
 instance HasTypeVars Con where
   typeVarsEx s = traversalVL $ \f -> \case
@@ -533,7 +549,6 @@ instance SubstType Type where
   substType m (ForallVisT bs ty)   = ForallVisT bs (substType m' ty)
     where m' = foldrOf typeVars Map.delete m bs
 #endif
-  substType _ t                   = t
 
 instance SubstType t => SubstType [t] where
   substType = map . substType
