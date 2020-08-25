@@ -29,6 +29,7 @@ module Optics.IxLens
   -- @
 
   -- * Additional introduction forms
+  , chosen
   , devoid
 
   -- * Subtyping
@@ -96,6 +97,13 @@ withIxLensVL o k = k (toIxLensVL o)
 
 ----------------------------------------
 -- Lenses
+
+-- | Focus on both sides of an 'Either'.
+chosen :: IxLens (Either () ()) (Either a a) (Either b b) a b
+chosen = ilensVL $ \f -> \case
+  Left  a -> Left  <$> f (Left ())  a
+  Right a -> Right <$> f (Right ()) a
+{-# INLINE chosen #-}
 
 -- | There is an indexed field for every type in the 'Void'.
 --
