@@ -530,6 +530,10 @@ instance SubstType Type where
   substType m (AppKindT t k)       = AppKindT (substType m t) (substType m k)
   substType m (ImplicitParamT n t) = ImplicitParamT n (substType m t)
 #endif
+#if MIN_VERSION_template_haskell(2,16,0)
+  substType m (ForallVisT bs ty)   = ForallVisT bs (substType m' ty)
+    where m' = foldrOf typeVars Map.delete m bs
+#endif
   substType _ t                   = t
 
 instance SubstType t => SubstType [t] where
