@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP              #-}
 {-# LANGUAGE LambdaCase       #-}
+{-# OPTIONS_GHC -Werror #-}
 module Language.Haskell.TH.Optics
   (
   -- * Traversals
@@ -255,6 +256,9 @@ module Language.Haskell.TH.Optics
   , _DoublePrimL
   , _StringPrimL
   , _CharPrimL
+#if MIN_VERSION_template_haskell(2, 16, 0)
+  , _BytesPrimL
+#endif
   -- ** Pat Prisms
   , _LitP
   , _VarP
@@ -303,6 +307,9 @@ module Language.Haskell.TH.Optics
 #if MIN_VERSION_template_haskell(2,15,0)
   , _AppKindT
   , _ImplicitParamT
+#endif
+#if MIN_VERSION_template_haskell(2,16,0)
+  , _ForallVisT
 #endif
   -- ** TyVarBndr Prisms
   , _PlainTV
@@ -468,6 +475,10 @@ instance HasTypeVars Type where
     AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
                                    <*> traverseOf (typeVarsEx s) f k
     ImplicitParamT n t -> ImplicitParamT n <$> traverseOf (typeVarsEx s) f t
+#endif
+#if MIN_VERSION_template_haskell(2,16,0)
+    ForallVisT bs ty -> let s' = s `Set.union` setOf typeVars bs
+                        in ForallVisT bs <$> traverseOf (typeVarsEx s') f ty
 #endif
     t                 -> pure t
 
@@ -1967,6 +1978,16 @@ _CharPrimL
       remitter (CharPrimL x) = Just x
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,16,0)
+_BytesPrimL :: Prism' Lit Bytes
+_BytesPrimL
+  = prism' reviewer remitter
+  where
+      reviewer = BytesPrimL
+      remitter (BytesPrimL x) = Just x
+      remitter _ = Nothing
+#endif
+
 _LitP :: Prism' Pat Lit
 _LitP
   = prism' reviewer remitter
@@ -2298,6 +2319,16 @@ _ImplicitParamT
   where
       reviewer (x, y) = ImplicitParamT x y
       remitter (ImplicitParamT x y) = Just (x, y)
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,16,0)
+_ForallVisT :: Prism' Type ([TyVarBndr], Type)
+_ForallVisT
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ForallVisT x y
+      remitter (ForallVisT x y) = Just (x, y)
       remitter _ = Nothing
 #endif
 
