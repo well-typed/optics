@@ -482,9 +482,11 @@ instance HasTypeVars Type where
     t@PromotedT{}      -> pure t
     t@StarT{}          -> pure t
     t@TupleT{}         -> pure t
-    t@UnboxedSumT{}    -> pure t
     t@UnboxedTupleT{}  -> pure t
     t@WildCardT{}      -> pure t
+#if MIN_VERSION_template_haskell(2,12,0)
+    t@UnboxedSumT{}    -> pure t
+#endif
 #if MIN_VERSION_template_haskell(2,15,0)
     AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
                                    <*> traverseOf (typeVarsEx s) f k
