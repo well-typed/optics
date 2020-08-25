@@ -255,7 +255,7 @@ module Language.Haskell.TH.Optics
   , _DoublePrimL
   , _StringPrimL
   , _CharPrimL
-#if MIN_VERSION_template_haskell(2, 16, 0)
+#if MIN_VERSION_template_haskell(2,16,0)
   , _BytesPrimL
 #endif
   -- ** Pat Prisms
