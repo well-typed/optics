@@ -541,6 +541,23 @@ instance SubstType Type where
   substType m (InfixT  t1 n t2)   = InfixT  (substType m t1) n (substType m t2)
   substType m (UInfixT t1 n t2)   = UInfixT (substType m t1) n (substType m t2)
   substType m (ParensT t)         = ParensT (substType m t)
+  substType _ t@ArrowT{}          = t
+  substType _ t@ConT{}            = t
+  substType _ t@ConstraintT{}     = t
+  substType _ t@EqualityT{}       = t
+  substType _ t@ListT{}           = t
+  substType _ t@LitT{}            = t
+  substType _ t@PromotedConsT{}   = t
+  substType _ t@PromotedNilT{}    = t
+  substType _ t@PromotedTupleT{}  = t
+  substType _ t@PromotedT{}       = t
+  substType _ t@StarT{}           = t
+  substType _ t@TupleT{}          = t
+  substType _ t@UnboxedTupleT{}   = t
+  substType _ t@WildCardT{}       = t
+#if MIN_VERSION_template_haskell(2,12,0)
+  substType _ t@UnboxedSumT{}   = t
+#endif
 #if MIN_VERSION_template_haskell(2,15,0)
   substType m (AppKindT t k)       = AppKindT (substType m t) (substType m k)
   substType m (ImplicitParamT n t) = ImplicitParamT n (substType m t)
