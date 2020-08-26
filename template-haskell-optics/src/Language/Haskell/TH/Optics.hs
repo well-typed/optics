@@ -1,5 +1,16 @@
 {-# LANGUAGE CPP              #-}
 {-# LANGUAGE LambdaCase       #-}
+-- |
+-- Module: Language.Haskell.TH.Optics
+-- Description: Optics for types defined in "Language.Haskell.TH".
+--
+-- Note:
+-- The API offered in this module is subject to change, as
+-- it mirrors the API provided by the @template-haskell@ package,
+-- which changes between different releases of GHC. This module
+-- makes an effort to identify the version of @template-haskell@
+-- associated with API differences or extensions.
+--
 module Language.Haskell.TH.Optics
   (
   -- * Traversals
@@ -902,6 +913,11 @@ _PragmaD
       remitter (PragmaD x) = Just x
       remitter _ = Nothing
 
+-- |
+-- @
+-- _TySynInstD :: 'Prism'' 'Dec' 'TySynEqn'         -- template-haskell 2.15+
+-- _TySynInstD :: 'Prism'' 'Dec' ('Name', 'TySynEqn') -- Earlier versions
+-- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _TySynInstD :: Prism' Dec TySynEqn
 _TySynInstD
@@ -928,6 +944,11 @@ _RoleAnnotD
       remitter (RoleAnnotD x y) = Just (x, y)
       remitter _ = Nothing
 
+-- |
+-- @
+-- _StandaloneDerivD :: 'Prism'' 'Dec' ('Maybe' 'DerivStrategy', 'Cxt', 'Type') -- template-haskell 2.12+
+-- _StandaloneDerivD :: 'Prism'' 'Dec' ('Cxt', 'Type')                      -- Earlier versions
+-- @
 #if MIN_VERSION_template_haskell(2,12,0)
 _StandaloneDerivD :: Prism' Dec (Maybe DerivStrategy, Cxt, Type)
 _StandaloneDerivD
@@ -962,6 +983,13 @@ _ClosedTypeFamilyD
       remitter (ClosedTypeFamilyD x y) = Just (x, y)
       remitter _ = Nothing
 
+-- |
+-- @
+-- -- template-haskell-2.12+:
+-- type DataPrism' tys cons = 'Prism'' 'Dec' ('Cxt', 'Name', 'tys', 'Maybe' 'Kind', cons, ['DerivClause'])
+-- -- Earlier versions:
+-- type DataPrism' tys cons = 'Prism'' 'Dec' ('Cxt', 'Name', tys, 'Maybe' 'Kind', cons, 'Cxt')
+-- @
 #if MIN_VERSION_template_haskell(2,12,0)
 type DataPrism' tys cons = Prism' Dec (Cxt, Name, tys, Maybe Kind, cons, [DerivClause])
 #else
@@ -984,6 +1012,13 @@ _NewtypeD
       remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
+-- |
+-- @
+-- -- template-haskell-2.15+:
+-- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause'])
+-- -- Earlier versions:
+-- _DataInstD :: 'DataPrism'' ['Type'] ['Con']
+-- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _DataInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr], Type, Maybe Kind, [Con], [DerivClause])
 _DataInstD
@@ -1002,6 +1037,13 @@ _DataInstD
       remitter _ = Nothing
 #endif
 
+-- |
+-- @
+-- -- template-haskell-2.15+:
+-- _NewtypeInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause'])
+-- -- Earlier versions:
+-- _NewtypeInstD :: 'DataPrism'' ['Type'] 'Con'
+-- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _NewtypeInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr], Type, Maybe Kind, Con, [DerivClause])
 _NewtypeInstD
@@ -1036,6 +1078,11 @@ _OpenTypeFamilyD
       remitter (OpenTypeFamilyD x) = Just x
       remitter _ = Nothing
 
+-- |
+-- @
+-- _PatSynD :: 'Prism'' 'Dec' ('Name', 'PatSynArgs', 'PatSynDir', 'Pat') -- template-haskell-2.12+
+-- _PatSynD :: 'Prism'' 'Dec' ('Name', 'PatSynType')                 -- Earlier versions
+-- @
 #if MIN_VERSION_template_haskell(2,12,0)
 _PatSynD :: Prism' Dec (Name, PatSynArgs, PatSynDir, Pat)
 _PatSynD
@@ -1340,6 +1387,13 @@ _SpecialiseInstP
       remitter (SpecialiseInstP x) = Just x
       remitter _ = Nothing
 
+-- |
+-- @
+-- -- template-haskell 2.15+:
+-- _RuleP :: 'Prism'' 'Pragma' ('String', 'Maybe' ['TyVarBndr'], ['RuleBndr'], 'Exp', 'Exp', 'Phases')
+-- -- Earlier versions:
+-- _RuleP :: 'Prism'' 'Pragma' ('String', ['RuleBndr'], 'Exp', 'Exp', 'Phases') -- Earlier versions
+-- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _RuleP :: Prism' Pragma (String, Maybe [TyVarBndr], [RuleBndr], Exp, Exp, Phases)
 _RuleP
