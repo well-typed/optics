@@ -255,6 +255,9 @@ module Language.Haskell.TH.Optics
   , _DoublePrimL
   , _StringPrimL
   , _CharPrimL
+#if MIN_VERSION_template_haskell(2,16,0)
+  , _BytesPrimL
+#endif
   -- ** Pat Prisms
   , _LitP
   , _VarP
@@ -303,6 +306,9 @@ module Language.Haskell.TH.Optics
 #if MIN_VERSION_template_haskell(2,15,0)
   , _AppKindT
   , _ImplicitParamT
+#endif
+#if MIN_VERSION_template_haskell(2,16,0)
+  , _ForallVisT
 #endif
   -- ** TyVarBndr Prisms
   , _PlainTV
@@ -449,27 +455,48 @@ instance HasTypeVars Name where
 
 instance HasTypeVars Type where
   typeVarsEx s = traversalVL $ \f -> \case
-    VarT n            -> VarT <$> traverseOf (typeVarsEx s) f n
-    AppT l r          -> AppT <$> traverseOf (typeVarsEx s) f l
+    VarT n             -> VarT <$> traverseOf (typeVarsEx s) f n
+    AppT l r           -> AppT <$> traverseOf (typeVarsEx s) f l
                               <*> traverseOf (typeVarsEx s) f r
-    SigT t k          -> SigT <$> traverseOf (typeVarsEx s) f t
-                              <*> traverseOf (typeVarsEx s) f k
-    ForallT bs ctx ty -> let s' = s `Set.union` setOf typeVars bs
-                         in ForallT bs <$> traverseOf (typeVarsEx s') f ctx
-                                       <*> traverseOf (typeVarsEx s') f ty
-    InfixT  t1 n t2   -> InfixT <$> traverseOf (typeVarsEx s) f t1
-                                <*> pure n
-                                <*> traverseOf (typeVarsEx s) f t2
-    UInfixT t1 n t2   -> UInfixT <$> traverseOf (typeVarsEx s) f t1
+    SigT t k           -> SigT <$> traverseOf (typeVarsEx s) f t
+                               <*> traverseOf (typeVarsEx s) f k
+    ForallT bs ctx ty  -> let s' = s `Set.union` setOf typeVars bs
+                          in ForallT bs <$> traverseOf (typeVarsEx s') f ctx
+                                        <*> traverseOf (typeVarsEx s') f ty
+    InfixT  t1 n t2    -> InfixT <$> traverseOf (typeVarsEx s) f t1
                                  <*> pure n
                                  <*> traverseOf (typeVarsEx s) f t2
-    ParensT t         -> ParensT <$> traverseOf (typeVarsEx s) f t
+    UInfixT t1 n t2    -> UInfixT <$> traverseOf (typeVarsEx s) f t1
+                                  <*> pure n
+                                  <*> traverseOf (typeVarsEx s) f t2
+    ParensT t          -> ParensT <$> traverseOf (typeVarsEx s) f t
+    t@ArrowT{}         -> pure t
+    t@ConT{}           -> pure t
+    t@ConstraintT{}    -> pure t
+    t@EqualityT{}      -> pure t
+    t@ListT{}          -> pure t
+    t@LitT{}           -> pure t
+    t@PromotedConsT{}  -> pure t
+    t@PromotedNilT{}   -> pure t
+    t@PromotedTupleT{} -> pure t
+    t@PromotedT{}      -> pure t
+    t@StarT{}          -> pure t
+    t@TupleT{}         -> pure t
+    t@UnboxedTupleT{}  -> pure t
+    t@WildCardT{}      -> pure t
+#if MIN_VERSION_template_haskell(2,12,0)
+    t@UnboxedSumT{}    -> pure t
+#endif
 #if MIN_VERSION_template_haskell(2,15,0)
     AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
                                    <*> traverseOf (typeVarsEx s) f k
     ImplicitParamT n t -> ImplicitParamT n <$> traverseOf (typeVarsEx s) f t
 #endif
-    t                 -> pure t
+#if MIN_VERSION_template_haskell(2,16,0)
+    ForallVisT bs ty -> let s' = s `Set.union` setOf typeVars bs
+                        in ForallVisT bs <$> traverseOf (typeVarsEx s') f ty
+#endif
+
 
 instance HasTypeVars Con where
   typeVarsEx s = traversalVL $ \f -> \case
@@ -515,11 +542,31 @@ instance SubstType Type where
   substType m (InfixT  t1 n t2)   = InfixT  (substType m t1) n (substType m t2)
   substType m (UInfixT t1 n t2)   = UInfixT (substType m t1) n (substType m t2)
   substType m (ParensT t)         = ParensT (substType m t)
+  substType _ t@ArrowT{}          = t
+  substType _ t@ConT{}            = t
+  substType _ t@ConstraintT{}     = t
+  substType _ t@EqualityT{}       = t
+  substType _ t@ListT{}           = t
+  substType _ t@LitT{}            = t
+  substType _ t@PromotedConsT{}   = t
+  substType _ t@PromotedNilT{}    = t
+  substType _ t@PromotedTupleT{}  = t
+  substType _ t@PromotedT{}       = t
+  substType _ t@StarT{}           = t
+  substType _ t@TupleT{}          = t
+  substType _ t@UnboxedTupleT{}   = t
+  substType _ t@WildCardT{}       = t
+#if MIN_VERSION_template_haskell(2,12,0)
+  substType _ t@UnboxedSumT{}   = t
+#endif
 #if MIN_VERSION_template_haskell(2,15,0)
   substType m (AppKindT t k)       = AppKindT (substType m t) (substType m k)
   substType m (ImplicitParamT n t) = ImplicitParamT n (substType m t)
 #endif
-  substType _ t                   = t
+#if MIN_VERSION_template_haskell(2,16,0)
+  substType m (ForallVisT bs ty)   = ForallVisT bs (substType m' ty)
+    where m' = foldrOf typeVars Map.delete m bs
+#endif
 
 instance SubstType t => SubstType [t] where
   substType = map . substType
@@ -1967,6 +2014,16 @@ _CharPrimL
       remitter (CharPrimL x) = Just x
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,16,0)
+_BytesPrimL :: Prism' Lit Bytes
+_BytesPrimL
+  = prism' reviewer remitter
+  where
+      reviewer = BytesPrimL
+      remitter (BytesPrimL x) = Just x
+      remitter _ = Nothing
+#endif
+
 _LitP :: Prism' Pat Lit
 _LitP
   = prism' reviewer remitter
@@ -2298,6 +2355,16 @@ _ImplicitParamT
   where
       reviewer (x, y) = ImplicitParamT x y
       remitter (ImplicitParamT x y) = Just (x, y)
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,16,0)
+_ForallVisT :: Prism' Type ([TyVarBndr], Type)
+_ForallVisT
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ForallVisT x y
+      remitter (ForallVisT x y) = Just (x, y)
       remitter _ = Nothing
 #endif
 
