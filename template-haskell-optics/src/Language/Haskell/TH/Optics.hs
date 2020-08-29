@@ -983,42 +983,18 @@ _ClosedTypeFamilyD
       remitter (ClosedTypeFamilyD x y) = Just (x, y)
       remitter _ = Nothing
 
--- |
--- @
--- -- template-haskell-2.12+:
--- type DataPrism' tys cons = 'Prism'' 'Dec' ('Cxt', 'Name', 'tys', 'Maybe' 'Kind', cons, ['DerivClause'])
--- -- Earlier versions:
--- type DataPrism' tys cons = 'Prism'' 'Dec' ('Cxt', 'Name', tys, 'Maybe' 'Kind', cons, 'Cxt')
--- @
 #if MIN_VERSION_template_haskell(2,12,0)
 type DataPrism' tys cons = Prism' Dec (Cxt, Name, tys, Maybe Kind, cons, [DerivClause])
 #else
 type DataPrism' tys cons = Prism' Dec (Cxt, Name, tys, Maybe Kind, cons, Cxt)
 #endif
 
-_DataD :: DataPrism' [TyVarBndr] [Con]
-_DataD
-  = prism' reviewer remitter
-  where
-      reviewer (x, y, z, w, u, v) = DataD x y z w u v
-      remitter (DataD x y z w u v) = Just (x, y, z, w, u, v)
-      remitter _ = Nothing
-
-_NewtypeD :: DataPrism' [TyVarBndr] Con
-_NewtypeD
-  = prism' reviewer remitter
-  where
-      reviewer (x, y, z, w, u, v) = NewtypeD x y z w u v
-      remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
-      remitter _ = Nothing
-
 -- |
 -- @
--- -- template-haskell-2.15+:
--- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause'])
--- -- Earlier versions:
--- _DataInstD :: 'DataPrism'' ['Type'] ['Con']
--- @
+-- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause']) -- template-haskell-2.15+
+-- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['Type'],            'Maybe' 'Kind', ['Con'], ['DerivClause']) -- template-haskell-2.12 through 2.14
+-- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['Type'],            'Maybe' 'Kind', ['Con'], 'Cxt')           -- Earlier versions
+ -- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _DataInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr], Type, Maybe Kind, [Con], [DerivClause])
 _DataInstD
@@ -1039,10 +1015,9 @@ _DataInstD
 
 -- |
 -- @
--- -- template-haskell-2.15+:
--- _NewtypeInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause'])
--- -- Earlier versions:
--- _NewtypeInstD :: 'DataPrism'' ['Type'] 'Con'
+-- _NewtypeInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndr'], 'Type', 'Maybe' 'Kind', 'Con', ['DerivClause']) -- template-haskell-2.15+
+-- _NewtypeInstD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['Type'],            'Maybe' 'Kind', 'Con', ['DerivClause']) -- template-haskell-2.12 through 2.14
+-- _NewtypeInstD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['Type'],            'Maybe' 'Kind', 'Con', 'Cxt')           -- Earlier versions
 -- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _NewtypeInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr], Type, Maybe Kind, Con, [DerivClause])
@@ -1061,6 +1036,32 @@ _NewtypeInstD
       remitter (NewtypeInstD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 #endif
+
+-- |
+-- @
+-- _DataD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['TyVarBndr'], 'Maybe' 'Kind', ['Con'], ['DerivClause']) -- template-haskell-2.12+
+-- _DataD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['TyVarBndr'], 'Maybe' 'Kind', ['Con'], 'Cxt')           -- Earlier versions
+-- @
+_DataD :: DataPrism' [TyVarBndr] [Con]
+_DataD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u, v) = DataD x y z w u v
+      remitter (DataD x y z w u v) = Just (x, y, z, w, u, v)
+      remitter _ = Nothing
+
+-- |
+-- @
+-- _NewtypeD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['TyVarBndr'], 'Maybe' 'Kind', 'Con', ['DerivClause']) -- template-haskell-2.12+
+-- _NewtypeD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['TyVarBndr'], 'Maybe' 'Kind', 'Con', 'Cxt')           -- Earlier versions
+-- @
+_NewtypeD :: DataPrism' [TyVarBndr] Con
+_NewtypeD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u, v) = NewtypeD x y z w u v
+      remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
+      remitter _ = Nothing
 
 _DataFamilyD :: Prism' Dec (Name, [TyVarBndr], Maybe Kind)
 _DataFamilyD
@@ -1389,10 +1390,8 @@ _SpecialiseInstP
 
 -- |
 -- @
--- -- template-haskell 2.15+:
--- _RuleP :: 'Prism'' 'Pragma' ('String', 'Maybe' ['TyVarBndr'], ['RuleBndr'], 'Exp', 'Exp', 'Phases')
--- -- Earlier versions:
--- _RuleP :: 'Prism'' 'Pragma' ('String', ['RuleBndr'], 'Exp', 'Exp', 'Phases') -- Earlier versions
+-- _RuleP :: 'Prism'' 'Pragma' ('String', 'Maybe' ['TyVarBndr'], ['RuleBndr'], 'Exp', 'Exp', 'Phases') -- template-haskell 2.15+:
+-- _RuleP :: 'Prism'' 'Pragma' ('String', ['RuleBndr'], 'Exp', 'Exp', 'Phases')                    -- Earlier versions
 -- @
 #if MIN_VERSION_template_haskell(2,15,0)
 _RuleP :: Prism' Pragma (String, Maybe [TyVarBndr], [RuleBndr], Exp, Exp, Phases)
