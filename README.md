@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/well-typed/optics.svg?branch=master)](https://travis-ci.org/well-typed/optics)
 [![Hackage](https://img.shields.io/hackage/v/optics.svg)](https://hackage.haskell.org/package/optics)
+[![Dependencies](https://img.shields.io/hackage-deps/v/optics.svg)](https://packdeps.haskellers.com/feed?needle=optics@well-typed.com)
+[![Stackage LTS](https://www.stackage.org/package/optics/badge/lts)](https://www.stackage.org/lts/package/optics)
+[![Stackage Nightly](https://www.stackage.org/package/optics/badge/nightly)](https://www.stackage.org/nightly/package/optics)
 
 The [`optics`](https://hackage.haskell.org/package/optics) family of Haskell
 packages make it possible to define and use Lenses, Traversals, Prisms and other
@@ -52,6 +55,10 @@ Edward Kmett and contributors.
    dependency on `profunctors`.  Note that `optics-core` already supports
    conversion for van Laarhoven lenses and various other optics.
 
+ * [`template-haskell-optics`](http://hackage.haskell.org/package/template-haskell-optics):
+   optics for working with types in the `template-haskell` package (see
+   `optics-th` for *using* `TemplateHaskell` to construct optics).
+
 ### Work in progress packages
 
 These packages have not (yet) been officially released. If you find them
@@ -59,10 +66,6 @@ useful, we would welcome offers to maintain these packages.
 
  * `optics-sop`: generic construction of optics using the `generics-sop`
    package, and optics for `generics-sop` types.
-
- * `template-haskell-optics`: optics for working with types in the
-   `template-haskell` package (see `optics-th` for *using* `TemplateHaskell` to
-   construct optics).
 
 ### Internal packages
 
