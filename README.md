@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/well-typed/optics.svg?branch=master)](https://travis-ci.org/well-typed/optics)
 [![Hackage](https://img.shields.io/hackage/v/optics.svg)](https://hackage.haskell.org/package/optics)
+[![Dependencies](https://img.shields.io/hackage-deps/v/optics.svg)](https://packdeps.haskellers.com/feed?needle=optics@well-typed.com)
+[![Stackage LTS](https://www.stackage.org/package/optics/badge/lts)](https://www.stackage.org/lts/package/optics)
+[![Stackage Nightly](https://www.stackage.org/package/optics/badge/nightly)](https://www.stackage.org/nightly/package/optics)
 
 The [`optics`](https://hackage.haskell.org/package/optics) family of Haskell
 packages make it possible to define and use Lenses, Traversals, Prisms and other
