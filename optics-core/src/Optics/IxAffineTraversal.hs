@@ -43,7 +43,7 @@ module Optics.IxAffineTraversal
   , IxAffineTraversalVL
   , IxAffineTraversalVL'
   , iatraversalVL
-  , iatraverseOf
+--  , iatraverseOf
   ) where
 
 import Data.Profunctor.Indexed
@@ -87,6 +87,7 @@ iatraversalVL :: IxAffineTraversalVL i s t a b -> IxAffineTraversal i s t a b
 iatraversalVL f = Optic (ivisit f)
 {-# INLINE iatraversalVL #-}
 
+{-
 -- | Traverse over the target of an 'IxAffineTraversal' and compute a
 -- 'Functor'-based answer.
 --
@@ -98,6 +99,7 @@ iatraverseOf
 iatraverseOf o point = \f ->
   runIxStarA (getOptic (castOptic @An_AffineTraversal o) (IxStarA point f)) id
 {-# INLINE iatraverseOf #-}
+-}
 
 -- | Obtain a potentially empty 'IxAffineTraversal' by taking the element from
 -- another 'AffineFold' and using it as an index.

@@ -1,5 +1,9 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
@@ -56,11 +60,17 @@ module Data.Profunctor.Indexed
    -- * Utilities
   , (#.)
   , (.#)
+  , Coercible1
+  , Coercible2
+  , Coercible3
+  , lcoerce'
+  , rcoerce'
   ) where
 
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
 import Data.Functor.Identity
+import Data.Kind (Constraint)
 
 ----------------------------------------
 -- Concrete profunctors
@@ -129,26 +139,14 @@ reFunArrow (FunArrow k) = FunArrow k
 ----------------------------------------
 -- Classes and instances
 
-class Profunctor p where
+type Coercible1 f = (forall x y . Coercible x y => Coercible (f x) (f y)) :: Constraint
+type Coercible2 f = (forall a a' b b' . (Coercible a a', Coercible b b') => Coercible (f a b) (f a' b')) :: Constraint
+type Coercible3 f = (forall a a' b b' c c' . (Coercible a a', Coercible b b', Coercible c c') => Coercible (f a b c) (f a' b' c')) :: Constraint
+
+class Coercible3 p => Profunctor p where
   dimap :: (a -> b) -> (c -> d) -> p i b c -> p i a d
   lmap  :: (a -> b)             -> p i b c -> p i a c
   rmap  ::             (c -> d) -> p i b c -> p i b d
-
-  lcoerce' :: Coercible a b => p i a c -> p i b c
-  default lcoerce'
-    :: Coercible (p i a c) (p i b c)
-    => p i a c
-    -> p i b c
-  lcoerce' = coerce
-  {-# INLINE lcoerce' #-}
-
-  rcoerce' :: Coercible a b => p i c a -> p i c b
-  default rcoerce'
-    :: Coercible (p i c a) (p i c b)
-    => p i c a
-    -> p i c b
-  rcoerce' = coerce
-  {-# INLINE rcoerce' #-}
 
   conjoined__
     :: (p i a b -> p i s t)
@@ -181,7 +179,15 @@ lcoerce :: (Coercible a b, Profunctor p) => p i a c -> p i b c
 lcoerce = lcoerce'
 {-# INLINE lcoerce #-}
 
-instance Functor f => Profunctor (StarA f) where
+lcoerce' :: (Profunctor p, Coercible a b) => p i a c -> p i b c
+lcoerce' = coerce
+
+rcoerce' :: (Profunctor p, Coercible a b) => p i c a -> p i c b
+rcoerce' = coerce
+
+
+{-
+instance (Functor f, Coercible1 f) => Profunctor (StarA f) where
   dimap f g (StarA point k) = StarA point (fmap g . k . f)
   lmap  f   (StarA point k) = StarA point (k . f)
   rmap    g (StarA point k) = StarA point (fmap g . k)
@@ -191,17 +197,15 @@ instance Functor f => Profunctor (StarA f) where
 
   rcoerce' = rmap coerce
   {-# INLINE rcoerce' #-}
+-}
 
-instance Functor f => Profunctor (Star f) where
+instance (Functor f, Coercible1 f) => Profunctor (Star f) where
   dimap f g (Star k) = Star (fmap g . k . f)
   lmap  f   (Star k) = Star (k . f)
   rmap    g (Star k) = Star (fmap g . k)
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
-
-  rcoerce' = rmap coerce
-  {-# INLINE rcoerce' #-}
 
 instance Profunctor (Forget r) where
   dimap f _ (Forget k) = Forget (k . f)
@@ -227,7 +231,8 @@ instance Profunctor FunArrow where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
-instance Functor f => Profunctor (IxStarA f) where
+{-
+instance (Functor f, Coercible1 f) => Profunctor (IxStarA f) where
   dimap f g (IxStarA point k) = IxStarA point (\i -> fmap g . k i . f)
   lmap  f   (IxStarA point k) = IxStarA point (\i -> k i . f)
   rmap    g (IxStarA point k) = IxStarA point (\i -> fmap g . k i)
@@ -242,17 +247,15 @@ instance Functor f => Profunctor (IxStarA f) where
   ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
   {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
+-}
 
-instance Functor f => Profunctor (IxStar f) where
+instance (Functor f, Coercible1 f) => Profunctor (IxStar f) where
   dimap f g (IxStar k) = IxStar (\i -> fmap g . k i . f)
   lmap  f   (IxStar k) = IxStar (\i -> k i . f)
   rmap    g (IxStar k) = IxStar (\i -> fmap g . k i)
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
-
-  rcoerce' = rmap coerce
-  {-# INLINE rcoerce' #-}
 
   conjoined__ _ f = f
   ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
@@ -306,7 +309,7 @@ class Profunctor p => Strong p where
 
   -- There are a few places where default implementation is good enough.
   linear
-    :: (forall f. Functor f => (a -> f b) -> s -> f t)
+    :: (forall f. (Functor f, Coercible1 f) => (a -> f b) -> s -> f t)
     -> p i a b
     -> p i s t
   linear f = dimap
@@ -317,18 +320,22 @@ class Profunctor p => Strong p where
 
   -- There are a few places where default implementation is good enough.
   ilinear
-    :: (forall f. Functor f => (i -> a -> f b) -> s -> f t)
+    :: (forall f. (Functor f, Coercible1 f) => (i -> a -> f b) -> s -> f t)
     -> p       j  a b
     -> p (i -> j) s t
+{-
   default ilinear
     :: Coercible (p j s t) (p (i -> j) s t)
-    => (forall f. Functor f => (i -> a -> f b) -> s -> f t)
+    => (forall f. (Functor f, Coercible1 f) => (i -> a -> f b) -> s -> f t)
     -> p       j  a b
     -> p (i -> j) s t
   ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
   {-# INLINE ilinear #-}
+-}
 
-instance Functor f => Strong (StarA f) where
+
+{-
+instance (Functor f, Coercible1 f) => Strong (StarA f) where
   first'  (StarA point k) = StarA point $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
   second' (StarA point k) = StarA point $ \ ~(c, a) -> (,) c <$> k a
   {-# INLINE first' #-}
@@ -336,8 +343,9 @@ instance Functor f => Strong (StarA f) where
 
   linear f (StarA point k) = StarA point (f k)
   {-# INLINE linear #-}
+-}
 
-instance Functor f => Strong (Star f) where
+instance (Functor f, Coercible1 f) => Strong (Star f) where
   first'  (Star k) = Star $ \ ~(a, c) -> (\b' -> (b', c)) <$> k a
   second' (Star k) = Star $ \ ~(c, a) -> (,) c <$> k a
   {-# INLINE first' #-}
@@ -345,6 +353,7 @@ instance Functor f => Strong (Star f) where
 
   linear f (Star k) = Star (f k)
   {-# INLINE linear #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
 instance Strong (Forget r) where
   first'  (Forget k) = Forget (k . fst)
@@ -354,6 +363,7 @@ instance Strong (Forget r) where
 
   linear f (Forget k) = Forget (getConst #. f (Const #. k))
   {-# INLINE linear #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
 instance Strong (ForgetM r) where
   first'  (ForgetM k) = ForgetM (k . fst)
@@ -363,6 +373,7 @@ instance Strong (ForgetM r) where
 
   linear f (ForgetM k) = ForgetM (getConst #. f (Const #. k))
   {-# INLINE linear #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
 instance Strong FunArrow where
   first'  (FunArrow k) = FunArrow $ \ ~(a, c) -> (k a, c)
@@ -372,8 +383,10 @@ instance Strong FunArrow where
 
   linear f (FunArrow k) = FunArrow $ runIdentity #. f (Identity #. k)
   {-# INLINE linear #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
-instance Functor f => Strong (IxStarA f) where
+{-
+instance (Functor f, Coercible1 f) => Strong (IxStarA f) where
   first'  (IxStarA point k) = IxStarA point $ \i ~(a, c) -> (\b' -> (b', c)) <$> k i a
   second' (IxStarA point k) = IxStarA point $ \i ~(c, a) -> (,) c <$> k i a
   {-# INLINE first' #-}
@@ -383,8 +396,9 @@ instance Functor f => Strong (IxStarA f) where
   ilinear f (IxStarA point k) = IxStarA point $ \ij -> f $ \i -> k (ij i)
   {-# INLINE linear #-}
   {-# INLINE ilinear #-}
+-}
 
-instance Functor f => Strong (IxStar f) where
+instance (Functor f, Coercible1 f) => Strong (IxStar f) where
   first'  (IxStar k) = IxStar $ \i ~(a, c) -> (\b' -> (b', c)) <$> k i a
   second' (IxStar k) = IxStar $ \i ~(c, a) -> (,) c <$> k i a
   {-# INLINE first' #-}
@@ -442,13 +456,15 @@ class Profunctor p => Choice p where
   left'  :: p i a b -> p i (Either a c) (Either b c)
   right' :: p i a b -> p i (Either c a) (Either c b)
 
-instance Functor f => Choice (StarA f) where
+{-
+instance (Functor f, Coercible1 f) => Choice (StarA f) where
   left'  (StarA point k) = StarA point $ either (fmap Left . k) (point . Right)
   right' (StarA point k) = StarA point $ either (point . Left) (fmap Right . k)
   {-# INLINE left' #-}
   {-# INLINE right' #-}
+-}
 
-instance Applicative f => Choice (Star f) where
+instance (Applicative f, Coercible1 f) => Choice (Star f) where
   left'  (Star k) = Star $ either (fmap Left . k) (pure . Right)
   right' (Star k) = Star $ either (pure . Left) (fmap Right . k)
   {-# INLINE left' #-}
@@ -472,15 +488,17 @@ instance Choice FunArrow where
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
-instance Functor f => Choice (IxStarA f) where
+{-
+instance (Functor f, Coercible1 f) => Choice (IxStarA f) where
   left'  (IxStarA point k) =
     IxStarA point $ \i -> either (fmap Left . k i) (point . Right)
   right' (IxStarA point k) =
     IxStarA point $ \i -> either (point . Left) (fmap Right . k i)
   {-# INLINE left' #-}
   {-# INLINE right' #-}
+-}
 
-instance Applicative f => Choice (IxStar f) where
+instance (Applicative f, Coercible1 f) => Choice (IxStar f) where
   left'  (IxStar k) = IxStar $ \i -> either (fmap Left . k i) (pure . Right)
   right' (IxStar k) = IxStar $ \i -> either (pure . Left) (fmap Right . k i)
   {-# INLINE left' #-}
@@ -557,6 +575,7 @@ class (Choice p, Strong p) => Visiting p where
     :: (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t)
     -> p       j  a b
     -> p (i -> j) s t
+    {-
   default ivisit
     :: Coercible (p j s t) (p (i -> j) s t)
     => (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f b) -> s -> f t)
@@ -564,15 +583,18 @@ class (Choice p, Strong p) => Visiting p where
     -> p (i -> j) s t
   ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
   {-# INLINE ivisit #-}
+-}
 
 
-instance Functor f => Visiting (StarA f) where
+{-
+instance (Functor f, Coercible1 f) => Visiting (StarA f) where
   visit  f (StarA point k) = StarA point $ f point k
   ivisit f (StarA point k) = StarA point $ f point (\_ -> k)
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
+-}
 
-instance Applicative f => Visiting (Star f) where
+instance (Applicative f, Coercible1 f) => Visiting (Star f) where
   visit  f (Star k) = Star $ f pure k
   ivisit f (Star k) = Star $ f pure (\_ -> k)
   {-# INLINE visit #-}
@@ -598,13 +620,15 @@ instance Visiting FunArrow where
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
 
-instance Functor f => Visiting (IxStarA f) where
+{-
+instance (Functor f, Coercible1 f) => Visiting (IxStarA f) where
   visit  f (IxStarA point k) = IxStarA point $ \i  -> f point (k i)
   ivisit f (IxStarA point k) = IxStarA point $ \ij -> f point $ \i -> k (ij i)
   {-# INLINE visit #-}
   {-# INLINE ivisit #-}
+-}
 
-instance Applicative f => Visiting (IxStar f) where
+instance (Applicative f, Coercible1 f) => Visiting (IxStar f) where
   visit  f (IxStar k) = IxStar $ \i  -> f pure (k i)
   ivisit f (IxStar k) = IxStar $ \ij -> f pure $ \i -> k (ij i)
   {-# INLINE visit #-}
@@ -638,15 +662,15 @@ instance Visiting IxFunArrow where
 
 class Visiting p => Traversing p where
   wander
-    :: (forall f. Applicative f => (a -> f b) -> s -> f t)
+    :: (forall f. (Applicative f, Coercible1 f) => (a -> f b) -> s -> f t)
     -> p i a b
     -> p i s t
   iwander
-    :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
+    :: (forall f. (Applicative f, Coercible1 f) => (i -> a -> f b) -> s -> f t)
     -> p       j  a b
     -> p (i -> j) s t
 
-instance Applicative f => Traversing (Star f) where
+instance (Applicative f, Coercible1 f) => Traversing (Star f) where
   wander  f (Star k) = Star $ f k
   iwander f (Star k) = Star $ f (\_ -> k)
   {-# INLINE wander #-}
@@ -664,7 +688,7 @@ instance Traversing FunArrow where
   {-# INLINE wander #-}
   {-# INLINE iwander #-}
 
-instance Applicative f => Traversing (IxStar f) where
+instance (Applicative f, Coercible1 f) => Traversing (IxStar f) where
   wander  f (IxStar k) = IxStar $ \i -> f (k i)
   iwander f (IxStar k) = IxStar $ \ij -> f $ \i -> k (ij i)
   {-# INLINE wander #-}
@@ -739,6 +763,7 @@ instance Strong (Store a b) where
   second' (Store get set) = Store (get . snd) (\(c, s) b -> (c, set s b))
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
 -- | Type to represent the components of a prism.
 data Market a b i s t = Market (b -> t) (s -> Either t a)
@@ -809,11 +834,13 @@ instance Strong (AffineMarket a b) where
     (\(c, a) -> bimap (c,) id (seta a))
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
 bimap :: (a -> b) -> (c -> d) -> Either a c -> Either b d
 bimap f g = either (Left . f) (Right . g)
 
-instance Visiting (AffineMarket a b)
+instance Visiting (AffineMarket a b) where
+  ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
 
 
 -- | Tag a value with not one but two phantom type parameters (so that 'Tagged'

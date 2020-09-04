@@ -198,9 +198,11 @@ instance IxOptic A_Lens s t a b where
   noIx o = lensVL (toLensVL o)
   {-# INLINE noIx #-}
 
+{-
 instance IxOptic An_AffineTraversal s t a b where
   noIx o = atraversalVL (atraverseOf o)
   {-# INLINE noIx #-}
+-}
 
 instance (s ~ t, a ~ b) => IxOptic An_AffineFold s t a b where
   noIx o = afolding (preview o)

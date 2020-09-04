@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 -- |
 -- Module: Optics.AffineTraversal
 -- Description: A 'Optics.Traversal.Traversal' that applies to at most one element.
@@ -56,7 +57,7 @@ module Optics.AffineTraversal
   , AffineTraversalVL
   , AffineTraversalVL'
   , atraversalVL
-  , atraverseOf
+  -- , atraverseOf
   )
   where
 
@@ -148,11 +149,11 @@ atraversalVL f = Optic (visit f)
 --
 -- @since 0.3
 atraverseOf
-  :: (Is k An_AffineTraversal, Functor f)
+  :: (Is k An_AffineTraversal, Functor f, Coercible1 f)
   => Optic k is s t a b
   -> (forall r. r -> f r) -> (a -> f b) -> s -> f t
 atraverseOf o point =
-  runStarA . getOptic (castOptic @An_AffineTraversal o) . StarA point
+  runStar . getOptic (castOptic @An_AffineTraversal o) . Star
 {-# INLINE atraverseOf #-}
 
 -- | Retrieve the value targeted by an 'AffineTraversal' or return the original

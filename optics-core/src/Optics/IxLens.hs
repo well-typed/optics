@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 -- |
 -- Module: Optics.IxLens
 -- Description: An indexed version of a 'Optics.Lens.Lens'.
@@ -59,7 +60,7 @@ type IxLens' i s a = Optic' A_Lens (WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed lens.
 type IxLensVL i s t a b =
-  forall f. Functor f => (i -> a -> f b) -> s -> f t
+  forall f. (Functor f, Coercible1 f) => (i -> a -> f b) -> s -> f t
 
 -- | Type synonym for a type-preserving van Laarhoven indexed lens.
 type IxLensVL' i s a = IxLensVL i s s a a

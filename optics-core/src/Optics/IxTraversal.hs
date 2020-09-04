@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 -- |
 -- Module: Optics.IxTraversal
 -- Description: An indexed version of a 'Optics.Traversal.Traversal'.
@@ -40,10 +41,10 @@ module Optics.IxTraversal
   -- | See also 'Optics.Each.Core.each', which is an 'IxTraversal' over each element of a (potentially monomorphic) container.
   , itraversed
   , ignored
-  , elementsOf
-  , elements
-  , elementOf
-  , element
+--  , elementsOf
+--  , elements
+--  , elementOf
+--  , element
 
   -- * Additional elimination forms
   , iforOf
@@ -51,8 +52,8 @@ module Optics.IxTraversal
   , imapAccumROf
   , iscanl1Of
   , iscanr1Of
-  , ifailover
-  , ifailover'
+--  , ifailover
+--  , ifailover'
 
   -- * Combinators
   , indices
@@ -117,7 +118,7 @@ type IxTraversal' i s a = Optic' A_Traversal (WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed traversal.
 type IxTraversalVL i s t a b =
-  forall f. Applicative f => (i -> a -> f b) -> s -> f t
+  forall f. (Applicative f, Coercible1 f) => (i -> a -> f b) -> s -> f t
 
 -- | Type synonym for a type-preserving van Laarhoven indexed traversal.
 type IxTraversalVL' i s a = IxTraversalVL i s s a a
@@ -139,7 +140,7 @@ itraversalVL t = Optic (iwander t)
 --
 -- This yields the van Laarhoven representation of an indexed traversal.
 itraverseOf
-  :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
+  :: (Is k A_Traversal, Applicative f, Coercible1 f, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> f b) -> s -> f t
 itraverseOf o = \f ->
@@ -148,7 +149,7 @@ itraverseOf o = \f ->
 
 -- | A version of 'itraverseOf' with the arguments flipped.
 iforOf
-  :: (Is k A_Traversal, Applicative f, is `HasSingleIndex` i)
+  :: (Is k A_Traversal, Applicative f, Coercible1 f, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> s -> (i -> a -> f b) -> f t
 iforOf = flip . itraverseOf
@@ -208,6 +209,7 @@ iscanr1Of o f = fst . imapAccumROf o step Nothing
       Just s  -> let r = f i a s in (r, Just r)
 {-# INLINE iscanr1Of #-}
 
+{-
 -- | Try to map a function which uses the index over this 'IxTraversal',
 -- returning 'Nothing' if the 'IxTraversal' has no targets.
 ifailover
@@ -232,6 +234,7 @@ ifailover' o = \f s ->
      then Just (unwrapIdentity' t)
      else Nothing
 {-# INLINE ifailover' #-}
+-}
 
 ----------------------------------------
 -- Traversals
@@ -279,6 +282,7 @@ ibackwards o = conjoined (backwards o) $ itraversalVL $ \f ->
   forwards #. itraverseOf o (\i -> Backwards #. f i)
 {-# INLINE ibackwards #-}
 
+{-
 -- | Traverse selected elements of a 'Traversal' where their ordinal positions
 -- match a predicate.
 elementsOf
@@ -317,6 +321,8 @@ elementOf o = \i -> isingular $ elementsOf o (== i)
 element :: Traversable f => Int -> IxAffineTraversal' Int (f a) a
 element = elementOf traversed
 {-# INLINE element #-}
+-}
+
 
 -- | An indexed version of 'partsOf' that receives the entire list of indices as
 -- its indices.

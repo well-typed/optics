@@ -1,3 +1,5 @@
+{-# LANGUAGE QuantifiedConstraints #-}
+
 -- |
 -- Module: Optics.Arrow
 -- Description: Turn optics into arrow transformers.
@@ -38,7 +40,7 @@ instance Arrow p => Arrow (WrappedArrow p i) where
   {-# INLINE (***) #-}
   {-# INLINE (&&&) #-}
 
-instance Arrow p => Profunctor (WrappedArrow p) where
+instance (Arrow p, Coercible2 p) => Profunctor (WrappedArrow p) where
   dimap f g k = arr f >>> k >>> arr g
   lmap  f   k = arr f >>> k
   rmap    g k =           k >>> arr g
@@ -46,42 +48,39 @@ instance Arrow p => Profunctor (WrappedArrow p) where
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
 
-  lcoerce' = lmap coerce
-  rcoerce' = rmap coerce
-  {-# INLINE lcoerce' #-}
-  {-# INLINE rcoerce' #-}
-
-instance Arrow p => Strong (WrappedArrow p) where
+instance (Arrow p, Coercible2 p) => Strong (WrappedArrow p) where
   first'  (WrapArrow k) = WrapArrow (first k)
   second' (WrapArrow k) = WrapArrow (second k)
   {-# INLINE first' #-}
   {-# INLINE second' #-}
+  ilinear f = coerce . linear (\afb -> f $ \_ -> afb)
 
-instance ArrowChoice p => Choice (WrappedArrow p) where
+instance (ArrowChoice p, Coercible2 p) => Choice (WrappedArrow p) where
   left'  (WrapArrow k) = WrapArrow (left k)
   right' (WrapArrow k) = WrapArrow (right k)
   {-# INLINE left' #-}
   {-# INLINE right' #-}
 
-instance ArrowChoice p => Visiting (WrappedArrow p)
+instance (ArrowChoice p, Coercible2 p) => Visiting (WrappedArrow p) where
+  ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
 
 class Arrow arr => ArrowOptic k arr where
   -- | Turn an optic into an arrow transformer.
   overA :: Optic k is s t a b -> arr a b -> arr s t
 
-instance Arrow arr => ArrowOptic An_Iso arr where
+instance (Arrow arr, Coercible2 arr) => ArrowOptic An_Iso arr where
   overA = overA__
   {-# INLINE overA #-}
 
-instance Arrow arr => ArrowOptic A_Lens arr where
+instance (Arrow arr, Coercible2 arr) => ArrowOptic A_Lens arr where
   overA = overA__
   {-# INLINE overA #-}
 
-instance ArrowChoice arr => ArrowOptic A_Prism arr where
+instance (ArrowChoice arr, Coercible2 arr) => ArrowOptic A_Prism arr where
   overA = overA__
   {-# INLINE overA #-}
 
-instance ArrowChoice arr => ArrowOptic An_AffineTraversal arr where
+instance (ArrowChoice arr, Coercible2 arr) => ArrowOptic An_AffineTraversal arr where
   overA = overA__
   {-# INLINE overA #-}
 

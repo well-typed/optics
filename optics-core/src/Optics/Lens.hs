@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 -- |
 -- Module: Optics.Lens
 -- Description: A generalised or first-class field.
@@ -126,7 +127,7 @@ type Lens s t a b = Optic A_Lens NoIx s t a b
 type Lens' s a = Optic' A_Lens NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven lens.
-type LensVL s t a b = forall f. Functor f => (a -> f b) -> s -> f t
+type LensVL s t a b = forall f. (Functor f, Coercible1 f) => (a -> f b) -> s -> f t
 
 -- | Type synonym for a type-preserving van Laarhoven lens.
 type LensVL' s a = LensVL s s a a

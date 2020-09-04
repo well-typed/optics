@@ -1,3 +1,5 @@
+{-# LANGUAGE QuantifiedConstraints #-}
+
 -- |
 -- Module: Optics.Traversal
 -- Description: Lifts an effectful operation on elements to act on structures.
@@ -55,8 +57,8 @@ module Optics.Traversal
   , mapAccumLOf
   , scanr1Of
   , scanl1Of
-  , failover
-  , failover'
+--  , failover
+--  , failover'
 
     -- * Combinators
   , backwards
@@ -114,7 +116,7 @@ type Traversal s t a b = Optic A_Traversal NoIx s t a b
 type Traversal' s a = Optic' A_Traversal NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven traversal.
-type TraversalVL s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
+type TraversalVL s t a b = forall f. (Applicative f, Coercible1 f) => (a -> f b) -> s -> f t
 
 -- | Type synonym for a type-preserving van Laarhoven traversal.
 type TraversalVL' s a = TraversalVL s s a a
@@ -132,7 +134,7 @@ traversalVL t = Optic (wander t)
 -- | Map each element of a structure targeted by a 'Traversal', evaluate these
 -- actions from left to right, and collect the results.
 traverseOf
-  :: (Is k A_Traversal, Applicative f)
+  :: (Is k A_Traversal, Applicative f, Coercible1 f)
   => Optic k is s t a b
   -> (a -> f b) -> s -> f t
 traverseOf o = \f -> runStar $ getOptic (castOptic @A_Traversal o) (Star f)
@@ -140,7 +142,7 @@ traverseOf o = \f -> runStar $ getOptic (castOptic @A_Traversal o) (Star f)
 
 -- | A version of 'traverseOf' with the arguments flipped.
 forOf
-  :: (Is k A_Traversal, Applicative f)
+  :: (Is k A_Traversal, Applicative f, Coercible1 f)
   => Optic k is s t a b
   -> s -> (a -> f b) -> f t
 forOf = flip . traverseOf
@@ -157,7 +159,7 @@ forOf = flip . traverseOf
 -- 'sequenceOf' o ≡ 'traverseOf' o 'id'
 -- @
 sequenceOf
-  :: (Is k A_Traversal, Applicative f)
+  :: (Is k A_Traversal, Applicative f, Coercible1 f)
   => Optic k is s t (f b) b
   -> s -> f t
 sequenceOf o = traverseOf o id
@@ -242,6 +244,7 @@ scanr1Of o = \f ->
   in fst . mapAccumROf o step Nothing
 {-# INLINE scanr1Of #-}
 
+{-
 -- | Try to map a function over this 'Traversal', returning Nothing if the
 -- traversal has no targets.
 --
@@ -276,6 +279,7 @@ failover' o = \f s ->
      then Just (unwrapIdentity' t)
      else Nothing
 {-# INLINE failover' #-}
+-}
 
 ----------------------------------------
 -- Traversals

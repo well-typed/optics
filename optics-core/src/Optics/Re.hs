@@ -1,3 +1,4 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 -- |
 -- Module: Optics.Re
 -- Description: The 're' operator allows some optics to be reversed.
@@ -108,18 +109,15 @@ re__ o = unRe (getOptic o (Re id))
 -- | Helper for reversing optics.
 newtype Re p s t i a b = Re { unRe :: p i b a -> p i t s }
 
-instance Profunctor p => Profunctor (Re p s t) where
+instance (Profunctor p
+         , forall i x y a . Coercible x y => Coercible (p i x a) (p i y a)
+         ) => Profunctor (Re p s t) where
   dimap f g (Re p) = Re (p . dimap g f)
   lmap  f   (Re p) = Re (p . rmap f)
   rmap    g (Re p) = Re (p . lmap g)
   {-# INLINE dimap #-}
   {-# INLINE lmap #-}
   {-# INLINE rmap #-}
-
-  lcoerce' = lmap coerce
-  rcoerce' = rmap coerce
-  {-# INLINE lcoerce' #-}
-  {-# INLINE rcoerce' #-}
 
   conjoined__ = error "conjoined__(Re) shouldn't be reachable"
   ixcontramap = error "ixcontramap(Re) shouldn't be reachable"
