@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeInType #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | This module is intended for internal use only, and may change without
@@ -8,6 +9,7 @@
 module Optics.Internal.Optic.TypeLevel where
 
 import Data.Kind (Type)
+import Data.Type.Equality
 import GHC.TypeLits
 
 -- | A list of index types, used for indexed optics.
@@ -85,6 +87,28 @@ type family Append (xs :: [k]) (ys :: [k]) :: [k] where
   Append '[]       ys  = ys -- needed for (<%>) and (%>)
   Append xs        '[] = xs -- needed for (<%)
   Append (x ': xs) ys  = x ': Append xs ys
+
+-- | In pseudo (dependent-)Haskell, provide a witness
+--
+-- @
+-- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
+--    where f = (->)
+-- @
+class Append xs ys ~ zs => AppendIndices xs ys zs | xs ys -> zs where
+  appendIndices :: proxy i -> Curry xs (Curry ys i) :~: Curry zs i
+
+-- | If we know the second list is empty, we can pick the first list without
+-- knowing anything about it, hence the instance is marked as INCOHERENT.
+instance {-# INCOHERENT #-} xs ~ zs => AppendIndices xs '[] zs where
+  appendIndices _ = Refl
+
+instance ys ~ zs => AppendIndices '[] ys zs where
+  appendIndices _ = Refl
+
+instance
+  (Append (x ': xs) ys ~ (x ': zs), AppendIndices xs ys zs
+  ) => AppendIndices (x ': xs) ys (x ': zs) where
+  appendIndices i | Refl <- appendIndices @xs @ys @zs i = Refl
 
 -- | Class that is inhabited by all type-level lists @xs@, providing the ability
 -- to compose a function under @'Curry' xs@.
