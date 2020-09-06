@@ -82,6 +82,7 @@ makeClassyPrisms = makePrisms' False
 
 makePrismLabels :: Name -> DecsQ
 makePrismLabels typeName = do
+  requireExtensionsForLabels
   info <- D.reifyDatatype typeName
   let cons = map (normalizeCon info) $ D.datatypeCons info
   catMaybes <$> traverse (makeLabel info cons) cons
