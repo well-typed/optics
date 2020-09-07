@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Optics.Tests.Misc (miscTests) where
@@ -35,6 +36,8 @@ miscTests = testGroup "Miscellaneous"
     -- GHC <= 8.4 doesn't optimize away profunctor classes
   , testCase "optimized iadjoin" $
     ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
+  , testCase "optimized appendIndices" $
+    assertSuccess $ $(inspectTest $ hasNoAppendIndices 'checkNoAppendProof)
   ]
 
 simpleMapIx
@@ -83,3 +86,18 @@ checkAdjoin = over (_1 % _Just `adjoin` _2 % chosen `adjoin` _3 % traversed)
 
 checkIxAdjoin :: (Int -> a -> a) -> ((Int, a), [a], (Int, Maybe a)) -> ((Int, a), [a], (Int, Maybe a))
 checkIxAdjoin = iover (_1 % itraversed `iadjoin` _2 % itraversed `iadjoin` _3 % itraversed % _Just)
+
+checkNoAppendProof
+  :: ( TraversableWithIndex i1 f1, TraversableWithIndex i2 f2
+     , TraversableWithIndex i3 f3, TraversableWithIndex i4 f4
+     , TraversableWithIndex i5 f5, TraversableWithIndex i6 f6
+     , TraversableWithIndex i7 f7, TraversableWithIndex i8 f8
+     ) => Optic A_Traversal
+                '[i1, i2, i3, i4, i5, i6, i7, i8]
+                (f1 (f2 (f3 (f4 (f5 (f6 (f7 (f8 a))))))))
+                (f1 (f2 (f3 (f4 (f5 (f6 (f7 (f8 b))))))))
+                a
+                b
+checkNoAppendProof
+  = (((itraversed % itraversed) % itraversed) % itraversed)
+  % (itraversed % (itraversed % (itraversed % itraversed)))

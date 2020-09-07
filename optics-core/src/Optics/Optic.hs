@@ -61,12 +61,12 @@ module Optics.Optic
   , NoIx
   , WithIx
   , Append
-  , AppendIndices
+  , AppendIndices(..)
   , NonEmptyIndices
   , HasSingleIndex
   , AcceptsEmptyIndices
   , Curry
-  , CurryCompose
+  , CurryCompose(..)
 
     -- * Base re-exports
   , (&)

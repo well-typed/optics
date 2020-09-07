@@ -6,6 +6,7 @@ import Language.Haskell.TH (Name)
 import Test.Tasty.HUnit
 import Test.Inspection
 
+import Optics.Optic
 import qualified Data.Profunctor.Indexed as P
 
 hasNoProfunctors :: Name -> Obligation
@@ -33,7 +34,12 @@ hasNoProfunctors name = mkObligation name $ NoUseOf
   , 'P.iwander
   , 'P.roam
   , 'P.iroam
+  , 'appendIndices
+  , 'composeN
   ]
+
+hasNoAppendIndices :: Name -> Obligation
+hasNoAppendIndices name = mkObligation name $ NoUseOf ['appendIndices]
 
 assertSuccess :: Result -> IO ()
 assertSuccess (Success _)   = return ()

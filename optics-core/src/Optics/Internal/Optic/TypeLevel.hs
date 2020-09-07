@@ -94,21 +94,21 @@ type family Append (xs :: [k]) (ys :: [k]) :: [k] where
 -- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
 --    where f = (->)
 -- @
-class Append xs ys ~ zs => AppendIndices xs ys zs | xs ys -> zs where
-  appendIndices :: proxy i -> Curry xs (Curry ys i) :~: Curry zs i
+class AppendIndices xs ys where
+  appendIndices :: proxy i -> Curry xs (Curry ys i) :~: Curry (Append xs ys) i
 
 -- | If we know the second list is empty, we can pick the first list without
 -- knowing anything about it, hence the instance is marked as INCOHERENT.
-instance {-# INCOHERENT #-} xs ~ zs => AppendIndices xs '[] zs where
+instance {-# INCOHERENT #-} AppendIndices xs '[] where
   appendIndices _ = Refl
 
-instance ys ~ zs => AppendIndices '[] ys zs where
+instance AppendIndices '[] ys where
   appendIndices _ = Refl
 
 instance
-  (Append (x ': xs) ys ~ (x ': zs), AppendIndices xs ys zs
-  ) => AppendIndices (x ': xs) ys (x ': zs) where
-  appendIndices i | Refl <- appendIndices @xs @ys @zs i = Refl
+  (Append (x ': xs) ys ~ (x ': Append xs ys), AppendIndices xs ys
+  ) => AppendIndices (x ': xs) ys where
+  appendIndices i | Refl <- appendIndices @xs @ys i = Refl
 
 -- | Class that is inhabited by all type-level lists @xs@, providing the ability
 -- to compose a function under @'Curry' xs@.
