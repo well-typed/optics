@@ -2,6 +2,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
@@ -38,8 +39,8 @@ module Optics.Internal.Optic
   ) where
 
 import Data.Function ((&))
-import Data.Proxy (Proxy (..))
 import Data.Type.Equality
+import GHC.Exts (Proxy#, proxy#)
 import GHC.Generics (Rep)
 import GHC.OverloadedLabels
 import GHC.TypeLits
@@ -148,7 +149,7 @@ Optic o %% Optic o' = Optic oo
   where
     oo :: forall p i. (Profunctor p, Constraints k p)
        => Optic__ p i (Curry (Append is js) i) s t a b
-    oo | Refl <- appendIndices @is @js (Proxy @i) = o . o'
+    oo | Refl <- appendIndices @is @js (proxy# :: Proxy# i) = o . o'
 {-# INLINE (%%) #-}
 
 -- | Flipped function application, specialised to optics and binding tightly.

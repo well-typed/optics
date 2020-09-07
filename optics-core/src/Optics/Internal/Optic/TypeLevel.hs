@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
@@ -10,6 +11,7 @@ module Optics.Internal.Optic.TypeLevel where
 
 import Data.Kind (Type)
 import Data.Type.Equality
+import GHC.Exts (Proxy#)
 import GHC.TypeLits
 
 -- | A list of index types, used for indexed optics.
@@ -95,7 +97,7 @@ type family Append (xs :: [k]) (ys :: [k]) :: [k] where
 --    where f = (->)
 -- @
 class AppendIndices xs ys where
-  appendIndices :: proxy i -> Curry xs (Curry ys i) :~: Curry (Append xs ys) i
+  appendIndices :: Proxy# i -> Curry xs (Curry ys i) :~: Curry (Append xs ys) i
 
 -- | If we know the second list is empty, we can pick the first list without
 -- knowing anything about it, hence the instance is marked as INCOHERENT.
