@@ -687,6 +687,13 @@ declareFieldLabels [d|
   data Quark2 a = Qualified2   { gaffer2 :: a }
                 | Unqualified2 { gaffer2 :: a, tape2 :: a }
   |]
+makePrismLabels ''Quark2 -- after declareFieldLabels
+
+checkQualified2 :: Prism' (Quark2 a) a
+checkQualified2 = #_Qualified2
+
+checkUnqualified2 :: Prism' (Quark2 a) (a, a)
+checkUnqualified2 = #_Unqualified2
 
 checkGaffer2 :: Lens' (Quark2 a) a
 checkGaffer2 = #gaffer2
