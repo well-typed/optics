@@ -99,6 +99,8 @@ requireExtensions what extLists = do
       , show extension
       , " language extension. Please enable it by copy/pasting this line to the top of your file:\n\n"
       , extensionToPragma extension
+      , "\n\nTo enable it in a GHCi session, use the following command:\n\n"
+      , ":seti -X" ++ show extension
       ]
     extensions -> fail $ mconcat
       [ "Generating " ++ what ++ " requires the following language extensions:\n\n"
