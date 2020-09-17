@@ -84,8 +84,11 @@ makeFieldOpticsForDatatype rules info =
      case _classyLenses rules tyName of
        Just (className, methodName) ->
          makeClassyDriver rules className methodName s defs
-       Nothing -> do decss <- traverse (makeFieldOptic rules) defs
-                     return (concat decss)
+       Nothing -> do
+         when (has (traversed % _1 % _MethodName) defs) $ do
+           lift requireExtensionsForFields
+         decss <- traverse (makeFieldOptic rules) defs
+         return (concat decss)
 
   where
   tyName = D.datatypeName info
@@ -877,6 +880,11 @@ data DefName
   = TopName Name -- ^ Simple top-level definition name
   | MethodName Name Name -- ^ makeFields-style class name and method name
   deriving (Show, Eq, Ord)
+
+_MethodName :: Prism' DefName (Name, Name)
+_MethodName = prism' (uncurry MethodName) $ \case
+  TopName{}      -> Nothing
+  MethodName c n -> Just (c, n)
 
 -- | The optional rule to create a class and method around a
 -- monomorphic data type. If this naming convention is provided, it

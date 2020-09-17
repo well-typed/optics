@@ -122,6 +122,12 @@ requireExtensionsForLabels = requireExtensions "LabelOptic instances"
   , [UndecidableInstances]
   ]
 
+requireExtensionsForFields :: Q ()
+requireExtensionsForFields = requireExtensions "field optics"
+  [ [FlexibleInstances]
+  , [FunctionalDependencies]
+  ]
+
 ------------------------------------------------------------------------
 -- Support for generating inline pragmas
 ------------------------------------------------------------------------
