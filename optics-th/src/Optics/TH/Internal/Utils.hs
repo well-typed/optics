@@ -105,8 +105,8 @@ requireExtensions what extLists = do
       , intercalate "\n" (map (("- " ++) . show) extensions)
       , "\n\nPlease enable the extensions by copy/pasting these lines into the top of your file:\n\n"
       , intercalate "\n" (map extensionToPragma extensions)
-      , "\n\nTo enable them in the GHCi session, use the following command:\n\n"
-      , ":set " ++ unwords (map (("-X" ++) . show) extensions)
+      , "\n\nTo enable them in a GHCi session, use the following command:\n\n"
+      , ":seti " ++ unwords (map (("-X" ++) . show) extensions)
       ]
   where
     extensionToPragma ext = "{-# LANGUAGE " ++ show ext ++ " #-}"
