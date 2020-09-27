@@ -1,6 +1,8 @@
 module Optics.TH.Internal.Utils where
 
+import Control.Monad
 import Data.Maybe
+import Data.List
 import Language.Haskell.TH
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -75,6 +77,56 @@ quantifyType' exclude vars cx t = ForallT vs cx t
 
     bndrToType (PlainTV n)    = VarT n
     bndrToType (KindedTV n k) = SigT (VarT n) k
+
+-- | Pass in a list of lists of extensions, where any of the given extensions
+-- will satisfy it. For example, you might need either GADTs or
+-- ExistentialQuantification, so you'd write:
+--
+-- > requireExtensions [[GADTs, ExistentialQuantification]]
+--
+-- But if you need TypeFamilies and MultiParamTypeClasses, then you'd write:
+--
+-- > requireExtensions [[TypeFamilies], [MultiParamTypeClasses]]
+--
+requireExtensions :: String -> [[Extension]] -> Q ()
+requireExtensions what extLists = do
+  -- Taken from the persistent library
+  required <- filterM (fmap (not . or) . traverse isExtEnabled) extLists
+  case mapMaybe listToMaybe required of
+    [] -> pure ()
+    [extension] -> fail $ mconcat
+      [ "Generating " ++ what ++ " requires the "
+      , show extension
+      , " language extension. Please enable it by copy/pasting this line to the top of your file:\n\n"
+      , extensionToPragma extension
+      , "\n\nTo enable it in a GHCi session, use the following command:\n\n"
+      , ":seti -X" ++ show extension
+      ]
+    extensions -> fail $ mconcat
+      [ "Generating " ++ what ++ " requires the following language extensions:\n\n"
+      , intercalate "\n" (map (("- " ++) . show) extensions)
+      , "\n\nPlease enable the extensions by copy/pasting these lines into the top of your file:\n\n"
+      , intercalate "\n" (map extensionToPragma extensions)
+      , "\n\nTo enable them in a GHCi session, use the following command:\n\n"
+      , ":seti " ++ unwords (map (("-X" ++) . show) extensions)
+      ]
+  where
+    extensionToPragma ext = "{-# LANGUAGE " ++ show ext ++ " #-}"
+
+requireExtensionsForLabels :: Q ()
+requireExtensionsForLabels = requireExtensions "LabelOptic instances"
+  [ [DataKinds]
+  , [FlexibleInstances]
+  , [MultiParamTypeClasses]
+  , [TypeFamilies, GADTs]
+  , [UndecidableInstances]
+  ]
+
+requireExtensionsForFields :: Q ()
+requireExtensionsForFields = requireExtensions "field optics"
+  [ [FlexibleInstances]
+  , [FunctionalDependencies]
+  ]
 
 ------------------------------------------------------------------------
 -- Support for generating inline pragmas

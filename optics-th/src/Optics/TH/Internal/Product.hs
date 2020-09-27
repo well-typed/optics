@@ -84,8 +84,11 @@ makeFieldOpticsForDatatype rules info =
      case _classyLenses rules tyName of
        Just (className, methodName) ->
          makeClassyDriver rules className methodName s defs
-       Nothing -> do decss <- traverse (makeFieldOptic rules) defs
-                     return (concat decss)
+       Nothing -> do
+         when (has (traversed % _1 % _MethodName) defs) $ do
+           lift requireExtensionsForFields
+         decss <- traverse (makeFieldOptic rules) defs
+         return (concat decss)
 
   where
   tyName = D.datatypeName info
@@ -135,17 +138,16 @@ makeFieldLabelsWith rules = D.reifyDatatype >=> makeFieldLabelsForDatatype rules
 -- | Compute the field optics for a deconstructed datatype Dec
 -- When possible build an Iso otherwise build one optic per field.
 makeFieldLabelsForDatatype :: LensRules -> D.DatatypeInfo -> Q [Dec]
-makeFieldLabelsForDatatype rules info =
-  do perDef <- do
-       fieldCons <- traverse (normalizeConstructor info) cons
-       let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
-       let defCons    = over normFieldLabels (expandName rules tyName cons allFields) fieldCons
-           allDefs    = setOf (normFieldLabels % folded) defCons
-       T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
-
-     let defs = filter isRank1 $ M.toList perDef
-     traverse (makeFieldLabel rules) defs
-
+makeFieldLabelsForDatatype rules info = do
+  requireExtensionsForLabels
+  perDef <- do
+    fieldCons <- traverse (normalizeConstructor info) cons
+    let allFields  = toListOf (folded % _2 % folded % _1 % folded) fieldCons
+    let defCons    = over normFieldLabels (expandName rules tyName cons allFields) fieldCons
+        allDefs    = setOf (normFieldLabels % folded) defCons
+    T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
+  let defs = filter isRank1 $ M.toList perDef
+  traverse (makeFieldLabel rules) defs
   where
     -- LabelOptic doesn't support higher rank fields because of functional
     -- dependencies (s -> a, t -> b), so just skip them.
@@ -878,6 +880,11 @@ data DefName
   = TopName Name -- ^ Simple top-level definition name
   | MethodName Name Name -- ^ makeFields-style class name and method name
   deriving (Show, Eq, Ord)
+
+_MethodName :: Prism' DefName (Name, Name)
+_MethodName = prism' (uncurry MethodName) $ \case
+  TopName{}      -> Nothing
+  MethodName c n -> Just (c, n)
 
 -- | The optional rule to create a class and method around a
 -- monomorphic data type. If this naming convention is provided, it
