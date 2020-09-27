@@ -26,7 +26,7 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs03" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs03)
   , testCase "traverseOf_ (folded % folded) = traverseOf_ (ifolded % ifolded)" $
-    assertSuccess $(inspectTest $ 'lhs04 === 'rhs04)
+    assertSuccess $(inspectTest $ 'lhs04 ==- 'rhs04)
   , testCase "optimized lhs04" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs04)
   , testCase "optimized rhs04" $
@@ -67,7 +67,8 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs09)
   , testCase "itraverseOf_ itraversed = itraverseOf_ ifolded" $
-    assertSuccess $(inspectTest $ 'lhs10 === 'rhs10)
+    -- GHC >= 8.2 && =< 8.6 gives different order of let bindings
+    ghc82to86failure $(inspectTest $ 'lhs10 === 'rhs10)
   , testCase "optimized lhs10a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs10a)
   , testCase "optimized rhs10a" $
@@ -91,7 +92,7 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs13" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs13)
   , testCase "traverseOf_ itraversed = traverseOf_ folded" $
-    assertSuccess $(inspectTest $ 'lhs14 === 'rhs14)
+    assertSuccess $(inspectTest $ 'lhs14 ==- 'rhs14)
   , testCase "optimized lhs14a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs14a)
   , testCase "optimized rhs14a" $
@@ -103,9 +104,7 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs15" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs15)
   , testCase "iset (itraversed..) = iset (imapped..)" $
-    -- GHC >= 8.2 && =< 8.6 has additional let in generated core, but the
-    -- difference is trivial.
-    ghc82to86failure $(inspectTest $ 'lhs16 === 'rhs16)
+    assertSuccess $(inspectTest $ 'lhs16 === 'rhs16)
   , testCase "optimized lhs16" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs16)
   , testCase "optimized rhs16" $

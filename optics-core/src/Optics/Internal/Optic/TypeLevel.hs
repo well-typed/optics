@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeInType #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | This module is intended for internal use only, and may change without
@@ -8,7 +9,9 @@
 module Optics.Internal.Optic.TypeLevel where
 
 import Data.Kind (Type)
+import Data.Type.Equality
 import GHC.TypeLits
+import Unsafe.Coerce
 
 -- | A list of index types, used for indexed optics.
 --
@@ -85,6 +88,38 @@ type family Append (xs :: [k]) (ys :: [k]) :: [k] where
   Append '[]       ys  = ys -- needed for (<%>) and (%>)
   Append xs        '[] = xs -- needed for (<%)
   Append (x ': xs) ys  = x ': Append xs ys
+
+-- | In pseudo (dependent-)Haskell, provide a witness
+--
+-- @
+-- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
+--    where f = (->)
+-- @
+class AppendIndices xs ys where
+  appendIndices__ :: proxy i -> Curry xs (Curry ys i) :~: Curry (Append xs ys) i
+
+-- | If we know the second list is empty, we can pick the first list without
+-- knowing anything about it, hence the instance is marked as INCOHERENT.
+instance {-# INCOHERENT #-} AppendIndices xs '[] where
+  appendIndices__ _ = Refl
+
+instance AppendIndices '[] ys where
+  appendIndices__ _ = Refl
+
+instance
+  (Append (x ': xs) ys ~ (x ': Append xs ys), AppendIndices xs ys
+  ) => AppendIndices (x ': xs) ys where
+  appendIndices__ i | Refl <- appendIndices__ @xs @ys i = Refl
+
+appendIndices :: forall xs ys i. Curry xs (Curry ys i) :~: Curry (Append xs ys) i
+appendIndices = unsafeCoerce Refl
+-- Note: below is the proper definition, but it requires @AppendIndices xs ys@
+-- in the context. We don't want to propagate that constraint down into (%) and
+-- force users to experience it since it's about internal details, so we trick
+-- the compiler with unsafeCoerce that we always have the proof (which we do,
+-- but GHC can't see it and would want to compute it itself).
+--
+-- appendIndices = appendIndices__ @xs @ys (Proxy @i)
 
 -- | Class that is inhabited by all type-level lists @xs@, providing the ability
 -- to compose a function under @'Curry' xs@.
