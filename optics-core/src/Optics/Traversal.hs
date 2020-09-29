@@ -1,3 +1,7 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE EmptyCase #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE UndecidableInstances #-}
 -- |
 -- Module: Optics.Traversal
 -- Description: Lifts an effectful operation on elements to act on structures.
@@ -79,6 +83,9 @@ module Optics.Traversal
   -- ('<>') operator could not be used to combine optics of different kinds.
   , adjoin
 
+  -- * Generics
+  , GPlate(..)
+
   -- * Subtyping
   , A_Traversal
   -- | <<diagrams/Traversal.png Traversal in the optics hierarchy>>
@@ -96,9 +103,9 @@ import Control.Applicative
 import Control.Applicative.Backwards
 import Control.Monad.Trans.State
 import Data.Functor.Identity
+import GHC.Generics
 
 import Data.Profunctor.Indexed
-
 import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Internal.Optic
@@ -470,6 +477,93 @@ adjoin4 o1 o2 o3 o4 = combined % traversed
       []       ->            pure a
 {-# INLINE [1] adjoin4 #-}
 
+----------------------------------------
+-- Generics
+
+-- | Traverse occurrences of the type @a@ within the type @s@ using its
+-- 'Generic' instance.
+--
+-- >>> toListOf (gplate @Char) ('h', ((), 'e', Just 'l'), "lo")
+-- "hello"
+--
+-- If @a@ occurs recursively in its own definition, only outermost occurrences
+-- of @a@ within @s@ will be traversed:
+--
+-- >>> toListOf (gplate @String) ("one","two")
+-- ["one","two"]
+--
+-- /Note:/ types without a 'Generic' instance in scope when 'GPlate' class
+-- constraint is resolved will not be entered during the traversal.
+--
+-- >>> newtype NoG = NoG Char
+-- >>> let noG = (NoG 'n', (Just 'i', "c"), 'e')
+--
+-- >>> toListOf (gplate @Char) noG
+-- "ice"
+--
+-- >>> deriving instance Generic NoG
+--
+-- >>> toListOf (gplate @Char) noG
+-- "nice"
+--
+class GPlate a s where
+  gplate :: Traversal' s a
+
+instance
+  ( Generic s
+  , GPlateImpl (Rep s) a
+  ) => GPlate a s where
+  gplate = traversalVL (gplateInner @'RepDefined)
+  {-# INLINE gplate #-}
+
+data Void0
+-- Prevent GHC from solving GPlate constraint too early.
+instance GPlate a Void0 where
+  gplate = error "unreachable"
+instance GPlate Void0 a where
+  gplate = error "unreachable"
+
+class GPlateImpl g a where
+  gplateImpl :: TraversalVL' (g x) a
+
+instance GPlateImpl f a => GPlateImpl (M1 i c f) a where
+  gplateImpl f (M1 x) = M1 <$> gplateImpl f x
+
+instance (GPlateImpl f a, GPlateImpl g a) => GPlateImpl (f :+: g) a where
+  gplateImpl f (L1 x) = L1 <$> gplateImpl f x
+  gplateImpl f (R1 x) = R1 <$> gplateImpl f x
+
+instance (GPlateImpl f a, GPlateImpl g a) => GPlateImpl (f :*: g) a where
+  gplateImpl f (x :*: y) = (:*:) <$> gplateImpl f x <*> gplateImpl f y
+  {-# INLINE gplateImpl #-}
+
+-- | Matching type.
+instance {-# OVERLAPPING #-} GPlateImpl (K1 i a) a where
+  gplateImpl f (K1 a) = K1 <$> f a
+
+-- | Recurse into the inner type if it has a 'Generic' instance.
+instance GPlateInner (HasRep (Rep b)) b a => GPlateImpl (K1 i b) a where
+  gplateImpl f (K1 b) = K1 <$> gplateInner @(HasRep (Rep b)) f b
+
+instance GPlateImpl U1 a where
+  gplateImpl _ = pure
+
+instance GPlateImpl V1 a where
+  gplateImpl _ = \case {}
+
+instance GPlateImpl (URec b) a where
+  gplateImpl _ = pure
+
+class GPlateInner (repDefined :: RepDefined) s a where
+  gplateInner :: TraversalVL' s a
+
+instance (Generic s, GPlateImpl (Rep s) a) => GPlateInner 'RepDefined s a where
+  gplateInner f = fmap to . gplateImpl f . from
+
+instance {-# INCOHERENT #-} GPlateInner repNotDefined s a where
+  gplateInner _ = pure
+
 -- $setup
+-- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving
 -- >>> import Data.List
 -- >>> import Optics.Core

@@ -65,6 +65,12 @@ type family ShowEliminations forms :: ErrorMessage where
 ----------------------------------------
 
 data RepDefined = RepDefined
+
+-- | This type family should be called with an application of 'Rep' and will
+-- reduce to 'RepDefined' if it's defined; otherwise it is stuck.
+type family HasRep (s :: Type -> Type) :: RepDefined
+type instance HasRep (s x) = 'RepDefined
+
 -- | This type family should be called with applications of 'Rep' on both sides,
 -- and will reduce to 'RepDefined' if at least one of them is defined; otherwise
 -- it is stuck.

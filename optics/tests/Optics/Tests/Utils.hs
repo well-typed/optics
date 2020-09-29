@@ -5,6 +5,7 @@ module Optics.Tests.Utils where
 import Language.Haskell.TH (Name)
 import Test.Tasty.HUnit
 import Test.Inspection
+import qualified GHC.Generics as G
 
 import qualified Data.Profunctor.Indexed as P
 
@@ -33,6 +34,21 @@ hasNoProfunctors name = mkObligation name $ NoUseOf
   , 'P.iwander
   , 'P.roam
   , 'P.iroam
+  ]
+
+-- | 'hasNoGenerics' from 'Test.Inspection' checks for lack of data types, but
+-- they show up in coercions even though the representation was optimized away;
+-- check for functions and data constructors instead.
+hasNoGenericRep :: Name -> Obligation
+hasNoGenericRep name = mkObligation name $ NoUseOf
+  [ 'G.from
+  , 'G.to
+  , '(G.:*:)
+  , 'G.K1
+  , 'G.L1
+  , 'G.M1
+  , 'G.R1
+  , 'G.U1
   ]
 
 assertSuccess :: Result -> IO ()
