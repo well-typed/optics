@@ -59,6 +59,7 @@ import Optics.Empty.Core                       as P
 import Optics.Generic                          as P
 import Optics.Mapping                          as P
 import Optics.Operators                        as P
+import Optics.Plated                           as P
 import Optics.Re                               as P
 import Optics.ReadOnly                         as P
 
