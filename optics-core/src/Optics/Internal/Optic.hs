@@ -41,6 +41,9 @@ import Data.Function ((&))
 import Data.Type.Equality
 import GHC.Generics (Rep)
 import GHC.OverloadedLabels
+#if __GLASGOW_HASKELL__ >= 901
+import GHC.Records
+#endif
 import GHC.TypeLits
 
 import Data.Profunctor.Indexed
@@ -212,6 +215,18 @@ instance {-# OVERLAPPABLE #-}
   ) => LabelOptic name k s t a b where
   labelOptic = generalLabelOptic @name @k @s @t @a @b @(AnyHasRep (Rep s) (Rep t))
 
+#if __GLASGOW_HASKELL__ >= 901
+-- | Leverage 'HasField' type class to obtain field lenses by default.
+instance {-# INCOHERENT #-}
+  ( k ~ A_Lens
+  , s ~ t
+  , a ~ b
+  , HasField name s a
+  ) => GeneralLabelOptic name k s t a b repDefined where
+  generalLabelOptic =
+    Optic (linear (\f s -> case hasField @name s of (as, a) -> fmap as (f a)))
+  {-# INLINE generalLabelOptic #-}
+#else
 -- | If no instance matches, GHC tends to bury error messages "No instance for
 -- LabelOptic..." within a ton of other error messages about ambiguous type
 -- variables and overlapping instances which are irrelevant and confusing. Use
@@ -227,6 +242,7 @@ instance {-# INCOHERENT #-}
     ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
    => GeneralLabelOptic name k s t a b repDefined where
   generalLabelOptic = error "unreachable"
+#endif
 
 instance
   (LabelOptic name k s t a b, is ~ NoIx
