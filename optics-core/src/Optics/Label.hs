@@ -1,3 +1,10 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 -- |
 -- Module: Optics.Label
 -- Description: Overloaded labels as optics
@@ -35,7 +42,14 @@ module Optics.Label
     -- $fundepLimitations
   ) where
 
+import Data.Type.Bool
+import Data.Type.Equality
+import GHC.Generics (Rep)
+import GHC.OverloadedLabels
+import GHC.TypeLits
+
 import Optics.Internal.Optic
+import Optics.Generic
 
 -- $sampleUsage
 --
@@ -453,6 +467,98 @@ import Optics.Internal.Optic
 --
 -- - Modify type parameters of type @s@ or @t@ if @a@ or @b@ contain ambiguous
 --   applications of type families to these type parameters.
+
+----------------------------------------
+-- Definitions
+
+-- | Support for overloaded labels as optics. An overloaded label @#foo@ can be
+-- used as an optic if there is an instance of @'LabelOptic' "foo" k s t a b@ or
+-- either @s@ or @t@ has a 'Generic' instance.
+class LabelOptic (name :: Symbol) k s t a b | name s -> k a
+                                            , name t -> k b
+                                            , name s b -> t
+                                            , name t a -> s where
+  -- | Used to interpret overloaded label syntax.  An overloaded label @#foo@
+  -- corresponds to @'labelOptic' \@"foo"@.
+  labelOptic :: Optic k NoIx s t a b
+
+-- | Type synonym for a type-preserving optic as overloaded label.
+type LabelOptic' name k s a = LabelOptic name k s s a a
+
+data Void0
+-- | If for an overloaded label @#label@ there is no instance starting with
+-- @LabelOptic "label"@ in scope, using it in the context of optics makes GHC
+-- immediately pick the overlappable instance defined below (since no other
+-- instance could match). If at this point GHC has no information about @s@ or
+-- @t@, it ends up picking incoherent instance of 'GenericLabelOptic' defined
+-- below. Prevent that (if only to be able to inspect most polymorphic types of
+-- @#foo % #bar@ or @view #foo@ in GHCi) by defining a dummy instance that
+-- matches all names, thus postponing instance resolution until @s@ or @t@ is
+-- known.
+instance
+  ( k ~ An_Iso, a ~ Void0, b ~ Void0
+  ) => LabelOptic name k Void0 Void0 a b where
+  labelOptic = Optic id
+
+-- | If no instance matches, try to use 'Generic' machinery for field access.
+instance {-# OVERLAPPABLE #-}
+  ( LabelOptic name k s t a b -- Needed to satisfy functional dependencies
+  , GenericLabelOptic (AnyHasRep (Rep s) (Rep t)) name k s t a b
+  ) => LabelOptic name k s t a b where
+  labelOptic = genericLabelOptic @(AnyHasRep (Rep s) (Rep t)) @name
+
+----------------------------------------
+
+-- | Implements fallback behaviour for 'Generic' based field access in case
+-- there is no explicit 'LabelOptic' instance.
+--
+-- To support this, the first parameter will be instantiated to 'RepDefined' if
+-- at least one of @s@ or @t@ has a 'Generic' instance.
+class GenericLabelOptic (repDefined :: RepDefined) (name :: Symbol) k s t a b where
+  -- | Used to interpret overloaded label syntax in the absence of an explicit
+  -- 'LabelOptic' instance.
+  genericLabelOptic :: Optic k NoIx s t a b
+
+-- | If @s@ or @t@ has a 'Generic' instance, use Generic based data access.
+instance
+  ( k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
+           A_Prism
+           A_Lens
+  , GenericOptic name k s t a b
+  ) => GenericLabelOptic 'RepDefined name k s t a b where
+  genericLabelOptic = genericOptic @name
+
+class GenericOptic name k s t a b where
+  genericOptic :: Optic k NoIx s t a b
+
+instance GField name s t a b => GenericOptic name A_Lens s t a b where
+  genericOptic = gfield @name
+
+instance
+  ( GConstructor name s t a b
+  , _name ~ AppendSymbol "_" name
+  ) => GenericOptic _name A_Prism s t a b where
+  genericOptic = gconstructor @name
+
+-- | Otherwise report an error.
+instance {-# INCOHERENT #-}
+  TypeError
+   ('Text "No instance for LabelOptic " ':<>: 'ShowType name
+    ':<>: 'Text " " ':<>: QuoteType k
+    ':<>: 'Text " " ':<>: QuoteType s
+    ':<>: 'Text " " ':<>: QuoteType t
+    ':<>: 'Text " " ':<>: QuoteType a
+    ':<>: 'Text " " ':<>: QuoteType b
+    ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
+   => GenericLabelOptic repNotDefined name k s t a b where
+  genericLabelOptic = error "unreachable"
+
+----------------------------------------
+
+instance
+  (LabelOptic name k s t a b, is ~ NoIx
+  ) => IsLabel name (Optic k is s t a b) where
+  fromLabel = labelOptic @name
 
 -- $setup
 -- >>> import Optics.Core

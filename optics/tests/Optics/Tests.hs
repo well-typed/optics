@@ -8,7 +8,8 @@ import Optics
 import Optics.Tests.Computation
 import Optics.Tests.Core
 import Optics.Tests.Eta
-import Optics.Tests.Labels
+import Optics.Tests.Labels.Generic
+import Optics.Tests.Labels.TH
 import Optics.Tests.Misc
 import Optics.Tests.Properties
 
@@ -45,7 +46,8 @@ main = defaultMain $ testGroup "Tests"
   [ testGroup "Inspection"
     [ coreTests
     , etaTests
-    , labelsTests
+    , genericLabelsTests
+    , thLabelsTests
     , miscTests
     ]
   , computationTests

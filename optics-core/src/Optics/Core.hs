@@ -56,6 +56,7 @@ import Optics.Coerce                           as P
 import Optics.Cons.Core                        as P
 import Optics.Each.Core                        as P
 import Optics.Empty.Core                       as P
+import Optics.Generic                          as P
 import Optics.Mapping                          as P
 import Optics.Operators                        as P
 import Optics.Re                               as P

@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
-module Optics.Tests.Labels where
+module Optics.Tests.Labels.TH where
 
 import Data.Ord
 import Data.Word
@@ -46,8 +46,8 @@ makeFieldLabels ''Human
 
 ----------------------------------------
 
-labelsTests :: TestTree
-labelsTests = testGroup "Labels"
+thLabelsTests :: TestTree
+thLabelsTests = testGroup "Labels via Template Haskell"
   [
     testCase "view #name s = humanName s" $
     assertSuccess $(inspectTest $ 'label1lhs ==- 'label1rhs)

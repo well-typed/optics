@@ -71,6 +71,7 @@ library
                    Optics.Cons.Core
                    Optics.Each.Core
                    Optics.Empty.Core
+                   Optics.Generic
                    Optics.Indexed.Core
                    Optics.Mapping
                    Optics.Label
@@ -97,6 +98,8 @@ library
                    -- internal modules
                    Optics.Internal.Bi
                    Optics.Internal.Fold
+                   Optics.Internal.Generic
+                   Optics.Internal.Generic.TypeLevel
                    Optics.Internal.Indexed
                    Optics.Internal.Indexed.Classes
                    Optics.Internal.IxFold

@@ -81,6 +81,7 @@ library
                     , Optics.Cons
                     , Optics.Each
                     , Optics.Empty
+                    , Optics.Generic
                     , Optics.Indexed
                     , Optics.Label
                     , Optics.Mapping
@@ -151,7 +152,8 @@ test-suite optics-tests
   other-modules: Optics.Tests.Computation
                  Optics.Tests.Core
                  Optics.Tests.Eta
-                 Optics.Tests.Labels
+                 Optics.Tests.Labels.Generic
+                 Optics.Tests.Labels.TH
                  Optics.Tests.Misc
                  Optics.Tests.Properties
                  Optics.Tests.Utils
