@@ -35,6 +35,10 @@ miscTests = testGroup "Miscellaneous"
     -- GHC <= 8.4 doesn't optimize away profunctor classes
   , testCase "optimized iadjoin" $
     ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
+  , testCase "optimized gplate (profunctors)" $
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkGplate)
+  , testCase "optimized gplate (generics)" $
+    ghc80failure $(inspectTest $ hasNoGenericRep 'checkGplate)
   ]
 
 simpleMapIx
@@ -83,3 +87,8 @@ checkAdjoin = over (_1 % _Just `adjoin` _2 % chosen `adjoin` _3 % traversed)
 
 checkIxAdjoin :: (Int -> a -> a) -> ((Int, a), [a], (Int, Maybe a)) -> ((Int, a), [a], (Int, Maybe a))
 checkIxAdjoin = iover (_1 % itraversed `iadjoin` _2 % itraversed `iadjoin` _3 % itraversed % _Just)
+
+checkGplate
+  :: (Char, ([Either Char ()], Char, Maybe Char), [Char], Either Char Int)
+  -> [Char]
+checkGplate = toListOf gplate
