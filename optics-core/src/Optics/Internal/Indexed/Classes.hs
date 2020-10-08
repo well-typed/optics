@@ -198,11 +198,7 @@ instance FunctorWithIndex Int Seq.Seq where
   imap = Seq.mapWithIndex
   {-# INLINE imap #-}
 instance FoldableWithIndex Int Seq.Seq where
-#if MIN_VERSION_containers(0,5,8)
   ifoldMap = Seq.foldMapWithIndex
-#else
-  ifoldMap f = ifoldr (\i -> mappend . f i) mempty
-#endif
   {-# INLINE ifoldMap #-}
 
   ifoldr = Seq.foldrWithIndex

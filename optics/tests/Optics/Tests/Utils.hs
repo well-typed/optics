@@ -59,20 +59,6 @@ assertFailure' :: Result -> IO ()
 assertFailure' (Success err) = assertFailure err
 assertFailure' (Failure _)   = return ()
 
-ghc80failure :: Result -> IO ()
-#if __GLASGOW_HASKELL__ == 800
-ghc80failure = assertFailure'
-#else
-ghc80failure = assertSuccess
-#endif
-
-ghc80success :: Result -> IO ()
-#if __GLASGOW_HASKELL__ == 800
-ghc80success = assertSuccess
-#else
-ghc80success = assertFailure'
-#endif
-
 ghc82to86failure :: Result -> IO ()
 #if __GLASGOW_HASKELL__ >= 802 && __GLASGOW_HASKELL__ <= 806
 ghc82to86failure = assertFailure'

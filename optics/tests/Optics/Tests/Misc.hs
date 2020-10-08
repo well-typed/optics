@@ -22,9 +22,9 @@ miscTests = testGroup "Miscellaneous"
   , testCase "optimized itoList" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkitoListOf)
   , testCase "optimized partsOf" $
-    ghc80failure $(inspectTest $ hasNoProfunctors 'checkPartsOf)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkPartsOf)
   , testCase "optimized singular" $
-    ghc80failure $(inspectTest $ hasNoProfunctors 'checkSingular)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkSingular)
   , testCase "optimized filteredBy" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkFilteredBy)
   , testCase "optimized unsafeFilteredBy" $
@@ -38,7 +38,7 @@ miscTests = testGroup "Miscellaneous"
   , testCase "optimized gplate (profunctors)" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkGplate)
   , testCase "optimized gplate (generics)" $
-    ghc80failure $(inspectTest $ hasNoGenericRep 'checkGplate)
+    assertSuccess $(inspectTest $ hasNoGenericRep 'checkGplate)
   ]
 
 simpleMapIx

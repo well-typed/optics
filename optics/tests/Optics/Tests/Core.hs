@@ -60,8 +60,7 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs08a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs08a)
   , testCase "iover (imapped <% imapped) = iover (imapped % mapped)" $
-    -- Code is the same on GHC 8.0.2 modulo names of parameters.
-    ghc80failure $(inspectTest $ 'lhs09 === 'rhs09)
+    assertSuccess $(inspectTest $ 'lhs09 === 'rhs09)
   , testCase "optimized lhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs09)
   , testCase "optimized rhs09" $

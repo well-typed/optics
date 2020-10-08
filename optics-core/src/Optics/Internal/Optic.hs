@@ -231,11 +231,7 @@ instance {-# INCOHERENT #-}
 instance
   (LabelOptic name k s t a b, is ~ NoIx
   ) => IsLabel name (Optic k is s t a b) where
-#if __GLASGOW_HASKELL__ >= 802
   fromLabel = labelOptic @name @k @s @t @a @b
-#else
-  fromLabel _ = labelOptic @name @k @s @t @a @b
-#endif
 
 -- $setup
 -- >>> import Optics.Core

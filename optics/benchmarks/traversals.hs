@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 module Main where
 
 import Criterion.Main
@@ -21,15 +20,6 @@ import qualified Data.Vector.Unboxed as U
 
 import Data.ByteString.Optics
 import Optics
-
-seqTraverseWithIndex
-  :: Applicative f => (Int -> a -> f b) -> S.Seq a -> f (S.Seq b)
-seqTraverseWithIndex f =
-#if MIN_VERSION_containers(0,5,8)
-  S.traverseWithIndex f
-#else
-  sequenceA . S.mapWithIndex f
-#endif
 
 main :: IO ()
 main = defaultMainWith config
@@ -119,7 +109,7 @@ main = defaultMainWith config
           nf (\x -> S.execState (L.traverseOf L.itraversed (S.modify' . (+)) x) 0) s
       ]
     , bgroup "itraverse"
-      [ bench "native" $ nf (\x -> S.execState (seqTraverseWithIndex (\i a -> S.modify' $ (i + a +)) x) 0) s
+      [ bench "native" $ nf (\x -> S.execState (S.traverseWithIndex (\i a -> S.modify' $ (i + a +)) x) 0) s
       , bench "itraverse " $ nf (\x -> S.execState (itraverse (\i a -> S.modify' $ (i + a +)) x) 0) s
       , bench "itraverse/lens" $ nf (\x -> S.execState (L.itraverse (\i a -> S.modify' $ (i + a +)) x) 0) s
       , bench "each" $ nf (\x -> S.execState (itraverseOf each (\i a -> S.modify' $ (i + a +)) x) 0) s

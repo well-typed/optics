@@ -437,27 +437,11 @@ instance At (Maybe a) where
   {-# INLINE at #-}
 
 instance At (IntMap a) where
-#if MIN_VERSION_containers(0,5,8)
   at k = lensVL $ \f -> IntMap.alterF f k
-#else
-  at k = lensVL $ \f m ->
-    let mv = IntMap.lookup k m
-    in f mv <&> \r -> case r of
-      Nothing -> maybe m (const (IntMap.delete k m)) mv
-      Just v' -> IntMap.insert k v' m
-#endif
   {-# INLINE at #-}
 
 instance Ord k => At (Map k a) where
-#if MIN_VERSION_containers(0,5,8)
   at k = lensVL $ \f -> Map.alterF f k
-#else
-  at k = lensVL $ \f m ->
-    let mv = Map.lookup k m
-    in f mv <&> \r -> case r of
-      Nothing -> maybe m (const (Map.delete k m)) mv
-      Just v' -> Map.insert k v' m
-#endif
   {-# INLINE at #-}
 
 instance At IntSet where
