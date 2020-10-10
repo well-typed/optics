@@ -4,6 +4,7 @@ import Control.Monad
 import Data.Maybe
 import Data.List
 import Language.Haskell.TH
+import Language.Haskell.TH.Datatype.TyVarBndr
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
@@ -63,20 +64,20 @@ addKindVars = substType . M.fromList . mapMaybe var . D.datatypeInstTypes
 
 -- | Template Haskell wants type variables declared in a forall, so
 -- we find all free type variables in a given type and declare them.
-quantifyType :: [TyVarBndr] -> Cxt -> Type -> Type
+quantifyType :: [TyVarBndrSpec] -> Cxt -> Type -> Type
 quantifyType = quantifyType' S.empty
 
 -- | This function works like 'quantifyType' except that it takes
 -- a list of variables to exclude from quantification.
-quantifyType' :: S.Set Name -> [TyVarBndr] -> Cxt -> Type -> Type
+quantifyType' :: S.Set Name -> [TyVarBndrSpec] -> Cxt -> Type -> Type
 quantifyType' exclude vars cx t = ForallT vs cx t
   where
     vs = filter (\v -> D.tvName v `S.notMember` exclude)
+       . changeTVFlags SpecifiedSpec
        . D.freeVariablesWellScoped
        $ map bndrToType vars ++ S.toList (setOf typeVarsKinded t)
 
-    bndrToType (PlainTV n)    = VarT n
-    bndrToType (KindedTV n k) = SigT (VarT n) k
+    bndrToType = elimTV VarT (\n k -> SigT (VarT n) k)
 
 -- | Pass in a list of lists of extensions, where any of the given extensions
 -- will satisfy it. For example, you might need either GADTs or
