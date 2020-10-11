@@ -67,7 +67,7 @@ checkPairEq = _PairEq
 
 checkPairEq_
   :: (Eq a', Eq b')
-  => Iso (PairEq a b c) (PairEq a' b' c) (a, b) (a', b')
+  => Iso (PairEq a b c) (PairEq a' b' c') (a, b) (a', b')
 checkPairEq_ = #_PairEq
 
 data Brr a where
@@ -97,15 +97,13 @@ makePrismLabels ''Bzzt
 checkBzztShow :: Show a => Prism (Bzzt a b c) (Bzzt a b c') a a
 checkBzztShow = _BzztShow
 
--- We can't change b because of LabelOptic fundeps.
-checkBzztShow_ :: Show a => Prism' (Bzzt a b c) a
+checkBzztShow_ :: Show a => Prism (Bzzt a b c) (Bzzt a b c') a a
 checkBzztShow_ = #_BzztShow
 
 checkBzztRead :: Read b => Prism (Bzzt a b c) (Bzzt a b c') b b
 checkBzztRead = _BzztRead
 
--- We can't change b because of LabelOptic fundeps.
-checkBzztRead_ :: Read b => Prism' (Bzzt a b c) b
+checkBzztRead_ :: Read b => Prism (Bzzt a b c) (Bzzt a b c') b b
 checkBzztRead_ = #_BzztRead
 
 data FooX a where
@@ -116,15 +114,13 @@ makePrismLabels ''FooX
 checkFooX1 :: Prism (FooX a) (FooX b) (Int, Int) (Int, Int)
 checkFooX1 = _FooX1
 
--- We can't change a because of LabelOptic fundeps.
-checkFooX1_ :: Prism' (FooX a) (Int, Int)
+checkFooX1_ :: Prism (FooX a) (FooX b) (Int, Int) (Int, Int)
 checkFooX1_ = #_FooX1
 
 checkFooX2 :: Prism (FooX a) (FooX b) (Int, Int) (Int, Int)
 checkFooX2 = _FooX2
 
--- We can't change a because of LabelOptic fundeps.
-checkFooX2_ :: Prism' (FooX a) (Int, Int)
+checkFooX2_ :: Prism (FooX a) (FooX b) (Int, Int) (Int, Int)
 checkFooX2_ = #_FooX2
 
 data ClassyTest = ClassyT1 Int | ClassyT2 String | ClassyT3 Char
@@ -173,9 +169,11 @@ checkWeird2
 checkWeird2 = _Weird2
 
 checkWeird2_
-  :: forall (a  :: Type -> Type)
-            (b  :: Type -> Type)
-   . Iso (Weird2 a b) (Weird2 a b) () ()
+  :: forall k (a  :: k    -> Type)
+              (b  :: k    -> Type)
+              (a' :: Type -> Type)
+              (b' :: Type -> Type)
+   . Iso (Weird2 a b) (Weird2 a' b') () ()
 checkWeird2_ = #_Weird2
 
 data Weird3 (a :: k) where
@@ -186,7 +184,7 @@ makePrismLabels ''Weird3
 checkWeird3 :: forall k (a :: k) (b :: Type). Iso (Weird3 a) (Weird3 b) () ()
 checkWeird3 = _Weird3
 
-checkWeird3_ :: forall (a :: Type). Iso (Weird3 a) (Weird3 a) () ()
+checkWeird3_ :: forall k (a :: k) (b :: Type). Iso (Weird3 a) (Weird3 b) () ()
 checkWeird3_ = #_Weird3
 
 ----------------------------------------
@@ -198,8 +196,7 @@ makeFieldLabelsWith lensRules ''Bar
 checkBaz :: Iso (Bar a b c) (Bar a' b' c') (a, b) (a', b')
 checkBaz = baz
 
--- We can't change c because of LabelOptic fundeps.
-checkBaz_ :: Iso (Bar a b c) (Bar a' b' c) (a, b) (a', b')
+checkBaz_ :: Iso (Bar a b c) (Bar a' b' c') (a, b) (a', b')
 checkBaz_ = #baz
 
 data Quux a b = Quux { _quaffle :: Int, _quartz :: Double }
@@ -209,15 +206,13 @@ makeFieldLabelsWith lensRules ''Quux
 checkQuaffle :: Lens (Quux a b) (Quux a' b') Int Int
 checkQuaffle = quaffle
 
--- We can't change a and b because of LabelOptic fundeps.
-checkQuaffle_ :: Lens (Quux a b) (Quux a b) Int Int
+checkQuaffle_ :: Lens (Quux a b) (Quux a' b') Int Int
 checkQuaffle_ = #quaffle
 
 checkQuartz :: Lens (Quux a b) (Quux a' b') Double Double
 checkQuartz = quartz
 
--- We can't change a and b because of LabelOptic fundeps.
-checkQuartz_ :: Lens (Quux a b) (Quux a b) Double Double
+checkQuartz_ :: Lens (Quux a b) (Quux a' b') Double Double
 checkQuartz_ = #quartz
 
 data Quark a = Qualified   { _gaffer :: a }
@@ -289,8 +284,14 @@ checkAltitude_ = #altitude
 checkAbsurdity1 :: Eq x => Getter (Perambulation a b) (x -> y)
 checkAbsurdity1 = absurdity1
 
+checkAbsurdity1_ :: Eq x => Getter (Perambulation a b) (x -> y)
+checkAbsurdity1_ = #absurdity1
+
 checkAbsurdity2 :: Eq x => AffineFold (Perambulation a b) (x -> y)
 checkAbsurdity2 = absurdity2
+
+checkAbsurdity2_ :: Eq x => AffineFold (Perambulation a b) (x -> y)
+checkAbsurdity2_ = #absurdity2
 
 checkDunes :: AffineTraversal' (Perambulation a b) a
 checkDunes = dunes
@@ -507,9 +508,13 @@ data Kinded0 k = Kinded0
   { _kinded0Thing :: forall a. Proxy (a :: k)
   }
 makeLenses ''Kinded0
+makeFieldLabelsWith lensRules ''Kinded0
 
 checkKinded0Thing :: Getter (Kinded0 k) (Proxy (a :: k))
 checkKinded0Thing = kinded0Thing
+
+checkKinded0Thing_ :: Getter (Kinded0 k) (Proxy (a :: k))
+checkKinded0Thing_ = #kinded0Thing
 
 data Kinded1 (a :: k1) (b :: k2) = Kinded
   { _kinded1Thing :: Tagged '(a, b) Int
@@ -565,7 +570,7 @@ type family FamInj1 (a :: k) b = r | r -> a
 data FamRec2 a b = FamRec2 { _famRec2Thing :: FamInj1 a b }
 makeFieldLabels ''FamRec2
 
-checkFamRec2Thing :: Iso (FamRec2 a b) (FamRec2 a' b) (FamInj1 a b) (FamInj1 a' b)
+checkFamRec2Thing :: Iso (FamRec2 a b) (FamRec2 a' b') (FamInj1 a b) (FamInj1 a' b')
 checkFamRec2Thing = #thing
 
 type family a :#: b = r | r -> b
@@ -574,15 +579,14 @@ type family a :#: b = r | r -> b
 data FamRec3 a b = FamRec3 { _famRec3Thing :: a :#: b }
 makeFieldLabels ''FamRec3
 
-checkFamRec3Thing :: Iso (FamRec3 a b) (FamRec3 a b') (a :#: b) (a :#: b')
+checkFamRec3Thing :: Iso (FamRec3 a b) (FamRec3 a' b') (a :#: b) (a' :#: b')
 checkFamRec3Thing = #thing
 
 -- ambiguous type family application, type-preserving optic
 data FamRec4 a = FamRec4 { _famRec4Thing :: FamInj1 (Fam a) a }
 makeFieldLabels ''FamRec4 -- no error
 
--- no type changing optic here
-checkFamRec4Thing :: Iso' (FamRec4 a) (FamInj1 (Fam a) a)
+checkFamRec4Thing :: Iso (FamRec4 a) (FamRec4 b) (FamInj1 (Fam a) a) (FamInj1 (Fam b) b)
 checkFamRec4Thing = #thing
 
 type family FamInj2 a b (c :: k) = r | r -> a b c
@@ -612,10 +616,10 @@ data FamRec7 a b (c :: [k]) = FamRec7
   }
 makeFieldLabels ''FamRec7
 
-checkFamRec7Thing :: Iso (FamRec7 a b  (c  :: [k ]))
-                         (FamRec7 a' b (c' :: [k']))
+checkFamRec7Thing :: Iso (FamRec7 a  b  (c  :: [k ]))
+                         (FamRec7 a' b' (c' :: [k']))
                          (FamInj1 (b :#: (a -> FamInj1 c b)) b)
-                         (FamInj1 (b :#: (a' -> FamInj1 c' b)) b)
+                         (FamInj1 (b' :#: (a' -> FamInj1 c' b')) b')
 checkFamRec7Thing = #thing
 
 data FamRec a = FamRec
@@ -860,25 +864,34 @@ data Rank2Tests
   | C2 { _r2length :: forall a. [a] -> Int }
 
 makeLenses ''Rank2Tests
-makeFieldLabelsWith lensRules ''Rank2Tests -- doesn't generate anything
+makeFieldLabelsWith lensRules ''Rank2Tests
 
 checkR2length :: Getter Rank2Tests ([a] -> Int)
 checkR2length = r2length
 
+checkR2length_ :: Getter Rank2Tests ([a] -> Int)
+checkR2length_ = #r2length
+
 checkR2nub :: Eq a => AffineFold Rank2Tests ([a] -> [a])
 checkR2nub = r2nub
+
+checkR2nub_ :: Eq a => AffineFold Rank2Tests ([a] -> [a])
+checkR2nub_ = #r2nub
 
 data PureNoFields = PureNoFieldsA | PureNoFieldsB { _pureNoFields :: Int }
 makeLenses ''PureNoFields
 makeFieldLabels ''PureNoFields
 
-data ReviewTest where
-  ReviewTest :: (Typeable a, Typeable b) => a -> b -> ReviewTest
+data ReviewTest k where
+  ReviewTest :: Typeable t => t -> Proxy (a :: k) -> ReviewTest k
 makePrisms ''ReviewTest
-makePrismLabels ''ReviewTest -- doesn't generate anything
+makePrismLabels ''ReviewTest
 
-checkReviewTest :: (Typeable a, Typeable b) => Review ReviewTest (a, b)
+checkReviewTest :: Typeable t => Review (ReviewTest k) (t, Proxy (a :: k))
 checkReviewTest = _ReviewTest
+
+checkReviewTest_ :: Typeable t => Review (ReviewTest k) (t, Proxy (a :: k))
+checkReviewTest_ = #_ReviewTest
 
 -- test FieldNamers
 
