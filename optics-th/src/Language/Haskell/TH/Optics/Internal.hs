@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module Language.Haskell.TH.Optics.Internal
   (
   -- * Traversals
@@ -14,6 +15,9 @@ module Language.Haskell.TH.Optics.Internal
   , _ClosedTypeFamilyD
   , _OpenTypeFamilyD
   , _ForallT
+
+  -- * TyVarBndr compatiblity
+  , TyVarBndrSpec
   ) where
 
 import Data.Map as Map hiding (map, toList)
@@ -21,6 +25,7 @@ import Data.Maybe (fromMaybe)
 import Data.Foldable (traverse_)
 import Data.Set as Set hiding (map, toList)
 import Language.Haskell.TH
+import Language.Haskell.TH.Datatype.TyVarBndr
 
 import Data.Set.Optics
 import Optics.Core
@@ -30,10 +35,15 @@ class HasName t where
   -- | Extract (or modify) the 'Name' of something
   name :: Lens' t Name
 
-instance HasName TyVarBndr where
+instance HasName (TyVarBndr_ flag) where
   name = lensVL $ \f -> \case
+#if MIN_VERSION_template_haskell(2,17,0)
+    PlainTV n flag    -> (\n' -> PlainTV n' flag) <$> f n
+    KindedTV n flag k -> (\n' -> KindedTV n' flag k ) <$> f n
+#else
     PlainTV n    -> PlainTV <$> f n
     KindedTV n k -> (`KindedTV` k) <$> f n
+#endif
 
 -- | Provides for the extraction of free type variables, and alpha renaming.
 class HasTypeVars t where
@@ -42,7 +52,7 @@ class HasTypeVars t where
   -- 'Traversal' laws, when in doubt generate your names with 'newName'.
   typeVarsEx :: Set Name -> Traversal' t Name
 
-instance HasTypeVars TyVarBndr where
+instance HasTypeVars (TyVarBndr_ flag) where
   typeVarsEx s = traversalVL $ \f b ->
     if view name b `Set.member` s
     then pure b
@@ -159,7 +169,7 @@ _OpenTypeFamilyD
       remitter (OpenTypeFamilyD x) = Just x
       remitter _ = Nothing
 
-_ForallT :: Prism' Type ([TyVarBndr], Cxt, Type)
+_ForallT :: Prism' Type ([TyVarBndrSpec], Cxt, Type)
 _ForallT
   = prism' reviewer remitter
   where

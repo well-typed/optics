@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
@@ -44,8 +45,13 @@ import Optics.TH.Internal.Utils
 typeSelf :: Traversal' Type Type
 typeSelf = traversalVL $ \f -> \case
   ForallT tyVarBndrs ctx ty ->
+#if MIN_VERSION_template_haskell(2,17,0)
+    let go (KindedTV nam flag kind) = KindedTV <$> pure nam <*> pure flag <*> f kind
+        go (PlainTV nam flag)       = pure (PlainTV nam flag)
+#else
     let go (KindedTV nam kind) = KindedTV <$> pure nam <*> f kind
         go (PlainTV nam)       = pure (PlainTV nam)
+#endif
     in ForallT <$> traverse go tyVarBndrs <*> traverse f ctx <*> f ty
   AppT ty1 ty2              -> AppT <$> f ty1 <*> f ty2
   SigT ty kind              -> SigT <$> f ty <*> f kind
@@ -335,8 +341,8 @@ opticTypeName typeChanging  TraversalType       = if typeChanging
                                                   else ''Traversal'
 
 data OpticStab
-  = OpticStab               OpticType Type Type Type Type
-  | OpticSa [TyVarBndr] Cxt OpticType Type Type
+  = OpticStab                   OpticType Type Type Type Type
+  | OpticSa [TyVarBndrSpec] Cxt OpticType Type Type
   deriving Show
 
 stabToType :: OpticStab -> Type
@@ -530,7 +536,7 @@ makeClassyClass className methodName s defs = do
            | otherwise = [FunDep [c] vars]
 
 
-  classD (cxt[]) className (map PlainTV (c:vars)) fd
+  classD (cxt[]) className (map plainTV (c:vars)) fd
     $ sigD methodName (return (''Lens' `conAppsT` [VarT c, s]))
     : concat
       [ [sigD defName (return ty)
@@ -574,7 +580,7 @@ makeClassyInstance rules className methodName s defs = do
 
 makeFieldClass :: OpticStab -> Name -> Name -> DecQ
 makeFieldClass defType className methodName =
-  classD (cxt []) className [PlainTV s, PlainTV a] [FunDep [s] [a]]
+  classD (cxt []) className [plainTV s, plainTV a] [FunDep [s] [a]]
          [sigD methodName (return methodType)]
   where
   methodType = quantifyType' (S.fromList [s,a])

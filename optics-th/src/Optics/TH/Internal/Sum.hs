@@ -11,6 +11,7 @@ import Data.List
 import Data.Maybe
 import Data.Traversable
 import Language.Haskell.TH
+import Language.Haskell.TH.Datatype.TyVarBndr
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
@@ -217,7 +218,8 @@ stabToType stab@(Stab cx ty s t a b) = ForallT vs cx $
     ReviewType                   -> ''Review  `conAppsT` [t,b]
 
   where
-    vs = D.freeVariablesWellScoped
+    vs = changeTVFlags SpecifiedSpec
+       . D.freeVariablesWellScoped
        . S.toList
        $ setOf (folded % typeVarsKinded) cx
 
@@ -404,7 +406,7 @@ makeClassyPrismClass t className methodName cons =
   do r <- newName "r"
      let methodType = appsT (conT ''Prism') [varT r,return t]
      methodss <- traverse (mkMethod (VarT r)) cons'
-     classD (cxt[]) className (map PlainTV (r : vs)) (fds r)
+     classD (cxt[]) className (map plainTV (r : vs)) (fds r)
        ( sigD methodName methodType
        : map return (concat methodss)
        )
