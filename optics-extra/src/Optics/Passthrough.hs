@@ -16,11 +16,11 @@ class (Is k A_Traversal, ViewableOptic k r) => PermeableOptic k r where
     -> (ViewResult k r, t)
 
 instance PermeableOptic An_Iso r where
-  passthrough = toLensVL
+  passthrough o = toLensVL o
   {-# INLINE passthrough #-}
 
 instance PermeableOptic A_Lens r where
-  passthrough = toLensVL
+  passthrough o = toLensVL o
   {-# INLINE passthrough #-}
 
 instance PermeableOptic A_Prism r where
