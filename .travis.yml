@@ -54,9 +54,6 @@ jobs:
     - compiler: ghc-8.2.2
       addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.2.2","cabal-install-3.2"]}}
       os: linux
-    - compiler: ghc-8.0.2
-      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.0.2","cabal-install-3.2"]}}
-      os: linux
 before_install:
   - |
     if echo $CC | grep -q ghcjs; then
@@ -125,24 +122,24 @@ install:
     echo "packages: indexed-profunctors" >> cabal.project
     echo "packages: template-haskell-optics" >> cabal.project
     if ! $GHCJS ; then echo "packages: metametapost" >> cabal.project ; fi
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-core' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-extra' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-sop' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-th' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-vl' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package indexed-profunctors' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package template-haskell-optics' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package metametapost' >> cabal.project ; fi
-  - "if ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
+  - echo 'package optics' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-core' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-extra' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-sop' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-th' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-vl' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package indexed-profunctors' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package template-haskell-optics' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - if ! $GHCJS ; then echo 'package metametapost' >> cabal.project ; fi
+  - "if ! $GHCJS ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
   - |
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
@@ -192,24 +189,24 @@ script:
     echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
     echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
     if ! $GHCJS ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-core' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-extra' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-sop' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-th' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package optics-vl' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package indexed-profunctors' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package template-haskell-optics' >> cabal.project ; fi
-  - "if $GHCJS || ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
-  - if ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo 'package metametapost' >> cabal.project ; fi
-  - "if ! $GHCJS && [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
+  - echo 'package optics' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-core' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-extra' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-sop' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-th' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package optics-vl' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package indexed-profunctors' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - echo 'package template-haskell-optics' >> cabal.project
+  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - if ! $GHCJS ; then echo 'package metametapost' >> cabal.project ; fi
+  - "if ! $GHCJS ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
   - |
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | (grep -vE -- '^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$' || true) | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true

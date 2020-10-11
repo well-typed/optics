@@ -6,7 +6,7 @@ build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
 cabal-version: 1.24
-tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.2, GHCJS ==8.4
+tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.2, GHCJS ==8.4
 synopsis:      Optics construction using TemplateHaskell
 category:      Data, Optics, Lenses
 description:
@@ -29,11 +29,11 @@ library
   hs-source-dirs:   src
   ghc-options:      -Wall
 
-  build-depends: base                   >= 4.9       && <5
-               , containers             >= 0.5.7.1   && <0.7
+  build-depends: base                   >= 4.10      && <5
+               , containers             >= 0.5.10.2  && <0.7
                , mtl                    >= 2.2.2     && <2.3
                , optics-core            >= 0.3       && <0.4
-               , template-haskell       >= 2.11      && <2.17
+               , template-haskell       >= 2.12      && <2.17
                , th-abstraction         >= 0.2.1     && <0.5
                , transformers           >= 0.5       && <0.6
 

@@ -6,7 +6,7 @@ build-type:    Simple
 cabal-version: 1.24
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
-tested-with:   ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.2, GHCJS ==8.4
+tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.2, GHCJS ==8.4
 synopsis:      Extra utilities and instances for optics-core
 category:      Data, Optics, Lenses
 description:
@@ -30,10 +30,10 @@ library
   hs-source-dirs:   src
   ghc-options:      -Wall
 
-  build-depends: base                   >= 4.9       && <5
-               , array                  >= 0.5.1.1   && <0.6
+  build-depends: base                   >= 4.10      && <5
+               , array                  >= 0.5.2.0   && <0.6
                , bytestring             >= 0.10.8    && <0.11
-               , containers             >= 0.5.7.1   && <0.7
+               , containers             >= 0.5.10.2  && <0.7
                , hashable               >= 1.1.1     && <1.4
                , indexed-profunctors    >= 0.1       && <0.2
                , mtl                    >= 2.2.2     && <2.3
