@@ -56,10 +56,19 @@ data Void0
 -- ...Data constructor ‘User’ doesn't have a field named ‘salary’
 -- ...
 --
--- /Note:/ Type changing updates are also supported:
+-- Type changing updates are supported:
 --
 -- >>> user & gfield @"age" .~ ()
 -- User {name = "Tom", age = ()}
+--
+-- /Note:/ 'gfield' is supported by 'Optics.Label.labelOptic' and can be used
+-- with a concise syntax via @OverloadedLabels@:
+--
+-- >>> user ^. #name
+-- "Tom"
+--
+-- >>> user & #age %~ (+1)
+-- User {name = "Tom", age = 33}
 --
 class GField (name :: Symbol) s t a b | name s -> a
                                       , name t -> b
@@ -211,6 +220,15 @@ instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
 -- ...
 -- ...Type ‘Animal’ doesn't have a constructor named ‘Parrot’
 -- ...
+--
+-- /Note:/ 'gconstructor' is supported by 'Optics.Label.labelOptic' and can be
+-- used with a concise syntax via @OverloadedLabels@:
+--
+-- >>> dog ^? #_Dog
+-- Just ("Sparky",2)
+--
+-- >>> cat & #_Cat % _1 .~ "Merry"
+-- Cat {name = "Merry", purrs = True}
 --
 class GConstructor (name :: Symbol) s t a b | name s -> a
                                             , name t -> b
