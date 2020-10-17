@@ -34,7 +34,7 @@ type family GetFieldPaths s (name :: Symbol) g :: PathTree () where
   GetFieldPaths s name (M1 C _ g)  = 'PathLeaf (GetNamePath name g '[])
 
   GetFieldPaths s name V1 = TypeError ('Text "Type " ':<>: QuoteType s ':<>:
-                                     'Text " has no data constructors")
+                                       'Text " has no data constructors")
 
 -- | Compute path to a constructor in a sum or a field in a product with a
 -- specific name.
@@ -64,7 +64,7 @@ type family GetPositionPaths s (n :: Nat) g :: PathTree Nat where
   GetPositionPaths s n (M1 C _ g)  = 'PathLeaf (GetPositionPath n g 1 '[])
 
   GetPositionPaths s n V1 = TypeError ('Text "Type " ':<>: QuoteType s ':<>:
-                                     'Text " has no data constructors")
+                                       'Text " has no data constructors")
 
 -- | Compute path to a constructor in a sum or a field in a product at a
 -- specific position.
@@ -102,8 +102,7 @@ type family AnyHasPath (path :: PathTree e) :: Bool where
   AnyHasPath ('PathLeaf ('Right _))  = 'True
   AnyHasPath ('PathLeaf ('Left _ ))  = 'False
 
--- | Ensure that the types @a@ and @b@ are both applications of the same
--- constructor. The arguments may be different.
-class UnifyHead (a :: k) (b :: k)
-instance {-# OVERLAPPING #-} (gb ~ g b, UnifyHead f g) => UnifyHead (f a) gb
-instance (a ~ b) => UnifyHead a b
+-- | Derive the shape of @a@ from the shape of @b@.
+class HasShapeOf (a :: k) (b :: k)
+instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
+instance (a ~ b) => HasShapeOf a b

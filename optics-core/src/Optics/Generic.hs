@@ -24,9 +24,7 @@ module Optics.Generic
   , GPlate(..)
   ) where
 
-import Data.Kind
-import Data.Type.Bool
-import GHC.Generics (Generic, Rep, from, to)
+import GHC.Generics (Generic, Rep)
 import GHC.TypeLits
 
 import Optics.AffineTraversal
@@ -77,18 +75,12 @@ class GField (name :: Symbol) s t a b | name s -> a
   gfield :: Lens s t a b
 
 instance
-  ( GField name s t a b
-  , Generic s
-  , Generic t
-  , UnifyHead s t
-  , UnifyHead t s
-  , path ~ GetFieldPaths s name (Rep s)
-  , GFieldSum name path (Rep s) (Rep t) a b
+  ( GField name s t a b -- Lift the coverage condition
+  , s `HasShapeOf` t
+  , t `HasShapeOf` s
+  , GFieldImpl name s t a b
   ) => GField name s t a b where
-  gfield = withLens
-    (lensVL (\f s -> to <$> gfieldSum @name @path f (from s)))
-    (\get set -> lensVL $ \f s -> set s <$> f (get s))
-  {-# INLINE gfield #-}
+  gfield = gfieldImpl @name
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
@@ -130,24 +122,12 @@ class GAffineField (name :: Symbol) s t a b | name s -> a
   gafield :: AffineTraversal s t a b
 
 instance
-  ( GAffineField name s t a b
-  , Generic s
-  , Generic t
-  , UnifyHead s t
-  , UnifyHead t s
-  , path ~ GetFieldPaths s name (Rep s)
-  , If (AnyHasPath path)
-       (() :: Constraint)
-       (TypeError
-        ('Text "Type " ':<>: QuoteType s ':<>:
-         'Text " doesn't have a field named " ':<>: QuoteSymbol name))
-  , GAffineFieldSum path (Rep s) (Rep t) a b
+  ( GAffineField name s t a b -- Lift the coverage condition
+  , s `HasShapeOf` t
+  , t `HasShapeOf` s
+  , GAffineFieldImpl name s t a b
   ) => GAffineField name s t a b where
-  gafield = withAffineTraversal
-    (atraversalVL (\point f s -> to <$> gafieldSum @path point f (from s)))
-    (\match update -> atraversalVL $ \point f s ->
-        either point (fmap (update s) . f) (match s))
-  {-# INLINE gafield #-}
+  gafield = gafieldImpl @name
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GAffineField name Void0 Void0 a b where
@@ -174,20 +154,12 @@ class GPosition (n :: Nat) s t a b | n s -> a
   gposition :: Lens s t a b
 
 instance
-  ( GPosition n s t a b
-  , Generic s
-  , Generic t
-  , UnifyHead s t
-  , UnifyHead t s
-  , path ~ If (n <=? 0)
-              (TypeError ('Text "There is no 0th position"))
-              (GetPositionPaths s n (Rep s))
-  , GPositionSum n path (Rep s) (Rep t) a b
+  ( GPosition n s t a b -- Lift the coverage condition
+  , s `HasShapeOf` t
+  , t `HasShapeOf` s
+  , GPositionImpl n s t a b
   ) => GPosition n s t a b where
-  gposition = withLens
-    (lensVL (\f s -> to <$> gpositionSum @n @path f (from s)))
-    (\get set -> lensVL $ \f s -> set s <$> f (get s))
-  {-# INLINE gposition #-}
+  gposition = gpositionImpl @n
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
@@ -237,20 +209,12 @@ class GConstructor (name :: Symbol) s t a b | name s -> a
   gconstructor :: Prism s t a b
 
 instance
-  ( GConstructor name s t a b
-  , Generic s
-  , Generic t
-  , UnifyHead s t
-  , UnifyHead t s
-  , path ~ FromRight
-      (TypeError
-        ('Text "Type " ':<>: QuoteType s ':<>:
-         'Text " doesn't have a constructor named " ':<>: QuoteSymbol name))
-      (GetNamePath name (Rep s) '[])
-  , GConstructorSum path (Rep s) (Rep t) a b
+  ( GConstructor name s t a b -- Lift the coverage condition
+  , s `HasShapeOf` t
+  , t `HasShapeOf` s
+  , GConstructorImpl name s t a b
   ) => GConstructor name s t a b where
-  gconstructor = withPrism (generic % gconstructorSum @path) prism
-  {-# INLINE gconstructor #-}
+  gconstructor = gconstructorImpl @name
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GConstructor name Void0 Void0 a b where
@@ -300,5 +264,5 @@ instance GPlate Void0 a where
   gplate = error "unreachable"
 
 -- $setup
--- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving
+-- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
 -- >>> import Optics.Core

@@ -48,8 +48,8 @@ import GHC.Generics (Rep)
 import GHC.OverloadedLabels
 import GHC.TypeLits
 
+import Optics.Internal.Generic
 import Optics.Internal.Optic
-import Optics.Generic
 
 -- $sampleUsage
 --
@@ -506,10 +506,10 @@ instance
 
 -- | If no instance matches, try to use 'Generic' machinery for field access.
 instance {-# OVERLAPPABLE #-}
-  ( LabelOptic name k s t a b -- Needed to satisfy functional dependencies
-  , GenericLabelOptic (AnyHasRep (Rep s) (Rep t)) name k s t a b
+  ( LabelOptic name k s t a b -- Lift the coverage condition
+  , GeneralLabelOptic (AnyHasRep (Rep s) (Rep t)) name k s t a b
   ) => LabelOptic name k s t a b where
-  labelOptic = genericLabelOptic @(AnyHasRep (Rep s) (Rep t)) @name
+  labelOptic = generalLabelOptic @(AnyHasRep (Rep s) (Rep t)) @name
 
 ----------------------------------------
 
@@ -518,31 +518,21 @@ instance {-# OVERLAPPABLE #-}
 --
 -- To support this, the first parameter will be instantiated to 'RepDefined' if
 -- at least one of @s@ or @t@ has a 'Generic' instance.
-class GenericLabelOptic (repDefined :: RepDefined) (name :: Symbol) k s t a b where
+class GeneralLabelOptic (repDefined :: RepDefined) (name :: Symbol) k s t a b where
   -- | Used to interpret overloaded label syntax in the absence of an explicit
   -- 'LabelOptic' instance.
-  genericLabelOptic :: Optic k NoIx s t a b
+  generalLabelOptic :: Optic k NoIx s t a b
 
--- | If @s@ or @t@ has a 'Generic' instance, use Generic based data access.
+-- | If @s@ or @t@ has a 'Generic' instance, use generics-based data access.
 instance
   ( k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
            A_Lens
+  , s `HasShapeOf` t
+  , t `HasShapeOf` s
   , GenericOptic name k s t a b
-  ) => GenericLabelOptic 'RepDefined name k s t a b where
-  genericLabelOptic = genericOptic @name
-
-class GenericOptic name k s t a b where
-  genericOptic :: Optic k NoIx s t a b
-
-instance GField name s t a b => GenericOptic name A_Lens s t a b where
-  genericOptic = gfield @name
-
-instance
-  ( GConstructor name s t a b
-  , _name ~ AppendSymbol "_" name
-  ) => GenericOptic _name A_Prism s t a b where
-  genericOptic = gconstructor @name
+  ) => GeneralLabelOptic 'RepDefined name k s t a b where
+  generalLabelOptic = genericOptic @name
 
 -- | Otherwise report an error.
 instance {-# INCOHERENT #-}
@@ -554,8 +544,24 @@ instance {-# INCOHERENT #-}
     ':<>: 'Text " " ':<>: QuoteType a
     ':<>: 'Text " " ':<>: QuoteType b
     ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
-   => GenericLabelOptic repNotDefined name k s t a b where
-  genericLabelOptic = error "unreachable"
+   => GeneralLabelOptic repNotDefined name k s t a b where
+  generalLabelOptic = error "unreachable"
+
+----------------------------------------
+
+class GenericOptic name k s t a b where
+  genericOptic :: Optic k NoIx s t a b
+
+instance
+  ( GFieldImpl name s t a b
+  ) => GenericOptic name A_Lens s t a b where
+  genericOptic = gfieldImpl @name
+
+instance
+  ( GConstructorImpl name s t a b
+  , _name ~ AppendSymbol "_" name
+  ) => GenericOptic _name A_Prism s t a b where
+  genericOptic = gconstructorImpl @name
 
 ----------------------------------------
 

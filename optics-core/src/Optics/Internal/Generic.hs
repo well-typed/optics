@@ -17,18 +17,27 @@ module Optics.Internal.Generic
   , _M1
   , _L1
   , _R1
+  -- * Fields
+  , GFieldImpl(..)
   , GFieldSum(..)
   , GFieldProd(..)
+  , GAffineFieldImpl(..)
   , GAffineFieldSum(..)
+  -- * Positions
+  , GPositionImpl(..)
   , GPositionSum(..)
+  -- * Constructors
+  , GConstructorImpl(..)
   , GConstructorSum(..)
   , GConstructorTuple(..)
+  -- * Types
   , GPlateImpl(..)
   , GPlateInner(..)
   -- * Re-export
   , module Optics.Internal.Generic.TypeLevel
   ) where
 
+import Data.Kind
 import Data.Type.Bool
 import GHC.Generics
 import GHC.TypeLits
@@ -88,6 +97,22 @@ _R1 = prism R1 reviewer
 
 ----------------------------------------
 -- Field
+
+class GFieldImpl (name :: Symbol) s t a b where
+  gfieldImpl :: Lens s t a b
+
+instance
+  ( Generic s
+  , Generic t
+  , path ~ GetFieldPaths s name (Rep s)
+  , GFieldSum name path (Rep s) (Rep t) a b
+  ) => GFieldImpl name s t a b where
+  gfieldImpl = withLens
+    (lensVL (\f s -> to <$> gfieldSum @name @path f (from s)))
+    (\get set -> lensVL $ \f s -> set s <$> f (get s))
+  {-# INLINE gfieldImpl #-}
+
+----------------------------------------
 
 class GFieldSum (name :: Symbol) (path :: PathTree ()) g h a b where
   gfieldSum :: LensVL (g x) (h x) a b
@@ -153,6 +178,28 @@ instance
 ----------------------------------------
 -- Affine field
 
+class GAffineFieldImpl (name :: Symbol) s t a b where
+  gafieldImpl :: AffineTraversal s t a b
+
+instance
+  ( Generic s
+  , Generic t
+  , path ~ GetFieldPaths s name (Rep s)
+  , If (AnyHasPath path)
+       (() :: Constraint)
+       (TypeError
+        ('Text "Type " ':<>: QuoteType s ':<>:
+         'Text " doesn't have a field named " ':<>: QuoteSymbol name))
+  , GAffineFieldSum path (Rep s) (Rep t) a b
+  ) => GAffineFieldImpl name s t a b where
+  gafieldImpl = withAffineTraversal
+    (atraversalVL (\point f s -> to <$> gafieldSum @path point f (from s)))
+    (\match update -> atraversalVL $ \point f s ->
+        either point (fmap (update s) . f) (match s))
+  {-# INLINE gafieldImpl #-}
+
+----------------------------------------
+
 class GAffineFieldSum (path :: PathTree ()) g h a b where
   gafieldSum :: AffineTraversalVL (g x) (h x) a b
 
@@ -195,6 +242,24 @@ instance
 ----------------------------------------
 -- Position
 
+class GPositionImpl (n :: Nat) s t a b where
+  gpositionImpl :: Lens s t a b
+
+instance
+  ( Generic s
+  , Generic t
+  , path ~ If (n <=? 0)
+              (TypeError ('Text "There is no 0th position"))
+              (GetPositionPaths s n (Rep s))
+  , GPositionSum n path (Rep s) (Rep t) a b
+  ) => GPositionImpl n s t a b where
+  gpositionImpl = withLens
+    (lensVL (\f s -> to <$> gpositionSum @n @path f (from s)))
+    (\get set -> lensVL $ \f s -> set s <$> f (get s))
+  {-# INLINE gpositionImpl #-}
+
+----------------------------------------
+
 class GPositionSum (n :: Nat) (path :: PathTree Nat) g h a b where
   gpositionSum :: LensVL (g x) (h x) a b
 
@@ -224,6 +289,24 @@ instance
 
 ----------------------------------------
 -- Constructor
+
+class GConstructorImpl (name :: Symbol) s t a b where
+  gconstructorImpl :: Prism s t a b
+
+instance
+  ( Generic s
+  , Generic t
+  , path ~ FromRight
+    (TypeError
+      ('Text "Type " ':<>: QuoteType s ':<>:
+       'Text " doesn't have a constructor named " ':<>: QuoteSymbol name))
+    (GetNamePath name (Rep s) '[])
+  , GConstructorSum path (Rep s) (Rep t) a b
+  ) => GConstructorImpl name s t a b where
+  gconstructorImpl = withPrism (generic % gconstructorSum @path) prism
+  {-# INLINE gconstructorImpl #-}
+
+----------------------------------------
 
 class GConstructorSum (path :: [Path]) g h a b where
   gconstructorSum :: Prism (g x) (h x) a b
