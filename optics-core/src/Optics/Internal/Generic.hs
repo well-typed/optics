@@ -98,49 +98,62 @@ _R1 = prism R1 reviewer
 ----------------------------------------
 -- Field
 
-class GFieldImpl (name :: Symbol) s t a b where
+class GFieldImpl (name :: Symbol) s t a b | name s -> a
+                                       {- These hold morally, but we can't prove it.
+                                          , name t -> b
+                                          , name s b -> t
+                                          , name t a -> s -} where
   gfieldImpl :: Lens s t a b
 
 instance
   ( Generic s
   , Generic t
   , path ~ GetFieldPaths s name (Rep s)
-  , GFieldSum name path (Rep s) (Rep t) a b
+  , GFieldSum path (Rep s) (Rep t) a b
   ) => GFieldImpl name s t a b where
   gfieldImpl = withLens
-    (lensVL (\f s -> to <$> gfieldSum @name @path f (from s)))
+    (lensVL (\f s -> to <$> gfieldSum @path f (from s)))
     (\get set -> lensVL $ \f s -> set s <$> f (get s))
   {-# INLINE gfieldImpl #-}
 
 ----------------------------------------
 
-class GFieldSum (name :: Symbol) (path :: PathTree ()) g h a b where
+class GFieldSum (path :: PathTree Symbol) g h a b | path g -> a
+                                                  , path h -> b
+                                                  , path g b -> h
+                                                  , path h a -> g where
   gfieldSum :: LensVL (g x) (h x) a b
 
 instance
-  ( GFieldSum name path g h a b
-  ) => GFieldSum name path (M1 D m g) (M1 D m h) a b where
-  gfieldSum f (M1 x) = M1 <$> gfieldSum @name @path f x
+  ( GFieldSum path g h a b
+  ) => GFieldSum path (M1 D m g) (M1 D m h) a b where
+  gfieldSum f (M1 x) = M1 <$> gfieldSum @path f x
 
 instance
-  ( GFieldSum name path1 g1 h1 a b
-  , GFieldSum name path2 g2 h2 a b
-  ) => GFieldSum name ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
-  gfieldSum f (L1 x) = L1 <$> gfieldSum @name @path1 f x
-  gfieldSum f (R1 y) = R1 <$> gfieldSum @name @path2 f y
+  ( GFieldSum path1 g1 h1 a b
+  , GFieldSum path2 g2 h2 a b
+  ) => GFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
+  gfieldSum f (L1 x) = L1 <$> gfieldSum @path1 f x
+  gfieldSum f (R1 y) = R1 <$> gfieldSum @path2 f y
   {-# INLINE gfieldSum #-}
 
 instance
-  ( path ~ FromRight
-      (TypeError
-       ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
-        'Text " doesn't have a field named " ':<>: QuoteSymbol name))
-      epath
+  ( path ~ GFieldPath con epath
   , GFieldProd path g h a b
-  ) => GFieldSum name ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g) (M1 C m h) a b where
+  ) => GFieldSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
+                                   (M1 C ('MetaCons con fix hs) h) a b where
   gfieldSum f (M1 x) = M1 <$> gfieldProd @path f x
 
-class GFieldProd (path :: [Path]) g h a b where
+type family GFieldPath (con :: Symbol) (e :: Either Symbol [Path]) :: [Path] where
+  GFieldPath _   ('Right path) = path
+  GFieldPath con ('Left name)  = TypeError
+    ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
+     'Text " doesn't have a field named " ':<>: QuoteSymbol name)
+
+class GFieldProd (path :: [Path]) g h a b | path g -> a
+                                          , path h -> b
+                                          , path g b -> h
+                                          , path h a -> g where
   gfieldProd :: LensVL (g x) (h x) a b
 
 -- fast path left
@@ -200,7 +213,7 @@ instance
 
 ----------------------------------------
 
-class GAffineFieldSum (path :: PathTree ()) g h a b where
+class GAffineFieldSum (path :: PathTree Symbol) g h a b where
   gafieldSum :: AffineTraversalVL (g x) (h x) a b
 
 instance
@@ -221,17 +234,17 @@ instance
   ) => GAffineFieldSum ('PathLeaf epath) (M1 C m g) (M1 C m h) a b where
   gafieldSum point f (M1 x) = M1 <$> gafieldMaybe @epath point f x
 
-class GAffineFieldMaybe (epath :: Either () [Path]) g h a b where
+class GAffineFieldMaybe (epath :: Either Symbol [Path]) g h a b where
   gafieldMaybe :: AffineTraversalVL (g x) (h x) a b
 
 -- fast path
-instance GAffineFieldMaybe ('Left '()) g g a b where
+instance GAffineFieldMaybe ('Left name) g g a b where
   gafieldMaybe point _ g = point g
 
 -- slow path
 instance {-# INCOHERENT #-}
   ( g ~ h
-  ) => GAffineFieldMaybe ('Left '()) g h a b where
+  ) => GAffineFieldMaybe ('Left name) g h a b where
   gafieldMaybe point _ g = point g
 
 instance
@@ -242,7 +255,12 @@ instance
 ----------------------------------------
 -- Position
 
-class GPositionImpl (n :: Nat) s t a b where
+class GPositionImpl (n :: Nat) s t a b | n s -> a
+                                    {- These hold morally, but we can't prove it.
+                                       , n t -> b
+                                       , n s b -> t
+                                       , n t a -> s -} where
+
   gpositionImpl :: Lens s t a b
 
 instance
@@ -251,46 +269,57 @@ instance
   , path ~ If (n <=? 0)
               (TypeError ('Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
-  , GPositionSum n path (Rep s) (Rep t) a b
+  , GPositionSum path (Rep s) (Rep t) a b
   ) => GPositionImpl n s t a b where
   gpositionImpl = withLens
-    (lensVL (\f s -> to <$> gpositionSum @n @path f (from s)))
+    (lensVL (\f s -> to <$> gpositionSum @path f (from s)))
     (\get set -> lensVL $ \f s -> set s <$> f (get s))
   {-# INLINE gpositionImpl #-}
 
 ----------------------------------------
 
-class GPositionSum (n :: Nat) (path :: PathTree Nat) g h a b where
+class GPositionSum (path :: PathTree (Nat, Nat)) g h a b | path g -> a
+                                                         , path h -> b
+                                                         , path g b -> h
+                                                         , path h a -> g where
   gpositionSum :: LensVL (g x) (h x) a b
 
 instance
-  ( GPositionSum n path g h a b
-  ) => GPositionSum n path (M1 D m1 g) (M1 D m2 h) a b where
-  gpositionSum f (M1 x) = M1 <$> gpositionSum @n @path f x
+  ( GPositionSum path g h a b
+  ) => GPositionSum path (M1 D m g) (M1 D m h) a b where
+  gpositionSum f (M1 x) = M1 <$> gpositionSum @path f x
 
 instance
-  ( GPositionSum n path1 g1 h1 a b
-  , GPositionSum n path2 g2 h2 a b
-  ) => GPositionSum n ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
-  gpositionSum f (L1 x) = L1 <$> gpositionSum @n @path1 f x
-  gpositionSum f (R1 y) = R1 <$> gpositionSum @n @path2 f y
+  ( GPositionSum path1 g1 h1 a b
+  , GPositionSum path2 g2 h2 a b
+  ) => GPositionSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
+  gpositionSum f (L1 x) = L1 <$> gpositionSum @path1 f x
+  gpositionSum f (R1 y) = R1 <$> gpositionSum @path2 f y
   {-# INLINE gpositionSum #-}
 
 instance
-  ( path ~ If (IsRight epath)
-      (FromRight Any epath)
-      (TypeError
-       ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
-        'Text " has " ':<>: 'ShowType (FromLeft Any epath) ':<>:
-        'Text " fields, " ':<>: ToOrdinal n ':<>: 'Text " requested"))
+  ( path ~ GPositionPath con epath
   , GFieldProd path g h a b
-  ) => GPositionSum n ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g) (M1 C m h) a b where
+  ) => GPositionSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
+                                      (M1 C ('MetaCons con fix hs) h) a b where
   gpositionSum f (M1 x) = M1 <$> gfieldProd @path f x
+
+type family GPositionPath con (e :: Either (Nat, Nat) [Path]) :: [Path] where
+  GPositionPath _   ('Right path)   = path
+  GPositionPath con ('Left '(n, k)) = TypeError
+    ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
+     'Text " has " ':<>: 'ShowType k ':<>:
+     'Text " fields, " ':<>: ToOrdinal n ':<>: 'Text " requested")
 
 ----------------------------------------
 -- Constructor
 
-class GConstructorImpl (name :: Symbol) s t a b where
+class GConstructorImpl (name :: Symbol) s t a b | name s -> a
+                                             {- These hold morally, but we can't prove it.
+                                                , name t -> b
+                                                , name s b -> t
+                                                , name t a -> s -} where
+
   gconstructorImpl :: Prism s t a b
 
 instance
@@ -308,7 +337,10 @@ instance
 
 ----------------------------------------
 
-class GConstructorSum (path :: [Path]) g h a b where
+class GConstructorSum (path :: [Path]) g h a b  | path g -> a
+                                                , path h -> b
+                                                , path g b -> h
+                                                , path h a -> g where
   gconstructorSum :: Prism (g x) (h x) a b
 
 instance
@@ -347,14 +379,18 @@ instance
   ) => GConstructorSum '[] (M1 C m g) (M1 C m h) a b where
   gconstructorSum = _M1 % gconstructorTuple
 
-class GConstructorTuple g h a b where
+class GConstructorTuple g h a b | g -> a
+                                , h -> b
+                                , g b -> h
+                                , h a -> g where
   gconstructorTuple :: Prism (g x) (h x) a b
 
 -- Fon uncluttering types in below instances a bit.
 type F m a = M1 S m (Rec0 a)
 
 instance {-# INCOHERENT #-}
-  ( TypeError
+  ( LiftCoverageCondition () g h a b
+  , TypeError
     ('Text "Generic based access supports constructors" ':$$:
      'Text "containing up to 5 fields. Please generate" ':$$:
      'Text "PrismS with Template Haskell if you need more.")

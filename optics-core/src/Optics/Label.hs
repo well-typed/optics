@@ -506,8 +506,8 @@ instance
 
 -- | If no instance matches, try to use 'Generic' machinery for field access.
 instance {-# OVERLAPPABLE #-}
-  ( LabelOptic name k s t a b -- Lift the coverage condition
-  , GeneralLabelOptic (AnyHasRep (Rep s) (Rep t)) name k s t a b
+  ( GeneralLabelOptic (AnyHasRep (Rep s) (Rep t)) name k s t a b
+  , LiftCoverageCondition k s t a b
   ) => LabelOptic name k s t a b where
   labelOptic = generalLabelOptic @(AnyHasRep (Rep s) (Rep t)) @name
 
@@ -536,15 +536,15 @@ instance
 
 -- | Otherwise report an error.
 instance {-# INCOHERENT #-}
-  TypeError
-   ('Text "No instance for LabelOptic " ':<>: 'ShowType name
-    ':<>: 'Text " " ':<>: QuoteType k
-    ':<>: 'Text " " ':<>: QuoteType s
-    ':<>: 'Text " " ':<>: QuoteType t
-    ':<>: 'Text " " ':<>: QuoteType a
-    ':<>: 'Text " " ':<>: QuoteType b
-    ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
-   => GeneralLabelOptic repNotDefined name k s t a b where
+  ( TypeError
+    ('Text "No instance for LabelOptic " ':<>: 'ShowType name
+     ':<>: 'Text " " ':<>: QuoteType k
+     ':<>: 'Text " " ':<>: QuoteType s
+     ':<>: 'Text " " ':<>: QuoteType t
+     ':<>: 'Text " " ':<>: QuoteType a
+     ':<>: 'Text " " ':<>: QuoteType b
+     ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
+  ) => GeneralLabelOptic repNotDefined name k s t a b where
   generalLabelOptic = error "unreachable"
 
 ----------------------------------------

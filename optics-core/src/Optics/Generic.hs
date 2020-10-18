@@ -75,10 +75,10 @@ class GField (name :: Symbol) s t a b | name s -> a
   gfield :: Lens s t a b
 
 instance
-  ( GField name s t a b -- Lift the coverage condition
-  , s `HasShapeOf` t
+  ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GFieldImpl name s t a b
+  , LiftCoverageCondition () s t a b
   ) => GField name s t a b where
   gfield = gfieldImpl @name
 
@@ -122,10 +122,10 @@ class GAffineField (name :: Symbol) s t a b | name s -> a
   gafield :: AffineTraversal s t a b
 
 instance
-  ( GAffineField name s t a b -- Lift the coverage condition
-  , s `HasShapeOf` t
+  ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GAffineFieldImpl name s t a b
+  , LiftCoverageCondition () s t a b
   ) => GAffineField name s t a b where
   gafield = gafieldImpl @name
 
@@ -154,10 +154,10 @@ class GPosition (n :: Nat) s t a b | n s -> a
   gposition :: Lens s t a b
 
 instance
-  ( GPosition n s t a b -- Lift the coverage condition
-  , s `HasShapeOf` t
+  ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GPositionImpl n s t a b
+  , LiftCoverageCondition () s t a b
   ) => GPosition n s t a b where
   gposition = gpositionImpl @n
 
@@ -209,10 +209,10 @@ class GConstructor (name :: Symbol) s t a b | name s -> a
   gconstructor :: Prism s t a b
 
 instance
-  ( GConstructor name s t a b -- Lift the coverage condition
-  , s `HasShapeOf` t
+  ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GConstructorImpl name s t a b
+  , LiftCoverageCondition () s t a b
   ) => GConstructor name s t a b where
   gconstructor = gconstructorImpl @name
 

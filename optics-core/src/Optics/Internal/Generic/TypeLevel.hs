@@ -27,7 +27,7 @@ data Path = PathLeft | PathRight
 -- Paths to a field
 
 -- | Compute paths to a field with a specific name.
-type family GetFieldPaths s (name :: Symbol) g :: PathTree () where
+type family GetFieldPaths s (name :: Symbol) g :: PathTree Symbol where
   GetFieldPaths s name (M1 D _ g)  = GetFieldPaths s name g
   GetFieldPaths s name (g1 :+: g2) = 'PathTree (GetFieldPaths s name g1)
                                                (GetFieldPaths s name g2)
@@ -38,7 +38,7 @@ type family GetFieldPaths s (name :: Symbol) g :: PathTree () where
 
 -- | Compute path to a constructor in a sum or a field in a product with a
 -- specific name.
-type family GetNamePath (name :: Symbol) g (acc :: [Path]) :: Either () [Path] where
+type family GetNamePath (name :: Symbol) g (acc :: [Path]) :: Either Symbol [Path] where
   GetNamePath name (M1 D _ g) acc = GetNamePath name g acc
 
   -- Find path to a constructor in a sum type
@@ -51,13 +51,13 @@ type family GetNamePath (name :: Symbol) g (acc :: [Path]) :: Either () [Path] w
   GetNamePath name (g1 :*: g2) acc = FirstRight (GetNamePath name g1 ('PathLeft  : acc))
                                                 (GetNamePath name g2 ('PathRight : acc))
 
-  GetNamePath _ _ _ = 'Left '()
+  GetNamePath name _ _ = 'Left name
 
 ----------------------------------------
 -- Paths to a position
 
 -- | Compute paths to a field at a specific position.
-type family GetPositionPaths s (n :: Nat) g :: PathTree Nat where
+type family GetPositionPaths s (n :: Nat) g :: PathTree (Nat, Nat) where
   GetPositionPaths s n (M1 D _ g)  = GetPositionPaths s n g
   GetPositionPaths s n (g1 :+: g2) = 'PathTree (GetPositionPaths s n g1)
                                                (GetPositionPaths s n g2)
@@ -69,29 +69,29 @@ type family GetPositionPaths s (n :: Nat) g :: PathTree Nat where
 -- | Compute path to a constructor in a sum or a field in a product at a
 -- specific position.
 type family GetPositionPath (n :: Nat) g (k :: Nat) (acc :: [Path])
-  :: Either Nat [Path] where
+  :: Either (Nat, Nat) [Path] where
   GetPositionPath n (M1 D _ g) k acc = GetPositionPath n g k acc
 
   -- Find field at a position in a sum type
   GetPositionPath n (M1 C _ _) k acc =
-    If (n == k) ('Right (Reverse acc '[])) ('Left k)
+    If (n == k) ('Right (Reverse acc '[])) ('Left '(n, k))
   GetPositionPath n (g1 :+: g2) k acc =
-    ContinueWhenLeft (GetPositionPath n g1 k ('PathLeft : acc)) n g2 acc
+    ContinueWhenLeft (GetPositionPath n g1 k ('PathLeft : acc)) g2 acc
 
   -- Find field at a position in a product type
   GetPositionPath n (M1 S _ _) k acc =
-    If (n == k) ('Right (Reverse acc '[])) ('Left k)
+    If (n == k) ('Right (Reverse acc '[])) ('Left '(n, k))
   GetPositionPath n (g1 :*: g2) k acc =
-    ContinueWhenLeft (GetPositionPath n g1 k ('PathLeft : acc)) n g2 acc
+    ContinueWhenLeft (GetPositionPath n g1 k ('PathLeft : acc)) g2 acc
 
-  GetPositionPath _ _ k _ = 'Left k
+  GetPositionPath n _ k _ = 'Left '(n, k)
 
 -- | If the left branch had the position we're looking for, return it. Otherwise
 -- continue with the right branch.
-type family ContinueWhenLeft (r :: Either Nat [Path]) (n :: Nat) g acc
-  :: Either Nat [Path] where
-  ContinueWhenLeft ('Right path) _ _ _ = 'Right path
-  ContinueWhenLeft ('Left k) n g acc = GetPositionPath n g (k + 1) ('PathRight : acc)
+type family ContinueWhenLeft (r :: Either (Nat, Nat) [Path]) g acc
+  :: Either (Nat, Nat) [Path] where
+  ContinueWhenLeft ('Right path)   _ _   = 'Right path
+  ContinueWhenLeft ('Left '(n, k)) g acc = GetPositionPath n g (k + 1) ('PathRight : acc)
 
 ----------------------------------------
 -- Misc
@@ -106,3 +106,28 @@ type family AnyHasPath (path :: PathTree e) :: Bool where
 class HasShapeOf (a :: k) (b :: k)
 instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
 instance (a ~ b) => HasShapeOf a b
+
+-- | Lift the coverage condition and show something useful when type inference
+-- goes into a loop and stops with "reduction stack overflow" message (sometimes
+-- happens when trying to infer types of local bindings when monomorphism
+-- restriction is enabled).
+class LiftCoverageCondition k s t a b | s -> k a
+                                      , t -> k b
+                                      , s b -> t
+                                      , t a -> s
+
+instance
+  ( TypeInferenceLoop
+    "Type inference for the local binding failed. Write the type"
+    "signature yourself or disable monomorphism restriction with"
+    "NoMonomorphismRestriction LANGUAGE pragma so GHC infers it."
+    k s t a b
+  ) => LiftCoverageCondition k s t a b
+
+class TypeInferenceLoop msg1 msg2 msg3 k s t a b | s -> k a
+                                                 , t -> k b
+                                                 , s b -> t
+                                                 , t a -> s
+instance
+  ( TypeInferenceLoop msg1 msg2 msg3 k s t a b
+  ) => TypeInferenceLoop msg1 msg2 msg3 k s t a b
