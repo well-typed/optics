@@ -24,11 +24,15 @@
 -- >>> set _2 'x' (MkT 1 False)
 -- MkT 1 'x'
 --
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances   #-}
 module Data.Tuple.Optics
   (
+    PositionOptic (..)
   -- * Tuples
-    Field1(..)
+  , Field1, _1
   , Field2(..)
   , Field3(..)
   , Field4(..)
@@ -46,78 +50,91 @@ import Data.Functor.Product
 import Data.Kind
 import Data.Proxy
 import GHC.Generics ((:*:)(..), Generic(..), K1, M1, U1)
+import GHC.TypeLits (Nat, type (-))
 
 import GHC.Generics.Optics
+import Optics.Iso
 import Optics.Lens
 import Optics.Optic
 
+class PositionOptic (pos :: Nat) k s t a b | pos s -> k a
+                                           , pos t -> k b
+                                           , pos s b -> t
+                                           , pos t a -> s where
+    positionOptic :: Optic k NoIx s t a b
+    default positionOptic :: (k ~ A_Lens, Generic s, Generic t, GIxed (NatToN pos) (Rep s) (Rep t) a b) => Optic k NoIx s t a b
+    positionOptic = ix (Proxy :: Proxy (NatToN pos))
+    {-# INLINE [1] positionOptic #-}
+
+type family NatToN (n :: Nat) :: Type where
+    NatToN 0 = Z
+    NatToN n = S (NatToN (n - 1))
+
 -- | Provides access to 1st field of a tuple.
-class Field1 s t a b | s -> a, t -> b, s b -> t, t a -> s where
-  -- | Access the 1st field of a tuple (and possibly change its type).
-  --
-  -- >>> (1,2) ^. _1
-  -- 1
-  --
-  -- >>> (1,2) & _1 .~ "hello"
-  -- ("hello",2)
-  --
-  -- >>> traverseOf _1 putStrLn ("hello","world")
-  -- hello
-  -- ((),"world")
-  --
-  -- This can also be used on larger tuples as well:
-  --
-  -- >>> (1,2,3,4,5) & _1 %~ (+41)
-  -- (42,2,3,4,5)
-  _1 :: Lens s t a b
-  default _1 :: (Generic s, Generic t, GIxed N0 (Rep s) (Rep t) a b)
-             => Lens s t a b
-  _1 = ix proxyN0
-  {-# INLINE[1] _1 #-}
+type Field1 = PositionOptic 0 A_Lens
 
-instance Field1 (Identity a) (Identity b) a b where
-  _1 = lensVL $ \f (Identity a) -> Identity <$> f a
-  {-# INLINE[1] _1 #-}
+-- | Access the 1st field of a tuple (and possibly change its type).
+--
+-- >>> (1,2) ^. _1
+-- 1
+--
+-- >>> (1,2) & _1 .~ "hello"
+-- ("hello",2)
+--
+-- >>> traverseOf _1 putStrLn ("hello","world")
+-- hello
+-- ((),"world")
+--
+-- This can also be used on larger tuples as well:
+--
+-- >>> (1,2,3,4,5) & _1 %~ (+41)
+-- (42,2,3,4,5)
+_1 :: Field1 s t a b => Lens s t a b
+_1 = positionOptic @0
 
-instance Field1 (Product f g a) (Product f' g a) (f a) (f' a) where
-  _1 = lensVL $ \f ~(Pair a b) -> flip Pair b <$> f a
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 An_Iso (Identity a) (Identity b) a b where
+  positionOptic = coerced
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 ((f :*: g) p) ((f' :*: g) p) (f p) (f' p) where
-  _1 = lensVL $ \f ~(l :*: r) -> (:*: r) <$> f l
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (Product f g a) (Product f' g a) (f a) (f' a) where
+  positionOptic = lensVL $ \f ~(Pair a b) -> flip Pair b <$> f a
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b) (a',b) a a' where
-  _1 = lensVL $ \k ~(a,b) -> k a <&> \a' -> (a',b)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens ((f :*: g) p) ((f' :*: g) p) (f p) (f' p) where
+  positionOptic = lensVL $ \f ~(l :*: r) -> (:*: r) <$> f l
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c) (a',b,c) a a' where
-  _1 = lensVL $ \k ~(a,b,c) -> k a <&> \a' -> (a',b,c)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b) (a',b) a a' where
+  positionOptic = lensVL $ \k ~(a,b) -> k a <&> \a' -> (a',b)
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c,d) (a',b,c,d) a a' where
-  _1 = lensVL $ \k ~(a,b,c,d) -> k a <&> \a' -> (a',b,c,d)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b,c) (a',b,c) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c) -> k a <&> \a' -> (a',b,c)
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c,d,e) (a',b,c,d,e) a a' where
-  _1 = lensVL $ \k ~(a,b,c,d,e) -> k a <&> \a' -> (a',b,c,d,e)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b,c,d) (a',b,c,d) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c,d) -> k a <&> \a' -> (a',b,c,d)
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c,d,e,f) (a',b,c,d,e,f) a a' where
-  _1 = lensVL $ \k ~(a,b,c,d,e,f) -> k a <&> \a' -> (a',b,c,d,e,f)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b,c,d,e) (a',b,c,d,e) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c,d,e) -> k a <&> \a' -> (a',b,c,d,e)
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c,d,e,f,g) (a',b,c,d,e,f,g) a a' where
-  _1 = lensVL $ \k ~(a,b,c,d,e,f,g) -> k a <&> \a' -> (a',b,c,d,e,f,g)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b,c,d,e,f) (a',b,c,d,e,f) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c,d,e,f) -> k a <&> \a' -> (a',b,c,d,e,f)
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c,d,e,f,g,h) (a',b,c,d,e,f,g,h) a a' where
-  _1 = lensVL $ \k ~(a,b,c,d,e,f,g,h) -> k a <&> \a' -> (a',b,c,d,e,f,g,h)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b,c,d,e,f,g) (a',b,c,d,e,f,g) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c,d,e,f,g) -> k a <&> \a' -> (a',b,c,d,e,f,g)
+  {-# INLINE[1] positionOptic #-}
 
-instance Field1 (a,b,c,d,e,f,g,h,i) (a',b,c,d,e,f,g,h,i) a a' where
-  _1 = lensVL $ \k ~(a,b,c,d,e,f,g,h,i) -> k a <&> \a' -> (a',b,c,d,e,f,g,h,i)
-  {-# INLINE[1] _1 #-}
+instance PositionOptic 0 A_Lens (a,b,c,d,e,f,g,h) (a',b,c,d,e,f,g,h) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c,d,e,f,g,h) -> k a <&> \a' -> (a',b,c,d,e,f,g,h)
+  {-# INLINE[1] positionOptic #-}
+
+instance PositionOptic 0 A_Lens (a,b,c,d,e,f,g,h,i) (a',b,c,d,e,f,g,h,i) a a' where
+  positionOptic = lensVL $ \k ~(a,b,c,d,e,f,g,h,i) -> k a <&> \a' -> (a',b,c,d,e,f,g,h,i)
+  {-# INLINE[1] positionOptic #-}
 
 -- | Provides access to the 2nd field of a tuple.
 class Field2 s t a b | s -> a, t -> b, s b -> t, t a -> s where
@@ -479,10 +496,6 @@ type N5 = S N4
 type N6 = S N5
 type N7 = S N6
 type N8 = S N7
-
-proxyN0 :: Proxy N0
-proxyN0 = Proxy
-{-# INLINE proxyN0 #-}
 
 proxyN1 :: Proxy N1
 proxyN1 = Proxy
