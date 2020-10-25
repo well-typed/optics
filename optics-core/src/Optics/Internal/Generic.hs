@@ -19,10 +19,11 @@ module Optics.Internal.Generic
   , _R1
   -- * Fields
   , GFieldImpl(..)
-  , GFieldSum(..)
-  , GFieldProd(..)
+  , GSetFieldSum(..)
+  , GSetFieldProd(..)
   , GAffineFieldImpl(..)
   , GAffineFieldSum(..)
+  , GFieldProd(..)
   -- * Positions
   , GPositionImpl(..)
   , GPositionSum(..)
@@ -40,6 +41,7 @@ module Optics.Internal.Generic
 import Data.Kind
 import Data.Type.Bool
 import GHC.Generics
+import GHC.Records
 import GHC.TypeLits
 
 import Optics.AffineTraversal
@@ -109,84 +111,77 @@ instance
   ( Generic s
   , Generic t
   , path ~ GetFieldPaths s name (Rep s)
-  , GFieldSum path (Rep s) (Rep t) a b
+  , HasField name s a
+  , GSetFieldSum path (Rep s) (Rep t) b
   ) => GFieldImpl name s t a b where
-  gfieldImpl = withLens
-    (lensVL (\f s -> to <$> gfieldSum @path f (from s)))
-    (\get set -> lensVL $ \f s -> set s <$> f (get s))
+  gfieldImpl = lens (getField @name) (\s -> to . gsetFieldSum @path (from s))
   {-# INLINE gfieldImpl #-}
 
 ----------------------------------------
 
-class GFieldSum (path :: PathTree Symbol) g h a b | path g -> a
-                                                  , path h -> b
-                                                  , path g b -> h
-                                                  , path h a -> g where
-  gfieldSum :: LensVL (g x) (h x) a b
+class GSetFieldSum (path :: PathTree Symbol) g h b | path h -> b
+                                                   , path g b -> h where
+  gsetFieldSum :: g x -> b -> h x
 
 instance
-  ( GFieldSum path g h a b
-  ) => GFieldSum path (M1 D m g) (M1 D m h) a b where
-  gfieldSum f (M1 x) = M1 <$> gfieldSum @path f x
+  ( GSetFieldSum path g h b
+  ) => GSetFieldSum path (M1 D m g) (M1 D m h) b where
+  gsetFieldSum (M1 x) = M1 . gsetFieldSum @path x
 
 instance
-  ( GFieldSum path1 g1 h1 a b
-  , GFieldSum path2 g2 h2 a b
-  ) => GFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
-  gfieldSum f (L1 x) = L1 <$> gfieldSum @path1 f x
-  gfieldSum f (R1 y) = R1 <$> gfieldSum @path2 f y
-  {-# INLINE gfieldSum #-}
+  ( GSetFieldSum path1 g1 h1 b
+  , GSetFieldSum path2 g2 h2 b
+  ) => GSetFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) b where
+  gsetFieldSum (L1 x) = L1 . gsetFieldSum @path1 x
+  gsetFieldSum (R1 y) = R1 . gsetFieldSum @path2 y
+  {-# INLINE gsetFieldSum #-}
 
 instance
-  ( path ~ GFieldPath con epath
-  , GFieldProd path g h a b
-  ) => GFieldSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
-                                   (M1 C ('MetaCons con fix hs) h) a b where
-  gfieldSum f (M1 x) = M1 <$> gfieldProd @path f x
+  ( path ~ GSetFieldPath con epath
+  , GSetFieldProd path g h b
+  ) => GSetFieldSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
+                                      (M1 C ('MetaCons con fix hs) h) b where
+  gsetFieldSum (M1 x) = M1 . gsetFieldProd @path x
 
-type family GFieldPath (con :: Symbol) (e :: Either Symbol [Path]) :: [Path] where
-  GFieldPath _   ('Right path) = path
-  GFieldPath con ('Left name)  = TypeError
+type family GSetFieldPath (con :: Symbol) (e :: Either Symbol [Path]) :: [Path] where
+  GSetFieldPath _   ('Right path) = path
+  GSetFieldPath con ('Left name)  = TypeError
     ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
      'Text " doesn't have a field named " ':<>: QuoteSymbol name)
 
-class GFieldProd (path :: [Path]) g h a b | path g -> a
-                                          , path h -> b
-                                          , path g b -> h
-                                          , path h a -> g where
-  gfieldProd :: LensVL (g x) (h x) a b
+class GSetFieldProd (path :: [Path]) g h b | path h -> b
+                                           , path g b -> h where
+  gsetFieldProd :: g x -> b -> h x
 
--- fast path left
 instance
-  ( GFieldProd path g1 h1 a b
-  ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) a b where
-  gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
+  ( GSetFieldProd path g1 h1 b
+  ) => GSetFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) b where
+  gsetFieldProd (x :*: y) = (:*: y) . gsetFieldProd @path x
 
 -- slow path left
 instance {-# INCOHERENT #-}
-  ( GFieldProd path g1 h1 a b
+  ( GSetFieldProd path g1 h1 b
   , g2 ~ h2
-  ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) a b where
-  gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
+  ) => GSetFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) b where
+  gsetFieldProd (x :*: y) = (:*: y) . gsetFieldProd @path x
 
 -- fast path right
 instance
-  ( GFieldProd path g2 h2 a b
-  ) => GFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) a b where
-  gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
+  ( GSetFieldProd path g2 h2 b
+  ) => GSetFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) b where
+  gsetFieldProd (x :*: y) = (x :*:) . gsetFieldProd @path y
 
 -- slow path right
 instance {-# INCOHERENT #-}
-  ( GFieldProd path g2 h2 a b
+  ( GSetFieldProd path g2 h2 b
   , g1 ~ h1
-  ) => GFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) a b where
-  gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
+  ) => GSetFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) b where
+  gsetFieldProd (x :*: y) = (x :*:) . gsetFieldProd @path y
 
 instance
-  ( g ~ Rec0 a
-  , h ~ Rec0 b
-  ) => GFieldProd path (M1 S m g) (M1 S m h) a b where
-  gfieldProd f (M1 (K1 x)) = M1 . K1 <$> f x
+  ( r ~ b
+  ) => GSetFieldProd path (M1 S m g) (M1 S m (Rec0 b)) r where
+  gsetFieldProd _ = M1 . K1
 
 ----------------------------------------
 -- Affine field
@@ -251,6 +246,46 @@ instance
   ( GFieldProd prodPath g h a b
   ) => GAffineFieldMaybe ('Right prodPath) g h a b where
   gafieldMaybe _ f g = gfieldProd @prodPath f g
+
+----------------------------------------
+
+class GFieldProd (path :: [Path]) g h a b | path g -> a
+                                          , path h -> b
+                                          , path g b -> h
+                                          , path h a -> g where
+  gfieldProd :: LensVL (g x) (h x) a b
+
+-- fast path left
+instance
+  ( GFieldProd path g1 h1 a b
+  ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) a b where
+  gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
+
+-- slow path left
+instance {-# INCOHERENT #-}
+  ( GFieldProd path g1 h1 a b
+  , g2 ~ h2
+  ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) a b where
+  gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
+
+-- fast path right
+instance
+  ( GFieldProd path g2 h2 a b
+  ) => GFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) a b where
+  gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
+
+-- slow path right
+instance {-# INCOHERENT #-}
+  ( GFieldProd path g2 h2 a b
+  , g1 ~ h1
+  ) => GFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) a b where
+  gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
+
+instance
+  ( r ~ a
+  , s ~ b
+  ) => GFieldProd path (M1 S m (Rec0 a)) (M1 S m (Rec0 b)) r s where
+  gfieldProd f (M1 (K1 x)) = M1 . K1 <$> f x
 
 ----------------------------------------
 -- Position
