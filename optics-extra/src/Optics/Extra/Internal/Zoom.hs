@@ -139,8 +139,7 @@ instance SG.Semigroup a => SG.Semigroup (May a) where
 
 instance Monoid a => Monoid (May a) where
   mempty = May $ Just mempty
-  May (Just a) `mappend` May (Just b) = May $ Just (a `mappend` b)
-  _            `mappend` _            = May Nothing
+  mappend = (<>)
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
 
@@ -163,9 +162,7 @@ instance SG.Semigroup a => SG.Semigroup (Err e a) where
 
 instance Monoid a => Monoid (Err e a) where
   mempty = Err $ Right mempty
-  Err (Right a) `mappend` Err (Right b) = Err $ Right (a `mappend` b)
-  Err (Left e)  `mappend` _             = Err $ Left e
-  _             `mappend` Err (Left e)  = Err $ Left e
+  mappend = (<>)
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
 
@@ -186,7 +183,7 @@ instance (Monad m, SG.Semigroup r) => SG.Semigroup (Effect m r) where
 
 instance (Monad m, Monoid r) => Monoid (Effect m r) where
   mempty = Effect $ pure mempty
-  Effect ma `mappend` Effect mb = Effect $ mappend <$> ma <*> mb
+  mappend = (<>)
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
 
@@ -206,10 +203,7 @@ instance
 
 instance (Monoid c, Monoid w, Monad m) => Monoid (EffectRWS w s m c) where
   mempty  = EffectRWS $ \s -> pure (mempty, s, mempty)
-  EffectRWS ma `mappend` EffectRWS mb = EffectRWS $ \s -> do
-    (c, s', w)    <- ma s
-    (c', s'', w') <- mb s'
-    pure (c `mappend` c', s'', w `mappend` w')
+  mappend = (<>)
   {-# INLINE mempty #-}
   {-# INLINE mappend #-}
 
