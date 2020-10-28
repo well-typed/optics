@@ -153,26 +153,27 @@ class GSetFieldProd (path :: [Path]) g h b | path h -> b
                                            , path g b -> h where
   gsetFieldProd :: g x -> b -> h x
 
-instance
+-- fast path left
+instance {-# OVERLAPPING #-}
   ( GSetFieldProd path g1 h1 b
   ) => GSetFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) b where
   gsetFieldProd (x :*: y) = (:*: y) . gsetFieldProd @path x
 
 -- slow path left
-instance {-# INCOHERENT #-}
+instance
   ( GSetFieldProd path g1 h1 b
   , g2 ~ h2
   ) => GSetFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) b where
   gsetFieldProd (x :*: y) = (:*: y) . gsetFieldProd @path x
 
 -- fast path right
-instance
+instance {-# OVERLAPPING #-}
   ( GSetFieldProd path g2 h2 b
   ) => GSetFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) b where
   gsetFieldProd (x :*: y) = (x :*:) . gsetFieldProd @path y
 
 -- slow path right
-instance {-# INCOHERENT #-}
+instance
   ( GSetFieldProd path g2 h2 b
   , g1 ~ h1
   ) => GSetFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) b where
@@ -233,11 +234,12 @@ class GAffineFieldMaybe (epath :: Either Symbol [Path]) g h a b where
   gafieldMaybe :: AffineTraversalVL (g x) (h x) a b
 
 -- fast path
-instance GAffineFieldMaybe ('Left name) g g a b where
+instance {-# OVERLAPPING #-}
+  GAffineFieldMaybe ('Left name) g g a b where
   gafieldMaybe point _ g = point g
 
 -- slow path
-instance {-# INCOHERENT #-}
+instance
   ( g ~ h
   ) => GAffineFieldMaybe ('Left name) g h a b where
   gafieldMaybe point _ g = point g
@@ -256,26 +258,26 @@ class GFieldProd (path :: [Path]) g h a b | path g -> a
   gfieldProd :: LensVL (g x) (h x) a b
 
 -- fast path left
-instance
+instance {-# OVERLAPPING #-}
   ( GFieldProd path g1 h1 a b
   ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) a b where
   gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
 
 -- slow path left
-instance {-# INCOHERENT #-}
+instance
   ( GFieldProd path g1 h1 a b
   , g2 ~ h2
   ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) a b where
   gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
 
 -- fast path right
-instance
+instance {-# OVERLAPPING #-}
   ( GFieldProd path g2 h2 a b
   ) => GFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) a b where
   gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
 
 -- slow path right
-instance {-# INCOHERENT #-}
+instance
   ( GFieldProd path g2 h2 a b
   , g1 ~ h1
   ) => GFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) a b where
@@ -384,26 +386,26 @@ instance
   gconstructorSum = _M1 % gconstructorSum @path
 
 -- fast path left
-instance
+instance {-# OVERLAPPING #-}
   ( GConstructorSum path g1 h1 a b
   ) => GConstructorSum ('PathLeft : path) (g1 :+: g2) (h1 :+: g2) a b where
   gconstructorSum = _L1 % gconstructorSum @path
 
 -- slow path left
-instance {-# INCOHERENT #-}
+instance
   ( GConstructorSum path g1 h1 a b
   , g2 ~ h2
   ) => GConstructorSum ('PathLeft : path) (g1 :+: g2) (h1 :+: h2) a b where
   gconstructorSum = _L1 % gconstructorSum @path
 
 -- fast path right
-instance
+instance {-# OVERLAPPING #-}
   ( GConstructorSum path g2 h2 a b
   ) => GConstructorSum ('PathRight : path) (g1 :+: g2) (g1 :+: h2) a b where
   gconstructorSum = _R1 % gconstructorSum @path
 
 -- slow path right
-instance {-# INCOHERENT #-}
+instance
   ( GConstructorSum path g2 h2 a b
   , g1 ~ h1
   ) => GConstructorSum ('PathRight : path) (g1 :+: g2) (h1 :+: h2) a b where
