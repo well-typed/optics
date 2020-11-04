@@ -142,3 +142,8 @@ instance CurryCompose '[] where
 instance CurryCompose xs => CurryCompose (x ': xs) where
   composeN ij f = composeN @xs ij . f
   {-# INLINE composeN #-}
+
+-- | Derive the shape of @a@ from the shape of @b@.
+class HasShapeOf (a :: k) (b :: k)
+instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
+instance (a ~ b) => HasShapeOf a b

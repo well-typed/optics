@@ -217,15 +217,13 @@ instance {-# OVERLAPPABLE #-}
 -- variables and overlapping instances which are irrelevant and confusing. Use
 -- incoherent instance providing a custom type error to cut its efforts short.
 instance {-# INCOHERENT #-}
-  TypeError
-   ('Text "No instance for LabelOptic " ':<>: 'ShowType name
-    ':<>: 'Text " " ':<>: QuoteType k
-    ':<>: 'Text " " ':<>: QuoteType s
-    ':<>: 'Text " " ':<>: QuoteType t
-    ':<>: 'Text " " ':<>: QuoteType a
-    ':<>: 'Text " " ':<>: QuoteType b
-    ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
-   => GeneralLabelOptic name k s t a b repDefined where
+  ( s `HasShapeOf` t
+  , t `HasShapeOf` s
+  , TypeError
+    ('Text "Type " ':<>: QuoteType s ':<>: 'Text " has no label " ':<>:
+     QuoteSymbol name ':<>: 'Text " as an optic for " ':<>: QuoteType a
+    )
+  ) => GeneralLabelOptic name k s t a b repDefined where
   generalLabelOptic = error "unreachable"
 
 instance
