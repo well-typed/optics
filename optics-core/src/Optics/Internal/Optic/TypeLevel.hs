@@ -159,14 +159,6 @@ type family FromRight (def :: b) (e :: Either a b) :: b where
   FromRight _   ('Right b) = b
   FromRight def ('Left  _) = def
 
-type family FromLeft (def :: a) (e :: Either a b) :: a where
-  FromLeft _   ('Left  a) = a
-  FromLeft def ('Right _) = def
-
-type family IsRight (e :: Either a b) :: Bool where
-  IsRight ('Left  _) = 'False
-  IsRight ('Right _) = 'True
-
 ----------------------------------------
 -- Errors
 
@@ -183,9 +175,3 @@ type family ToOrdinal (n :: Nat) :: ErrorMessage where
   ToOrdinal 2 = 'Text "2nd"
   ToOrdinal 3 = 'Text "3rd"
   ToOrdinal n = 'ShowType n ':<>: 'Text "th"
-
-----------------------------------------
--- Misc
-
--- | Satisfy anything.
-type family Any :: k
