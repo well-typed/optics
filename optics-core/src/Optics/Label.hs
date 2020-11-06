@@ -193,8 +193,9 @@ import Optics.Internal.Optic
 -- @
 --
 -- Then appropriate 'LabelOptic' instances can be either written by hand,
--- seamlessly derived via generic representation (see <Optics-Label.html#usage
--- usage> section for more details) or generated with Template Haskell functions
+-- seamlessly derived via generic representation (see the
+-- <Optics-Label.html#usage Sample usage> section for more details)
+-- or generated with Template Haskell functions
 -- (defined in
 -- <https://hackage.haskell.org/package/optics-th/docs/Optics-TH.html Optics.TH>
 -- module from <https://hackage.haskell.org/package/optics-th optics-th>
