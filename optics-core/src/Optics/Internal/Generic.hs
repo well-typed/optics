@@ -108,8 +108,8 @@ class GFieldImpl (name :: Symbol) s t a b | name s -> a
   gfieldImpl :: Lens s t a b
 
 instance
-  ( Generic s
-  , Generic t
+  ( HasGeneric (HasRep (Rep s)) s
+  , HasGeneric (HasRep (Rep t)) t
   , path ~ GetFieldPaths s name (Rep s)
   , HasField name s a
   , GSetFieldSum path (Rep s) (Rep t) b
@@ -191,8 +191,8 @@ class GAffineFieldImpl (name :: Symbol) s t a b where
   gafieldImpl :: AffineTraversal s t a b
 
 instance
-  ( Generic s
-  , Generic t
+  ( HasGeneric (HasRep (Rep s)) s
+  , HasGeneric (HasRep (Rep s)) t
   , path ~ GetFieldPaths s name (Rep s)
   , If (AnyHasPath path)
        (() :: Constraint)
@@ -301,8 +301,8 @@ class GPositionImpl (n :: Nat) s t a b | n s -> a
   gpositionImpl :: Lens s t a b
 
 instance
-  ( Generic s
-  , Generic t
+  ( HasGeneric (HasRep (Rep s)) s
+  , HasGeneric (HasRep (Rep t)) t
   , path ~ If (n <=? 0)
               (TypeError ('Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
@@ -360,8 +360,8 @@ class GConstructorImpl (name :: Symbol) s t a b | name s -> a
   gconstructorImpl :: Prism s t a b
 
 instance
-  ( Generic s
-  , Generic t
+  ( HasGeneric (HasRep (Rep s)) s
+  , HasGeneric (HasRep (Rep t)) t
   , path ~ FromRight
     (TypeError
       ('Text "Type " ':<>: QuoteType s ':<>:

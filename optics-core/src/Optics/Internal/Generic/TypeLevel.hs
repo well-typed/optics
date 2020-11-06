@@ -102,6 +102,16 @@ type family AnyHasPath (path :: PathTree e) :: Bool where
   AnyHasPath ('PathLeaf ('Right _))  = 'True
   AnyHasPath ('PathLeaf ('Left _ ))  = 'False
 
+-- | Display a nice error message if @t@ doesn't have a 'Generic' instance.
+class Generic t => HasGeneric repDefined t
+instance Generic t => HasGeneric 'RepDefined t
+instance {-# INCOHERENT #-}
+  ( Generic t
+  , TypeError
+     ('Text "Type " ':<>: QuoteType t ':<>:
+      'Text " doesn't have a Generic instance")
+  ) => HasGeneric repNotDefined t
+
 -- | Derive the shape of @a@ from the shape of @b@.
 class HasShapeOf (a :: k) (b :: k)
 instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
