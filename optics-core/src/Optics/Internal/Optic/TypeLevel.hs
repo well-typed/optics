@@ -65,11 +65,10 @@ type family HasRep (s :: Type -> Type) :: RepDefined
 type instance HasRep (s x) = 'RepDefined
 
 -- | This type family should be called with applications of 'Rep' on both sides,
--- and will reduce to 'RepDefined' if at least one of them is defined; otherwise
--- it is stuck.
-type family AnyHasRep (s :: Type -> Type) (t :: Type -> Type) :: RepDefined
-type instance AnyHasRep (s x) t = 'RepDefined
-type instance AnyHasRep s (t x) = 'RepDefined
+-- and will reduce to 'RepDefined' if both of them are defined; otherwise it is
+-- stuck.
+type family BothHaveRep (s :: Type -> Type) (t :: Type -> Type) :: RepDefined
+type instance BothHaveRep (s x) (t y) = 'RepDefined
 
 ----------------------------------------
 -- Lists

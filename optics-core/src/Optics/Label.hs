@@ -385,7 +385,7 @@ import Optics.Internal.Optic
 --
 -- >>> human1 & #pets .~ []
 -- ...
--- ...Couldn't match type ‘Human1’ with ‘()’...
+-- ...No instance for LabelOptic "pets" ‘A_Lens’ ‘Human1’ ‘()’ ‘[Pet]’ ‘[a0]’
 -- ...
 --
 -- >>> human2 & #pets .~ []
@@ -415,7 +415,7 @@ import Optics.Internal.Optic
 --
 -- >>> human1 & #pets .~ "hi"
 -- ...
--- ...No instance for LabelOptic "pets" ‘k’ ‘Human1’ ‘b’ ‘a’ ‘[Char]’
+-- ...No instance for LabelOptic "pets" ‘k0’ ‘Human1’ ‘Human1’ ‘a0’ ‘[Char]’
 -- ...
 --
 -- >>> pets = #pets :: Iso' Human1 [Pet]
@@ -507,10 +507,12 @@ instance
 
 -- | If no instance matches, try to use 'Generic' machinery for field access.
 instance {-# OVERLAPPABLE #-}
-  ( GeneralLabelOptic (AnyHasRep (Rep s) (Rep t)) name k s t a b
+  ( s `HasShapeOf` t
+  , t `HasShapeOf` s
+  , GeneralLabelOptic (BothHaveRep (Rep s) (Rep t)) name k s t a b
   , LiftCoverageCondition k s t a b
   ) => LabelOptic name k s t a b where
-  labelOptic = generalLabelOptic @(AnyHasRep (Rep s) (Rep t)) @name
+  labelOptic = generalLabelOptic @(BothHaveRep (Rep s) (Rep t)) @name
 
 ----------------------------------------
 
@@ -529,8 +531,6 @@ instance
   ( k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
            A_Lens
-  , s `HasShapeOf` t
-  , t `HasShapeOf` s
   , GenericOptic name k s t a b
   ) => GeneralLabelOptic 'RepDefined name k s t a b where
   generalLabelOptic = genericOptic @name
@@ -544,7 +544,11 @@ instance {-# INCOHERENT #-}
      ':<>: 'Text " " ':<>: QuoteType t
      ':<>: 'Text " " ':<>: QuoteType a
      ':<>: 'Text " " ':<>: QuoteType b
-     ':$$: 'Text "Perhaps you forgot to define it or misspelled its name?")
+     ':$$: 'Text "Possible solutions:"
+     ':$$: 'Text "- Check spelling of the label"
+     ':$$: 'Text "- Define the LabelOptic instance by hand or via Template Haskell"
+     ':$$: 'Text "- Derive a Generic instance for " ':<>: QuoteType s
+    )
   ) => GeneralLabelOptic repNotDefined name k s t a b where
   generalLabelOptic = error "unreachable"
 
