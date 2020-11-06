@@ -3,6 +3,7 @@ module Optics.TH
   -- * Generation of field optics
   -- ** Labels
     makeFieldLabels
+  , makeFieldLabelsNoPrefix
   , makeFieldLabelsFor
   , makeFieldLabelsWith
   , declareFieldLabels
@@ -137,6 +138,10 @@ import Optics.TH.Internal.Sum
 -- @
 makeFieldLabels :: Name -> DecsQ
 makeFieldLabels = makeFieldLabelsWith fieldLabelsRules
+
+-- | An alias for @makeFieldLabels noPrefixFieldLabels@.
+makeFieldLabelsNoPrefix :: Name -> DecsQ
+makeFieldLabelsNoPrefix = makeFieldLabelsWith noPrefixFieldLabels
 
 -- | Derive field optics as labels, specifying explicit pairings of @(fieldName,
 -- labelName)@.

@@ -75,7 +75,7 @@ import Optics.Internal.Optic
 -- /Note:/ Generic deriving of optics works well on a small scale, but for
 -- ubiquitous usage (and in production in general) we recommend generating them
 -- with Template Haskell as it scales better in terms of compilation time. For
--- more details see @makeFieldLabelsWith@ and @noPrefixFieldLabels@ from
+-- more details see @makeFieldLabelsNoPrefix@ from
 -- <https://hackage.haskell.org/package/optics-th/docs/Optics-TH.html Optics.TH>
 -- in the <https://hackage.haskell.org/package/optics-th optics-th> package.
 --
@@ -202,8 +202,8 @@ import Optics.Internal.Optic
 -- package) with
 --
 -- @
--- makeFieldLabelsWith noPrefixFieldLabels ''User
--- makeFieldLabelsWith noPrefixFieldLabels ''Movie
+-- makeFieldLabelsNoPrefix ''User
+-- makeFieldLabelsNoPrefix ''Movie
 -- @
 --
 -- For production software the recommended approach is generation with Template
@@ -252,7 +252,7 @@ import Optics.Internal.Optic
 --                  , name :: String
 --                  }
 --
--- makeFieldLabelsWith noPrefixFieldLabels ''User
+-- makeFieldLabelsNoPrefix ''User
 --
 -- ...
 -- @
