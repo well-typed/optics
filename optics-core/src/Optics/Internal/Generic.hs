@@ -425,7 +425,7 @@ class GConstructorTuple g h a b | g -> a
 -- Fon uncluttering types in below instances a bit.
 type F m a = M1 S m (Rec0 a)
 
-instance {-# INCOHERENT #-}
+instance {-# OVERLAPPABLE #-}
   ( LiftCoverageCondition () g h a b
   , TypeError
     ('Text "Generic based access supports constructors" ':$$:
