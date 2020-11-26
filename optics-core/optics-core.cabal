@@ -105,6 +105,7 @@ library
                    Optics.Internal.IxFold
                    Optics.Internal.IxSetter
                    Optics.Internal.IxTraversal
+                   Optics.Internal.Magic
                    Optics.Internal.Optic
                    Optics.Internal.Optic.Subtyping
                    Optics.Internal.Optic.TypeLevel

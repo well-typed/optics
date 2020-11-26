@@ -49,6 +49,7 @@ import GHC.OverloadedLabels
 import GHC.TypeLits
 
 import Optics.Internal.Generic
+import Optics.Internal.Magic
 import Optics.Internal.Optic
 
 -- $sampleUsage

@@ -116,28 +116,3 @@ instance {-# INCOHERENT #-}
 class HasShapeOf (a :: k) (b :: k)
 instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
 instance (a ~ b) => HasShapeOf a b
-
--- | Lift the coverage condition and show something useful when type inference
--- goes into a loop and stops with "reduction stack overflow" message (sometimes
--- happens when trying to infer types of local bindings when monomorphism
--- restriction is enabled).
-class LiftCoverageCondition k s t a b | s -> k a
-                                      , t -> k b
-                                      , s b -> t
-                                      , t a -> s
-
-instance
-  ( TypeInferenceLoop
-    "Type inference for the local binding failed. Write the type"
-    "signature yourself or disable monomorphism restriction with"
-    "NoMonomorphismRestriction LANGUAGE pragma so GHC infers it."
-    k s t a b
-  ) => LiftCoverageCondition k s t a b
-
-class TypeInferenceLoop msg1 msg2 msg3 k s t a b | s -> k a
-                                                 , t -> k b
-                                                 , s b -> t
-                                                 , t a -> s
-instance
-  ( TypeInferenceLoop msg1 msg2 msg3 k s t a b
-  ) => TypeInferenceLoop msg1 msg2 msg3 k s t a b

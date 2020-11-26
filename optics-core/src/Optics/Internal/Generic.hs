@@ -46,6 +46,7 @@ import GHC.TypeLits
 
 import Optics.AffineTraversal
 import Optics.Internal.Generic.TypeLevel
+import Optics.Internal.Magic
 import Optics.Internal.Optic
 import Optics.Iso
 import Optics.Lens
