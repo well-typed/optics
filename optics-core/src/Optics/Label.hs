@@ -479,7 +479,7 @@ import Optics.Internal.Optic
 
 -- | Support for overloaded labels as optics. An overloaded label @#foo@ can be
 -- used as an optic if there is an instance of @'LabelOptic' "foo" k s t a b@ or
--- either @s@ or @t@ has a 'Generic' instance.
+-- both @s@ and @t@ have a 'Generic' instance.
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b
                                             , name s b -> t
