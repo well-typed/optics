@@ -55,7 +55,9 @@ import Optics.Internal.Optic
 -- $sampleUsage
 --
 -- #usage#
--- An example showing how overloaded labels can be used as optics.
+--
+-- An example showing how overloaded labels can be used as optics for fields of
+-- types having a 'Generic' instance.
 --
 -- >>> :set -XDeriveGeneric
 -- >>> :set -XDuplicateRecordFields
@@ -73,7 +75,7 @@ import Optics.Internal.Optic
 --   deriving (Show, Generic)
 -- :}
 --
--- /Note:/ Generic deriving of optics works well on a small scale, but for
+-- /Note:/ Generic deriving of optics works well on a moderate scale, but for
 -- ubiquitous usage (and in production in general) we recommend generating them
 -- with Template Haskell as it scales better in terms of compilation time. For
 -- more details see @makeFieldLabelsNoPrefix@ from
@@ -208,14 +210,16 @@ import Optics.Internal.Optic
 -- @
 --
 -- For production software the recommended approach is generation with Template
--- Haskell as it scales well and provides the best performance.
+-- Haskell as it scales well in terms of compilation time and provides the best
+-- performance in general.
 --
 -- /Note:/ there exists a similar approach that involves prefixing field names
--- with the underscore and generation of lenses as ordinary functions so that
--- @_field@ is the ordinary field name and @field@ is the lens referencing
--- it. The drawback of such solution is inability to get working
--- jump-to-definition for field names, which makes navigation in unfamiliar code
--- bases significantly harder, so it's not recommended.
+-- (either with the underscore or name of the data type) and generation of
+-- lenses as ordinary functions so that @prefixField@ is the ordinary field name
+-- and @field@ is the lens referencing it. The drawback of such solution is
+-- inability to get working jump-to-definition for field names, which makes
+-- navigation in unfamiliar code bases significantly harder, so it's not
+-- recommended.
 --
 -- === Emulation of @NoFieldSelectors@
 --
@@ -414,21 +418,21 @@ import Optics.Internal.Optic
 -- ...No instance for LabelOptic "pets" ‘k0’ ‘Human1’ ‘Human1’ ‘Char’ ‘Char’
 -- ...
 --
--- >>> human1 & #pets .~ "hi"
+-- >>> human1 & #pets .~ 'x'
 -- ...
--- ...No instance for LabelOptic "pets" ‘k0’ ‘Human1’ ‘Human1’ ‘a0’ ‘[Char]’
+-- ...No instance for LabelOptic "pets" ‘k0’ ‘Human1’ ‘Human1’ ‘a0’ ‘Char’
 -- ...
 --
--- >>> pets = #pets :: Iso' Human1 [Pet]
+-- >>> let pets = #pets :: Iso' Human1 [Pet]
 -- ...
 -- ...No instance for LabelOptic "pets" ‘An_Iso’ ‘Human1’ ‘Human1’ ‘[Pet]’ ‘[Pet]’
 -- ...
 --
 -- If we use the second form, error messages become much more accurate:
 --
--- >>> human2 ^. #pets :: Int
+-- >>> human2 ^. #pets :: Char
 -- ...
--- ...Couldn't match type ‘Int’ with ‘[Pet]’
+-- ...Couldn't match type ‘Char’ with ‘[Pet]’
 -- ...  arising from the overloaded label ‘#pets’
 -- ...
 --
@@ -438,7 +442,7 @@ import Optics.Internal.Optic
 -- ...  arising from the overloaded label ‘#pets’
 -- ...
 --
--- >>> pets = #pets :: Iso' Human2 [Pet]
+-- >>> let pets = #pets :: Iso' Human2 [Pet]
 -- ...
 -- ...Couldn't match type ‘An_Iso’ with ‘A_Lens’
 -- ...  arising from the overloaded label ‘#pets’
