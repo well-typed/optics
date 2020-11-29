@@ -76,6 +76,8 @@ class GField (name :: Symbol) s t a b | name s -> t a b
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , UnlessDefined (Rep s) (NoGenericError s)
+  , UnlessDefined (Rep t) (NoGenericError t)
   , GFieldImpl name s t a b
   , LiftCoverageCondition name () s t a b
   ) => GField name s t a b where
@@ -121,6 +123,8 @@ class GAffineField (name :: Symbol) s t a b | name s -> t a b
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , UnlessDefined (Rep s) (NoGenericError s)
+  , UnlessDefined (Rep t) (NoGenericError t)
   , GAffineFieldImpl name s t a b
   , LiftCoverageCondition name () s t a b
   ) => GAffineField name s t a b where
@@ -151,6 +155,8 @@ class GPosition (n :: Nat) s t a b | n s -> t a b
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , UnlessDefined (Rep s) (NoGenericError s)
+  , UnlessDefined (Rep t) (NoGenericError t)
   , GPositionImpl n s t a b
   , LiftCoverageCondition n () s t a b
   ) => GPosition n s t a b where
@@ -204,6 +210,8 @@ class GConstructor (name :: Symbol) s t a b | name s -> t a b
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , UnlessDefined (Rep s) (NoGenericError s)
+  , UnlessDefined (Rep t) (NoGenericError t)
   , GConstructorImpl name s t a b
   , LiftCoverageCondition name () s t a b
   ) => GConstructor name s t a b where

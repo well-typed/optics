@@ -64,12 +64,6 @@ data RepDefined = RepDefined
 type family HasRep (s :: Type -> Type) :: RepDefined where
   HasRep (s x) = 'RepDefined
 
--- | This type family should be called with applications of 'Rep' on both sides,
--- and will reduce to 'RepDefined' if both of them are defined; otherwise it is
--- stuck.
-type family BothHaveRep (s :: Type -> Type) (t :: Type -> Type) :: RepDefined where
-  BothHaveRep (s x) (t y) = 'RepDefined
-
 ----------------------------------------
 -- Lists
 
@@ -161,6 +155,13 @@ type family FromRight (def :: b) (e :: Either a b) :: b where
 ----------------------------------------
 -- Errors
 
+data VoidP a
+-- | Show a custom type error if @f@ has a stuck type familiy. For more details
+-- have a look at <https://kcsongor.github.io/report-stuck-families/>.
+type family UnlessDefined (f :: k) (err :: Constraint) :: Constraint where
+  UnlessDefined VoidP _ = ((), ())
+  UnlessDefined _     _ = ()
+
 -- | Show a type surrounded by quote marks.
 type family QuoteType (x :: t) :: ErrorMessage where
   QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
@@ -174,3 +175,11 @@ type family ToOrdinal (n :: Nat) :: ErrorMessage where
   ToOrdinal 2 = 'Text "2nd"
   ToOrdinal 3 = 'Text "3rd"
   ToOrdinal n = 'ShowType n ':<>: 'Text "th"
+
+----------------------------------------
+-- Misc
+
+-- | Derive the shape of @a@ from the shape of @b@.
+class HasShapeOf (a :: k) (b :: k)
+instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
+instance (a ~ b) => HasShapeOf a b

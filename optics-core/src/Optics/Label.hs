@@ -415,12 +415,12 @@ import Optics.Internal.Optic
 --
 -- >>> human1 ^. #pets :: Char
 -- ...
--- ...No instance for LabelOptic "pets" ‘k0’ ‘Human1’ ‘Human1’ ‘Char’ ‘Char’
+-- ...No instance for LabelOptic "pets" ‘A_Lens’ ‘Human1’ ‘Human1’ ‘Char’ ‘Char’
 -- ...
 --
 -- >>> human1 & #pets .~ 'x'
 -- ...
--- ...No instance for LabelOptic "pets" ‘k0’ ‘Human1’ ‘Human1’ ‘a0’ ‘Char’
+-- ...No instance for LabelOptic "pets" ‘A_Lens’ ‘Human1’ ‘Human1’ ‘[Pet]’ ‘Char’
 -- ...
 --
 -- >>> let pets = #pets :: Iso' Human1 [Pet]
@@ -514,35 +514,20 @@ instance
 instance {-# OVERLAPPABLE #-}
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
-  , GeneralLabelOptic (BothHaveRep (Rep s) (Rep t)) name k s t a b
-  , LiftCoverageCondition name k s t a b
-  ) => LabelOptic name k s t a b where
-  labelOptic = generalLabelOptic @(BothHaveRep (Rep s) (Rep t)) @name
-
-----------------------------------------
-
--- | Implements fallback behaviour for 'Generic' based field access in case
--- there is no explicit 'LabelOptic' instance.
---
--- To support this, the first parameter will be instantiated to 'RepDefined' if
--- at least one of @s@ or @t@ has a 'Generic' instance.
-class GeneralLabelOptic (repDefined :: RepDefined) (name :: Symbol) k s t a b where
-  -- | Used to interpret overloaded label syntax in the absence of an explicit
-  -- 'LabelOptic' instance.
-  generalLabelOptic :: Optic k NoIx s t a b
-
--- | If @s@ or @t@ has a 'Generic' instance, use generics-based data access.
-instance
-  ( k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
+  , UnlessDefined (Rep s) (NoLabelOpticError name k s t a b)
+  , UnlessDefined (Rep t) (NoLabelOpticError name k s t a b)
+  , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
            A_Lens
   , GenericOptic name k s t a b
-  ) => GeneralLabelOptic 'RepDefined name k s t a b where
-  generalLabelOptic = genericOptic @name
+  , LiftCoverageCondition name k s t a b
+  ) => LabelOptic name k s t a b where
+  labelOptic = genericOptic @name
 
--- | Otherwise report an error.
-instance {-# INCOHERENT #-}
-  ( TypeError
+-- | If there is no specific 'LabelOptic' instance and the type doesn't have a
+-- 'Generic' instance, display a custom type error.
+type family NoLabelOpticError name k s t a b where
+  NoLabelOpticError name k s t a b = TypeError
     ('Text "No instance for LabelOptic " ':<>: 'ShowType name
      ':<>: 'Text " " ':<>: QuoteType k
      ':<>: 'Text " " ':<>: QuoteType s
@@ -554,8 +539,6 @@ instance {-# INCOHERENT #-}
      ':$$: 'Text "- Define the LabelOptic instance by hand or via Template Haskell"
      ':$$: 'Text "- Derive a Generic instance for " ':<>: QuoteType s
     )
-  ) => GeneralLabelOptic repNotDefined name k s t a b where
-  generalLabelOptic = error "unreachable"
 
 ----------------------------------------
 

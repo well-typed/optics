@@ -109,8 +109,8 @@ class GFieldImpl (name :: Symbol) s t a b | name s -> a
   gfieldImpl :: Lens s t a b
 
 instance
-  ( HasGeneric (HasRep (Rep s)) s
-  , HasGeneric (HasRep (Rep t)) t
+  ( Generic s
+  , Generic t
   , path ~ GetFieldPaths s name (Rep s)
   , HasField name s a
   , GSetFieldSum path (Rep s) (Rep t) b
@@ -188,13 +188,19 @@ instance
 ----------------------------------------
 -- Affine field
 
-class GAffineFieldImpl (name :: Symbol) s t a b where
+class GAffineFieldImpl (name :: Symbol) s t a b | name s -> a
+                                             {- These hold morally, but we can't prove it.
+                                                , name t -> b
+                                                , name s b -> t
+                                                , name t a -> s -} where
+
   gafieldImpl :: AffineTraversal s t a b
 
 instance
-  ( HasGeneric (HasRep (Rep s)) s
-  , HasGeneric (HasRep (Rep s)) t
+  ( Generic s
+  , Generic t
   , path ~ GetFieldPaths s name (Rep s)
+  , HasField name s a -- require the field to be in scope
   , If (AnyHasPath path)
        (() :: Constraint)
        (TypeError
@@ -296,8 +302,8 @@ class GPositionImpl (n :: Nat) s t a b | n s -> a
   gpositionImpl :: Lens s t a b
 
 instance
-  ( HasGeneric (HasRep (Rep s)) s
-  , HasGeneric (HasRep (Rep t)) t
+  ( Generic s
+  , Generic t
   , path ~ If (n <=? 0)
               (TypeError ('Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
@@ -355,8 +361,8 @@ class GConstructorImpl (name :: Symbol) s t a b | name s -> a
   gconstructorImpl :: Prism s t a b
 
 instance
-  ( HasGeneric (HasRep (Rep s)) s
-  , HasGeneric (HasRep (Rep t)) t
+  ( Generic s
+  , Generic t
   , path ~ FromRight
     (TypeError
       ('Text "Type " ':<>: QuoteType s ':<>:
@@ -369,10 +375,10 @@ instance
 
 ----------------------------------------
 
-class GConstructorSum (path :: [Path]) g h a b  | path g -> a
-                                                , path h -> b
-                                                , path g b -> h
-                                                , path h a -> g where
+class GConstructorSum (path :: [Path]) g h a b | path g -> a
+                                               , path h -> b
+                                               , path g b -> h
+                                               , path h a -> g where
   gconstructorSum :: Prism (g x) (h x) a b
 
 instance
