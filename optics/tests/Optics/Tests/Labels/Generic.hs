@@ -1,5 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -89,11 +92,7 @@ label5lhs s b = set (#pets % traversed % #lazy) b s
 label5rhs s b = s { pets = map (\p -> p { lazy = b }) (pets s) }
 
 label6lhs, label6rhs :: Human a -> String -> Int -> String -> [b] -> Human b
-label6lhs s name_ age_ fishName_ pets_ = s
-  & #name              .~ name_
-  & #age               .~ age_
-  & #fish % #_GoldFish .~ fishName_
-  & #pets              .~ pets_
+label6lhs = label6setter
 label6rhs s name_ age_ fishName_ pets_ = s
   { name = name_
   , age  = age_
@@ -102,6 +101,26 @@ label6rhs s name_ age_ fishName_ pets_ = s
       herring    -> herring
   , pets = pets_
   }
+
+-- | Check that the setter compiles in full generality.
+label6setter
+  :: ( Is k1 A_Setter
+     , Is k3 A_Setter
+     , Is k4 A_Setter
+     , Is l (Join k2 l)
+     , Is k2 (Join k2 l)
+     , Is (Join k2 l) A_Setter
+     , LabelOptic "_GoldFish" l u v a1 b1
+     , LabelOptic "age" k4 s1 s2 a2 b2
+     , LabelOptic "fish" k2 s2 s3 u v
+     , LabelOptic "name" k3 s4 s1 a3 b3
+     , LabelOptic "pets" k1 s3 b4 a4 b5
+     ) => s4 -> b3 -> b2 -> b1 -> b5 -> b4
+label6setter s name_ age_ fishName_ pets_ = s
+  & #name              .~ name_
+  & #age               .~ age_
+  & #fish % #_GoldFish .~ fishName_
+  & #pets              .~ pets_
 
 ----------------------------------------
 -- Basic data manipulation

@@ -41,7 +41,18 @@ data Void0
 -- | Focus on a field @name@ of type @a@ within a type @s@ using its 'Generic'
 -- instance.
 --
--- >>> data User a = User { name :: String, age :: a } deriving (Show, Generic)
+-- >>> :{
+-- data User a
+--   = User { name :: String
+--          , age  :: a
+--          }
+--   | LazyUser { name :: String
+--              , age  :: a
+--              , lazy :: Bool
+--              }
+--   deriving (Show, Generic)
+-- :}
+--
 -- >>> let user = User "Tom" 32 :: User Int
 --
 -- >>> user ^. gfield @"name"
@@ -52,7 +63,14 @@ data Void0
 --
 -- >>> user ^. gfield @"salary"
 -- ...
--- ...Data constructor ‘User’ doesn't have a field named ‘salary’
+-- ...User’ doesn't have a field named ‘salary’
+-- ...
+--
+-- Only total field are accessible (for partial ones see 'gafield'):
+--
+-- >>> user ^. gfield @"lazy"
+-- ...
+-- ...Data constructor ‘User’ doesn't have a field named ‘lazy’
 -- ...
 --
 -- Type changing updates are supported:

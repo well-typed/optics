@@ -511,6 +511,8 @@ instance
   labelOptic = Optic id
 
 -- | If no instance matches, try to use 'Generic' machinery for field access.
+--
+-- For more information have a look at 'gfield' and 'gconstructor'.
 instance {-# OVERLAPPABLE #-}
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
