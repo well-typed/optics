@@ -69,17 +69,15 @@ data Void0
 -- >>> user & #age %~ (+1)
 -- User {name = "Tom", age = 33}
 --
-class GField (name :: Symbol) s t a b | name s -> a
-                                      , name t -> b
-                                      , name s b -> t
-                                      , name t a -> s where
+class GField (name :: Symbol) s t a b | name s -> t a b
+                                      , name t -> s a b where
   gfield :: Lens s t a b
 
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GFieldImpl name s t a b
-  , LiftCoverageCondition () s t a b
+  , LiftCoverageCondition name () s t a b
   ) => GField name s t a b where
   gfield = gfieldImpl @name
 
@@ -116,17 +114,15 @@ instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
 -- ...Type ‘Fish’ doesn't have a field named ‘salary’
 -- ...
 --
-class GAffineField (name :: Symbol) s t a b | name s -> a
-                                            , name t -> b
-                                            , name s b -> t
-                                            , name t a -> s where
+class GAffineField (name :: Symbol) s t a b | name s -> t a b
+                                            , name t -> s a b where
   gafield :: AffineTraversal s t a b
 
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GAffineFieldImpl name s t a b
-  , LiftCoverageCondition () s t a b
+  , LiftCoverageCondition name () s t a b
   ) => GAffineField name s t a b where
   gafield = gafieldImpl @name
 
@@ -148,17 +144,15 @@ instance (a ~ Void0, b ~ Void0) => GAffineField name Void0 Void0 a b where
 -- ...Data constructor ‘(,,)’ has 3 fields, 4th requested
 -- ...
 --
-class GPosition (n :: Nat) s t a b | n s -> a
-                                   , n t -> b
-                                   , n s b -> t
-                                   , n t a -> s where
+class GPosition (n :: Nat) s t a b | n s -> t a b
+                                   , n t -> s a b where
   gposition :: Lens s t a b
 
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GPositionImpl n s t a b
-  , LiftCoverageCondition () s t a b
+  , LiftCoverageCondition n () s t a b
   ) => GPosition n s t a b where
   gposition = gpositionImpl @n
 
@@ -203,17 +197,15 @@ instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
 -- >>> cat & #_Cat % _1 .~ "Merry"
 -- Cat {name = "Merry", purrs = True}
 --
-class GConstructor (name :: Symbol) s t a b | name s -> a
-                                            , name t -> b
-                                            , name s b -> t
-                                            , name t a -> s where
+class GConstructor (name :: Symbol) s t a b | name s -> t a b
+                                            , name t -> s a b where
   gconstructor :: Prism s t a b
 
 instance
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GConstructorImpl name s t a b
-  , LiftCoverageCondition () s t a b
+  , LiftCoverageCondition name () s t a b
   ) => GConstructor name s t a b where
   gconstructor = gconstructorImpl @name
 

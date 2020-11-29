@@ -427,7 +427,7 @@ class GConstructorTuple g h a b | g -> a
 type F m a = M1 S m (Rec0 a)
 
 instance {-# OVERLAPPABLE #-}
-  ( LiftCoverageCondition () g h a b
+  ( LiftCoverageCondition () () g h a b
   , TypeError
     ('Text "Generic based access supports constructors" ':$$:
      'Text "containing up to 5 fields. Please generate" ':$$:

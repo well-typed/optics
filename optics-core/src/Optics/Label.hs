@@ -515,7 +515,7 @@ instance {-# OVERLAPPABLE #-}
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , GeneralLabelOptic (BothHaveRep (Rep s) (Rep t)) name k s t a b
-  , LiftCoverageCondition k s t a b
+  , LiftCoverageCondition name k s t a b
   ) => LabelOptic name k s t a b where
   labelOptic = generalLabelOptic @(BothHaveRep (Rep s) (Rep t)) @name
 
