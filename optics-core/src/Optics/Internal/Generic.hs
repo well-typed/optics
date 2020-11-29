@@ -182,7 +182,7 @@ instance
 
 instance
   ( r ~ b
-  ) => GSetFieldProd path (M1 S m g) (M1 S m (Rec0 b)) r where
+  ) => GSetFieldProd '[] (M1 S m g) (M1 S m (Rec0 b)) r where
   gsetFieldProd _ = M1 . K1
 
 ----------------------------------------
@@ -234,12 +234,6 @@ instance
 class GAffineFieldMaybe (epath :: Either Symbol [Path]) g h a b where
   gafieldMaybe :: AffineTraversalVL (g x) (h x) a b
 
--- fast path
-instance {-# OVERLAPPING #-}
-  GAffineFieldMaybe ('Left name) g g a b where
-  gafieldMaybe point _ g = point g
-
--- slow path
 instance
   ( g ~ h
   ) => GAffineFieldMaybe ('Left name) g h a b where
@@ -287,7 +281,7 @@ instance
 instance
   ( r ~ a
   , s ~ b
-  ) => GFieldProd path (M1 S m (Rec0 a)) (M1 S m (Rec0 b)) r s where
+  ) => GFieldProd '[] (M1 S m (Rec0 a)) (M1 S m (Rec0 b)) r s where
   gfieldProd f (M1 (K1 x)) = M1 . K1 <$> f x
 
 ----------------------------------------
