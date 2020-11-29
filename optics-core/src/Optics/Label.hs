@@ -550,7 +550,7 @@ instance {-# INCOHERENT #-}
      ':<>: 'Text " " ':<>: QuoteType a
      ':<>: 'Text " " ':<>: QuoteType b
      ':$$: 'Text "Possible solutions:"
-     ':$$: 'Text "- Check spelling of the label"
+     ':$$: 'Text "- Check and correct spelling of the label"
      ':$$: 'Text "- Define the LabelOptic instance by hand or via Template Haskell"
      ':$$: 'Text "- Derive a Generic instance for " ':<>: QuoteType s
     )
