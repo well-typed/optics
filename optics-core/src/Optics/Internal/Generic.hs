@@ -38,7 +38,6 @@ module Optics.Internal.Generic
   , module Optics.Internal.Generic.TypeLevel
   ) where
 
-import Data.Kind
 import Data.Type.Bool
 import GHC.Generics
 import GHC.Records
@@ -201,11 +200,10 @@ instance
   , Generic t
   , path ~ GetFieldPaths s name (Rep s)
   , HasField name s a -- require the field to be in scope
-  , If (AnyHasPath path)
-       (() :: Constraint)
-       (TypeError
-        ('Text "Type " ':<>: QuoteType s ':<>:
-         'Text " doesn't have a field named " ':<>: QuoteSymbol name))
+  , Unless (AnyHasPath path)
+    (TypeError
+      ('Text "Type " ':<>: QuoteType s ':<>:
+       'Text " doesn't have a field named " ':<>: QuoteSymbol name))
   , GAffineFieldSum path (Rep s) (Rep t) a b
   ) => GAffineFieldImpl name s t a b where
   gafieldImpl = withAffineTraversal

@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -21,12 +22,12 @@ import Optics.Tests.Utils
 data Mammal
   = Dog { name :: String, age :: Int, lazy :: Bool }
   | Cat { name :: String, age :: Int, lazy :: Bool }
-  deriving (Show, Generic)
+  deriving (Show, Generic, GenericLabelOptics)
 
 data Fish
   = GoldFish { name :: String }
   | Herring  { name :: String }
-  deriving (Show, Generic)
+  deriving (Show, Generic, GenericLabelOptics)
 
 data Human a = Human
   { name :: String
@@ -34,7 +35,7 @@ data Human a = Human
   , fish :: Fish
   , pets :: [a]
   }
-  deriving (Show, Generic)
+  deriving (Show, Generic, GenericLabelOptics)
 
 ----------------------------------------
 
