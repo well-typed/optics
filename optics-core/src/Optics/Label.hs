@@ -518,8 +518,9 @@ instance
 instance {-# OVERLAPPABLE #-}
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
-  , Unless (HasGenericLabelOptics s) (NoLabelOpticError name k s t a b)
-  , Unless (HasGenericLabelOptics t) (NoLabelOpticError name k s t a b)
+  , Unless
+      (HasGenericLabelOptics s && HasGenericLabelOptics t)
+      (NoLabelOpticError name k s t a b)
   , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
            A_Lens

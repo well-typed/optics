@@ -155,17 +155,15 @@ type family FromRight (def :: b) (e :: Either a b) :: b where
 ----------------------------------------
 -- Errors
 
-data VoidP a
--- | Show a custom type error if @f@ has a stuck type familiy. For more details
--- have a look at <https://kcsongor.github.io/report-stuck-families/>.
-type family UnlessDefined (f :: Type -> Type) (err :: Constraint) :: Constraint where
-  UnlessDefined VoidP _ = ((), ())
-  UnlessDefined _     _ = ()
-
--- | Show a custom type error if @p@ is false.
+-- | Show a custom type error if @p@ is false (or stuck).
 type family Unless (p :: Bool) (err :: Constraint) :: Constraint where
   Unless 'True  _   = ()
   Unless 'False err = err
+
+-- | Use with 'Unless' to detect stuck (undefined) type families.
+type family Defined (f :: k) :: Bool where
+  Defined (f _) = Defined f
+  Defined _     = 'True
 
 -- | Show a type surrounded by quote marks.
 type family QuoteType (x :: t) :: ErrorMessage where
