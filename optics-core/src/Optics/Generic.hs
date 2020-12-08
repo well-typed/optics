@@ -79,10 +79,7 @@ data Void0
 -- User {name = "Tom", age = ()}
 --
 -- /Note:/ 'gfield' is supported by 'Optics.Label.labelOptic' and can be used
--- with a concise syntax via @OverloadedLabels@ if the type has a
--- 'GenericLabelOptics' instance.
---
--- >>> instance GenericLabelOptics (User a)
+-- with a concise syntax via @OverloadedLabels@.
 --
 -- >>> user ^. #name
 -- "Tom"
@@ -216,10 +213,7 @@ instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
 -- ...
 --
 -- /Note:/ 'gconstructor' is supported by 'Optics.Label.labelOptic' and can be
--- used with a concise syntax via @OverloadedLabels@ if the type has a
--- 'GenericLabelOptics' instance.
---
--- >>> instance GenericLabelOptics Animal
+-- used with a concise syntax via @OverloadedLabels@.
 --
 -- >>> dog ^? #_Dog
 -- Just ("Sparky",2)

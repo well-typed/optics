@@ -45,7 +45,7 @@ module Optics.Label
 
 import Data.Type.Bool
 import Data.Type.Equality
-import GHC.Generics (Generic)
+import GHC.Generics
 import GHC.OverloadedLabels
 import GHC.TypeLits
 
@@ -70,11 +70,11 @@ import Optics.Internal.Optic
 --   { name :: String
 --   , age  :: Integer
 --   , pets :: [Pet]
---   } deriving (Show, Generic, GenericLabelOptics)
+--   } deriving (Show, Generic)
 -- data Pet
 --   = Cat  { name :: String, age :: Int, lazy :: Bool }
 --   | Fish { name :: String, age :: Int, lazy :: Bool }
---   deriving (Show, Generic, GenericLabelOptics)
+--   deriving (Show, Generic)
 -- :}
 --
 -- /Note:/ Generic deriving of optics works well on a moderate scale, but for
@@ -519,7 +519,11 @@ instance {-# OVERLAPPABLE #-}
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , Unless
+#ifdef EXPLICIT_GENERIC_LABELS
       (HasGenericLabelOptics s && HasGenericLabelOptics t)
+#else
+      (Defined (Rep s) && Defined (Rep t))
+#endif
       (NoLabelOpticError name k s t a b)
   , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
@@ -531,12 +535,21 @@ instance {-# OVERLAPPABLE #-}
 
 ----------------------------------------
 
+-- | If @explicit-generic-labels@ Cabal flag is enabled, only types with this
+-- instance (which can be trivially derived with @DeriveAnyClass@ extension)
+-- will be able to use labels as generic optics with a specific type.
+--
+-- It's an option for application developers to disable implicit fallback to
+-- generic optics for more control.
+--
+-- /Note:/ the flag @explicit-generic-labels@ is disabled by default. Enabling
+-- it is generally unsupported as it might lead to compilation errors of
+-- dependencies relying on implicit fallback to generic optics.
 class Generic t => GenericLabelOptics t where
   type HasGenericLabelOptics t :: Bool
   type HasGenericLabelOptics t = 'True
 
--- | If there is no specific 'LabelOptic' instance and the type doesn't have a
--- 'GenericLabelOptics' instance, display a custom type error.
+-- | If there is no specific 'LabelOptic' instance, display a custom type error.
 type family NoLabelOpticError name k s t a b where
   NoLabelOpticError name k s t a b = TypeError
     ('Text "No instance for LabelOptic " ':<>: 'ShowType name
@@ -548,7 +561,11 @@ type family NoLabelOpticError name k s t a b where
      ':$$: 'Text "Possible solutions:"
      ':$$: 'Text "- Check and correct spelling of the label"
      ':$$: 'Text "- Define the LabelOptic instance by hand or via Template Haskell"
+#ifdef EXPLICIT_GENERIC_LABELS
      ':$$: 'Text "- Derive a GenericLabelOptics instance for " ':<>: QuoteType s
+#else
+     ':$$: 'Text "- Derive a Generic instance for " ':<>: QuoteType s
+#endif
     )
 
 ----------------------------------------
