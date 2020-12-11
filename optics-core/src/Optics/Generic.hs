@@ -66,7 +66,7 @@ data Void0
 -- ...User’ doesn't have a field named ‘salary’
 -- ...
 --
--- Only total field are accessible (for partial ones see 'gafield'):
+-- Only total fields are accessible (for partial ones see 'gafield'):
 --
 -- >>> user ^. gfield @"lazy"
 -- ...
