@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -91,15 +92,18 @@ class GField (name :: Symbol) s t a b | name s -> t a b
                                       , name t -> s a b where
   gfield :: Lens s t a b
 
-instance
+instance GFieldContext name s t a b => GField name s t a b where
+  gfield = gfieldImpl @name
+
+-- | Hide implementation from haddock.
+type GFieldContext name s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GFieldImpl name s t a b
   , LiftCoverageCondition name () s t a b
-  ) => GField name s t a b where
-  gfield = gfieldImpl @name
+  )
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
@@ -138,15 +142,18 @@ class GAffineField (name :: Symbol) s t a b | name s -> t a b
                                             , name t -> s a b where
   gafield :: AffineTraversal s t a b
 
-instance
+instance GAFieldContext name s t a b => GAffineField name s t a b where
+  gafield = gafieldImpl @name
+
+-- | Hide implementation from haddock.
+type GAFieldContext name s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GAffineFieldImpl name s t a b
   , LiftCoverageCondition name () s t a b
-  ) => GAffineField name s t a b where
-  gafield = gafieldImpl @name
+  )
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GAffineField name Void0 Void0 a b where
@@ -170,15 +177,18 @@ class GPosition (n :: Nat) s t a b | n s -> t a b
                                    , n t -> s a b where
   gposition :: Lens s t a b
 
-instance
+instance GPositionContext n s t a b => GPosition n s t a b where
+  gposition = gpositionImpl @n
+
+-- | Hide implementation from haddock.
+type GPositionContext n s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GPositionImpl n s t a b
   , LiftCoverageCondition n () s t a b
-  ) => GPosition n s t a b where
-  gposition = gpositionImpl @n
+  )
 
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
@@ -225,16 +235,18 @@ class GConstructor (name :: Symbol) s t a b | name s -> t a b
                                             , name t -> s a b where
   gconstructor :: Prism s t a b
 
-instance
+instance GConstructorContext name s t a b => GConstructor name s t a b where
+  gconstructor = gconstructorImpl @name
+
+-- | Hide implementation from haddock.
+type GConstructorContext name s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GConstructorImpl name s t a b
   , LiftCoverageCondition name () s t a b
-  ) => GConstructor name s t a b where
-  gconstructor = gconstructorImpl @name
-
+  )
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GConstructor name Void0 Void0 a b where
   gconstructor = prism id (\case {})
@@ -268,12 +280,15 @@ instance (a ~ Void0, b ~ Void0) => GConstructor name Void0 Void0 a b where
 class GPlate a s where
   gplate :: Traversal' s a
 
-instance
-  ( Generic s
-  , GPlateImpl (Rep s) a
-  ) => GPlate a s where
+instance GPlateContext a s => GPlate a s where
   gplate = traversalVL (gplateInner @'RepDefined)
   {-# INLINE gplate #-}
+
+-- | Hide implementation from haddock.
+type GPlateContext a s =
+  ( Generic s
+  , GPlateImpl (Rep s) a
+  )
 
 -- | Hidden instance.
 instance GPlate a Void0 where

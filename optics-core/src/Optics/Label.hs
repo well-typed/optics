@@ -514,8 +514,15 @@ instance
 
 -- | If no instance matches, try to use 'Generic' machinery for field access.
 --
--- For more information have a look at 'gfield' and 'gconstructor'.
+-- For more information have a look at 'Optics.Generic.gfield' and
+-- 'Optics.Generic.gconstructor'.
 instance {-# OVERLAPPABLE #-}
+  ( GenericLabelOpticContext name k s t a b
+  ) => LabelOptic name k s t a b where
+  labelOptic = genericOptic @name
+
+-- | Hide implementation from haddock.
+type GenericLabelOpticContext name k s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
   , Unless
@@ -530,24 +537,7 @@ instance {-# OVERLAPPABLE #-}
            A_Lens
   , GenericOptic name k s t a b
   , LiftCoverageCondition name k s t a b
-  ) => LabelOptic name k s t a b where
-  labelOptic = genericOptic @name
-
-----------------------------------------
-
--- | If the @explicit-generic-labels@ Cabal flag is enabled, only types with this
--- instance (which can be trivially derived with @DeriveAnyClass@ extension)
--- will be able to use labels as generic optics with a specific type.
---
--- It's an option for application developers to disable implicit fallback to
--- generic optics for more control.
---
--- /Note:/ the flag @explicit-generic-labels@ is disabled by default. Enabling
--- it is generally unsupported as it might lead to compilation errors of
--- dependencies relying on implicit fallback to generic optics.
-class Generic t => GenericLabelOptics t where
-  type HasGenericLabelOptics t :: Bool
-  type HasGenericLabelOptics t = 'True
+  )
 
 -- | If there is no specific 'LabelOptic' instance, display a custom type error.
 type family NoLabelOpticError name k s t a b where
@@ -567,6 +557,25 @@ type family NoLabelOpticError name k s t a b where
      ':$$: 'Text "- Derive a Generic instance for " ':<>: QuoteType s
 #endif
     )
+
+----------------------------------------
+
+-- | If the @explicit-generic-labels@ Cabal flag is enabled, only types with
+-- this instance (which can be trivially derived with @DeriveAnyClass@
+-- extension) will be able to use labels as generic optics with a specific type.
+--
+-- It's an option for application developers to disable implicit fallback to
+-- generic optics for more control.
+--
+-- Libraries using generic labels with their data types should derive this
+-- instance for compatibility with the @explicit-generic-labels@ flag.
+--
+-- /Note:/ the flag @explicit-generic-labels@ is disabled by default. Enabling
+-- it is generally unsupported as it might lead to compilation errors of
+-- dependencies relying on implicit fallback to generic optics.
+class Generic t => GenericLabelOptics t where
+  type HasGenericLabelOptics t :: Bool
+  type HasGenericLabelOptics t = 'True
 
 ----------------------------------------
 
