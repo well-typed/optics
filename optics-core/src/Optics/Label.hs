@@ -535,7 +535,7 @@ instance {-# OVERLAPPABLE #-}
 
 ----------------------------------------
 
--- | If @explicit-generic-labels@ Cabal flag is enabled, only types with this
+-- | If the @explicit-generic-labels@ Cabal flag is enabled, only types with this
 -- instance (which can be trivially derived with @DeriveAnyClass@ extension)
 -- will be able to use labels as generic optics with a specific type.
 --
