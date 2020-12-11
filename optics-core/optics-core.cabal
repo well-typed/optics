@@ -30,6 +30,7 @@ source-repository head
 flag explicit-generic-labels
   default: False
   manual:  True
+  description: Require explicit GenericLabelOptics instances in order to use generics-based labels
 
 library
   default-language: Haskell2010
