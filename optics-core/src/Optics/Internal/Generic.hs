@@ -181,7 +181,7 @@ instance
 
 instance
   ( r ~ b
-  ) => GSetFieldProd '[] (M1 S m g) (M1 S m (Rec0 b)) r where
+  ) => GSetFieldProd '[] (M1 S m (Rec0 a)) (M1 S m (Rec0 b)) r where
   gsetFieldProd _ = M1 . K1
 
 ----------------------------------------
