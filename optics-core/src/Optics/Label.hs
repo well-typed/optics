@@ -7,7 +7,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 -- |
 -- Module: Optics.Label
--- Description: Overloaded labels as optics
+-- Description: Overloaded labels as optics.
 --
 -- Overloaded labels are a solution to Haskell's namespace problem for records.
 -- The @-XOverloadedLabels@ extension allows a new expression syntax for labels,

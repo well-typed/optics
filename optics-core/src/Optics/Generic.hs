@@ -5,7 +5,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 -- |
 -- Module: Optics.Generic
--- Description: Data access via the 'Generic' type class
+-- Description: Data access via the 'Generic' type class.
 --
 -- This module provides, for data types having a 'Generic' instance, a way to
 -- focus on:
