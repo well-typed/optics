@@ -542,7 +542,7 @@ type GenericLabelOpticContext name k s t a b =
            A_Prism
            A_Lens
   , GenericOptic name k s t a b
-  , LiftCoverageCondition name k s t a b
+  , Dysfunctional name k s t a b
   )
 
 -- | If there is no specific 'LabelOptic' instance, display a custom type error.

@@ -8,8 +8,8 @@
 module Optics.Internal.Magic where
 
 -- | How about a magic trick? I'm gonna make the coverage condition disappear.
-class LiftCoverageCondition field k s t a b | field s -> k t a b
-                                            , field t -> k s a b
+class Dysfunctional field k s t a b | field s -> k t a b
+                                    , field t -> k s a b
 
 -- | Show something useful when type inference goes into a loop and stops with
 -- "reduction stack overflow" message (sometimes happens when trying to infer
@@ -20,7 +20,7 @@ instance
     "signature yourself or disable monomorphism restriction with"
     "NoMonomorphismRestriction LANGUAGE pragma so GHC infers it."
     field k s t a b
-  ) => LiftCoverageCondition field k s t a b
+  ) => Dysfunctional field k s t a b
 
 class TypeInferenceLoop msg1 msg2 msg3 field k s t a b | field s -> k t a b
                                                        , field t -> k s a b

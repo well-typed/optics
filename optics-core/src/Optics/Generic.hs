@@ -102,7 +102,7 @@ type GFieldContext name s t a b =
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GFieldImpl name s t a b
-  , LiftCoverageCondition name () s t a b
+  , Dysfunctional name () s t a b
   )
 
 -- | Hidden instance.
@@ -152,7 +152,7 @@ type GAFieldContext name s t a b =
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GAffineFieldImpl name s t a b
-  , LiftCoverageCondition name () s t a b
+  , Dysfunctional name () s t a b
   )
 
 -- | Hidden instance.
@@ -187,7 +187,7 @@ type GPositionContext n s t a b =
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GPositionImpl n s t a b
-  , LiftCoverageCondition n () s t a b
+  , Dysfunctional n () s t a b
   )
 
 -- | Hidden instance.
@@ -245,7 +245,7 @@ type GConstructorContext name s t a b =
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
   , GConstructorImpl name s t a b
-  , LiftCoverageCondition name () s t a b
+  , Dysfunctional name () s t a b
   )
 -- | Hidden instance.
 instance (a ~ Void0, b ~ Void0) => GConstructor name Void0 Void0 a b where
