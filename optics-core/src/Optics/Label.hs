@@ -483,9 +483,15 @@ import Optics.Internal.Optic
 ----------------------------------------
 -- Definitions
 
--- | Support for overloaded labels as optics. An overloaded label @#foo@ can be
--- used as an optic if there is an instance of @'LabelOptic' "foo" k s t a b@ or
--- both @s@ and @t@ have a 'Generic' instance.
+-- | Support for overloaded labels as optics.
+--
+-- An overloaded label @#foo@ can be used as an optic if there is an instance
+-- @'LabelOptic' "foo" k s t a b@.
+--
+-- Alternatively, if both @s@ and @t@ have a 'Generic' ('GenericLabelOptics' if
+-- @explicit-generic-labels@ flag is enabled) instance, a total field of @s@ is
+-- accessible by a label @#field@ of kind 'A_Lens', whereas its constructor by a
+-- label @#_Constructor@ of kind 'A_Prism'.
 class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t -> k b
                                             , name s b -> t
