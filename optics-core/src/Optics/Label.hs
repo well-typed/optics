@@ -579,9 +579,9 @@ type family NoLabelOpticError name k s t a b where
 -- /Note:/ the flag @explicit-generic-labels@ is disabled by default. Enabling
 -- it is generally unsupported as it might lead to compilation errors of
 -- dependencies relying on implicit fallback to generic optics.
-class Generic t => GenericLabelOptics t where
-  type HasGenericLabelOptics t :: Bool
-  type HasGenericLabelOptics t = 'True
+class Generic a => GenericLabelOptics a where
+  type HasGenericLabelOptics a :: Bool
+  type HasGenericLabelOptics a = 'True
 
 ----------------------------------------
 

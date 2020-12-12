@@ -7,7 +7,25 @@
 -- Module: Optics.Generic
 -- Description: Data access via the 'Generic' type class
 --
--- Data access via the 'Generic' type class.
+-- This module provides, for data types having a 'Generic' instance, a way to
+-- focus on:
+--
+-- - their named total fields via 'gfield',
+--
+-- - their named partial fields via 'gafield',
+--
+-- - their constructors via 'gconstructor',
+--
+-- - their fields at a specific position via 'gposition',
+--
+-- - their fields of a specific type via 'gplate'.
+--
+-- /Note:/ 'gfield' and 'gconstructor' are supported by
+-- 'Optics.Label.labelOptic' and can be used with a consise syntax via
+-- @OverloadedLabels@.
+--
+-- If you're looking for optics for working with a generic representation of a
+-- data type, there's "GHC.Generics.Optics".
 --
 module Optics.Generic
   (
