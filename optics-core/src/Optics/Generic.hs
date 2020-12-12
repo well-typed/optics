@@ -281,7 +281,7 @@ class GPlate a s where
   gplate :: Traversal' s a
 
 instance GPlateContext a s => GPlate a s where
-  gplate = traversalVL (gplateInner @'RepDefined)
+  gplate = traversalVL (gplateInner @'True)
   {-# INLINE gplate #-}
 
 -- | Hide implementation from haddock.

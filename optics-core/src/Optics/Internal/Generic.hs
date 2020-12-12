@@ -518,8 +518,8 @@ instance {-# OVERLAPPING #-} GPlateImpl (K1 i a) a where
   gplateImpl f (K1 a) = K1 <$> f a
 
 -- | Recurse into the inner type if it has a 'Generic' instance.
-instance GPlateInner (HasRep (Rep b)) b a => GPlateImpl (K1 i b) a where
-  gplateImpl f (K1 b) = K1 <$> gplateInner @(HasRep (Rep b)) f b
+instance GPlateInner (Defined (Rep b)) b a => GPlateImpl (K1 i b) a where
+  gplateImpl f (K1 b) = K1 <$> gplateInner @(Defined (Rep b)) f b
 
 instance GPlateImpl U1 a where
   gplateImpl _ = pure
@@ -530,10 +530,10 @@ instance GPlateImpl V1 a where
 instance GPlateImpl (URec b) a where
   gplateImpl _ = pure
 
-class GPlateInner (repDefined :: RepDefined) s a where
+class GPlateInner (repDefined :: Bool) s a where
   gplateInner :: TraversalVL' s a
 
-instance (Generic s, GPlateImpl (Rep s) a) => GPlateInner 'RepDefined s a where
+instance (Generic s, GPlateImpl (Rep s) a) => GPlateInner 'True s a where
   gplateInner f = fmap to . gplateImpl f . from
 
 instance {-# INCOHERENT #-} GPlateInner repNotDefined s a where

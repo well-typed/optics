@@ -55,16 +55,6 @@ type family ShowEliminations forms :: ErrorMessage where
     ShowSymbolsWithOrigin fs ':$$: 'Text "  " ':<>: ShowOperators ops
 
 ----------------------------------------
--- Generics
-
-data RepDefined = RepDefined
-
--- | This type family should be called with an application of 'Rep' and will
--- reduce to 'RepDefined' if it's defined; otherwise it is stuck.
-type family HasRep (s :: Type -> Type) :: RepDefined where
-  HasRep (s x) = 'RepDefined
-
-----------------------------------------
 -- Lists
 
 -- | Reverse a type-level list.
