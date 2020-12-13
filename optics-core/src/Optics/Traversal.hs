@@ -50,6 +50,7 @@ module Optics.Traversal
 
   -- * Additional introduction forms
   , traversed
+  , both
 
   -- * Additional elimination forms
   , forOf
@@ -99,6 +100,7 @@ module Optics.Traversal
 import Control.Applicative
 import Control.Applicative.Backwards
 import Control.Monad.Trans.State
+import Data.Bitraversable
 import Data.Functor.Identity
 
 import Data.Profunctor.Indexed
@@ -292,6 +294,24 @@ failover' o = \f s ->
 traversed :: Traversable t => Traversal (t a) (t b) a b
 traversed = Optic traversed__
 {-# INLINE traversed #-}
+
+-- | Traverse both parts of a 'Bitraversable' container with matching types.
+--
+-- /Note:/ for traversing a pair or an 'Either' it's better to use
+-- 'Optics.Each.Core.each' and 'Optics.IxLens.chosen' respectively to reduce
+-- potential for bugs due to too much polymorphism.
+--
+-- >>> (1,2) & both %~ (*10)
+-- (10,20)
+--
+-- >>> over both length ("hello","world")
+-- (5,5)
+--
+-- >>> foldOf both ("hello","world")
+-- "helloworld"
+both :: Bitraversable r => Traversal (r a a) (r b b) a b
+both = traversalVL $ \f -> bitraverse f f
+{-# INLINE both #-}
 
 ----------------------------------------
 -- Traversal combinators
