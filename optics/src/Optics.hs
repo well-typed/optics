@@ -86,6 +86,9 @@ module Optics
   --
   , module Optics.Empty
 
+  -- ** Generic data access
+  , module Optics.Generic
+
   -- ** Re
 
   -- | Some optics can be reversed with 're'.  This is mainly useful to invert
@@ -211,6 +214,7 @@ import Optics.At
 import Optics.Cons
 import Optics.Each
 import Optics.Empty
+import Optics.Generic
 import Optics.Indexed
 import Optics.Mapping
 import Optics.Operators

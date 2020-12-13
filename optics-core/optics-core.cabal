@@ -27,10 +27,18 @@ source-repository head
   location: https://github.com/well-typed/optics.git
   subdir:   optics-core
 
+flag explicit-generic-labels
+  default: False
+  manual:  True
+  description: Require explicit GenericLabelOptics instances in order to use generics-based labels
+
 library
   default-language: Haskell2010
   hs-source-dirs:   src
   ghc-options:      -Wall
+
+  if flag(explicit-generic-labels)
+    cpp-options: -DEXPLICIT_GENERIC_LABELS
 
   build-depends: base                   >= 4.10       && <5
                , array                  >= 0.5.2.0    && <0.6
@@ -71,6 +79,7 @@ library
                    Optics.Cons.Core
                    Optics.Each.Core
                    Optics.Empty.Core
+                   Optics.Generic
                    Optics.Indexed.Core
                    Optics.Mapping
                    Optics.Label
@@ -97,11 +106,14 @@ library
                    -- internal modules
                    Optics.Internal.Bi
                    Optics.Internal.Fold
+                   Optics.Internal.Generic
+                   Optics.Internal.Generic.TypeLevel
                    Optics.Internal.Indexed
                    Optics.Internal.Indexed.Classes
                    Optics.Internal.IxFold
                    Optics.Internal.IxSetter
                    Optics.Internal.IxTraversal
+                   Optics.Internal.Magic
                    Optics.Internal.Optic
                    Optics.Internal.Optic.Subtyping
                    Optics.Internal.Optic.TypeLevel

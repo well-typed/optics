@@ -8,7 +8,7 @@
 -- warning in subsequent releases.
 module Optics.Internal.Optic.TypeLevel where
 
-import Data.Kind (Type)
+import Data.Kind
 import Data.Type.Equality
 import GHC.TypeLits
 import Unsafe.Coerce
@@ -23,14 +23,6 @@ type NoIx = ('[] :: IxList)
 
 -- | Singleton index list
 type WithIx i = ('[i] :: IxList)
-
--- | Show a type surrounded by quote marks.
-type family QuoteType (x :: Type) :: ErrorMessage where
-  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
-
--- | Show a symbol surrounded by quote marks.
-type family QuoteSymbol (x :: Symbol) :: ErrorMessage where
-  QuoteSymbol x = 'Text "‘" ':<>: 'Text x ':<>: 'Text "’"
 
 ----------------------------------------
 -- Elimination forms in error messages
@@ -63,20 +55,12 @@ type family ShowEliminations forms :: ErrorMessage where
     ShowSymbolsWithOrigin fs ':$$: 'Text "  " ':<>: ShowOperators ops
 
 ----------------------------------------
+-- Lists
 
-data RepDefined = RepDefined
-
--- | This type family should be called with an application of 'Rep' and will
--- reduce to 'RepDefined' if it's defined; otherwise it is stuck.
-type family HasRep (s :: Type -> Type) :: RepDefined
-type instance HasRep (s x) = 'RepDefined
-
--- | This type family should be called with applications of 'Rep' on both sides,
--- and will reduce to 'RepDefined' if at least one of them is defined; otherwise
--- it is stuck.
-type family AnyHasRep (s :: Type -> Type) (t :: Type -> Type) :: RepDefined
-type instance AnyHasRep (s x) t = 'RepDefined
-type instance AnyHasRep s (t x) = 'RepDefined
+-- | Reverse a type-level list.
+type family Reverse (xs :: [k]) (acc :: [k]) :: [k] where
+  Reverse '[]      acc = acc
+  Reverse (x : xs) acc = Reverse xs (x : acc)
 
 -- | Curry a type-level list.
 --
@@ -94,6 +78,25 @@ type family Append (xs :: [k]) (ys :: [k]) :: [k] where
   Append '[]       ys  = ys -- needed for (<%>) and (%>)
   Append xs        '[] = xs -- needed for (<%)
   Append (x ': xs) ys  = x ': Append xs ys
+
+-- | Class that is inhabited by all type-level lists @xs@, providing the ability
+-- to compose a function under @'Curry' xs@.
+class CurryCompose xs where
+  -- | Compose a function under @'Curry' xs@.  This generalises @('.')@ (aka
+  -- 'fmap' for @(->)@) to work for curried functions with one argument for each
+  -- type in the list.
+  composeN :: (i -> j) -> Curry xs i -> Curry xs j
+
+instance CurryCompose '[] where
+  composeN = id
+  {-# INLINE composeN #-}
+
+instance CurryCompose xs => CurryCompose (x ': xs) where
+  composeN ij f = composeN @xs ij . f
+  {-# INLINE composeN #-}
+
+----------------------------------------
+-- Indices
 
 -- | In pseudo (dependent-)Haskell, provide a witness
 --
@@ -127,18 +130,49 @@ appendIndices = unsafeCoerce Refl
 --
 -- appendIndices = appendIndices__ @xs @ys (Proxy @i)
 
--- | Class that is inhabited by all type-level lists @xs@, providing the ability
--- to compose a function under @'Curry' xs@.
-class CurryCompose xs where
-  -- | Compose a function under @'Curry' xs@.  This generalises @('.')@ (aka
-  -- 'fmap' for @(->)@) to work for curried functions with one argument for each
-  -- type in the list.
-  composeN :: (i -> j) -> Curry xs i -> Curry xs j
+----------------------------------------
+-- Either
 
-instance CurryCompose '[] where
-  composeN = id
-  {-# INLINE composeN #-}
+-- | If lhs is 'Right', return it. Otherwise check rhs.
+type family FirstRight (m1 :: Either e a) (m2 :: Either e a) :: Either e a where
+  FirstRight ('Right a) _ = 'Right a
+  FirstRight          _ b = b
 
-instance CurryCompose xs => CurryCompose (x ': xs) where
-  composeN ij f = composeN @xs ij . f
-  {-# INLINE composeN #-}
+type family FromRight (def :: b) (e :: Either a b) :: b where
+  FromRight _   ('Right b) = b
+  FromRight def ('Left  _) = def
+
+----------------------------------------
+-- Errors
+
+-- | Show a custom type error if @p@ is false (or stuck).
+type family Unless (p :: Bool) (err :: Constraint) :: Constraint where
+  Unless 'True  _   = ()
+  Unless 'False err = err
+
+-- | Use with 'Unless' to detect stuck (undefined) type families.
+type family Defined (f :: k) :: Bool where
+  Defined (f _) = Defined f
+  Defined _     = 'True
+
+-- | Show a type surrounded by quote marks.
+type family QuoteType (x :: t) :: ErrorMessage where
+  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
+
+-- | Show a symbol surrounded by quote marks.
+type family QuoteSymbol (x :: Symbol) :: ErrorMessage where
+  QuoteSymbol x = 'Text "‘" ':<>: 'Text x ':<>: 'Text "’"
+
+type family ToOrdinal (n :: Nat) :: ErrorMessage where
+  ToOrdinal 1 = 'Text "1st"
+  ToOrdinal 2 = 'Text "2nd"
+  ToOrdinal 3 = 'Text "3rd"
+  ToOrdinal n = 'ShowType n ':<>: 'Text "th"
+
+----------------------------------------
+-- Misc
+
+-- | Derive the shape of @a@ from the shape of @b@.
+class HasShapeOf (a :: k) (b :: k)
+instance {-# OVERLAPPING #-} (fa ~ f a, HasShapeOf f g) => HasShapeOf fa (g b)
+instance (a ~ b) => HasShapeOf a b
