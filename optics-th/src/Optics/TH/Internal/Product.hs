@@ -394,6 +394,10 @@ buildStab forClassInstance s categorizedFields = do
     (fixedFields, targetFields) = partitionEithers categorizedFields
 
     unfixedTypeVars
+      | S.null freeTypeVars =
+        -- If there are no free type vars, don't bother searching for ambiguous
+        -- type family applications because there are none.
+        pure S.empty
       | forClassInstance = do
           ambiguousTypeVars <- getAmbiguousTypeFamilyTypeVars
           --runIO $ do
