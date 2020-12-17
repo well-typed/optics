@@ -125,7 +125,7 @@ main = defaultMainWith config
     ]
   , bgroup "intmap"
     [ bgroup "toList"
-      [ bench "native"          $ nf F.toList im
+      [ bench "native"          $ nf IM.elems im
       , bench "each"            $ nf (toListOf each) im
       , bench "each/lens"       $ nf (L.toListOf L.each) im
       , bench "itraversed"      $ nf (toListOf itraversed) im
@@ -146,7 +146,7 @@ main = defaultMainWith config
     ]
   , bgroup "map"
     [ bgroup "toList"
-      [ bench "native"          $ nf F.toList m
+      [ bench "native"          $ nf M.elems m
       , bench "each"            $ nf (toListOf each) m
       , bench "each/lens"       $ nf (L.toListOf L.each) m
       , bench "itraversed"      $ nf (toListOf itraversed) m
@@ -167,7 +167,7 @@ main = defaultMainWith config
     ]
   , bgroup "hash map"
     [ bgroup "toList"
-      [ bench "native"          $ nf HM.keys h
+      [ bench "native"          $ nf HM.elems h
       , bench "each"            $ nf (toListOf each) h
       , bench "each/lens"       $ nf (L.toListOf L.each) h
       , bench "itraversed"      $ nf (toListOf itraversed) h
