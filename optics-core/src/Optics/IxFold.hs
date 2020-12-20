@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.IxFold
 -- Description: An indexed version of a 'Optics.Fold.Fold'.

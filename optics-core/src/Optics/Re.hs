@@ -22,7 +22,6 @@
 --
 -- <<diagrams/reoptics.png Reversed Optics>>
 --
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 module Optics.Re
   ( ReversibleOptic(..)

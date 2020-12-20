@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeInType #-}
 {-# OPTIONS_HADDOCK not-home #-}
 

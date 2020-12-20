@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.IxSetter
 -- Description: An indexed version of a 'Optics.Setter.Setter'.

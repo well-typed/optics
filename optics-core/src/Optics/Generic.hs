@@ -1,6 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- |
@@ -316,5 +315,5 @@ instance GPlate Void0 a where
   gplate = error "unreachable"
 
 -- $setup
--- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
+-- >>> :set -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
 -- >>> import Optics.Core

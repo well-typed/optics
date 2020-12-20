@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.IxTraversal
 -- Description: An indexed version of a 'Optics.Traversal.Traversal'.
