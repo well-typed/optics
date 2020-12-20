@@ -98,8 +98,8 @@ instance ReversibleOptic A_Review where
 -- | Internal implementation of re.
 re__
   :: (Profunctor p, Constraints k (Re p a b))
-  => Optic k  NoIx s t a b
-  -> Optic__ p i i b a t s
+  => Optic k  'NoIx s t a b
+  -> Optic__ p i i  b a t s
 re__ o = unRe (getOptic o (Re id))
 {-# INLINE re__ #-}
 

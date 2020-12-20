@@ -16,82 +16,85 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Optic
 
 -- | Show useful error message when a function expects optics without indices.
-class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: IxList)
+class is ~ 'NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: IxList)
 
 instance
   ( TypeError
     ('Text "‘" ':<>: 'Text f ':<>: 'Text "’ accepts only optics with no indices")
-  , (x ': xs) ~ NoIx
-  ) => AcceptsEmptyIndices f (x ': xs)
+  , xs ~ 'NoIx
+  ) => AcceptsEmptyIndices f xs
 
-instance AcceptsEmptyIndices f '[]
+instance {-# OVERLAPPING #-} AcceptsEmptyIndices f 'NoIx
 
 -- | Check whether a list of indices is not empty and generate sensible error
 -- message if it's not.
 class NonEmptyIndices (is :: IxList)
 
-instance
+instance {-# OVERLAPPING #-}
   ( TypeError
     ('Text "Indexed optic is expected")
-  ) => NonEmptyIndices '[]
+  ) => NonEmptyIndices 'NoIx
 
-instance NonEmptyIndices (x ': xs)
+instance NonEmptyIndices xs
 
 -- | Generate sensible error messages in case a user tries to pass either an
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
 -- with a single index is expected.
-class is ~ '[i] => HasSingleIndex (is :: IxList) (i :: Type)
+class is ~ ('WithIx i) => HasSingleIndex (is :: IxList) (i :: Type)
 
-instance HasSingleIndex '[i] i
+instance HasSingleIndex ('WithIx i) i
 
 instance
   ( TypeError
     ('Text "Indexed optic is expected")
-  , '[] ~ '[i]
-  ) => HasSingleIndex '[] i
+  , 'NoIx ~ ('WithIx i)
+  ) => HasSingleIndex 'NoIx i
 
 instance
   ( TypeError
     ('Text "Use (<%>) or icompose to combine indices of type "
-     ':<>: ShowTypes is)
-  , is ~ '[i1, i2]
-  , is ~ '[i]
-  ) => HasSingleIndex '[i1, i2] i
+     ':<>: ShowIndices is)
+  , is ~ ('MultiIx i1 i2 '[])
+  , is ~ ('WithIx i)
+  ) => HasSingleIndex ('MultiIx i1 i2 '[]) i
 
 instance
   ( TypeError
     ('Text "Use icompose3 to combine indices of type "
-     ':<>: ShowTypes is)
-  , is ~ '[i1, i2, i3]
-  , is ~ '[i]
-  ) => HasSingleIndex [i1, i2, i3] i
+     ':<>: ShowIndices is)
+  , is ~ ('MultiIx i1 i2 '[i3])
+  , is ~ ('WithIx i)
+  ) => HasSingleIndex ('MultiIx i1 i2 '[i3]) i
 
 instance
   ( TypeError
     ('Text "Use icompose4 to combine indices of type "
-     ':<>: ShowTypes is)
-  , is ~ '[i1, i2, i3, i4]
-  , is ~ '[i]
-  ) => HasSingleIndex '[i1, i2, i3, i4] i
+     ':<>: ShowIndices is)
+  , is ~ ('MultiIx i1 i2 '[i3, i4])
+  , is ~ ('WithIx i)
+  ) => HasSingleIndex ('MultiIx i1 i2 '[i3, i4]) i
 
 instance
   ( TypeError
     ('Text "Use icompose5 to flatten indices of type "
-     ':<>: ShowTypes is)
-  , is ~ '[i1, i2, i3, i4, i5]
-  , is ~ '[i]
-  ) => HasSingleIndex '[i1, i2, i3, i4, i5] i
+     ':<>: ShowIndices is)
+  , is ~ ('MultiIx i1 i2 '[i3, i4, i5])
+  , is ~ ('WithIx i)
+  ) => HasSingleIndex ('MultiIx i1 i2 '[i3, i4, i5]) i
 
 instance
   ( TypeError
     ('Text "Use icomposeN to flatten indices of type "
-     ':<>: ShowTypes is)
-  , is ~ (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is')
-  , is ~ '[i]
-  ) => HasSingleIndex (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is') i
+     ':<>: ShowIndices is)
+  , is ~ ('MultiIx i1 i2 (i3 ': i4 ': i5 ': i6 ': is'))
+  , is ~ ('WithIx i)
+  ) => HasSingleIndex ('MultiIx i1 i2 (i3 ': i4 ': i5 ': i6 ': is')) i
 
 ----------------------------------------
 -- Helpers for HasSingleIndex
+
+type family ShowIndices (xs :: IxList) :: ErrorMessage where
+  ShowIndices xs = ShowTypes (FromIxList xs)
 
 type family ShowTypes (types :: [Type]) :: ErrorMessage where
   ShowTypes '[i]      = QuoteType i
@@ -138,8 +141,8 @@ indexing l iafb s =
 -- 'Optics.Indexed.Core.noIx' g@.
 conjoined
   :: is `HasSingleIndex` i
-  => Optic k NoIx s t a b
-  -> Optic k is   s t a b
-  -> Optic k is   s t a b
+  => Optic k 'NoIx s t a b
+  -> Optic k is    s t a b
+  -> Optic k is    s t a b
 conjoined (Optic f) (Optic g) = Optic (conjoined__ f g)
 {-# INLINE conjoined #-}

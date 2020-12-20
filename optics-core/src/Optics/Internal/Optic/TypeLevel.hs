@@ -15,14 +15,13 @@ import Unsafe.Coerce
 
 -- | A list of index types, used for indexed optics.
 --
--- @since 0.2
-type IxList = [Type]
+-- @since 0.4
+data IxList = NoIx | WithIx Type | MultiIx Type Type [Type]
 
--- | An alias for an empty index-list
-type NoIx = ('[] :: IxList)
-
--- | Singleton index list
-type WithIx i = ('[i] :: IxList)
+type family FromIxList (xs :: IxList) :: [Type] where
+  FromIxList 'NoIx             = '[]
+  FromIxList ('WithIx x)       = '[x]
+  FromIxList ('MultiIx x y is) = x : y : is
 
 ----------------------------------------
 -- Elimination forms in error messages
@@ -48,7 +47,7 @@ type family ShowOperators (ops :: [Symbol]) :: ErrorMessage where
 
 type family AppendEliminations a b where
   AppendEliminations '(fs1, ops1) '(fs2, ops2) =
-    '(Append fs1 fs2, Append ops1 ops2)
+    '(AppendList fs1 fs2, AppendList ops1 ops2)
 
 type family ShowEliminations forms :: ErrorMessage where
   ShowEliminations '(fs, ops) =
@@ -69,15 +68,26 @@ type family Reverse (xs :: [k]) (acc :: [k]) :: [k] where
 -- @
 -- 'Curry' xs y = 'foldr' (->) y xs
 -- @
-type family Curry (xs :: IxList) (y :: Type) :: Type where
-  Curry '[]       y = y
-  Curry (x ': xs) y = x -> Curry xs y
+type family Curry (xs :: IxList) (r :: Type) :: Type where
+  Curry 'NoIx             r = r
+  Curry ('WithIx x)       r = x -> r
+  Curry ('MultiIx x y is) r = x -> y -> CurryList is r
+
+type family CurryList (xs :: [Type]) (y :: Type) :: Type where
+  CurryList '[]       y = y
+  CurryList (x ': xs) y = x -> CurryList xs y
+
+type family Append (xs :: IxList) (ys :: IxList) :: IxList where
+  Append 'NoIx             ys                = ys
+  Append  xs               'NoIx             = xs
+  Append ('WithIx x)       ('WithIx y)       = 'MultiIx x y '[]
+  Append ('WithIx x)       ('MultiIx y z is) = 'MultiIx x y (z : is)
+  Append ('MultiIx x y is) ('WithIx z)       = 'MultiIx x y (AppendList is '[z])
 
 -- | Append two type-level lists together.
-type family Append (xs :: [k]) (ys :: [k]) :: [k] where
-  Append '[]       ys  = ys -- needed for (<%>) and (%>)
-  Append xs        '[] = xs -- needed for (<%)
-  Append (x ': xs) ys  = x ': Append xs ys
+type family AppendList (xs :: [k]) (ys :: [k]) :: [k] where
+  AppendList '[]       ys  = ys
+  AppendList (x ': xs) ys  = x ': AppendList xs ys
 
 -- | Class that is inhabited by all type-level lists @xs@, providing the ability
 -- to compose a function under @'Curry' xs@.
@@ -85,15 +95,25 @@ class CurryCompose xs where
   -- | Compose a function under @'Curry' xs@.  This generalises @('.')@ (aka
   -- 'fmap' for @(->)@) to work for curried functions with one argument for each
   -- type in the list.
-  composeN :: (i -> j) -> Curry xs i -> Curry xs j
+  curryCompose :: (i -> j) -> Curry xs i -> Curry xs j
 
-instance CurryCompose '[] where
-  composeN = id
-  {-# INLINE composeN #-}
+instance CurryCompose 'NoIx where
+  curryCompose = id
 
-instance CurryCompose xs => CurryCompose (x ': xs) where
-  composeN ij f = composeN @xs ij . f
-  {-# INLINE composeN #-}
+instance CurryCompose ('WithIx x) where
+  curryCompose ij f = ij . f
+
+instance CurryComposeList is => CurryCompose ('MultiIx x y is) where
+  curryCompose ij f x = curryComposeList @is ij . f x
+
+class CurryComposeList xs where
+  curryComposeList :: (i -> j) -> CurryList xs i -> CurryList xs j
+
+instance CurryComposeList '[] where
+  curryComposeList = id
+
+instance CurryComposeList xs => CurryComposeList (x ': xs) where
+  curryComposeList ij f = curryComposeList @xs ij . f
 
 ----------------------------------------
 -- Indices
@@ -105,28 +125,26 @@ instance CurryCompose xs => CurryCompose (x ': xs) where
 --    where f = (->)
 -- @
 class AppendIndices xs ys where
-  appendIndices__ :: proxy i -> Curry xs (Curry ys i) :~: Curry (Append xs ys) i
-
--- | If we know the second list is empty, we can pick the first list without
--- knowing anything about it, hence the instance is marked as INCOHERENT.
-instance {-# INCOHERENT #-} AppendIndices xs '[] where
-  appendIndices__ _ = Refl
+  appendIndices__
+    :: proxy i
+    -> CurryList xs (CurryList ys i) :~: CurryList (AppendList xs ys) i
 
 instance AppendIndices '[] ys where
   appendIndices__ _ = Refl
 
 instance
-  (Append (x ': xs) ys ~ (x ': Append xs ys), AppendIndices xs ys
+  (AppendList (x ': xs) ys ~ (x ': AppendList xs ys), AppendIndices xs ys
   ) => AppendIndices (x ': xs) ys where
   appendIndices__ i | Refl <- appendIndices__ @xs @ys i = Refl
 
 appendIndices :: forall xs ys i. Curry xs (Curry ys i) :~: Curry (Append xs ys) i
 appendIndices = unsafeCoerce Refl
--- Note: below is the proper definition, but it requires @AppendIndices xs ys@
--- in the context. We don't want to propagate that constraint down into (%) and
--- force users to experience it since it's about internal details, so we trick
--- the compiler with unsafeCoerce that we always have the proof (which we do,
--- but GHC can't see it and would want to compute it itself).
+-- Note: below is the proper definition (modulo IxList ~ [Type] isomorphism),
+-- but it requires @AppendIndices xs ys@ in the context. We don't want to
+-- propagate that constraint down into (%) and force users to experience it
+-- since it's about internal details, so we trick the compiler with unsafeCoerce
+-- that we always have the proof (which we do, but GHC can't see it and would
+-- want to compute it itself).
 --
 -- appendIndices = appendIndices__ @xs @ys (Proxy @i)
 

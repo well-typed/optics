@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Main (main) where
@@ -14,19 +15,19 @@ import Optics.Tests.Misc
 import Optics.Tests.Properties
 
 -- | Composing a lens and a traversal yields a traversal
-_comp1 :: Traversable t => Optic A_Traversal NoIx (t a, y) (t b, y) a b
+_comp1 :: Traversable t => Optic A_Traversal 'NoIx (t a, y) (t b, y) a b
 _comp1 = _1 % traversed
 
 -- | Composing two lenses yields a lens
-_comp2 :: Optic A_Lens NoIx ((a, y), y1) ((b, y), y1) a b
+_comp2 :: Optic A_Lens 'NoIx ((a, y), y1) ((b, y), y1) a b
 _comp2 = _1 % _1
 
 -- | Composing a getter and a lens yields a getter
-_comp3 :: Optic A_Getter NoIx ((b, y), b1) ((b, y), b1) b b
+_comp3 :: Optic A_Getter 'NoIx ((b, y), b1) ((b, y), b1) b b
 _comp3 = to fst % _1
 
 -- | Composing a prism and a lens yields a traversal
-_comp4 :: Optic An_AffineTraversal NoIx (Either c (a, y)) (Either c (b, y)) a b
+_comp4 :: Optic An_AffineTraversal 'NoIx (Either c (a, y)) (Either c (b, y)) a b
 _comp4 = _Right % _1
 
 -- | An iso can be used as a getter

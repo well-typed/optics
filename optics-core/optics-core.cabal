@@ -124,6 +124,7 @@ library
                    Optics.Internal.Utils
 
   default-extensions: BangPatterns
+                      DataKinds
                       DefaultSignatures
                       DeriveFunctor
                       FlexibleContexts

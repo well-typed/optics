@@ -110,10 +110,10 @@ import Optics.ReadOnly
 import Optics.Traversal
 
 -- | Type synonym for a type-modifying indexed traversal.
-type IxTraversal i s t a b = Optic A_Traversal (WithIx i) s t a b
+type IxTraversal i s t a b = Optic A_Traversal ('WithIx i) s t a b
 
 -- | Type synonym for a type-preserving indexed traversal.
-type IxTraversal' i s a = Optic' A_Traversal (WithIx i) s a
+type IxTraversal' i s a = Optic' A_Traversal ('WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed traversal.
 type IxTraversalVL i s t a b =

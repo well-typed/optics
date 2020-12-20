@@ -57,9 +57,7 @@ module Optics.Optic
   -- | See the "Indexed optics" section of the overview documentation in the
   -- @Optics@ module of the main @optics@ package for more details on indexed
   -- optics.
-  , IxList
-  , NoIx
-  , WithIx
+  , IxList(..)
   , Append
   , NonEmptyIndices
   , HasSingleIndex

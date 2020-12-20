@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 module Optics.Tests.Properties (propertiesTests) where
 
 import Data.Either (isRight)
@@ -82,5 +83,5 @@ propertiesTests = testGroup "properties"
     ]
   ]
 
-reviewing :: Optic A_Review NoIx s t a b -> Review t b
+reviewing :: Optic A_Review 'NoIx s t a b -> Review t b
 reviewing (Optic o) = Optic (lphantom . o . lphantom)

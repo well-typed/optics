@@ -103,10 +103,10 @@ import Optics.Review
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying iso.
-type Iso s t a b = Optic An_Iso NoIx s t a b
+type Iso s t a b = Optic An_Iso 'NoIx s t a b
 
 -- | Type synonym for a type-preserving iso.
-type Iso' s a = Optic' An_Iso NoIx s a
+type Iso' s a = Optic' An_Iso 'NoIx s a
 
 -- | Build an iso from a pair of inverse functions.
 --

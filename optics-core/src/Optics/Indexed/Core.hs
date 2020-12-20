@@ -77,9 +77,9 @@ infixl 9 <%>
 (<%>)
   :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b,
       is `HasSingleIndex` i, js `HasSingleIndex` j)
-  => Optic k is              s t u v
-  -> Optic l js              u v a b
-  -> Optic m (WithIx (i, j)) s t a b
+  => Optic k is               s t u v
+  -> Optic l js               u v a b
+  -> Optic m ('WithIx (i, j)) s t a b
 o <%> o' = icompose (,) (o % o')
 {-# INLINE (<%>) #-}
 
@@ -124,8 +124,8 @@ o <% o' = o % noIx o'
 reindexed
   :: is `HasSingleIndex` i
   => (i -> j)
-  -> Optic k is         s t a b
-  -> Optic k (WithIx j) s t a b
+  -> Optic k is          s t a b
+  -> Optic k ('WithIx j) s t a b
 reindexed = icomposeN
 {-# INLINE reindexed #-}
 
@@ -136,8 +136,8 @@ reindexed = icomposeN
 --
 icompose
   :: (i -> j -> ix)
-  -> Optic k '[i, j]     s t a b
-  -> Optic k (WithIx ix) s t a b
+  -> Optic k ('MultiIx i j '[]) s t a b
+  -> Optic k ('WithIx ix)       s t a b
 icompose = icomposeN
 {-# INLINE icompose #-}
 
@@ -148,24 +148,24 @@ icompose = icomposeN
 --
 icompose3
   :: (i1 -> i2 -> i3 -> ix)
-  -> Optic k '[i1, i2, i3] s t a b
-  -> Optic k (WithIx ix)   s t a b
+  -> Optic k ('MultiIx i1 i2 '[i3]) s t a b
+  -> Optic k ('WithIx ix)           s t a b
 icompose3 = icomposeN
 {-# INLINE icompose3 #-}
 
 -- | Flatten indices obtained from four indexed optics.
 icompose4
   :: (i1 -> i2 -> i3 -> i4 -> ix)
-  -> Optic k '[i1, i2, i3, i4] s t a b
-  -> Optic k (WithIx ix)       s t a b
+  -> Optic k ('MultiIx i1 i2 '[i3, i4]) s t a b
+  -> Optic k ('WithIx ix)               s t a b
 icompose4 = icomposeN
 {-# INLINE icompose4 #-}
 
 -- | Flatten indices obtained from five indexed optics.
 icompose5
   :: (i1 -> i2 -> i3 -> i4 -> i5 -> ix)
-  -> Optic k '[i1, i2, i3, i4, i5] s t a b
-  -> Optic k (WithIx ix)           s t a b
+  -> Optic k ('MultiIx i1 i2 '[i3, i4, i5]) s t a b
+  -> Optic k ('WithIx ix)                   s t a b
 icompose5 = icomposeN
 {-# INLINE icompose5 #-}
 
@@ -174,9 +174,9 @@ icomposeN
   :: forall k i is s t a b
   . (CurryCompose is, NonEmptyIndices is)
   => Curry is i
-  -> Optic k is         s t a b
-  -> Optic k (WithIx i) s t a b
-icomposeN f (Optic o) = Optic (ixcontramap (\ij -> composeN @is ij f) . o)
+  -> Optic k is          s t a b
+  -> Optic k ('WithIx i) s t a b
+icomposeN f (Optic o) = Optic (ixcontramap (\ij -> curryCompose @is ij f) . o)
 {-# INLINE icomposeN #-}
 
 ----------------------------------------
@@ -187,8 +187,8 @@ class IxOptic k s t a b where
   -- | Convert an indexed optic to its unindexed equivalent.
   noIx
     :: NonEmptyIndices is
-    => Optic k is   s t a b
-    -> Optic k NoIx s t a b
+    => Optic k is    s t a b
+    -> Optic k 'NoIx s t a b
 
 instance (s ~ t, a ~ b) => IxOptic A_Getter s t a b where
   noIx o = to (view o)

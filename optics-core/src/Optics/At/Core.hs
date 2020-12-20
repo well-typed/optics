@@ -146,8 +146,8 @@ class Ixed m where
   --
   -- >>> [] ^? ix 2
   -- Nothing
-  ix :: Index m -> Optic' (IxKind m) NoIx m (IxValue m)
-  default ix :: (At m, IxKind m ~ An_AffineTraversal) => Index m -> Optic' (IxKind m) NoIx m (IxValue m)
+  ix :: Index m -> Optic' (IxKind m) 'NoIx m (IxValue m)
+  default ix :: (At m, IxKind m ~ An_AffineTraversal) => Index m -> Optic' (IxKind m) 'NoIx m (IxValue m)
   ix = ixAt
   {-# INLINE ix #-}
 

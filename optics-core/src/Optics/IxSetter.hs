@@ -66,10 +66,10 @@ import Optics.Internal.Optic
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed setter.
-type IxSetter i s t a b = Optic A_Setter (WithIx i) s t a b
+type IxSetter i s t a b = Optic A_Setter ('WithIx i) s t a b
 
 -- | Type synonym for a type-preserving indexed setter.
-type IxSetter' i s a = Optic' A_Setter (WithIx i) s a
+type IxSetter' i s a = Optic' A_Setter ('WithIx i) s a
 
 -- | Apply an indexed setter as a modifier.
 iover

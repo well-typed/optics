@@ -31,7 +31,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Utils
 
 -- | Type synonym for an indexed getter.
-type IxGetter i s a = Optic' A_Getter (WithIx i) s a
+type IxGetter i s a = Optic' A_Getter ('WithIx i) s a
 
 -- | Build an indexed getter from a function.
 --

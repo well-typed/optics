@@ -498,7 +498,7 @@ class LabelOptic (name :: Symbol) k s t a b | name s -> k a
                                             , name t a -> s where
   -- | Used to interpret overloaded label syntax.  An overloaded label @#foo@
   -- corresponds to @'labelOptic' \@"foo"@.
-  labelOptic :: Optic k NoIx s t a b
+  labelOptic :: Optic k 'NoIx s t a b
 
 -- | Type synonym for a type-preserving optic as overloaded label.
 type LabelOptic' name k s a = LabelOptic name k s s a a
@@ -586,7 +586,7 @@ class Generic a => GenericLabelOptics a where
 ----------------------------------------
 
 class GenericOptic name k s t a b where
-  genericOptic :: Optic k NoIx s t a b
+  genericOptic :: Optic k 'NoIx s t a b
 
 instance
   ( GFieldImpl name s t a b
@@ -602,7 +602,7 @@ instance
 ----------------------------------------
 
 instance
-  (LabelOptic name k s t a b, is ~ NoIx
+  (LabelOptic name k s t a b, is ~ 'NoIx
   ) => IsLabel name (Optic k is s t a b) where
   fromLabel = labelOptic @name
 

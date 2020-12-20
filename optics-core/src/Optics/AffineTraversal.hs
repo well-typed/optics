@@ -65,10 +65,10 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying affine traversal.
-type AffineTraversal s t a b = Optic An_AffineTraversal NoIx s t a b
+type AffineTraversal s t a b = Optic An_AffineTraversal 'NoIx s t a b
 
 -- | Type synonym for a type-preserving affine traversal.
-type AffineTraversal' s a = Optic' An_AffineTraversal NoIx s a
+type AffineTraversal' s a = Optic' An_AffineTraversal 'NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven affine traversal.
 --

@@ -54,10 +54,10 @@ import Optics.Internal.Optic
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed affine traversal.
-type IxAffineTraversal i s t a b = Optic An_AffineTraversal (WithIx i) s t a b
+type IxAffineTraversal i s t a b = Optic An_AffineTraversal ('WithIx i) s t a b
 
 -- | Type synonym for a type-preserving indexed affine traversal.
-type IxAffineTraversal' i s a = Optic' An_AffineTraversal (WithIx i) s a
+type IxAffineTraversal' i s a = Optic' An_AffineTraversal ('WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed affine traversal.
 --

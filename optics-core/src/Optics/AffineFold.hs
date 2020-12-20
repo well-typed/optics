@@ -61,7 +61,7 @@ import Optics.Internal.Bi
 import Optics.Internal.Optic
 
 -- | Type synonym for an affine fold.
-type AffineFold s a = Optic' An_AffineFold NoIx s a
+type AffineFold s a = Optic' An_AffineFold 'NoIx s a
 
 -- | Obtain an 'AffineFold' by lifting 'traverse_' like function.
 --

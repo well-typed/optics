@@ -84,7 +84,7 @@ import Optics.IxAffineFold
 import Optics.Fold
 
 -- | Type synonym for an indexed fold.
-type IxFold i s a = Optic' A_Fold (WithIx i) s a
+type IxFold i s a = Optic' A_Fold ('WithIx i) s a
 
 -- | Obtain an indexed fold by lifting 'itraverse_' like function.
 --

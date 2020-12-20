@@ -52,10 +52,10 @@ import Optics.Internal.Optic
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed lens.
-type IxLens i s t a b = Optic A_Lens (WithIx i) s t a b
+type IxLens i s t a b = Optic A_Lens ('WithIx i) s t a b
 
 -- | Type synonym for a type-preserving indexed lens.
-type IxLens' i s a = Optic' A_Lens (WithIx i) s a
+type IxLens' i s a = Optic' A_Lens ('WithIx i) s a
 
 -- | Type synonym for a type-modifying van Laarhoven indexed lens.
 type IxLensVL i s t a b =

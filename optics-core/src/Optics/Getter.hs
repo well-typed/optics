@@ -45,7 +45,7 @@ import Optics.Internal.Bi
 import Optics.Internal.Optic
 
 -- | Type synonym for a getter.
-type Getter s a = Optic' A_Getter NoIx s a
+type Getter s a = Optic' A_Getter 'NoIx s a
 
 -- | View the value pointed to by a getter.
 --

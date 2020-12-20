@@ -67,10 +67,10 @@ import Optics.Internal.Setter
 import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying setter.
-type Setter s t a b = Optic A_Setter NoIx s t a b
+type Setter s t a b = Optic A_Setter 'NoIx s t a b
 
 -- | Type synonym for a type-preserving setter.
-type Setter' s a = Optic' A_Setter NoIx s a
+type Setter' s a = Optic' A_Setter 'NoIx s a
 
 -- | Apply a setter as a modifier.
 over

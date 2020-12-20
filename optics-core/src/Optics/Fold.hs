@@ -115,7 +115,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Utils
 
 -- | Type synonym for a fold.
-type Fold s a = Optic' A_Fold NoIx s a
+type Fold s a = Optic' A_Fold 'NoIx s a
 
 -- | Obtain a 'Fold' by lifting 'traverse_' like function.
 --

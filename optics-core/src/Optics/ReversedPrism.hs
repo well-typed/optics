@@ -57,7 +57,7 @@ module Optics.ReversedPrism
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying reversed prism.
-type ReversedPrism s t a b = Optic A_ReversedPrism NoIx s t a b
+type ReversedPrism s t a b = Optic A_ReversedPrism 'NoIx s t a b
 
 -- | Type synonym for a type-preserving reversed prism.
-type ReversedPrism' s a = Optic' A_ReversedPrism NoIx s a
+type ReversedPrism' s a = Optic' A_ReversedPrism 'NoIx s a

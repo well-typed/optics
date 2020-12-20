@@ -120,10 +120,10 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying lens.
-type Lens s t a b = Optic A_Lens NoIx s t a b
+type Lens s t a b = Optic A_Lens 'NoIx s t a b
 
 -- | Type synonym for a type-preserving lens.
-type Lens' s a = Optic' A_Lens NoIx s a
+type Lens' s a = Optic' A_Lens 'NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven lens.
 type LensVL s t a b = forall f. Functor f => (a -> f b) -> s -> f t

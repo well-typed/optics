@@ -57,7 +57,7 @@ module Optics.ReversedLens
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying reversed lens.
-type ReversedLens s t a b = Optic A_ReversedLens NoIx s t a b
+type ReversedLens s t a b = Optic A_ReversedLens 'NoIx s t a b
 
 -- | Type synonym for a type-preserving reversed lens.
-type ReversedLens' t b = Optic' A_ReversedLens NoIx t b
+type ReversedLens' t b = Optic' A_ReversedLens 'NoIx t b

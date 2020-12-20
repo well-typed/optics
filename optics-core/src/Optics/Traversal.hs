@@ -113,10 +113,10 @@ import Optics.Lens
 import Optics.ReadOnly
 
 -- | Type synonym for a type-modifying traversal.
-type Traversal s t a b = Optic A_Traversal NoIx s t a b
+type Traversal s t a b = Optic A_Traversal 'NoIx s t a b
 
 -- | Type synonym for a type-preserving traversal.
-type Traversal' s a = Optic' A_Traversal NoIx s a
+type Traversal' s a = Optic' A_Traversal 'NoIx s a
 
 -- | Type synonym for a type-modifying van Laarhoven traversal.
 type TraversalVL s t a b = forall f. Applicative f => (a -> f b) -> s -> f t

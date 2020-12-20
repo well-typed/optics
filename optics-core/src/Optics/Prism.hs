@@ -83,10 +83,10 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Optic
 
 -- | Type synonym for a type-modifying prism.
-type Prism s t a b = Optic A_Prism NoIx s t a b
+type Prism s t a b = Optic A_Prism 'NoIx s t a b
 
 -- | Type synonym for a type-preserving prism.
-type Prism' s a = Optic' A_Prism NoIx s a
+type Prism' s a = Optic' A_Prism 'NoIx s a
 
 -- | Build a prism from a constructor and a matcher, which must respect the
 -- well-formedness laws.

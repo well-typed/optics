@@ -35,7 +35,7 @@ import Optics.Internal.Bi
 import Optics.Internal.Optic
 
 -- | Type synonym for a review.
-type Review t b = Optic' A_Review NoIx t b
+type Review t b = Optic' A_Review 'NoIx t b
 
 -- | Retrieve the value targeted by a 'Review'.
 --

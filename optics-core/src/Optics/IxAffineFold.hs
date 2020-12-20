@@ -63,7 +63,7 @@ import Optics.Internal.Optic
 import Optics.Internal.Utils
 
 -- | Type synonym for an indexed affine fold.
-type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
+type IxAffineFold i s a = Optic' An_AffineFold ('WithIx i) s a
 
 -- | Obtain an 'IxAffineFold' by lifting 'itraverse_' like function.
 --
