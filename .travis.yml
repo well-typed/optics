@@ -221,7 +221,7 @@ script:
   - if ! $GHCJS ; then ${CABAL} v2-test $WITHCOMPILER ${TEST} ${BENCH} all ; fi
   # Doctest...
   - if ! $GHCJS ; then (cd ${PKGDIR_optics} && doctest  src) ; fi
-  - if ! $GHCJS ; then (cd ${PKGDIR_optics_core} && doctest  -XBangPatterns -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
+  - if ! $GHCJS ; then (cd ${PKGDIR_optics_core} && doctest  -XBangPatterns -XDataKinds -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_extra} && doctest  -XBangPatterns -XDefaultSignatures -XDeriveFunctor -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XInstanceSigs -XLambdaCase -XMultiParamTypeClasses -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_sop} && doctest  src) ; fi
   - if ! $GHCJS ; then (cd ${PKGDIR_optics_th} && doctest  src) ; fi
