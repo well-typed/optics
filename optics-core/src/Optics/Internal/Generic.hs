@@ -60,11 +60,11 @@ import Optics.Traversal
 -- >>> view (generic % re generic) "hello" :: String
 -- "hello"
 --
-generic :: (Generic a, Generic b) => Iso a b (Rep a c) (Rep b c)
+generic :: (Generic a, Generic b) => Iso a b (Rep a x) (Rep b y)
 generic = iso from to
 
 -- | Convert from the data type to its representation (or back)
-generic1 :: (Generic1 f, Generic1 g) => Iso (f a) (g b) (Rep1 f a) (Rep1 g b)
+generic1 :: (Generic1 f, Generic1 g) => Iso (f x) (g y) (Rep1 f x) (Rep1 g y)
 generic1 = iso from1 to1
 
 _V1 :: Lens (V1 s) (V1 t) a b
