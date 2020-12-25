@@ -799,6 +799,24 @@ declareFieldLabels [d|
 checkCoffee :: Iso' (Associated Double) Double
 checkCoffee = #coffee
 
+declareFieldLabels
+  [d| data User a = User
+        { user_name :: Name -- local type
+        , user_age  :: a
+        }
+
+      newtype Name = Name { name_unwrap :: String }
+    |]
+
+checkUserName :: Lens' (User a) Name
+checkUserName = #user_name
+
+checkUserAge :: Lens (User a) (User b) a b
+checkUserAge = #user_age
+
+checkNameUnwrap :: Iso' Name String
+checkNameUnwrap = #name_unwrap
+
 declareFields [d|
   data DeclaredFields f a
     = DeclaredField1 { declaredFieldsA0 :: f a    , declaredFieldsB0 :: Int }
