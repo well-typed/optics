@@ -106,7 +106,7 @@ makePrismLabels typeName = do
                              instHead
                              (fun stab 'labelOptic)
       where
-        ty        = addKindVars info $ D.datatypeType info
+        ty        = addKindInfo info $ D.datatypeType info
         isNewtype = D.datatypeVariant info == D.Newtype
 
         opticTypeToTag IsoType    = ''An_Iso
@@ -158,7 +158,7 @@ makeConsPrisms info cons Nothing = fmap concat . for cons $ \con -> do
     , valD (varP n) (normalB body) []
     ] ++ inlinePragma n
   where
-    ty        = addKindVars info $ D.datatypeType info
+    ty        = addKindInfo info $ D.datatypeType info
     isNewtype = D.datatypeVariant info == D.Newtype
 
 -- classy prism class and instance
@@ -493,7 +493,7 @@ normalizeCon :: D.DatatypeInfo -> D.ConstructorInfo -> NCon
 normalizeCon di info = NCon (D.constructorName info)
                             (D.tvName <$> D.constructorVars info)
                             (D.constructorContext info)
-                            (map (addKindVars di) $ D.constructorFields info)
+                            (map (addKindInfo di) $ D.constructorFields info)
 
 
 -- | Compute a prism's name by prefixing an underscore for normal
