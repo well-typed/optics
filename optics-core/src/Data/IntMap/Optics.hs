@@ -43,7 +43,8 @@ module Data.IntMap.Optics
   , ge
   ) where
 
-import Data.IntMap as IntMap
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
 
 import Optics.IxAffineTraversal
 import Optics.IxFold
@@ -82,7 +83,7 @@ toMapOf o = ifoldMapOf o IntMap.singleton
 -- Nothing
 lt :: Int -> IxAffineTraversal' Int (IntMap v) v
 lt k = iatraversalVL $ \point f s ->
-  case lookupLT k s of
+  case IntMap.lookupLT k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
 {-# INLINE lt #-}
@@ -97,7 +98,7 @@ lt k = iatraversalVL $ \point f s ->
 -- Just (2,'y')
 gt :: Int -> IxAffineTraversal' Int (IntMap v) v
 gt k = iatraversalVL $ \point f s ->
-  case lookupGT k s of
+  case IntMap.lookupGT k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
 {-# INLINE gt #-}
@@ -112,7 +113,7 @@ gt k = iatraversalVL $ \point f s ->
 -- Just (1,'x')
 le :: Int -> IxAffineTraversal' Int (IntMap v) v
 le k = iatraversalVL $ \point f s ->
-  case lookupLE k s of
+  case IntMap.lookupLE k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
 {-# INLINE le #-}
@@ -127,7 +128,7 @@ le k = iatraversalVL $ \point f s ->
 -- Just (3,'y')
 ge :: Int -> IxAffineTraversal' Int (IntMap v) v
 ge k = iatraversalVL $ \point f s ->
-  case lookupGE k s of
+  case IntMap.lookupGE k s of
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> IntMap.insert k' v' s
 {-# INLINE ge #-}

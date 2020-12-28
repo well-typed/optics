@@ -9,7 +9,8 @@ module Data.Set.Optics
   , setOf
   ) where
 
-import Data.Set as Set
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 import Optics.Fold
 import Optics.Optic
@@ -22,7 +23,7 @@ import Optics.Setter
 -- you can manipulate it by reading using 'Optics.Fold.folded' and reindexing it
 -- via 'setmapped'.
 --
--- >>> over setmapped (+1) (fromList [1,2,3,4])
+-- >>> over setmapped (+1) (Set.fromList [1,2,3,4])
 -- fromList [2,3,4,5]
 setmapped :: Ord b => Setter (Set a) (Set b) a b
 setmapped = sets Set.map

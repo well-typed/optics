@@ -24,12 +24,17 @@ module Optics.Empty.Core
   ) where
 
 import Control.Applicative (ZipList(..))
-import Data.IntMap as IntMap
-import Data.IntSet as IntSet
-import Data.Map as Map
-import Data.Maybe
-import Data.Monoid
-import Data.Set as Set
+import Data.Maybe (isNothing)
+import Data.Monoid (Any (..), All (..), Product (..), Sum (..), Last (..), First (..), Dual (..))
+
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
+import Data.IntSet (IntSet)
+import qualified Data.IntSet as IntSet
+import Data.Map (Map)
+import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
 import Data.Profunctor.Indexed
@@ -43,7 +48,7 @@ import Optics.Prism
 import Optics.Review
 
 #if !defined(mingw32_HOST_OS) && !defined(ghcjs_HOST_OS)
-import GHC.Event
+import GHC.Event (Event)
 #endif
 
 -- | Class for types that may be '_Empty'.

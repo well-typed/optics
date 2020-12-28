@@ -42,18 +42,25 @@ module Optics.At.Core
   , Contains(..)
   ) where
 
-import Data.Array.IArray as Array
-import Data.Array.Unboxed
-import Data.Complex
-import Data.Functor.Identity
-import Data.IntMap as IntMap
-import Data.IntSet as IntSet
+import qualified Data.Array.IArray as Array
+import Data.Array.Unboxed (UArray)
+import Data.Complex (Complex (..))
+import Data.Ix (Ix (..))
+import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
-import Data.List.NonEmpty as NonEmpty
-import Data.Map as Map
-import Data.Sequence as Seq
-import Data.Set as Set
-import Data.Tree
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Tree (Tree (..))
+
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
+import Data.IntSet (IntSet)
+import qualified Data.IntSet as IntSet
+import Data.Map (Map)
+import qualified Data.Map as Map
+import Data.Sequence (Seq)
+import qualified Data.Sequence as Seq
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 import Data.Maybe.Optics
 import Optics.AffineTraversal
@@ -239,7 +246,7 @@ type instance IxValue (Array.Array i e) = e
 -- @
 instance Ix i => Ixed (Array.Array i e) where
   ix i = atraversalVL $ \point f arr ->
-    if inRange (bounds arr) i
+    if inRange (Array.bounds arr) i
     then f (arr Array.! i) <&> \e -> arr Array.// [(i,e)]
     else point arr
   {-# INLINE ix #-}
@@ -250,9 +257,9 @@ type instance IxValue (UArray i e) = e
 -- arr 'Array.!' i ≡ arr 'Optics.Operators.^.' 'ix' i
 -- arr '//' [(i,e)] ≡ 'ix' i 'Optics.Operators..~' e '$' arr
 -- @
-instance (IArray UArray e, Ix i) => Ixed (UArray i e) where
+instance (Array.IArray UArray e, Ix i) => Ixed (UArray i e) where
   ix i = atraversalVL $ \point f arr ->
-    if inRange (bounds arr) i
+    if inRange (Array.bounds arr) i
     then f (arr Array.! i) <&> \e -> arr Array.// [(i,e)]
     else point arr
   {-# INLINE ix #-}

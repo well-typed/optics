@@ -9,7 +9,7 @@ module Data.Tree.Optics
   , branches
   ) where
 
-import Data.Tree
+import Data.Tree (Tree (..))
 
 import Optics.Lens
 

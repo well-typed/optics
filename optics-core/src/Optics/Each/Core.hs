@@ -16,14 +16,18 @@ module Optics.Each.Core
     Each(..)
   ) where
 
-import Data.Array
-import Data.Complex
-import Data.Functor.Identity
-import Data.IntMap as IntMap
-import Data.List.NonEmpty
-import Data.Map as Map
-import Data.Sequence as Seq
-import Data.Tree as Tree
+import Data.Complex (Complex (..))
+import Data.Functor.Identity (Identity (..))
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Tree (Tree (..))
+import Data.Ix (Ix)
+
+import Data.Array (Array)
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
+import Data.Map (Map)
+import qualified Data.Map as Map
+import Data.Sequence (Seq)
 
 import Optics.IxLens
 import Optics.IxTraversal
