@@ -98,7 +98,7 @@ makeFieldOpticsForDatatype rules info =
 
   where
   tyName = D.datatypeName info
-  s      = addKindVars info $ D.datatypeType info
+  s      = addKindInfo info $ D.datatypeType info
   cons   = D.datatypeCons info
 
   -- Traverse the field labels of a normalized constructor
@@ -162,7 +162,7 @@ makeFieldLabelsForDatatype rules info = do
       _                            -> True
 
     tyName = D.datatypeName info
-    s      = addKindVars info $ D.datatypeType info
+    s      = addKindInfo info $ D.datatypeType info
     cons   = D.datatypeCons info
 
     -- Traverse the field labels of a normalized constructor
@@ -229,11 +229,11 @@ normalizeConstructor info con =
     -- elligible for TH generated optics.
     checkForExistentials _ fieldtype
       | any (\tv -> D.tvName tv `S.member` used) unallowable
-      = (Nothing, addKindVars info fieldtype)
+      = (Nothing, addKindInfo info fieldtype)
       where
         used        = setOf typeVars fieldtype
         unallowable = D.constructorVars con
-    checkForExistentials fieldname fieldtype = (fieldname, addKindVars info fieldtype)
+    checkForExistentials fieldname fieldtype = (fieldname, addKindInfo info fieldtype)
 
 -- | Compute the positional location of the fields involved in
 -- each constructor for a given optic definition as well as the

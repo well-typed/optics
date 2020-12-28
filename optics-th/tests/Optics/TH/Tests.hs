@@ -533,6 +533,17 @@ checkKinded2Thing :: Iso (Kinded2 k  a )
                          (Proxy (a' :: k'))
 checkKinded2Thing = #thing
 
+data family KDF (a :: k)
+data instance KDF (a :: Type) = Kinded3 { _kdf :: Proxy a }
+makeLenses 'Kinded3
+makeFieldLabelsWith lensRules 'Kinded3
+
+checkKdf :: forall (a :: Type) (b :: Type). Iso (KDF a) (KDF b) (Proxy a) (Proxy b)
+checkKdf = kdf
+
+checkKdf_ :: forall (a :: Type) (b :: Type). Iso (KDF a) (KDF b) (Proxy a) (Proxy b)
+checkKdf_ = #kdf
+
 type family Fam0
 
 type family Fam (a :: k)

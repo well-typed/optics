@@ -54,10 +54,23 @@ eqSubst ty n = do
   pure (placeholder, D.equalPred placeholder ty)
 
 -- | Fill in kind variables using info from datatype type parameters.
-addKindVars :: D.DatatypeInfo -> Type -> Type
-addKindVars = substType . M.fromList . mapMaybe var . D.datatypeInstTypes
+addKindInfo :: D.DatatypeInfo -> Type -> Type
+addKindInfo di = substType . M.fromList . mapMaybe var $ D.datatypeInstTypes di
   where
+    -- If the type is a data/newtype family instance, we need to fill in all of
+    -- the kinds for weird cases such as:
+    --
+    -- data family KDF (a :: k)
+    -- data instance KDF (a :: Type) = Kinded3 { _kdf :: Proxy a }
+    --
+    -- Otherwise we only need info about kind variables.
+    --
+    -- More info at https://github.com/ekmett/lens/pull/945.
+    isDataFamily = D.datatypeVariant di == D.DataInstance
+                || D.datatypeVariant di == D.NewtypeInstance
+
     var t@(SigT (VarT n) k)
+      | isDataFamily   = Just (n, t)
       | has typeVars k = Just (n, t)
       | otherwise      = Nothing
     var _              = Nothing
