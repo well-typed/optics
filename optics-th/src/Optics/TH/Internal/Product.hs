@@ -433,7 +433,7 @@ buildStab forClassInstance s categorizedFields = do
         go (ConT nm) = do
           let getVarLen = afolding $ \tf@(TypeFamilyHead _ varBndrs _ _) ->
                 if null varBndrs then Nothing else Just (length varBndrs, tf, [])
-          preview (_FamilyI % _1 % typeFamilyHead % getVarLen) <$> lift (reify nm)
+          tryReify (preview $ _FamilyI % _1 % typeFamilyHead % getVarLen) nm
 
         go (AppT ty1 ty2) = go ty1 >>= \case
           Just (n, tf, !args)
@@ -445,10 +445,15 @@ buildStab forClassInstance s categorizedFields = do
         go _ = pure Nothing
 
         procInfix ty1 nm ty2 = do
-          mtf <- preview (_FamilyI % _1 % typeFamilyHead) <$> lift (reify nm)
+          mtf <- tryReify (preview $ _FamilyI % _1 % typeFamilyHead) nm
           case mtf of
             Just tf -> procTF tf [ty1, ty2]
             Nothing -> go ty1 *> go ty2 *> pure ()
+
+        -- If reification fails (e.g. because the type contains local names),
+        -- assume there are no type families (the best we can do really).
+        tryReify :: (Info -> Maybe a) -> Name -> StateT (S.Set Name) Q (Maybe a)
+        tryReify f nm = lift $ recover (pure Nothing) (f <$> reify nm)
 
         -- Once fully applied type family is collected, the only arguments that
         -- should be traversed further are these with injectivity annotation.
