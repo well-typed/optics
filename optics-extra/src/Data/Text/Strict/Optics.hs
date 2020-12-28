@@ -22,10 +22,11 @@ module Data.Text.Strict.Optics
   ) where
 
 import Data.ByteString (ByteString)
-import Data.Text as Strict
-import Data.Text.Encoding
+import Data.Text (Text)
+import qualified Data.Text as Strict
+import qualified Data.Text.Encoding as TE
 import Data.Text.Lazy (toStrict)
-import Data.Text.Lazy.Builder
+import qualified Data.Text.Lazy.Builder as B
 
 import Data.Profunctor.Indexed
 
@@ -48,7 +49,7 @@ import Optics.Internal.Optic
 -- 'packed' ≡ 'iso' 'pack' 'unpack'
 -- @
 packed :: Iso' String Text
-packed = iso pack unpack
+packed = iso Strict.pack Strict.unpack
 {-# INLINE packed #-}
 
 -- | This isomorphism can be used to 'unpack' (or 'pack') strict 'Strict.Text'.
@@ -87,8 +88,8 @@ _Text = unpacked
 -- 'fromText' x ≡ x 'Optics.Operators.^.' 'builder'
 -- 'toStrict' ('toLazyText' x) ≡ x 'Optics.Operators.^.' 're' 'builder'
 -- @
-builder :: Iso' Text Builder
-builder = iso fromText (toStrict . toLazyText)
+builder :: Iso' Text B.Builder
+builder = iso B.fromText (toStrict . B.toLazyText)
 {-# INLINE builder #-}
 
 -- | Traverse the individual characters in strict 'Strict.Text'.
@@ -114,7 +115,7 @@ text = Optic text__
 -- >>> utf8 # Strict.pack "☃"
 -- "\226\152\131"
 utf8 :: Prism' ByteString Text
-utf8 = prism' encodeUtf8 (preview _Right . decodeUtf8')
+utf8 = prism' TE.encodeUtf8 (preview _Right . TE.decodeUtf8')
 {-# INLINE utf8 #-}
 
 pattern Text :: String -> Text
@@ -126,7 +127,7 @@ pattern Text a <- (view _Text -> a) where
 
 -- | Internal implementation of 'unpacked'.
 unpacked__ :: Profunctor p => Optic__ p i i Text Text String String
-unpacked__ = dimap unpack pack
+unpacked__ = dimap Strict.unpack Strict.pack
 {-# INLINE unpacked__ #-}
 
 -- | Internal implementation of 'text'.

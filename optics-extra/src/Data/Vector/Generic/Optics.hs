@@ -18,9 +18,9 @@ module Data.Vector.Generic.Optics
   ) where
 
 import Data.Vector.Fusion.Bundle (Bundle)
-import Data.Vector.Generic as V hiding (zip, filter, indexed)
+import Data.Vector.Generic (Vector)
+import qualified Data.Vector.Generic as V
 import Data.Vector.Generic.New (New)
-import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
 
 import Data.Profunctor.Indexed
 
@@ -29,6 +29,9 @@ import Optics.Extra.Internal.Vector
 import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.Optic
+
+-- $setup
+-- >>> import qualified Data.Vector as Vector
 
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting at
 -- index @i@ from a 'Lens'.
@@ -50,7 +53,7 @@ sliced
   -> Int -- ^ @n@ length
   -> Lens' (v a) (v a)
 sliced i n = lensVL $ \f v ->
-  (\v0 -> v // zip [i..i+n-1] (V.toList v0)) <$> f (slice i n v)
+  (\v0 -> v V.// zip [i..i+n-1] (V.toList v0)) <$> f (V.slice i n v)
 {-# INLINE sliced #-}
 
 -- | Similar to 'toListOf', but returning a 'Vector'.
@@ -62,7 +65,7 @@ toVectorOf
   => Optic' k is s a
   -> s
   -> v a
-toVectorOf l s = fromList (toListOf l s)
+toVectorOf l s = V.fromList (toListOf l s)
 {-# INLINE toVectorOf #-}
 
 -- | Convert a list to a 'Vector' (or back.)
@@ -75,32 +78,32 @@ toVectorOf l s = fromList (toListOf l s)
 vector
   :: (Vector v a, Vector v b)
   => Iso [a] [b] (v a) (v b)
-vector = iso fromList V.toList
+vector = iso V.fromList V.toList
 {-# INLINE vector #-}
 
 -- | Convert a 'Vector' to a finite 'Bundle' (or back.)
 asStream
   :: (Vector v a, Vector v b)
   => Iso (v a) (v b) (Bundle v a) (Bundle v b)
-asStream = iso stream unstream
+asStream = iso V.stream V.unstream
 {-# INLINE asStream #-}
 
 -- | Convert a 'Vector' to a finite 'Bundle' from right to left (or back.)
 asStreamR
   :: (Vector v a, Vector v b)
   => Iso (v a) (v b) (Bundle v a) (Bundle v b)
-asStreamR = iso streamR unstreamR
+asStreamR = iso V.streamR V.unstreamR
 {-# INLINE asStreamR #-}
 
 -- | Convert a 'Vector' back and forth to an initializer that when run produces
 -- a copy of the 'Vector'.
 cloned :: Vector v a => Iso' (v a) (New v a)
-cloned = iso clone new
+cloned = iso V.clone V.new
 {-# INLINE cloned #-}
 
 -- | Convert a 'Vector' to a version that doesn't retain any extra memory.
 forced :: (Vector v a, Vector v b) => Iso (v a) (v b) (v a) (v b)
-forced = iso force force
+forced = iso V.force V.force
 {-# INLINE forced #-}
 
 -- | This 'Traversal' will ignore any duplicates in the supplied list of
@@ -110,7 +113,7 @@ forced = iso force force
 -- [4,8,6,12,20,22]
 ordinals :: forall v a. Vector v a => [Int] -> IxTraversal' Int (v a) a
 ordinals is = itraversalVL $ \f v ->
-  (v //) <$> traverse (\i -> (,) i <$> f i (v ! i)) (ordinalNub (length v) is)
+  (v V.//) <$> traverse (\i -> (,) i <$> f i (v V.! i)) (ordinalNub (V.length v) is)
 {-# INLINE ordinals #-}
 
 -- | Like 'ix' but polymorphic in the vector type.
@@ -132,7 +135,7 @@ vectorTraverse = Optic vectorTraverse__
 converted
   :: (Vector v a, Vector w a, Vector v b, Vector w b)
   => Iso (v a) (v b) (w a) (w b)
-converted = iso convert convert
+converted = iso V.convert V.convert
 {-# INLINE converted #-}
 
 ----------------------------------------
@@ -189,6 +192,3 @@ vectorTraverseIx__ = iwander $ \f v ->
     :: (V.Vector v a, V.Vector v b) => IxFunArrow (Int -> j) (v a) (v b)
 
 #-}
-
--- $setup
--- >>> import qualified Data.Vector as Vector
