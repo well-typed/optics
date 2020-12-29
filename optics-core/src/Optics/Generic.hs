@@ -82,7 +82,7 @@ data Void0
 --
 -- >>> user ^. gfield @"salary"
 -- ...
--- ...User’ doesn't have a field named ‘salary’
+-- ...Data constructor ‘User’ doesn't have a field named ‘salary’
 -- ...
 --
 -- Only total fields are accessible (for partial ones see 'gafield'):

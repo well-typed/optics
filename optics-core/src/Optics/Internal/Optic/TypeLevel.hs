@@ -142,8 +142,17 @@ type family FromRight (def :: b) (e :: Either a b) :: b where
   FromRight _   ('Right b) = b
   FromRight def ('Left  _) = def
 
+type family IsLeft (e :: Either a b) :: Bool where
+  IsLeft ('Left _)  = 'True
+  IsLeft ('Right _) = 'False
+
 ----------------------------------------
 -- Errors
+
+-- | Show a custom type error if @p@ is true.
+type family When (p :: Bool) (err :: Constraint) :: Constraint where
+  When 'True  err = err
+  When 'False _   = ()
 
 -- | Show a custom type error if @p@ is false (or stuck).
 type family Unless (p :: Bool) (err :: Constraint) :: Constraint where
