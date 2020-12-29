@@ -9,23 +9,30 @@ module Optics.Zoom
   , MagnifyMany(..)
   ) where
 
-import Control.Monad.Reader as Reader
-import Control.Monad.State
-import Control.Monad.Trans.Error
-import Control.Monad.Trans.Except
-import Control.Monad.Trans.Identity
-import Control.Monad.Trans.List
-import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.RWS.Lazy as L
-import Control.Monad.Trans.RWS.Strict as S
-import Control.Monad.Trans.State.Lazy as L
-import Control.Monad.Trans.State.Strict as S
-import Control.Monad.Trans.Writer.Lazy as L
-import Control.Monad.Trans.Writer.Strict as S
+import Control.Monad.Reader (ReaderT (..), MonadReader)
+import Control.Monad.State (MonadState (..))
+import Control.Monad.Trans.Error (Error, ErrorT (..))
+import Control.Monad.Trans.Except (ExceptT (..), runExceptT)
+import Control.Monad.Trans.Identity (IdentityT (..))
+import Control.Monad.Trans.List (ListT (..))
+import Control.Monad.Trans.Maybe (MaybeT (..))
+import qualified Control.Monad.Trans.RWS.Lazy as L
+import qualified Control.Monad.Trans.RWS.Strict as S
+import qualified Control.Monad.Trans.State.Lazy as L
+import qualified Control.Monad.Trans.State.Strict as S
+import qualified Control.Monad.Trans.Writer.Lazy as L
+import qualified Control.Monad.Trans.Writer.Strict as S
 
 import Optics.Core
 import Optics.Internal.Utils
 import Optics.Extra.Internal.Zoom
+
+-- $setup
+-- >>> import Data.Monoid
+-- >>> import Control.Monad.Reader (runReader, ask)
+-- >>> import Optics.State
+-- >>> import Optics.State.Operators
+-- >>> import Optics.View
 
 -- Chosen so that they have lower fixity than ('%=').
 infixr 2 `zoom`, `zoomMaybe`, `zoomMany`
@@ -215,10 +222,10 @@ instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
 -- >>> (1,2) & magnify _2 (+1)
 -- 3
 --
--- >>> flip runReader (1,2) $ magnify _1 Reader.ask
+-- >>> flip runReader (1,2) $ magnify _1 ask
 -- 1
 --
--- >>> flip runReader (1,2,[10..20]) $ magnifyMaybe (_3 % _tail) Reader.ask
+-- >>> flip runReader (1,2,[10..20]) $ magnifyMaybe (_3 % _tail) ask
 -- Just [11,12,13,14,15,16,17,18,19,20]
 --
 class
@@ -404,9 +411,3 @@ instance Magnify m n b a => Magnify (ExceptT e m) (ExceptT e n) b a where
 instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a where
   magnifyMany o = ExceptT #. fmap getErr . magnifyMany o . fmap Err .# runExceptT
   {-# INLINE magnifyMany #-}
-
--- $setup
--- >>> import Data.Monoid
--- >>> import Optics.State
--- >>> import Optics.State.Operators
--- >>> import Optics.View

@@ -10,11 +10,12 @@ module Data.Vector.Optics
   , ordinals
   ) where
 
-import Data.Vector as Vector hiding (zip, filter, indexed)
-import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
-
+import Data.Vector (Vector)
 import Optics.Core
 import qualified Data.Vector.Generic.Optics as G
+
+-- $setup
+-- >>> import Data.Vector as Vector
 
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting at
 -- index @i@ from a 'Lens'.

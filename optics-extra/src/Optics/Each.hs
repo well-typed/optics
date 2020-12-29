@@ -13,18 +13,19 @@ module Optics.Each
     Each(..)
   ) where
 
-import Data.ByteString as SB
-import Data.ByteString.Lazy as LB
-import Data.HashMap.Lazy as HashMap
-import Data.Int
-import Data.Text as ST
-import Data.Text.Lazy as LT
+import qualified Data.ByteString as SB
+import qualified Data.ByteString.Lazy as LB
+import Data.HashMap.Lazy (HashMap)
+import qualified Data.HashMap.Lazy as HashMap
+import Data.Int (Int64)
+import qualified Data.Text as ST
+import qualified Data.Text.Lazy as LT
 import Data.Text.Optics (text)
 import Data.Vector.Generic.Optics (vectorTraverse)
 import Data.Vector.Primitive (Prim)
 import Data.Vector.Storable (Storable)
 import Data.Vector.Unboxed (Unbox)
-import Data.Word
+import Data.Word (Word8)
 import qualified Data.Vector as V
 import qualified Data.Vector.Primitive as VP
 import qualified Data.Vector.Storable as VS

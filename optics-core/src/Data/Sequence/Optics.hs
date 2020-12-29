@@ -10,7 +10,8 @@ module Data.Sequence.Optics
   , seqOf
   ) where
 
-import Data.Sequence as Seq
+import Data.Sequence (Seq, ViewL (..), ViewR (..), (><))
+import qualified Data.Sequence as Seq
 
 import Optics.Internal.Indexed
 import Optics.Fold
@@ -34,10 +35,10 @@ import Optics.Traversal
 -- >>> EmptyL ^. re viewL
 -- fromList []
 --
--- >>> review viewL $ 1 Seq.:< fromList [2,3]
+-- >>> review viewL $ 1 Seq.:< Seq.fromList [2,3]
 -- fromList [1,2,3]
 viewL :: Iso (Seq a) (Seq b) (ViewL a) (ViewL b)
-viewL = iso viewl $ \xs -> case xs of
+viewL = iso Seq.viewl $ \xs -> case xs of
   EmptyL      -> mempty
   a Seq.:< as -> a Seq.<| as
 {-# INLINE viewL #-}
@@ -55,23 +56,23 @@ viewL = iso viewl $ \xs -> case xs of
 -- >>> EmptyR ^. re viewR
 -- fromList []
 --
--- >>> review viewR $ fromList [1,2] Seq.:> 3
+-- >>> review viewR $ Seq.fromList [1,2] Seq.:> 3
 -- fromList [1,2,3]
 viewR :: Iso (Seq a) (Seq b) (ViewR a) (ViewR b)
-viewR = iso viewr $ \xs -> case xs of
+viewR = iso Seq.viewr $ \xs -> case xs of
   EmptyR      -> mempty
   as Seq.:> a -> as Seq.|> a
 {-# INLINE viewR #-}
 
 -- | Traverse the first @n@ elements of a 'Seq'
 --
--- >>> fromList [1,2,3,4,5] ^.. slicedTo 2
+-- >>> Seq.fromList [1,2,3,4,5] ^.. slicedTo 2
 -- [1,2]
 --
--- >>> fromList [1,2,3,4,5] & slicedTo 2 %~ (*10)
+-- >>> Seq.fromList [1,2,3,4,5] & slicedTo 2 %~ (*10)
 -- fromList [10,20,3,4,5]
 --
--- >>> fromList [1,2,4,5,6] & slicedTo 10 .~ 0
+-- >>> Seq.fromList [1,2,4,5,6] & slicedTo 10 .~ 0
 -- fromList [0,0,0,0,0]
 slicedTo :: Int -> IxTraversal' Int (Seq a) a
 slicedTo n = conjoined noix ix
@@ -85,13 +86,13 @@ slicedTo n = conjoined noix ix
 
 -- | Traverse all but the first @n@ elements of a 'Seq'
 --
--- >>> fromList [1,2,3,4,5] ^.. slicedFrom 2
+-- >>> Seq.fromList [1,2,3,4,5] ^.. slicedFrom 2
 -- [3,4,5]
 --
--- >>> fromList [1,2,3,4,5] & slicedFrom 2 %~ (*10)
+-- >>> Seq.fromList [1,2,3,4,5] & slicedFrom 2 %~ (*10)
 -- fromList [1,2,30,40,50]
 --
--- >>> fromList [1,2,3,4,5] & slicedFrom 10 .~ 0
+-- >>> Seq.fromList [1,2,3,4,5] & slicedFrom 10 .~ 0
 -- fromList [1,2,3,4,5]
 slicedFrom :: Int -> IxTraversal' Int (Seq a) a
 slicedFrom n = conjoined noix ix
@@ -105,13 +106,13 @@ slicedFrom n = conjoined noix ix
 
 -- | Traverse all the elements numbered from @i@ to @j@ of a 'Seq'
 --
--- >>> fromList [1,2,3,4,5] & sliced 1 3 %~ (*10)
+-- >>> Seq.fromList [1,2,3,4,5] & sliced 1 3 %~ (*10)
 -- fromList [1,20,30,4,5]
 --
--- >>> fromList [1,2,3,4,5] ^.. sliced 1 3
+-- >>> Seq.fromList [1,2,3,4,5] ^.. sliced 1 3
 -- [2,3]
 --
--- >>> fromList [1,2,3,4,5] & sliced 1 3 .~ 0
+-- >>> Seq.fromList [1,2,3,4,5] & sliced 1 3 .~ 0
 -- fromList [1,0,0,4,5]
 sliced :: Int -> Int -> IxTraversal' Int (Seq a) a
 sliced i j = conjoined noix ix

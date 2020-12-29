@@ -19,9 +19,9 @@ module Data.Text.Optics
   , pattern Text
   ) where
 
-import Data.Text as Strict
-import Data.Text.Lazy as Lazy
-import Data.Text.Lazy.Builder
+import qualified Data.Text as Strict
+import qualified Data.Text.Lazy as Lazy
+import qualified Data.Text.Lazy.Builder as B
 
 import Optics.Core
 import qualified Data.Text.Lazy.Optics as Lazy
@@ -44,7 +44,7 @@ class IsText t where
   -- @
   -- 'fromText' x ≡ x 'Optics.Operators.^.' 'builder'
   -- @
-  builder :: Iso' t Builder
+  builder :: Iso' t B.Builder
 
   -- | Traverse the individual characters in strict or lazy 'Text'.
   --

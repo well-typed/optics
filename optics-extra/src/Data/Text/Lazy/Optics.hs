@@ -21,10 +21,11 @@ module Data.Text.Lazy.Optics
   , pattern Text
   ) where
 
-import Data.ByteString.Lazy as ByteString
-import Data.Text.Lazy as Text
-import Data.Text.Lazy.Builder
-import Data.Text.Lazy.Encoding
+import Data.ByteString.Lazy (ByteString)
+import Data.Text.Lazy (Text)
+import qualified Data.Text.Lazy as Text
+import qualified Data.Text.Lazy.Builder as B
+import qualified Data.Text.Lazy.Encoding as TE
 
 import Data.Profunctor.Indexed
 
@@ -33,6 +34,9 @@ import Optics.Internal.Fold
 import Optics.Internal.IxFold
 import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
+
+-- $setup
+-- >>> import Data.ByteString.Lazy as LBS
 
 -- | This isomorphism can be used to 'pack' (or 'unpack') lazy 'Text.Text'.
 --
@@ -87,8 +91,8 @@ _Text = re packed
 -- 'fromLazyText' x ≡ x 'Optics.Operators.^.' 'builder'
 -- 'toLazyText' x ≡ x 'Optics.Operators.^.' 're' 'builder'
 -- @
-builder :: Iso' Text Builder
-builder = iso fromLazyText toLazyText
+builder :: Iso' Text B.Builder
+builder = iso B.fromLazyText B.toLazyText
 {-# INLINE builder #-}
 
 -- | Traverse the individual characters in a 'Text.Text'.
@@ -117,10 +121,10 @@ text = Optic text__
 -- Note: This function does not decode lazily, as it must consume the entire
 -- input before deciding whether or not it fails.
 --
--- >>> ByteString.unpack (utf8 # Text.pack "☃")
+-- >>> LBS.unpack (utf8 # Text.pack "☃")
 -- [226,152,131]
 utf8 :: Prism' ByteString Text
-utf8 = prism' encodeUtf8 (preview _Right . decodeUtf8')
+utf8 = prism' TE.encodeUtf8 (preview _Right . TE.decodeUtf8')
 {-# INLINE utf8 #-}
 
 pattern Text :: String -> Text

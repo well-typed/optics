@@ -10,7 +10,8 @@ module Data.IntSet.Optics
   , setOf
   ) where
 
-import Data.IntSet as IntSet
+import Data.IntSet (IntSet)
+import qualified Data.IntSet as IntSet
 
 import Optics.Fold
 import Optics.Optic
@@ -32,7 +33,7 @@ members = folding IntSet.toAscList
 -- but you can manipulate it by reading using 'Optics.Fold.folded' and
 -- reindexing it via 'setmapped'.
 --
--- >>> over setmapped (+1) (fromList [1,2,3,4])
+-- >>> over setmapped (+1) (IntSet.fromList [1,2,3,4])
 -- fromList [2,3,4,5]
 setmapped :: Setter' IntSet Int
 setmapped = sets IntSet.map

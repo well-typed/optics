@@ -43,19 +43,21 @@ module Optics.At
   , Contains(..)
   ) where
 
-import Data.ByteString as StrictB
-import Data.ByteString.Lazy as LazyB
-import Data.HashMap.Lazy as HashMap
-import Data.HashSet as HashSet
-import Data.Hashable
-import Data.Int
-import Data.Text as StrictT
-import Data.Text.Lazy as LazyT
-import Data.Vector as Vector hiding (indexed)
-import Data.Vector.Primitive as Prim
-import Data.Vector.Storable as Storable
-import Data.Vector.Unboxed as Unboxed hiding (indexed)
-import Data.Word
+import qualified Data.ByteString as StrictB
+import qualified Data.ByteString.Lazy as LazyB
+import Data.HashMap.Lazy (HashMap)
+import qualified Data.HashMap.Lazy as HashMap
+import Data.HashSet (HashSet)
+import qualified Data.HashSet as HashSet
+import Data.Hashable (Hashable)
+import Data.Int (Int64)
+import qualified Data.Text as StrictT
+import qualified Data.Text.Lazy as LazyT
+import qualified Data.Vector as Vector hiding (indexed)
+import qualified Data.Vector.Primitive as Prim
+import qualified Data.Vector.Storable as Storable
+import qualified Data.Vector.Unboxed as Unboxed hiding (indexed)
+import Data.Word (Word8)
 
 import Optics.Core
 
@@ -100,7 +102,7 @@ instance Ixed (Vector.Vector a) where
   {-# INLINE ix #-}
 
 type instance IxValue (Prim.Vector a) = a
-instance Prim a => Ixed (Prim.Vector a) where
+instance Prim.Prim a => Ixed (Prim.Vector a) where
   ix i = atraversalVL $ \point f v ->
     if 0 <= i && i < Prim.length v
     then f (v Prim.! i) <&> \a -> v Prim.// [(i, a)]
@@ -108,7 +110,7 @@ instance Prim a => Ixed (Prim.Vector a) where
   {-# INLINE ix #-}
 
 type instance IxValue (Storable.Vector a) = a
-instance Storable a => Ixed (Storable.Vector a) where
+instance Storable.Storable a => Ixed (Storable.Vector a) where
   ix i = atraversalVL $ \point f v ->
     if 0 <= i && i < Storable.length v
     then f (v Storable.! i) <&> \a -> v Storable.// [(i, a)]
@@ -116,7 +118,7 @@ instance Storable a => Ixed (Storable.Vector a) where
   {-# INLINE ix #-}
 
 type instance IxValue (Unboxed.Vector a) = a
-instance Unbox a => Ixed (Unboxed.Vector a) where
+instance Unboxed.Unbox a => Ixed (Unboxed.Vector a) where
   ix i = atraversalVL $ \point f v ->
     if 0 <= i && i < Unboxed.length v
     then f (v Unboxed.! i) <&> \a -> v Unboxed.// [(i, a)]

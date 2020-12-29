@@ -29,7 +29,7 @@ import Data.Vector (Vector)
 import Data.Vector.Primitive (Prim)
 import Data.Vector.Storable (Storable)
 import Data.Vector.Unboxed (Unbox)
-import Data.Word
+import Data.Word (Word8)
 import qualified Data.ByteString as StrictB
 import qualified Data.ByteString.Lazy as LazyB
 import qualified Data.Text as StrictT

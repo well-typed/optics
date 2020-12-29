@@ -7,10 +7,11 @@ module Data.ByteString.Strict.Optics
   , pattern Chars
   ) where
 
-import Data.ByteString       as Words
-import Data.ByteString.Char8 as Char8
-import Data.Int
-import Data.Word
+import Data.ByteString (ByteString)
+import qualified Data.ByteString       as Words
+import qualified Data.ByteString.Char8 as Char8
+import Data.Int (Int64)
+import Data.Word (Word8)
 
 import Optics.Core
 import Optics.Extra.Internal.ByteString

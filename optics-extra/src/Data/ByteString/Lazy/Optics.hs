@@ -8,8 +8,9 @@ module Data.ByteString.Lazy.Optics
   , pattern Chars
   ) where
 
-import Data.ByteString.Lazy       as Words
-import Data.ByteString.Lazy.Char8 as Char8
+import Data.ByteString.Lazy (ByteString)
+import qualified Data.ByteString.Lazy       as Words
+import qualified Data.ByteString.Lazy.Char8 as Char8
 import Data.Int (Int64)
 import Data.Word (Word8)
 

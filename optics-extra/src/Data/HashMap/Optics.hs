@@ -47,8 +47,9 @@ module Data.HashMap.Optics
   , at'
   ) where
 
-import Data.Hashable
-import Data.HashMap.Lazy as HashMap
+import Data.Hashable (Hashable)
+import Data.HashMap.Lazy (HashMap)
+import qualified Data.HashMap.Lazy as HashMap
 
 import Optics.Core
 

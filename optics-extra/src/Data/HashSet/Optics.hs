@@ -10,8 +10,9 @@ module Data.HashSet.Optics
   , setOf
   ) where
 
-import Data.Hashable
-import Data.HashSet as HashSet
+import Data.Hashable (Hashable)
+import Data.HashSet (HashSet)
+import qualified Data.HashSet as HashSet
 
 import Optics.Fold
 import Optics.Optic
@@ -24,7 +25,7 @@ import Optics.Setter
 -- but you can manipulate it by reading using 'Optics.Fold.folded' and
 -- reindexing it via 'setmapped'.
 --
--- >>> over setmapped (+1) (fromList [1,2,3,4])
+-- >>> over setmapped (+1) (HashSet.fromList [1,2,3,4])
 -- fromList [2,3,4,5]
 setmapped :: (Eq b, Hashable b) => Setter (HashSet a) (HashSet b) a b
 setmapped = sets HashSet.map
