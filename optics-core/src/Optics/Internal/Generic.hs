@@ -193,7 +193,8 @@ instance
 ----------------------------------------
 -- Affine field
 
-class GAffineFieldImpl (name :: Symbol) s t a b | name s -> a
+class GAffineFieldImpl (repDefined :: Bool)
+                       (name :: Symbol) s t a b | name s -> a
                                              {- These hold morally, but we can't prove it.
                                                 , name t -> b
                                                 , name s b -> t
@@ -211,7 +212,7 @@ instance
       ('Text "Type " ':<>: QuoteType s ':<>:
        'Text " doesn't have a field named " ':<>: QuoteSymbol name))
   , GAffineFieldSum path (Rep s) (Rep t) a b
-  ) => GAffineFieldImpl name s t a b where
+  ) => GAffineFieldImpl 'True name s t a b where
   gafieldImpl = withAffineTraversal
     (atraversalVL (\point f s -> to <$> gafieldSum @path point f (from s)))
     (\match update -> atraversalVL $ \point f s ->
@@ -297,7 +298,8 @@ instance
 ----------------------------------------
 -- Position
 
-class GPositionImpl (n :: Nat) s t a b | n s -> a
+class GPositionImpl (repDefined :: Bool)
+                    (n :: Nat) s t a b | n s -> a
                                     {- These hold morally, but we can't prove it.
                                        , n t -> b
                                        , n s b -> t
@@ -313,7 +315,7 @@ instance
               (GetPositionPaths s n (Rep s))
   , When (n <=? 0) (Rep s ~ Void1, Rep t ~ Void1)
   , GPositionSum path (Rep s) (Rep t) a b
-  ) => GPositionImpl n s t a b where
+  ) => GPositionImpl 'True n s t a b where
   gpositionImpl = withLens
     (lensVL (\f s -> to <$> gpositionSum @path f (from s)))
     (\get set -> lensVL $ \f s -> set s <$> f (get s))
@@ -358,7 +360,8 @@ type family GPositionPath con (e :: Either (Nat, Nat) [Path]) :: [Path] where
 ----------------------------------------
 -- Constructor
 
-class GConstructorImpl (name :: Symbol) s t a b | name s -> a
+class GConstructorImpl (repDefined :: Bool)
+                       (name :: Symbol) s t a b | name s -> a
                                              {- These hold morally, but we can't prove it.
                                                 , name t -> b
                                                 , name s b -> t
@@ -377,7 +380,7 @@ instance
     epath
   , When (IsLeft epath) (Rep s ~ Void1, Rep t ~ Void1)
   , GConstructorSum path (Rep s) (Rep t) a b
-  ) => GConstructorImpl name s t a b where
+  ) => GConstructorImpl 'True name s t a b where
   gconstructorImpl = withPrism (generic % gconstructorSum @path) prism
   {-# INLINE gconstructorImpl #-}
 

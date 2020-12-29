@@ -43,6 +43,7 @@ module Optics.Generic
   , GPlate(..)
   ) where
 
+import Data.Type.Bool
 import GHC.Generics (Generic, Rep)
 import GHC.TypeLits
 
@@ -97,6 +98,13 @@ data Void0
 -- >>> user & gfield @"age" .~ ()
 -- User {name = "Tom", age = ()}
 --
+-- Types without a 'Generic' instance are not supported:
+--
+-- >>> NoG 'x' ^. gfield @"any"
+-- ...
+-- ...Type ‘NoG’ doesn't have a Generic instance
+-- ...
+--
 -- /Note:/ 'gfield' is supported by 'Optics.Label.labelOptic' and can be used
 -- with a concise syntax via @OverloadedLabels@.
 --
@@ -148,6 +156,13 @@ instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
 -- >>> tuna ^? gafield @"sleeping"
 -- Just True
 --
+-- Types without a 'Generic' instance are not supported:
+--
+-- >>> NoG 'x' ^? gafield @"any"
+-- ...
+-- ...Type ‘NoG’ doesn't have a Generic instance
+-- ...
+--
 -- /Note:/ trying to access a field that doesn't exist in any data constructor
 -- results in an error:
 --
@@ -160,16 +175,17 @@ class GAffineField (name :: Symbol) s t a b | name s -> t a b
                                             , name t -> s a b where
   gafield :: AffineTraversal s t a b
 
-instance GAFieldContext name s t a b => GAffineField name s t a b where
-  gafield = gafieldImpl @name
+instance GAFieldContext repDefined name s t a b => GAffineField name s t a b where
+  gafield = gafieldImpl @repDefined @name
 
 -- | Hide implementation from haddock.
-type GAFieldContext name s t a b =
+type GAFieldContext repDefined name s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , repDefined ~ (Defined (Rep s) && Defined (Rep t))
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
-  , GAffineFieldImpl name s t a b
+  , GAffineFieldImpl repDefined name s t a b
   , Dysfunctional name () s t a b
   )
 
@@ -191,20 +207,28 @@ instance (a ~ Void0, b ~ Void0) => GAffineField name Void0 Void0 a b where
 -- ...Data constructor ‘(,,)’ has 3 fields, 4th requested
 -- ...
 --
+-- Types without a 'Generic' instance are not supported:
+--
+-- >>> NoG 'x' ^. gposition @1
+-- ...
+-- ...Type ‘NoG’ doesn't have a Generic instance
+-- ...
+--
 class GPosition (n :: Nat) s t a b | n s -> t a b
                                    , n t -> s a b where
   gposition :: Lens s t a b
 
-instance GPositionContext n s t a b => GPosition n s t a b where
-  gposition = gpositionImpl @n
+instance GPositionContext repDefined n s t a b => GPosition n s t a b where
+  gposition = gpositionImpl @repDefined @n
 
 -- | Hide implementation from haddock.
-type GPositionContext n s t a b =
+type GPositionContext repDefined n s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , repDefined ~ (Defined (Rep s) && Defined (Rep t))
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
-  , GPositionImpl n s t a b
+  , GPositionImpl repDefined n s t a b
   , Dysfunctional n () s t a b
   )
 
@@ -240,6 +264,13 @@ instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
 -- ...Type ‘Animal’ doesn't have a constructor named ‘Parrot’
 -- ...
 --
+-- Types without a 'Generic' instance are not supported:
+--
+-- >>> NoG 'x' ^. gconstructor @"NoG"
+-- ...
+-- ...Type ‘NoG’ doesn't have a Generic instance
+-- ...
+--
 -- /Note:/ 'gconstructor' is supported by 'Optics.Label.labelOptic' and can be
 -- used with a concise syntax via @OverloadedLabels@.
 --
@@ -253,16 +284,17 @@ class GConstructor (name :: Symbol) s t a b | name s -> t a b
                                             , name t -> s a b where
   gconstructor :: Prism s t a b
 
-instance GConstructorContext name s t a b => GConstructor name s t a b where
-  gconstructor = gconstructorImpl @name
+instance GConstructorContext repDefined name s t a b => GConstructor name s t a b where
+  gconstructor = gconstructorImpl @repDefined @name
 
 -- | Hide implementation from haddock.
-type GConstructorContext name s t a b =
+type GConstructorContext repDefined name s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
+  , repDefined ~ (Defined (Rep s) && Defined (Rep t))
   , Unless (Defined (Rep s)) (NoGenericError s)
   , Unless (Defined (Rep t)) (NoGenericError t)
-  , GConstructorImpl name s t a b
+  , GConstructorImpl repDefined name s t a b
   , Dysfunctional name () s t a b
   )
 -- | Hidden instance.
@@ -284,7 +316,6 @@ instance (a ~ Void0, b ~ Void0) => GConstructor name Void0 Void0 a b where
 -- /Note:/ types without a 'Generic' instance in scope when 'GPlate' class
 -- constraint is resolved will not be entered during the traversal.
 --
--- >>> newtype NoG = NoG Char
 -- >>> let noG = (NoG 'n', (Just 'i', "c"), 'e')
 --
 -- >>> toListOf (gplate @Char) noG
@@ -318,3 +349,4 @@ instance GPlate Void0 a where
 -- $setup
 -- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
 -- >>> import Optics.Core
+-- >>> newtype NoG = NoG { fromNoG :: Char }
