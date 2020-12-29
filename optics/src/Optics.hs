@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -- |
 --
 -- Module: Optics
@@ -809,12 +810,19 @@ import Data.Either.Optics                    as P
 -- noIx (ifolded % simple)
 --   :: FoldableWithIndex i f => Optic A_Fold NoIx (f b) (f b) b b
 --
+#if __GLASGOW_HASKELL__ == 802
 -- @
 -- λ> :t noIx (ifolded % ifolded)
 -- noIx (ifolded % ifolded)
 --   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
 --      Optic A_Fold NoIx (f1 (f2 b)) (f1 (f2 b)) b b
 -- @
+#else
+-- >>> :t noIx (ifolded % ifolded)
+-- noIx (ifolded % ifolded)
+--   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
+--      Optic A_Fold NoIx (f1 (f2 b)) (f1 (f2 b)) b b
+#endif
 --
 -- As the example above illustrates, regular and indexed optics have the same
 -- tag in the first parameter of 'Optic', in this case 'A_Fold'.  Regular optics
@@ -828,22 +836,36 @@ import Data.Either.Optics                    as P
 -- Thus composing an unindexed optic with an indexed optic preserves the
 -- indices, or composing two indexed optics retains both indices:
 --
+#if __GLASGOW_HASKELL__ == 802
 -- @
 -- λ> :t (ifolded % ifolded)
 -- (ifolded % ifolded)
 --   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
 --      Optic A_Fold '[i1, i2] (f1 (f2 b)) (f1 (f2 b)) b b
 -- @
+#else
+-- >>> :t (ifolded % ifolded)
+-- (ifolded % ifolded)
+--   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
+--      Optic A_Fold '[i1, i2] (f1 (f2 b)) (f1 (f2 b)) b b
+#endif
 --
 -- In order to use such an optic, it is necessary to flatten the indices into a
 -- single index using 'icompose' or a similar function:
 --
+#if __GLASGOW_HASKELL__ == 802
 -- @
 -- λ> :t icompose (,) (ifolded % ifolded)
 -- icompose (,) (ifolded % ifolded)
 --   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
 --      Optic A_Fold (WithIx (i1, i2)) (f1 (f2 b)) (f1 (f2 b)) b b
 -- @
+#else
+-- >>> :t icompose (,) (ifolded % ifolded)
+-- icompose (,) (ifolded % ifolded)
+--   :: (FoldableWithIndex i1 f1, FoldableWithIndex i2 f2) =>
+--      Optic A_Fold (WithIx (i1, i2)) (f1 (f2 b)) (f1 (f2 b)) b b
+#endif
 --
 -- For example:
 --
