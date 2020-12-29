@@ -734,6 +734,8 @@ import Data.Either.Optics                    as P
 
 -- $otherresources
 --
+-- * <https://skillsmatter.com/skillscasts/14906-user-friendly-optics User Friendly Optics> A talk about the `optics` library in comparison to the `lens` library by Andrzej Rybczak
+--
 -- * <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
 --
 -- * <https://skillsmatter.com/skillscasts/12360-profunctors-and-data-accessors Profunctors and Data Accessors> a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
