@@ -523,25 +523,24 @@ instance
 -- For more information have a look at 'Optics.Generic.gfield' and
 -- 'Optics.Generic.gconstructor'.
 instance {-# OVERLAPPABLE #-}
-  ( GenericLabelOpticContext name k s t a b
+  ( GenericLabelOpticContext repDefined name k s t a b
   ) => LabelOptic name k s t a b where
-  labelOptic = genericOptic @name
+  labelOptic = genericOptic @repDefined @name
 
 -- | Hide implementation from haddock.
-type GenericLabelOpticContext name k s t a b =
+type GenericLabelOpticContext repDefined name k s t a b =
   ( s `HasShapeOf` t
   , t `HasShapeOf` s
-  , Unless
 #ifdef EXPLICIT_GENERIC_LABELS
-      (HasGenericLabelOptics s && HasGenericLabelOptics t)
+  , repDefined ~ (HasGenericLabelOptics s && HasGenericLabelOptics t)
 #else
-      (Defined (Rep s) && Defined (Rep t))
+  , repDefined ~ (Defined (Rep s) && Defined (Rep t))
 #endif
-      (NoLabelOpticError name k s t a b)
+  , Unless repDefined (NoLabelOpticError name k s t a b)
   , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
            A_Lens
-  , GenericOptic name k s t a b
+  , GenericOptic repDefined name k s t a b
   , Dysfunctional name k s t a b
   )
 
@@ -585,19 +584,22 @@ class Generic a => GenericLabelOptics a where
 
 ----------------------------------------
 
-class GenericOptic name k s t a b where
+class GenericOptic (repDefined :: Bool) name k s t a b where
   genericOptic :: Optic k NoIx s t a b
 
 instance
-  ( GFieldImpl name s t a b
-  ) => GenericOptic name A_Lens s t a b where
+  ( -- We always let GHC enter the GFieldImpl instance because doing so doesn't
+    -- generate any additional error messages and we might get type improvements
+    -- from the HasField constraint to show in the error message.
+    GFieldImpl name s t a b
+  ) => GenericOptic repDefined name A_Lens s t a b where
   genericOptic = gfieldImpl @name
 
 instance
-  ( GConstructorImpl name s t a b
+  ( GConstructorImpl repDefined name s t a b
   , _name ~ AppendSymbol "_" name
-  ) => GenericOptic _name A_Prism s t a b where
-  genericOptic = gconstructorImpl @name
+  ) => GenericOptic repDefined _name A_Prism s t a b where
+  genericOptic = gconstructorImpl @repDefined @name
 
 ----------------------------------------
 

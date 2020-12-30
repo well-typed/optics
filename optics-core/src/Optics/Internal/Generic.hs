@@ -100,6 +100,11 @@ _R1 = prism R1 reviewer
 ----------------------------------------
 -- Field
 
+-- | Generate bogus equality constraints that attempt to unify generic
+-- representations with this type in case there is an error such as missing
+-- field, constructor etc. so these huge types don't leak into error messages.
+data Void1 a
+
 class GFieldImpl (name :: Symbol) s t a b | name s -> a
                                        {- These hold morally, but we can't prove it.
                                           , name t -> b
@@ -138,6 +143,7 @@ instance
 
 instance
   ( path ~ GSetFieldPath con epath
+  , When (IsLeft epath) (g ~ Void1, h ~ Void1)
   , GSetFieldProd path g h b
   ) => GSetFieldSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
                                       (M1 C ('MetaCons con fix hs) h) b where
@@ -187,7 +193,8 @@ instance
 ----------------------------------------
 -- Affine field
 
-class GAffineFieldImpl (name :: Symbol) s t a b | name s -> a
+class GAffineFieldImpl (repDefined :: Bool)
+                       (name :: Symbol) s t a b | name s -> a
                                              {- These hold morally, but we can't prove it.
                                                 , name t -> b
                                                 , name s b -> t
@@ -205,7 +212,7 @@ instance
       ('Text "Type " ':<>: QuoteType s ':<>:
        'Text " doesn't have a field named " ':<>: QuoteSymbol name))
   , GAffineFieldSum path (Rep s) (Rep t) a b
-  ) => GAffineFieldImpl name s t a b where
+  ) => GAffineFieldImpl 'True name s t a b where
   gafieldImpl = withAffineTraversal
     (atraversalVL (\point f s -> to <$> gafieldSum @path point f (from s)))
     (\match update -> atraversalVL $ \point f s ->
@@ -291,7 +298,8 @@ instance
 ----------------------------------------
 -- Position
 
-class GPositionImpl (n :: Nat) s t a b | n s -> a
+class GPositionImpl (repDefined :: Bool)
+                    (n :: Nat) s t a b | n s -> a
                                     {- These hold morally, but we can't prove it.
                                        , n t -> b
                                        , n s b -> t
@@ -305,8 +313,9 @@ instance
   , path ~ If (n <=? 0)
               (TypeError ('Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
+  , When (n <=? 0) (Rep s ~ Void1, Rep t ~ Void1)
   , GPositionSum path (Rep s) (Rep t) a b
-  ) => GPositionImpl n s t a b where
+  ) => GPositionImpl 'True n s t a b where
   gpositionImpl = withLens
     (lensVL (\f s -> to <$> gpositionSum @path f (from s)))
     (\get set -> lensVL $ \f s -> set s <$> f (get s))
@@ -335,6 +344,7 @@ instance
 
 instance
   ( path ~ GPositionPath con epath
+  , When (IsLeft epath) (g ~ Void1, h ~ Void1)
   , GFieldProd path g h a b
   ) => GPositionSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
                                       (M1 C ('MetaCons con fix hs) h) a b where
@@ -350,7 +360,8 @@ type family GPositionPath con (e :: Either (Nat, Nat) [Path]) :: [Path] where
 ----------------------------------------
 -- Constructor
 
-class GConstructorImpl (name :: Symbol) s t a b | name s -> a
+class GConstructorImpl (repDefined :: Bool)
+                       (name :: Symbol) s t a b | name s -> a
                                              {- These hold morally, but we can't prove it.
                                                 , name t -> b
                                                 , name s b -> t
@@ -361,13 +372,15 @@ class GConstructorImpl (name :: Symbol) s t a b | name s -> a
 instance
   ( Generic s
   , Generic t
+  , epath ~ GetNamePath name (Rep s) '[]
   , path ~ FromRight
     (TypeError
       ('Text "Type " ':<>: QuoteType s ':<>:
        'Text " doesn't have a constructor named " ':<>: QuoteSymbol name))
-    (GetNamePath name (Rep s) '[])
+    epath
+  , When (IsLeft epath) (Rep s ~ Void1, Rep t ~ Void1)
   , GConstructorSum path (Rep s) (Rep t) a b
-  ) => GConstructorImpl name s t a b where
+  ) => GConstructorImpl 'True name s t a b where
   gconstructorImpl = withPrism (generic % gconstructorSum @path) prism
   {-# INLINE gconstructorImpl #-}
 
