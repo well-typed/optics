@@ -734,17 +734,25 @@ import Data.Either.Optics                    as P
 
 -- $otherresources
 --
--- * <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
+-- === Talks
 --
--- * <https://skillsmatter.com/skillscasts/12360-profunctors-and-data-accessors Profunctors and Data Accessors> a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
+-- * (2020-10) <https://skillsmatter.com/skillscasts/14906-user-friendly-optics User Friendly Optics> - a talk about the @optics@ library in comparison to the @lens@ library by Andrzej Rybczak
 --
--- * <https://www.youtube.com/watch?v=geV8F59q48E Basic optics: lenses, prisms, and traversals> an introductory talk about this library by Alejandro Serrano
+-- * (2020-06) <https://www.youtube.com/watch?v=geV8F59q48E Basic optics: lenses, prisms, and traversals> - an introductory talk about this library by Alejandro Serrano
 --
--- * <https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/poptics.pdf Profunctor Optics: Modular Data Accessors> a paper by Matthew Pickering, Jeremy Gibbons and Nicolas Wu
+-- * (2018-10) <https://skillsmatter.com/skillscasts/12360-profunctors-and-data-accessors Profunctors and Data Accessors> - a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
 --
--- * <https://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery> and <https://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics>, blog posts by Oleg Grenrus on the internal representations used by this library
+-- * (2017-10) <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> - a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
 --
--- * <https://oleg.fi/gists/posts/2020-01-25-case-study-migration-from-lens-to-optics.html Case study: migrating from lens to optics>, another blog post by Oleg Grenrus, potentially useful if you wish to migrate an existing codebase to @optics@ from @lens@
+-- === Articles
+--
+-- * (2020-01) <https://oleg.fi/gists/posts/2020-01-25-case-study-migration-from-lens-to-optics.html Case study: migrating from lens to optics> - a blog post by Oleg Grenrus, potentially useful if you wish to migrate an existing codebase to @optics@ from @lens@
+--
+-- * (2017-04) <https://oleg.fi/gists/posts/2017-04-18-glassery.html Glassery> and <https://oleg.fi/gists/posts/2017-04-26-indexed-poptics.html Indexed Profunctor optics> - blog posts by Oleg Grenrus on the internal representations used by this library
+--
+-- * (2017-03) <https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/poptics.pdf Profunctor Optics: Modular Data Accessors> - a paper by Matthew Pickering, Jeremy Gibbons and Nicolas Wu
+--
+-- === Libraries
 --
 -- * The <https://hackage.haskell.org/package/lens lens> package by Edward Kmett and contributors
 --
