@@ -132,6 +132,10 @@ test-suite optics-tests
   if impl(ghcjs)
     buildable: False
 
+  -- Doesn't compile because of inspection-testing
+  if impl(ghc >= 9.0)
+    buildable: False
+
   build-depends: base
                , containers
                , indexed-profunctors    >= 0.1        && <0.2
@@ -168,6 +172,10 @@ benchmark folds
   if impl(ghcjs)
     buildable: False
 
+  -- Doesn't compile, pulls in Cabal 3.2.1.0 that fails
+  if impl(ghc >= 9.0)
+    buildable: False
+
   build-depends: base
                , bytestring
                , containers
@@ -188,6 +196,10 @@ benchmark traversals
 
   -- GHCJS takes forever to compile dependencies
   if impl(ghcjs)
+    buildable: False
+
+  -- Doesn't compile, pulls in Cabal 3.2.1.0 that fails
+  if impl(ghc >= 9.0)
     buildable: False
 
   build-depends: base
