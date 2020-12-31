@@ -100,11 +100,6 @@ _R1 = prism R1 reviewer
 ----------------------------------------
 -- Field
 
--- | Generate bogus equality constraints that attempt to unify generic
--- representations with this type in case there is an error such as missing
--- field, constructor etc. so these huge types don't leak into error messages.
-data Void1 a
-
 class GFieldImpl (name :: Symbol) s t a b | name s -> a
                                        {- These hold morally, but we can't prove it.
                                           , name t -> b
@@ -143,7 +138,7 @@ instance
 
 instance
   ( path ~ GSetFieldPath con epath
-  , When (IsLeft epath) (g ~ Void1, h ~ Void1)
+  , When (IsLeft epath) (HideReps g h)
   , GSetFieldProd path g h b
   ) => GSetFieldSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
                                       (M1 C ('MetaCons con fix hs) h) b where
@@ -313,7 +308,7 @@ instance
   , path ~ If (n <=? 0)
               (TypeError ('Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
-  , When (n <=? 0) (Rep s ~ Void1, Rep t ~ Void1)
+  , When (n <=? 0) (HideReps (Rep s) (Rep t))
   , GPositionSum path (Rep s) (Rep t) a b
   ) => GPositionImpl 'True n s t a b where
   gpositionImpl = withLens
@@ -344,7 +339,7 @@ instance
 
 instance
   ( path ~ GPositionPath con epath
-  , When (IsLeft epath) (g ~ Void1, h ~ Void1)
+  , When (IsLeft epath) (HideReps g h)
   , GFieldProd path g h a b
   ) => GPositionSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
                                       (M1 C ('MetaCons con fix hs) h) a b where
@@ -378,7 +373,7 @@ instance
       ('Text "Type " ':<>: QuoteType s ':<>:
        'Text " doesn't have a constructor named " ':<>: QuoteSymbol name))
     epath
-  , When (IsLeft epath) (Rep s ~ Void1, Rep t ~ Void1)
+  , When (IsLeft epath) (HideReps (Rep s) (Rep t))
   , GConstructorSum path (Rep s) (Rep t) a b
   ) => GConstructorImpl 'True name s t a b where
   gconstructorImpl = withPrism (generic % gconstructorSum @path) prism
