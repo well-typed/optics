@@ -41,6 +41,16 @@ module Optics.Generic
 
   -- * Types
   , GPlate(..)
+
+  -- * Comparison with @generic-optics@
+  -- $comparison
+
+  -- ** Performance
+  -- $performance
+
+  -- ** User experience
+  -- $userExperience
+  --
   ) where
 
 import Data.Type.Bool
@@ -54,6 +64,181 @@ import Optics.Internal.Optic
 import Optics.Lens
 import Optics.Prism
 import Optics.Traversal
+
+-- $comparison
+--
+-- Functions from this module seem to duplicate functionality of the
+-- @generic-optics@ library. However, they:
+--
+-- 1. Integrate with 'Optics.Label.labelOptic' for use via @OverloadedLabels@.
+--
+-- 2. Are more efficient at both compile and run time than their
+--    @generic-optics@ equivalents.
+--
+-- 3. Provide better user experience (no multiple variants of the same accessor
+-- type) and excellent type inference properties.
+
+-- $performance
+--
+-- Disclaimer: the focus is on data types with one constructor since they occur
+-- most often.
+--
+-- === Compile time
+--
+-- The test involves compiling a module that defines:
+--
+-- - A data type with a single constructor and @N@ fields.
+--
+-- - @N@ top-level lenses, one for each field.
+--
+-- Testing environment:
+--
+-- - CPU: Intel Core i7 3770
+--
+-- - GHC: 8.10.3 (RTS flags: @-A32m@)
+--
+-- - @generic-optics@: @2.0.0.0@
+--
+-- Compile times with @-O0@ (in seconds):
+--
+-- +------------+----------+----------+----------+----------+----------+
+-- |Fields      | 10       | 20       |    30    |    40    |    50    |
+-- +============+==========+==========+==========+==========+==========+
+-- |'gfield'    | __0.43__ | __0.69__ | __1.12__ | __1.64__ | __2.17__ |
+-- +------------+----------+----------+----------+----------+----------+
+-- |@field@     | 0.54     | 1.14     | 2.12     | 3.49     | 5.04     |
+-- +------------+----------+----------+----------+----------+----------+
+-- |                                                                   |
+-- +------------+----------+----------+----------+----------+----------+
+-- |'gposition' | __0.48__ | __0.88__ | __1.51__ | __2.36__ | __3.61__ |
+-- +------------+----------+----------+----------+----------+----------+
+-- |@position@  | 0.93     | 2.97     | 6.30     | 11.2     | 17.6     |
+-- +------------+----------+----------+----------+----------+----------+
+--
+-- Compile times with @-O1@ (in seconds):
+--
+-- +------------+----------+----------+----------+----------+----------+
+-- |Fields      | 10       | 20       |    30    |    40    |    50    |
+-- +============+==========+==========+==========+==========+==========+
+-- |'gfield'    | __0.64__ | __1.06__ | __1.72__ | __2.63__ | __3.72__ |
+-- +------------+----------+----------+----------+----------+----------+
+-- |@field@     | 0.85     | 1.77     | 3.24     | 5.11     | 7.70     |
+-- +------------+----------+----------+----------+----------+----------+
+-- |                                                                   |
+-- +------------+----------+----------+----------+----------+----------+
+-- |'gposition' | __0.60__ | __1.18__ | __2.01__ | __3.12__ | __4.47__ |
+-- +------------+----------+----------+----------+----------+----------+
+-- |@position@  | 11.2     | 20.4     | 47.2     | 87.1     | 136      |
+-- +------------+----------+----------+----------+----------+----------+
+--
+-- Observations:
+--
+-- - `gfield` compiles on average twice as fast as @field@.
+--
+-- - `gposition` compiles slower than `gfield`, but still offers reasonable
+--   times.
+--
+-- - Compile times of @position@ are big even for small records and seem to
+--   increase exponentially with the number of fields, which makes it pretty
+--   much unusable for large data types.
+--
+-- === Run time
+--
+-- When GHC optimizes intermediate generic representation of a data type away,
+-- these functions will offer the same runtime performance as the ones from
+-- @generic-optics@.
+--
+-- Sadly, for types with one constructor this happens only if the type in
+-- question has 10 or less fields (*). For larger ones generic representation is
+-- not optimized away and access to a field becomes a few times slower (exact
+-- factor depends on the size of a data type).
+--
+-- However, 'gfield' uses the 'GHC.Records.getField' function for reading a
+-- field and generics-based access only for modification (unlike @field@), so
+-- reading a field with 'gfield' is always fast.
+--
+-- (*) GHC 9.2 introduces an optimization flag @-finline-generics@ (enabled by
+-- default at @-O1@ and higher) that fixes this.
+
+-- $userExperience
+--
+-- @generic-optics@ provides three variants of each optic:
+--
+-- - Two variants for type changing updates.
+--
+-- - One variant for type preserving updates.
+--
+-- This is confusing. This module provides a single, type changing optic for
+-- each type of data accessor with excellent type inference properties.
+--
+-- >>> newtype Name a = Name { unwrap :: a } deriving Generic
+-- >>> data User a = User { name :: Name a, age :: Int  } deriving Generic
+--
+-- Inference from @s@ for @#age@:
+--
+-- >>> let f :: Lens (User a) _t _a _b; f = #age
+-- ...
+-- ...Found type wildcard ‘_t’ standing for ‘User a’
+-- ...
+-- ...Found type wildcard ‘_a’ standing for ‘Int’
+-- ...
+-- ...Found type wildcard ‘_b’ standing for ‘Int’
+-- ...
+--
+-- Inference from @t@ for @#age@:
+--
+-- >>> let f :: Lens _s (User a) _a _b; f = #age
+-- ...
+-- ...Found type wildcard ‘_s’ standing for ‘User a’
+-- ...
+-- ...Found type wildcard ‘_a’ standing for ‘Int’
+-- ...
+-- ...Found type wildcard ‘_b’ standing for ‘Int’
+-- ...
+--
+-- Inference from @s@ for the composition:
+--
+-- >>> let f :: Lens (User a) _t _a _b; f = #name % #unwrap
+-- ...
+-- ...Found type wildcard ‘_t’ standing for ‘User a1’
+-- ...
+-- ...Found type wildcard ‘_a’ standing for ‘a’
+-- ...
+-- ...Found type wildcard ‘_b’ standing for ‘a1’
+-- ...
+--
+-- Inference from @t@ for the composition:
+--
+-- >>> let f :: Lens _s (User a) _a _b; f = #name % #unwrap
+-- ...
+-- ...Found type wildcard ‘_s’ standing for ‘User a1’
+-- ...
+-- ...Found type wildcard ‘_a’ standing for ‘a1’
+-- ...
+-- ...Found type wildcard ‘_b’ standing for ‘a’
+-- ...
+--
+-- Inference from @s@ for @#_User@:
+--
+-- >>> let f :: Prism (User a) _t _a _b; f = #_User
+-- ...
+-- ...Found type wildcard ‘_t’ standing for ‘User a1’
+-- ...
+-- ...Found type wildcard ‘_a’ standing for ‘(Name a, Int)’
+-- ...
+-- ...Found type wildcard ‘_b’ standing for ‘(Name a1, Int)’
+-- ...
+--
+-- Inference from @t@ for @#_User@:
+--
+-- >>> let f :: Prism _s (User a) _a _b; f = #_User
+-- ...
+-- ...Found type wildcard ‘_s’ standing for ‘User a1’
+-- ...
+-- ...Found type wildcard ‘_a’ standing for ‘(Name a1, Int)’
+-- ...
+-- ...Found type wildcard ‘_b’ standing for ‘(Name a, Int)’
+-- ...
 
 -- | Hidden type for preventing GHC from solving constraints too early.
 data Void0
@@ -380,6 +565,6 @@ instance GPlate Void0 a where
   gplate = error "unreachable"
 
 -- $setup
--- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
+-- >>> :set -XDataKinds -XDeriveGeneric -XNamedWildCards -XStandaloneDeriving -XOverloadedLabels
 -- >>> import Optics.Core
 -- >>> newtype NoG = NoG { fromNoG :: Char }
