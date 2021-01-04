@@ -162,10 +162,10 @@ class Profunctor p where
   conjoined__ f _ = coerce . f
   {-# INLINE conjoined__ #-}
 
-  ixcontramap :: (j -> i) -> p i a b -> p j a b
+  ixcontramap :: (a -> j -> i) -> p i a b -> p j a b
   default ixcontramap
     :: Coercible (p i a b) (p j a b)
-    => (j -> i)
+    => (a -> j -> i)
     -> p i a b
     -> p j a b
   ixcontramap _ = coerce
@@ -239,7 +239,7 @@ instance Functor f => Profunctor (IxStarA f) where
   {-# INLINE rcoerce' #-}
 
   conjoined__ _ f = f
-  ixcontramap ij (IxStarA point k) = IxStarA point $ \i -> k (ij i)
+  ixcontramap ij (IxStarA point k) = IxStarA point $ \i a -> k (ij a i) a
   {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
@@ -255,7 +255,7 @@ instance Functor f => Profunctor (IxStar f) where
   {-# INLINE rcoerce' #-}
 
   conjoined__ _ f = f
-  ixcontramap ij (IxStar k) = IxStar $ \i -> k (ij i)
+  ixcontramap ij (IxStar k) = IxStar $ \i a -> k (ij a i) a
   {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
@@ -268,7 +268,7 @@ instance Profunctor (IxForget r) where
   {-# INLINE rmap #-}
 
   conjoined__ _ f = f
-  ixcontramap ij (IxForget k) = IxForget $ \i -> k (ij i)
+  ixcontramap ij (IxForget k) = IxForget $ \i a -> k (ij a i) a
   {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
@@ -281,7 +281,7 @@ instance Profunctor (IxForgetM r) where
   {-# INLINE rmap #-}
 
   conjoined__ _ f = f
-  ixcontramap ij (IxForgetM k) = IxForgetM $ \i -> k (ij i)
+  ixcontramap ij (IxForgetM k) = IxForgetM $ \i a -> k (ij a i) a
   {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 
@@ -294,7 +294,7 @@ instance Profunctor IxFunArrow where
   {-# INLINE rmap #-}
 
   conjoined__ _ f = f
-  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i -> k (ij i)
+  ixcontramap ij (IxFunArrow k) = IxFunArrow $ \i a -> k (ij a i) a
   {-# INLINE conjoined__ #-}
   {-# INLINE ixcontramap #-}
 

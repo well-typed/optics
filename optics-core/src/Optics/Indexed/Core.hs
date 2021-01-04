@@ -176,7 +176,7 @@ icomposeN
   => Curry is i
   -> Optic k is         s t a b
   -> Optic k (WithIx i) s t a b
-icomposeN f (Optic o) = Optic (ixcontramap (\ij -> composeN @is ij f) . o)
+icomposeN f (Optic o) = Optic (ixcontramap (\_ ij -> composeN @is ij f) . o)
 {-# INLINE icomposeN #-}
 
 ----------------------------------------

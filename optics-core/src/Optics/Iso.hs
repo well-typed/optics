@@ -69,6 +69,9 @@ module Optics.Iso
   , involuted
   , Swapped(..)
 
+  -- TODO
+  , selfIndex
+
   -- * Additional elimination forms
   , withIso
   , au
@@ -166,6 +169,19 @@ equality = Optic id
 simple :: Iso' a a
 simple = Optic id
 {-# INLINE simple #-}
+
+-- | Use value as an index.
+--
+-- TODO: were this should be. Should we have IxIso?
+--
+-- >>> itoListOf (folded % selfIndex) "index"
+-- [('i','i'),('n','n'),('d','d'),('e','e'),('x','x')]
+--
+-- >>> iover (mapped % selfIndex % mapped) (\xs x -> x + maximum xs) [[1,2,3],[4,5,6],[7,8,9]]
+-- [[4,5,6],[10,11,12],[16,17,18]]
+--
+selfIndex :: Optic An_Iso (WithIx a) a b a b
+selfIndex = Optic $ ixcontramap (\x f -> f x)
 
 -- | Data types that are representationally equal are isomorphic.
 --

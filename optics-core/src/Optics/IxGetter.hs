@@ -13,7 +13,7 @@ module Optics.IxGetter
 
   -- * Introduction
   , ito
-  , selfIndex
+  -- , selfIndex
 
   -- * Elimination
   , iview
@@ -43,9 +43,9 @@ ito f = Optic (lmap f . ilinear uncurry' . rphantom)
 
 -- | Use a value itself as its own index. This is essentially an indexed version
 -- of 'Optics.Iso.equality'.
-selfIndex :: IxGetter a a a
-selfIndex = ito (\a -> (a, a))
-{-# INLINE selfIndex #-}
+-- selfIndex :: IxGetter a a a
+-- selfIndex = ito (\a -> (a, a))
+-- {-# INLINE selfIndex #-}
 
 -- | View the value pointed to by an indexed getter.
 iview
