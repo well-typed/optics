@@ -39,8 +39,8 @@ module Optics.Label
     -- ** Structure of 'LabelOptic' instances
     -- $instanceStructure
 
-    -- ** Limitations arising from functional dependencies
-    -- $fundepLimitations
+    -- ** Explanation of functional dependencies
+    -- $fundepExplanation
   ) where
 
 import Data.Type.Bool
@@ -338,7 +338,7 @@ import Optics.Internal.Optic
 --
 -- (3) The full power of optics at our disposal, should we ever need it.
 
--- $instanceStructure
+-- $instanceStructure #structure#
 --
 -- You might wonder why instances generated with Template Haskell have the
 -- following form:
@@ -450,7 +450,7 @@ import Optics.Internal.Optic
 -- ...  arising from the overloaded label ‘#pets’
 -- ...
 
--- $fundepLimitations #limitations#
+-- $fundepExplanation
 --
 -- 'LabelOptic' uses the following functional dependencies to guarantee good
 -- type inference:
@@ -466,19 +466,10 @@ import Optics.Internal.Optic
 -- 4. @name t a -> s@ (replacing the field @name@ in @t@ with @a@ yields @s@)
 --
 -- Dependencies (1) and (2) ensure that when we compose two optics, the middle
--- type is unambiguous. The consequence is that it's not possible to create
--- label optics with @a@ or @b@ referencing type variables not referenced in @s@
--- or @t@, i.e. getters for fields of rank 2 type or reviews for constructors
--- with existentially quantified types inside.
+-- type is unambiguous.
 --
 -- Dependencies (3) and (4) ensure that when we perform a chain of updates, the
--- middle type is unambiguous. The consequence is that it's not possible to
--- define label optics that:
---
--- - Modify phantom type parameters of type @s@ or @t@.
---
--- - Modify type parameters of type @s@ or @t@ if @a@ or @b@ contain ambiguous
---   applications of type families to these type parameters.
+-- middle type is unambiguous.
 
 ----------------------------------------
 -- Definitions

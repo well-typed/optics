@@ -125,13 +125,21 @@ import Optics.TH.Internal.Sum
 --   labelOptic = atraversalVL $ \\point f s -> case s of
 --     Cat x1 x2 -> fmap (\\y -> Cat x1 y) (f x2)
 --     Dog x1 x2 -> point (Dog x1 x2)
+--
+-- instance
+--   ( Dysfunctional "absurd" k Animal Animal a b
+--   , k ~ An_AffineFold, a ~ (x -> y), b ~ (x -> y)
+--   ) => LabelOptic "absurd" k Animal Animal a b where
+--   labelOptic = afolding $ \\s -> case s of
+--     Cat _ _  -> Nothing
+--     Dog _ f  -> Just f
 -- @
 --
--- which can be used as @#age@ and @#name@ with the @OverloadedLabels@ language
--- extension.
+-- which can be used as @#age@, @#name@ and @#absurd@ with the
+-- @OverloadedLabels@ language extension.
 --
--- /Note:/ if you wonder about the form of instances or why there is no label for
--- @animalAbsurd@, see "Optics.Label#limitations".
+-- /Note:/ if you wonder about the structure of instances, see
+-- "Optics.Label#structure".
 --
 -- @
 -- 'makeFieldOptics' = 'makeFieldLabelsWith' 'fieldLabelsRules'

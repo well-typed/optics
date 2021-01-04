@@ -19,6 +19,7 @@ import qualified Language.Haskell.TH.Datatype as D
 import Data.Set.Optics
 import Language.Haskell.TH.Optics.Internal
 import Optics.Core hiding (cons)
+import Optics.Internal.Magic
 import Optics.TH.Internal.Utils
 
 -- | Generate a 'Prism' for each constructor of a data type. Isos generated when
@@ -90,21 +91,22 @@ makePrismLabels typeName = do
   where
     makeLabel :: D.DatatypeInfo -> [NCon] -> NCon -> Q (Maybe Dec)
     makeLabel info cons con = do
-      stab@(Stab cx otype s t a b) <- computeOpticType labelConfig ty cons con
-      case otype of
-        -- Reviews are for existentially quantified types and these don't fit
-        -- into OpticLabel because of functional dependencies, just skip them.
-        ReviewType -> pure Nothing
-        _ -> do
-          (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
-          (a', cxtA) <- eqSubst a "a"
-          (b', cxtB) <- eqSubst b "b"
-          let label = nameBase . prismName $ view nconName con
-              instHead = pure $ conAppsT ''LabelOptic
-                [LitT (StrTyLit label), k, s, t, a', b']
-          Just <$> instanceD (pure $ cx ++ [cxtK, cxtA, cxtB])
-                             instHead
-                             (fun stab 'labelOptic)
+      stab@(Stab tvsCovered cx otype s t a b) <- computeOpticType labelConfig ty cons con
+      (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
+      (a', cxtA) <- eqSubst a "a"
+      (b', cxtB) <- eqSubst b "b"
+      let label = nameBase . prismName $ view nconName con
+          tyArgs = [LitT (StrTyLit label), k, s, t, a', b']
+          context = concat
+            [ -- If some of the type variables are not covered, instance is
+              -- dysfunctional.
+              if tvsCovered then [] else [conAppsT ''Dysfunctional tyArgs]
+            , [cxtK, cxtA, cxtB]
+            , cx
+            ]
+      Just <$> instanceD (pure context)
+                         (pure $ conAppsT ''LabelOptic tyArgs)
+                         (fun stab 'labelOptic)
       where
         ty        = addKindInfo info $ D.datatypeType info
         isNewtype = D.datatypeVariant info == D.Newtype
@@ -175,41 +177,42 @@ makeConsPrisms info cons (Just typeName) =
 ----------------------------------------
 
 data StabConfig = StabConfig
-  { scAllowPhantomsChange :: Bool
-  , scAllowIsos           :: Bool
+  { scForLabelInstance :: Bool
+  , scAllowIsos        :: Bool
   }
 
 defaultConfig :: StabConfig
 defaultConfig = StabConfig
-  { scAllowPhantomsChange = True
-  , scAllowIsos           = True
+  { scForLabelInstance = False
+  , scAllowIsos        = True
   }
 
 classyConfig :: StabConfig
 classyConfig = StabConfig
-  { scAllowPhantomsChange = True
-  , scAllowIsos           = False
+  { scForLabelInstance = False
+  , scAllowIsos        = False
   }
 
 labelConfig :: StabConfig
 labelConfig = StabConfig
-  { scAllowPhantomsChange = False
-  , scAllowIsos           = True
+  { scForLabelInstance = True
+  , scAllowIsos        = True
   }
 
 data OpticType = IsoType | PrismType | ReviewType
-data Stab  = Stab Cxt OpticType Type Type Type Type
+  deriving Eq
+data Stab  = Stab Bool Cxt OpticType Type Type Type Type
 
 simplifyStab :: Stab -> Stab
-simplifyStab (Stab cx ty _ t _ b) = Stab cx ty t t b b
+simplifyStab (Stab tvsCovered cx ty _ t _ b) = Stab tvsCovered cx ty t t b b
   -- simplification uses t and b because those types
   -- are interesting in the Review case
 
 stabSimple :: Stab -> Bool
-stabSimple (Stab _ _ s t a b) = s == t && a == b
+stabSimple (Stab _ _ _ s t a b) = s == t && a == b
 
 stabToType :: Stab -> Type
-stabToType stab@(Stab cx ty s t a b) = ForallT vs cx $
+stabToType stab@(Stab _ cx ty s t a b) = ForallT vs cx $
   case ty of
     IsoType    | stabSimple stab -> ''Iso'    `conAppsT` [s,a]
                | otherwise       -> ''Iso     `conAppsT` [s,t,a,b]
@@ -224,7 +227,7 @@ stabToType stab@(Stab cx ty s t a b) = ForallT vs cx $
        $ setOf (folded % typeVarsKinded) cx
 
 stabType :: Stab -> OpticType
-stabType (Stab _ o _ _ _ _) = o
+stabType (Stab _ _ o _ _ _ _) = o
 
 computeOpticType :: StabConfig -> Type -> [NCon] -> NCon -> Q Stab
 computeOpticType conf t cons con =
@@ -233,11 +236,10 @@ computeOpticType conf t cons con =
          then computePrismType conf t (view nconCxt con) cons' con
          else computeReviewType t (view nconCxt con) (view nconTypes con)
 
-
 computeReviewType :: Type -> Cxt -> [Type] -> Q Stab
 computeReviewType t cx tys = do
   b <- toTupleT (map return tys)
-  return (Stab cx ReviewType t t b b)
+  return (Stab False cx ReviewType t t b b)
 
 -- | Compute the full type-changing Prism type given an outer type, list of
 -- constructors, and target constructor name.
@@ -247,9 +249,11 @@ computePrismType conf s cx cons con = do
       free     = setOf typeVars s
       fixed    = setOf typeVars cons
       phantoms = free S.\\ setOf (folded % nconTypes % typeVars) (con : cons)
-      unbound  = if scAllowPhantomsChange conf
-                 then free S.\\ fixed
-                 else free S.\\ fixed S.\\ phantoms
+
+      unbound    = free S.\\ fixed
+      tvsCovered = if scForLabelInstance conf
+                   then S.null phantoms
+                   else True
   sub <- sequenceA (M.fromSet (newName . nameBase) unbound)
   a   <- toTupleT (map return ts)
   b   <- toTupleT (map return (substTypeVars sub ts))
@@ -265,7 +269,7 @@ computePrismType conf s cx cons con = do
       otype = if null cons && scAllowIsos conf
               then IsoType
               else PrismType
-  return (Stab cx' otype s t a b)
+  return (Stab tvsCovered cx' otype s t a b)
 
 -- | Construct either a Review or Prism as appropriate
 makeConOpticExp :: Stab -> [NCon] -> NCon -> ExpQ
@@ -413,8 +417,8 @@ makeClassyPrismClass t className methodName cons =
 
   where
   mkMethod r con =
-    do Stab cx o _ _ _ b <- computeOpticType classyConfig t cons con
-       let stab' = Stab cx o r r b b
+    do Stab tvsCovered cx o _ _ _ b <- computeOpticType classyConfig t cons con
+       let stab' = Stab tvsCovered cx o r r b b
            defName = view nconName con
            body    = appsE [varE '(%), varE methodName, varE defName]
        sequenceA
@@ -470,7 +474,7 @@ data NCon = NCon
   , _nconCxt  :: Cxt
   , _nconTypes :: [Type]
   }
-  deriving (Eq)
+  deriving (Eq, Show)
 
 instance HasTypeVars NCon where
   typeVarsEx s = traversalVL $ \f (NCon x vars y z) ->
@@ -490,10 +494,13 @@ nconTypes = lensVL $ \f x -> fmap (\y -> x {_nconTypes = y}) (f (_nconTypes x))
 
 -- | Normalize a single 'Con' to its constructor name and field types.
 normalizeCon :: D.DatatypeInfo -> D.ConstructorInfo -> NCon
-normalizeCon di info = NCon (D.constructorName info)
-                            (D.tvName <$> D.constructorVars info)
-                            (D.constructorContext info)
-                            (map (addKindInfo di) $ D.constructorFields info)
+normalizeCon di info = NCon
+  { _nconName  = D.constructorName info
+  , _nconVars  = D.tvName <$> D.constructorVars info
+  , _nconCxt   = D.constructorContext info
+  , _nconTypes = let tyVars = map tyVarBndrToType (D.constructorVars info)
+                 in addKindInfo' tyVars di <$> D.constructorFields info
+  }
 
 
 -- | Compute a prism's name by prefixing an underscore for normal

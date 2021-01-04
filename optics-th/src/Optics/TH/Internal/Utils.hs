@@ -53,9 +53,13 @@ eqSubst ty n = do
   placeholder <- VarT <$> newName n
   pure (placeholder, D.equalPred placeholder ty)
 
--- | Fill in kind variables using info from datatype type parameters.
 addKindInfo :: D.DatatypeInfo -> Type -> Type
-addKindInfo di = substType . M.fromList . mapMaybe var $ D.datatypeInstTypes di
+addKindInfo = addKindInfo' []
+
+-- | Fill in kind variables using info from datatype type parameters.
+addKindInfo' :: [Type] -> D.DatatypeInfo -> Type -> Type
+addKindInfo' additionalInfo di =
+  substType . M.fromList . mapMaybe var $ additionalInfo ++ D.datatypeInstTypes di
   where
     -- If the type is a data/newtype family instance, we need to fill in all of
     -- the kinds for weird cases such as:
@@ -88,9 +92,12 @@ quantifyType' exclude vars cx t = ForallT vs cx t
     vs = filter (\v -> D.tvName v `S.notMember` exclude)
        . changeTVFlags SpecifiedSpec
        . D.freeVariablesWellScoped
-       $ map bndrToType vars ++ S.toList (setOf typeVarsKinded t)
+       $ map tyVarBndrToType vars ++ S.toList (setOf typeVarsKinded t)
 
-    bndrToType = elimTV VarT (\n k -> SigT (VarT n) k)
+-- | Transform 'TyVarBndr' into a 'Type' so it's suitable e.g. for
+-- freeVariablesWellScoped or type substitution.
+tyVarBndrToType :: TyVarBndr_ flag -> Type
+tyVarBndrToType = elimTV VarT (\n k -> SigT (VarT n) k)
 
 -- | Pass in a list of lists of extensions, where any of the given extensions
 -- will satisfy it. For example, you might need either GADTs or

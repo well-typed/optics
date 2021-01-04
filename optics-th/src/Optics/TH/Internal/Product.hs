@@ -36,6 +36,7 @@ import Data.Tuple.Optics
 import Data.Set.Optics
 import Language.Haskell.TH.Optics.Internal
 import Optics.Core hiding (cons)
+import Optics.Internal.Magic
 import Optics.TH.Internal.Utils
 
 ------------------------------------------------------------------------
@@ -152,15 +153,9 @@ makeFieldLabelsForDatatype rules info = do
     let defCons    = over normFieldLabels (expandName rules tyName cons allFields) fieldCons
         allDefs    = setOf (normFieldLabels % folded) defCons
     T.sequenceA (M.fromSet (buildScaffold True rules s defCons) allDefs)
-  let defs = filter isRank1 $ M.toList perDef
-  traverse (makeFieldLabel rules) defs
+  let defs = M.toList perDef
+  traverse (makeFieldLabel info rules) defs
   where
-    -- LabelOptic doesn't support higher rank fields because of functional
-    -- dependencies (s -> a, t -> b), so just skip them.
-    isRank1 = \case
-      (_, (OpticSa vs _ _ _ _, _)) -> null vs
-      _                            -> True
-
     tyName = D.datatypeName info
     s      = addKindInfo info $ D.datatypeType info
     cons   = D.datatypeCons info
@@ -170,23 +165,38 @@ makeFieldLabelsForDatatype rules info = do
     normFieldLabels = traversed % _2 % traversed % _1
 
 makeFieldLabel
-  :: LensRules
+  :: D.DatatypeInfo
+  -> LensRules
   -> (DefName, (OpticStab, [(Name, Int, [Int])]))
   -> Q Dec
-makeFieldLabel rules (defName, (defType, cons)) = do
+makeFieldLabel info rules (defName, (defType, cons)) = do
   (context, instHead) <- case defType of
-    OpticSa _ _ otype s a -> do
+    OpticSa vs cx otype s a0 -> do
+      -- 'tv' might have info about type variables of 'a' that need filling in.
+      let a = addKindInfo' (map tyVarBndrToType vs) info a0
       (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
       (a', cxtA) <- eqSubst a "a"
       (b', cxtB) <- eqSubst a "b"
-      pure (pure [cxtK, cxtA, cxtB], pure $ conAppsT ''LabelOptic
-        [LitT (StrTyLit fieldName), k, s, s, a', b'])
-    OpticStab otype s t a b -> do
+      let tyArgs = [LitT (StrTyLit fieldName), k, s, s, a', b']
+          context = concat
+            [ -- If the field is polymorphic, the instance is dysfunctional.
+              if null vs then [] else [conAppsT ''Dysfunctional tyArgs]
+            , [cxtK, cxtA, cxtB]
+            , cx
+            ]
+      pure (pure context, pure $ conAppsT ''LabelOptic tyArgs)
+    OpticStab tvsCovered otype s t a b -> do
       (k,  cxtK) <- eqSubst (ConT $ opticTypeToTag otype) "k"
       (a', cxtA) <- eqSubst a "a"
       (b', cxtB) <- eqSubst b "b"
-      pure (pure [cxtK, cxtA, cxtB], pure $ conAppsT ''LabelOptic
-        [LitT (StrTyLit fieldName), k, s, t, a', b'])
+      let tyArgs = [LitT (StrTyLit fieldName), k, s, t, a', b']
+          context = concat
+            [ -- If some of the type variables are not covered, the instance is
+              -- dysfunctional.
+              if tvsCovered then [] else [conAppsT ''Dysfunctional tyArgs]
+            , [cxtK, cxtA, cxtB]
+            ]
+      pure (pure context, pure $ conAppsT ''LabelOptic tyArgs)
   instanceD context instHead (fun 'labelOptic)
   where
     opticTypeToTag AffineFoldType      = ''An_AffineFold
@@ -249,29 +259,30 @@ buildScaffold ::
               {- ^ optic type, definition type, field count, target fields -}
 buildScaffold forClassInstance rules s cons defName =
 
-  do (s',t,a,b) <- buildStab forClassInstance s (concatMap snd consForDef)
+  do (t,a,b, tvsCovered) <- buildTab forClassInstance s $
+       concatMap snd consForDef
 
      let defType
            | Just (tyvars, cx, a') <- preview _ForallT a =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa tyvars cx optic s' a'
+               in OpticSa tyvars cx optic s a'
 
            -- Getter and Fold are always simple
            | not (_allowUpdates rules) =
                let optic | lensCase   = GetterType
                          | affineCase = AffineFoldType
                          | otherwise  = FoldType
-               in OpticSa [] [] optic s' a
+               in OpticSa [] [] optic s a
 
            -- Generate simple Lens and Traversal where possible
-           | _simpleLenses rules || s' == t && a == b =
+           | _simpleLenses rules || s == t && a == b =
                let optic | isoCase && _allowIsos rules = IsoType
                          | lensCase                    = LensType
                          | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
-               in OpticSa [] [] optic s' a
+               in OpticSa [] [] optic s a
 
            -- Generate type-changing Lens and Traversal otherwise
            | otherwise =
@@ -279,7 +290,7 @@ buildScaffold forClassInstance rules s cons defName =
                          | lensCase                    = LensType
                          | affineCase                  = AffineTraversalType
                          | otherwise                   = TraversalType
-               in OpticStab optic s' t a b
+               in OpticStab tvsCovered optic s t a b
 
      return (defType, scaffolds)
   where
@@ -341,12 +352,12 @@ opticTypeName typeChanging  TraversalType       = if typeChanging
                                                   else ''Traversal'
 
 data OpticStab
-  = OpticStab                   OpticType Type Type Type Type
+  = OpticStab Bool              OpticType Type Type Type Type
   | OpticSa [TyVarBndrSpec] Cxt OpticType Type Type
   deriving Show
 
 stabToType :: OpticStab -> Type
-stabToType (OpticStab c s t a b) =
+stabToType (OpticStab _ c s t a b) =
   quantifyType [] [] (opticTypeName True c `conAppsT` [s,t,a,b])
 stabToType (OpticSa vs cx c s a) =
   quantifyType vs cx (opticTypeName False c `conAppsT` [s,a])
@@ -356,31 +367,33 @@ stabToContext OpticStab{}          = []
 stabToContext (OpticSa _ cx _ _ _) = cx
 
 stabToOpticType :: OpticStab -> OpticType
-stabToOpticType (OpticStab c _ _ _ _) = c
+stabToOpticType (OpticStab _ c _ _ _ _) = c
 stabToOpticType (OpticSa _ _ c _ _) = c
 
 stabToOptic :: OpticStab -> Name
-stabToOptic (OpticStab c _ _ _ _) = opticTypeName True c
+stabToOptic (OpticStab _ c _ _ _ _) = opticTypeName True c
 stabToOptic (OpticSa _ _ c _ _) = opticTypeName False c
 
 stabToS :: OpticStab -> Type
-stabToS (OpticStab _ s _ _ _) = s
+stabToS (OpticStab _ _ s _ _ _) = s
 stabToS (OpticSa _ _ _ s _) = s
 
 stabToA :: OpticStab -> Type
-stabToA (OpticStab _ _ _ a _) = a
+stabToA (OpticStab _ _ _ _ a _) = a
 stabToA (OpticSa _ _ _ _ a) = a
 
--- | Compute the s t a b types given the outer type 's' and the
+-- | Compute the t a b types given the outer type 's' and the
 -- categorized field types. Left for fixed and Right for visited.
 -- These types are "raw" and will be packaged into an 'OpticStab'
 -- shortly after creation.
-buildStab :: Bool -> Type -> [Either Type Type] -> Q (Type,Type,Type,Type)
-buildStab forClassInstance s categorizedFields = do
-  -- compute possible type changes
-  sub <- T.sequenceA . M.fromSet (newName . nameBase) =<< unfixedTypeVars
+buildTab :: Bool -> Type -> [Either Type Type] -> Q (Type,Type,Type,Bool)
+buildTab forClassInstance s categorizedFields = do
+  -- Compute possible type changes and check whether we have to lift the
+  -- coverage condition in case we're generating a class instance.
+  (unfixedTypeVars, tvsCovered) <- mkUnfixedTypeVars
+  sub <- T.sequenceA $ M.fromSet (newName . nameBase) unfixedTypeVars
   let (t, b) = over each (substTypeVars sub) (s, a)
-  pure (s, t, a, b)
+  pure (t, a, b, tvsCovered)
   where
     -- Just take the type of the first field and let GHC do the unification.
     a = fromMaybe
@@ -393,11 +406,11 @@ buildStab forClassInstance s categorizedFields = do
 
     (fixedFields, targetFields) = partitionEithers categorizedFields
 
-    unfixedTypeVars
+    mkUnfixedTypeVars
       | S.null freeTypeVars =
         -- If there are no free type vars, don't bother searching for ambiguous
         -- type family applications because there are none.
-        pure S.empty
+        pure (S.empty, True)
       | forClassInstance = do
           ambiguousTypeVars <- getAmbiguousTypeFamilyTypeVars
           --runIO $ do
@@ -407,10 +420,10 @@ buildStab forClassInstance s categorizedFields = do
           --  putStrLn $ "FIXED:     " ++ show fixedTypeVars
           --  putStrLn $ "PHANTOM:   " ++ show phantomTypeVars
           --  putStrLn $ "AMBIGUOUS: " ++ show ambiguousTypeVars
-          pure $ freeTypeVars S.\\ fixedTypeVars
-                              S.\\ phantomTypeVars
-                              S.\\ ambiguousTypeVars
-      | otherwise = pure $ freeTypeVars S.\\ fixedTypeVars
+          pure ( freeTypeVars S.\\ fixedTypeVars
+               , S.null phantomTypeVars && S.null ambiguousTypeVars
+               )
+      | otherwise = pure (freeTypeVars S.\\ fixedTypeVars, True)
       where
         freeTypeVars  = setOf typeVars s
         fixedTypeVars = setOf typeVars fixedFields
