@@ -31,6 +31,8 @@ module Optics.IxLens
   -- * Additional introduction forms
   , chosen
   , devoid
+  , ifst
+  , isnd
 
   -- * Subtyping
   , A_Lens
@@ -116,6 +118,28 @@ chosen = ilensVL $ \f -> \case
 devoid :: IxLens' i Void a
 devoid = ilens absurd const
 {-# INLINE devoid #-}
+
+-- | Indexed '_1' with other half of a pair as an index.
+--
+-- See 'isnd' for examples.
+--
+ifst :: IxLens i (a, i) (b, i) a b
+ifst = ilens (\(a, i) -> (i, a)) (\(_,i) b -> (b, i))
+
+-- | Indexed '_2' with other half of a pair as an index.
+-- Specialized version of 'itraversed' to pairs, which can be 'IxLens'.
+--
+-- >>> iview isnd ('a', True)
+-- ('a',True)
+--
+-- That is not possible with 'itraversed', because it is an 'IxTraversal'.
+--
+-- >>> :t itraversed :: IxTraversal i (i, a) (i, b) a b
+-- itraversed :: IxTraversal i (i, a) (i, b) a b
+--   :: IxTraversal i (i, a) (i, b) a b
+--
+isnd :: IxLens i (i, a) (i, b) a b
+isnd = ilens id (\(i,_) b -> (i, b))
 
 -- $setup
 -- >>> import Optics.Core
