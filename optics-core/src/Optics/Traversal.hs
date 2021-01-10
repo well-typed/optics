@@ -309,6 +309,9 @@ traversed = Optic traversed__
 --
 -- >>> foldOf both ("hello","world")
 -- "helloworld"
+--
+-- @since 0.4
+--
 both :: Bitraversable r => Traversal (r a a) (r b b) a b
 both = traversalVL $ \f -> bitraverse f f
 {-# INLINE both #-}
@@ -399,6 +402,8 @@ singular o = atraversalVL $ \point f s ->
 -- ('c','b')
 --
 -- For the 'Fold' version see 'Optics.Fold.summing'.
+--
+-- @since 0.4
 --
 adjoin
   :: (Is k A_Traversal, Is l A_Traversal)

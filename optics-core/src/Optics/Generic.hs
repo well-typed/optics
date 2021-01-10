@@ -117,6 +117,8 @@ data Void0
 -- >>> user & #age %~ (+1)
 -- User {name = "Tom", age = 33}
 --
+-- @since 0.4
+--
 class GField (name :: Symbol) s t a b | name s -> t a b
                                       , name t -> s a b where
   gfield :: Lens s t a b
@@ -176,6 +178,8 @@ instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
 -- ...In the...
 -- ...
 --
+-- @since 0.4
+--
 class GAffineField (name :: Symbol) s t a b | name s -> t a b
                                             , name t -> s a b where
   gafield :: AffineTraversal s t a b
@@ -228,6 +232,8 @@ instance (a ~ Void0, b ~ Void0) => GAffineField name Void0 Void0 a b where
 -- ...There is no 0th position
 -- ...In the...
 -- ...
+--
+-- @since 0.4
 --
 class GPosition (n :: Nat) s t a b | n s -> t a b
                                    , n t -> s a b where
@@ -342,6 +348,8 @@ instance (a ~ Void0, b ~ Void0) => GConstructor name Void0 Void0 a b where
 --
 -- >>> toListOf (gplate @Char) noG
 -- "nice"
+--
+-- @since 0.4
 --
 class GPlate a s where
   gplate :: Traversal' s a

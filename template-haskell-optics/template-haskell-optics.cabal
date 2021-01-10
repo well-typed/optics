@@ -1,5 +1,5 @@
 name:          template-haskell-optics
-version:       0.1
+version:       0.2
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
@@ -29,7 +29,7 @@ library
   ghc-options:      -Wall
 
   build-depends: base                   >= 4.10      && <5
-               , optics-core            >= 0.3       && <0.4
+               , optics-core            >= 0.4       && <0.5
                , containers             >= 0.5.10.2  && <0.7
                , template-haskell       >= 2.12      && <2.17
 
