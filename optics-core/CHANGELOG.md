@@ -1,13 +1,17 @@
 # optics-core-0.4 (2021-mm-dd)
 * See [migration-guide-0.4.md](#FIX-THIS-LINK-TO-GITHUB) for more details
-* GHC-9.0 support
-* The `FunctorWithIndex`, `FoldableWithIndex` and `TraversableWithIndex` type classes
-  have been migrated to a new package,
-  [`indexed-traversable`](https://hackage.haskell.org/package/indexed-traversable).
-* Add `adjoin` and `iadjoin`
-* Add `both`
-* Generalize types of `generic` and `generic1`
+* Add support for GHC-9.0
+* Drop support for GHC-8.0
+* The `FunctorWithIndex`, `FoldableWithIndex` and `TraversableWithIndex` type
+  classes have been migrated to a new package,
+  [`indexed-traversable`](https://hackage.haskell.org/package/indexed-traversable)
+* Add `adjoin`, `iadjoin` and `both` to `Optics.Traversal`
+* Generalize types of `generic`
 * Make `chosen` an indexed lens to see which value is traversed
+* Add `gfield`, `gafield`, `gconstructor`, `gposition` and `gplate` for
+  generics-based data access
+* Add support for generics-based field lenses and constructor prisms (`gfield`
+  and `gconstructor`) to `LabelOptic` so they can be used via `OverloadedLabels`
 
 # optics-core-0.3.0.1 (2020-08-05)
 * Add INLINE pragmas to `atraverseOf_`, `iaTraverseOf_` and `ignored`

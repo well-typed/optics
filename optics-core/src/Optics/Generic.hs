@@ -303,6 +303,8 @@ instance (a ~ Void0, b ~ Void0) => GPosition name Void0 Void0 a b where
 -- >>> cat & #_Cat % _1 .~ "Merry"
 -- Cat {name = "Merry", purrs = True}
 --
+-- @since 0.4
+--
 class GConstructor (name :: Symbol) s t a b | name s -> t a b
                                             , name t -> s a b where
   gconstructor :: Prism s t a b

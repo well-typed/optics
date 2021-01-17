@@ -1,3 +1,6 @@
+# optics-extra-0.4 (2020-mm-dd)
+* Add support for GHC-9.0
+
 # optics-extra-0.3 (2020-04-15)
 * `optics-core-0.3` compatible release
 * GHC-8.10 support

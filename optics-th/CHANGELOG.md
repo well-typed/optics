@@ -1,3 +1,13 @@
+# optics-th-0.4 (2021-mm-dd)
+* Add support for GHC-9.0
+* Print missing language extensions during TH generation of labels if there are
+  any
+* Add support for getters of rank1 polymorphic fields to optics generated with
+  the `makeFieldLabels` family of functions
+* Extend support of type-changing optics generated with the `makeFieldLabels`
+  family to type parameters that are phantom and applied to non-injective type
+  families
+
 # optics-th-0.3.0.2 (2020-08-20)
 * Fix tests on GHC 8.10.2
 
