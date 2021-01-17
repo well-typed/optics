@@ -1,5 +1,5 @@
 # optics-core-0.4 (2021-mm-dd)
-* See [migration-guide-0.4.md](#FIX-THIS-LINK-TO-GITHUB) for more details
+* See [migration-guide-0.4.md](https://github.com/well-typed/optics/blob/master/migration-guide-0.4.md) for more details
 * Add support for GHC-9.0
 * Drop support for GHC-8.0
 * The `FunctorWithIndex`, `FoldableWithIndex` and `TraversableWithIndex` type
