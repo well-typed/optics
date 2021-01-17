@@ -374,6 +374,8 @@ isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
 --
 -- For the 'IxFold' version see 'Optics.IxFold.isumming'.
 --
+-- @since 0.4
+--
 iadjoin
   :: (Is k A_Traversal, Is l A_Traversal, is `HasSingleIndex` i)
   => Optic' k is s a
