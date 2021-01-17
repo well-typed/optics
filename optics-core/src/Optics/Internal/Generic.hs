@@ -349,8 +349,13 @@ type family GPositionPath con (e :: Either (Nat, Nat) [Path]) :: [Path] where
   GPositionPath _   ('Right path)   = path
   GPositionPath con ('Left '(n, k)) = TypeError
     ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
-     'Text " has " ':<>: 'ShowType k ':<>:
-     'Text " fields, " ':<>: ToOrdinal n ':<>: 'Text " requested")
+     'Text " has " ':<>: ShowFieldNumber k ':<>: 'Text ", " ':<>:
+     ToOrdinal n ':<>: 'Text " requested")
+
+type family ShowFieldNumber (k :: Nat) :: ErrorMessage where
+  ShowFieldNumber 0 = 'Text "no fields"
+  ShowFieldNumber 1 = 'Text "1 field"
+  ShowFieldNumber k = 'ShowType k ':<>: 'Text " fields"
 
 ----------------------------------------
 -- Constructor
