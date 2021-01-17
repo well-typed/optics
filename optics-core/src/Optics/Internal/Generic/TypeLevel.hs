@@ -76,7 +76,7 @@ type family GetPositionPaths s (pos :: Nat) g :: PathTree (Nat, Nat) where
   GetPositionPaths s pos (M1 D _ g)  = GetPositionPaths s pos g
   GetPositionPaths s pos (g1 :+: g2) = 'PathTree (GetPositionPaths s pos g1)
                                                  (GetPositionPaths s pos g2)
-  GetPositionPaths s pos (M1 C _ g)  = 'PathLeaf (GetPositionPath pos g 1 '[])
+  GetPositionPaths s pos (M1 C _ g)  = 'PathLeaf (GetPositionPath pos g 0 '[])
 
   GetPositionPaths s pos V1 = TypeError ('Text "Type " ':<>: QuoteType s ':<>:
                                          'Text " has no data constructors")
@@ -89,13 +89,13 @@ type family GetPositionPath (pos :: Nat) g (k :: Nat) (acc :: [Path])
 
   -- Find field at a position in a sum type.
   GetPositionPath pos (M1 C _ _) k acc =
-    If (pos == k) ('Right (Reverse acc '[])) ('Left '(pos, k))
+    If (pos == k + 1) ('Right (Reverse acc '[])) ('Left '(pos, k + 1))
   GetPositionPath pos (g1 :+: g2) k acc =
     ContinueWhenLeft (GetPositionPath pos g1 k ('PathLeft : acc)) g2 acc
 
   -- Find field at a position in a product type.
   GetPositionPath pos (M1 S _ _) k acc =
-    If (pos == k) ('Right (Reverse acc '[])) ('Left '(pos, k))
+    If (pos == k + 1) ('Right (Reverse acc '[])) ('Left '(pos, k + 1))
   GetPositionPath pos (g1 :*: g2) k acc =
     ContinueWhenLeft (GetPositionPath pos g1 k ('PathLeft : acc)) g2 acc
 
@@ -107,8 +107,7 @@ type family GetPositionPath (pos :: Nat) g (k :: Nat) (acc :: [Path])
 type family ContinueWhenLeft (r :: Either (Nat, Nat) [Path]) g acc
   :: Either (Nat, Nat) [Path] where
   ContinueWhenLeft ('Right path) _ _ = 'Right path
-  ContinueWhenLeft ('Left '(pos, k)) g acc =
-    GetPositionPath pos g (k + 1) ('PathRight : acc)
+  ContinueWhenLeft ('Left '(pos, k)) g acc = GetPositionPath pos g k ('PathRight : acc)
 
 ----------------------------------------
 -- Misc
