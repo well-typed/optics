@@ -84,6 +84,7 @@ module Optics.Traversal
   -- is not a unique choice of monoid to use that works for all optics, and the
   -- ('<>') operator could not be used to combine optics of different kinds.
   , adjoin
+  , disjoin
 
   -- * Subtyping
   , A_Traversal
@@ -429,6 +430,20 @@ singular o = atraversalVL $ \point f s ->
       Just a' -> put Nothing >> pure a'
       Nothing ->                pure a
 {-# INLINE singular #-}
+
+disjoin
+  :: (Is k A_Traversal, Is l A_Traversal)
+  => Optic k is s t a b
+  -> Optic l js s t a b
+  -> Traversal s t a b
+disjoin a b = traversalVL $ \f s ->
+  let OrT visited fu = traverseOf a (wrapOrT . f) s
+  in if visited
+     then fu
+     else traverseOf b f s
+infixl 3 `disjoin` -- Same as (<|>)
+{-# INLINE disjoin #-}
+
 
 -- | Combine two disjoint traversals into one.
 --

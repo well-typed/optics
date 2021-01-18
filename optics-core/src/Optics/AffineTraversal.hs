@@ -48,6 +48,8 @@ module Optics.AffineTraversal
   -- * Additional elimination forms
   , withAffineTraversal
 
+  , adisjoin
+
   -- * Subtyping
   , An_AffineTraversal
   -- | <<diagrams/AffineTraversal.png AffineTraversal in the optics hierarchy>>
@@ -63,6 +65,7 @@ module Optics.AffineTraversal
 import Data.Profunctor.Indexed
 
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- $setup
 -- >>> import Optics.Core
@@ -167,6 +170,19 @@ atraverseOf o point =
 matching :: Is k An_AffineTraversal => Optic k is s t a b -> s -> Either t a
 matching o = withAffineTraversal o $ \match _ -> match
 {-# INLINE matching #-}
+
+adisjoin
+  :: (Is k An_AffineTraversal, Is l An_AffineTraversal)
+  => Optic k is s t a b
+  -> Optic l js s t a b
+  -> AffineTraversal s t a b
+adisjoin a b = atraversalVL $ \point f s ->
+  let OrT visited fu = atraverseOf a (OrT False . point) (wrapOrT . f) s
+  in if visited
+     then fu
+     else atraverseOf b point f s
+infixl 3 `adisjoin` -- Same as (<|>)
+{-# INLINE adisjoin #-}
 
 -- | Filter result(s) of a traversal that don't satisfy a predicate.
 --
