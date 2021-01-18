@@ -48,7 +48,7 @@ module Optics.IxAffineFold
   -- there is not a unique choice of monoid to use that works for all optics,
   -- and the ('<>') operator could not be used to combine optics of different
   -- kinds.
-  , iafailing
+  , iafailing_
 
   -- * Subtyping
   , An_AffineFold
@@ -129,13 +129,13 @@ filteredBy p = iafoldVL $ \point f s -> case preview p s of
 
 -- | Try the first 'IxAffineFold'. If it returns no entry, try the second one.
 --
-iafailing
+iafailing_
   :: (Is k An_AffineFold, Is l An_AffineFold,
       is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxAffineFold i s a
-iafailing a b = conjoined (afailing a b) $ iafolding $ \s ->
+iafailing_ a b = conjoined (afailing_ a b) $ iafolding $ \s ->
   maybe (ipreview b s) Just (ipreview a s)
-infixl 3 `iafailing` -- Same as (<|>)
-{-# INLINE iafailing #-}
+infixl 3 `iafailing_` -- Same as (<|>)
+{-# INLINE iafailing_ #-}

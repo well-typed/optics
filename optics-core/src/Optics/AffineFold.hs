@@ -46,7 +46,7 @@ module Optics.AffineFold
   -- there is not a unique choice of monoid to use that works for all optics,
   -- and the ('<>') operator could not be used to combine optics of different
   -- kinds.
-  , afailing
+  , afailing_
 
   -- * Subtyping
   , An_AffineFold
@@ -127,20 +127,20 @@ filtered p = afoldVL (\point f a -> if p a then f a else point a)
 
 -- | Try the first 'AffineFold'. If it returns no entry, try the second one.
 --
--- >>> preview (ix 1 % re _Left `afailing` ix 2 % re _Right) [0,1,2,3]
+-- >>> preview (ix 1 % re _Left `afailing_` ix 2 % re _Right) [0,1,2,3]
 -- Just (Left 1)
 --
--- >>> preview (ix 42 % re _Left `afailing` ix 2 % re _Right) [0,1,2,3]
+-- >>> preview (ix 42 % re _Left `afailing_` ix 2 % re _Right) [0,1,2,3]
 -- Just (Right 2)
 --
-afailing
+afailing_
   :: (Is k An_AffineFold, Is l An_AffineFold)
   => Optic' k is s a
   -> Optic' l js s a
   -> AffineFold s a
-afailing a b = afolding $ \s -> maybe (preview b s) Just (preview a s)
-infixl 3 `afailing` -- Same as (<|>)
-{-# INLINE afailing #-}
+afailing_ a b = afolding $ \s -> maybe (preview b s) Just (preview a s)
+infixl 3 `afailing_` -- Same as (<|>)
+{-# INLINE afailing_ #-}
 
 -- | Check to see if this 'AffineFold' doesn't match.
 --

@@ -76,6 +76,7 @@ module Optics.IxTraversal
   -- and the ('<>') operator could not be used to combine optics of different
   -- kinds.
   , iadjoin
+  , ifailing
 
   -- * Subtyping
   , A_Traversal
@@ -355,6 +356,20 @@ isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
       Just a' -> put Nothing >> pure a'
       Nothing ->                pure a
 {-# INLINE isingular #-}
+
+ifailing
+  :: ( Is k A_Traversal, Is l A_Traversal
+     , is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
+  => Optic k is1 s t a b
+  -> Optic l is2 s t a b
+  -> IxTraversal i s t a b
+ifailing a b = conjoined (failing a b) $ itraversalVL $ \f s ->
+  let OrT visited fu = itraverseOf a (\i -> wrapOrT . f i) s
+  in if visited
+     then fu
+     else itraverseOf b f s
+infixl 3 `ifailing` -- Same as (<|>)
+{-# INLINE ifailing #-}
 
 -- | Combine two disjoint indexed traversals into one.
 --

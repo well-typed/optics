@@ -59,7 +59,7 @@ module Optics.IxFold
   -- not a unique choice of monoid to use, and the ('<>') operator could not be
   -- used to combine optics of different kinds.
   , isumming
-  , ifailing
+  , ifailing_
 
   -- * Subtyping
   , A_Fold
@@ -265,18 +265,18 @@ infixr 6 `isumming` -- Same as (<>)
 -- >>> itoListOf (_1 % ifolded `ifailing` _2 % ifolded) ([], ["b","c"])
 -- [(0,"b"),(1,"c")]
 --
-ifailing
+ifailing_
   :: (Is k A_Fold, Is l A_Fold, is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
   => Optic' k is1 s a
   -> Optic' l is2 s a
   -> IxFold i s a
-ifailing a b = conjoined (failing a b) $ ifoldVL $ \f s ->
+ifailing_ a b = conjoined (failing_ a b) $ ifoldVL $ \f s ->
   let OrT visited fu = itraverseOf_ a (\i -> wrapOrT . f i) s
   in if visited
      then fu
      else itraverseOf_ b f s
-infixl 3 `ifailing` -- Same as (<|>)
-{-# INLINE ifailing #-}
+infixl 3 `ifailing_` -- Same as (<|>)
+{-# INLINE ifailing_ #-}
 
 ----------------------------------------
 -- Special folds
