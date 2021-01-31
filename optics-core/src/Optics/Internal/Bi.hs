@@ -21,9 +21,6 @@ instance Bifunctor Tagged where
   bimap  _f g = Tagged #. g .# unTagged
   first  _f   = coerce
   second    g = Tagged #. g .# unTagged
-  {-# INLINE bimap #-}
-  {-# INLINE first #-}
-  {-# INLINE second #-}
 
 -- | Class for contravariant bifunctors.
 class Bicontravariant p where
@@ -35,33 +32,21 @@ instance Bicontravariant (Forget r) where
   contrabimap  f _g (Forget k) = Forget (k . f)
   contrafirst  f    (Forget k) = Forget (k . f)
   contrasecond   _g (Forget k) = Forget k
-  {-# INLINE contrabimap #-}
-  {-# INLINE contrafirst #-}
-  {-# INLINE contrasecond #-}
 
 instance Bicontravariant (ForgetM r) where
   contrabimap  f _g (ForgetM k) = ForgetM (k . f)
   contrafirst  f    (ForgetM k) = ForgetM (k . f)
   contrasecond   _g (ForgetM k) = ForgetM k
-  {-# INLINE contrabimap #-}
-  {-# INLINE contrafirst #-}
-  {-# INLINE contrasecond #-}
 
 instance Bicontravariant (IxForget r) where
   contrabimap  f _g (IxForget k) = IxForget (\i -> k i . f)
   contrafirst  f    (IxForget k) = IxForget (\i -> k i . f)
   contrasecond   _g (IxForget k) = IxForget k
-  {-# INLINE contrabimap #-}
-  {-# INLINE contrafirst #-}
-  {-# INLINE contrasecond #-}
 
 instance Bicontravariant (IxForgetM r) where
   contrabimap  f _g (IxForgetM k) = IxForgetM (\i -> k i . f)
   contrafirst  f    (IxForgetM k) = IxForgetM (\i -> k i . f)
   contrasecond   _g (IxForgetM k) = IxForgetM k
-  {-# INLINE contrabimap #-}
-  {-# INLINE contrafirst #-}
-  {-# INLINE contrasecond #-}
 
 ----------------------------------------
 
@@ -69,10 +54,8 @@ instance Bicontravariant (IxForgetM r) where
 -- phantom.
 lphantom :: (Profunctor p, Bifunctor p) => p i a c -> p i b c
 lphantom = first absurd . lmap absurd
-{-# INLINE lphantom #-}
 
 -- | If @p@ is a 'Profunctor' and 'Bicontravariant' then its right parameter
 -- must be phantom.
 rphantom :: (Profunctor p, Bicontravariant p) => p i c a -> p i c b
 rphantom = rmap absurd . contrasecond absurd
-{-# INLINE rphantom #-}

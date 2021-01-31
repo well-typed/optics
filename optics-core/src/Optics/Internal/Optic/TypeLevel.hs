@@ -89,11 +89,9 @@ class CurryCompose xs where
 
 instance CurryCompose '[] where
   composeN = id
-  {-# INLINE composeN #-}
 
 instance CurryCompose xs => CurryCompose (x ': xs) where
   composeN ij f = composeN @xs ij . f
-  {-# INLINE composeN #-}
 
 ----------------------------------------
 -- Indices

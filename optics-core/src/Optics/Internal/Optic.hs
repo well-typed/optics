@@ -107,7 +107,6 @@ castOptic (Optic o) = Optic (cast o)
       .  Optic_ srcKind  p i (Curry is i) s t a b
       -> Optic_ destKind p i (Curry is i) s t a b
     cast x = implies @srcKind @destKind @p x
-{-# INLINE castOptic #-}
 
 -- | Compose two optics of compatible flavours.
 --
@@ -136,7 +135,6 @@ Optic o %% Optic o' = Optic oo
   where
     oo :: forall p i. (Profunctor p, Constraints k p) => Optic__ p i (Curry ks i) s t a b
     oo | Refl <- appendIndices @is @js @i = o . o'
-{-# INLINE (%%) #-}
 
 -- | Flipped function application, specialised to optics and binding tightly.
 --
@@ -150,7 +148,6 @@ infixl 9 %&
      -> (Optic k is s t a b -> Optic l js s' t' a' b')
      -> Optic l js s' t' a' b'
 (%&) = (&)
-{-# INLINE (%&) #-}
 
 -- $setup
 -- >>> import Optics.Core
