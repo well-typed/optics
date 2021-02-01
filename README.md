@@ -1,6 +1,6 @@
 # optics
 
-[![Build Status](https://travis-ci.org/well-typed/optics.svg?branch=master)](https://travis-ci.org/well-typed/optics)
+[![Build Status](https://github.com/well-typed/optics/workflows/Haskell-CI/badge.svg?branch=master)](https://github.com/well-typed/optics/actions?query=branch%3Amaster)
 [![Hackage](https://img.shields.io/hackage/v/optics.svg)](https://hackage.haskell.org/package/optics)
 [![Dependencies](https://img.shields.io/hackage-deps/v/optics.svg)](https://packdeps.haskellers.com/feed?needle=optics@well-typed.com)
 [![Stackage LTS](https://www.stackage.org/package/optics/badge/lts)](https://www.stackage.org/lts/package/optics)
