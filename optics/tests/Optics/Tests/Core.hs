@@ -66,8 +66,8 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs09)
   , testCase "itraverseOf_ itraversed = itraverseOf_ ifolded" $
-    -- GHC >= 8.2 && =< 8.6 gives different order of let bindings
-    ghc82to86failure $(inspectTest $ 'lhs10 === 'rhs10)
+    -- GHC 8.2 gives a different order of let bindings
+    ghc82failure $(inspectTest $ 'lhs10 === 'rhs10)
   , testCase "optimized lhs10a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs10a)
   , testCase "optimized rhs10a" $

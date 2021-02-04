@@ -61,6 +61,7 @@ module Optics.Optic
   , NoIx
   , WithIx
   , Append
+  , AppendIndices
   , NonEmptyIndices
   , HasSingleIndex
   , AcceptsEmptyIndices
