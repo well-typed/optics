@@ -32,8 +32,8 @@ etaTests = testGroup "Eta expansion"
   , testCase "optimized eta5lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta5lhs)
   , testCase "itraverseOf_ ifolded = \\f -> itraverseOf_ ifolded f" $
-    -- See the definition of itraverseOf_ for details.
-    ghc82failure $(inspectTest $ 'eta6lhs === 'eta6rhs)
+    -- The lhs has more lets which the rhs inlines.
+    ghc82and90failure $(inspectTest $ 'eta6lhs === 'eta6rhs)
   , testCase "optimized eta6lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta6lhs)
   , testCase "over mapped = \\f -> over mapped f" $

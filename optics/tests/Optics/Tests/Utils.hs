@@ -95,3 +95,17 @@ ghcLE84failure = assertFailure'
 #else
 ghcLE84failure = assertSuccess
 #endif
+
+ghc82and90failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 802 || __GLASGOW_HASKELL__ == 900
+ghc82and90failure = assertFailure'
+#else
+ghc82and90failure = assertSuccess
+#endif
+
+ghc90failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 900
+ghc90failure = assertFailure'
+#else
+ghc90failure = assertSuccess
+#endif
