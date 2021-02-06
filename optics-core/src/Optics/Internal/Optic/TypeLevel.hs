@@ -105,23 +105,20 @@ data IxEq i is js where
 -- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
 --    where f = (->)
 -- @
-class AppendIndices xs ys where
-  appendIndices :: IxEq i (Curry xs (Curry ys i)) (Curry (Append xs ys) i)
+class AppendIndices xs ys ks | xs ys -> ks where
+  appendIndices :: IxEq i (Curry xs (Curry ys i)) (Curry ks i)
 
 -- | If we know the second list is empty, we can pick the first list without
 -- knowing anything about it, hence the instance is marked as INCOHERENT.
-instance {-# INCOHERENT #-} AppendIndices xs '[] where
+instance {-# INCOHERENT #-} AppendIndices xs '[] xs where
   appendIndices = IxEq
 
-instance AppendIndices '[] ys where
+instance AppendIndices '[] ys ys where
   appendIndices = IxEq
 
-instance
-  (Append (x ': xs) ys ~ (x ': Append xs ys), AppendIndices xs ys
-  ) => AppendIndices (x ': xs) ys where
-  appendIndices :: forall i. IxEq i (Curry (x ': xs) (Curry ys i))
-                                    (Curry (x ': Append xs ys) i)
-  appendIndices | IxEq <- appendIndices @xs @ys @i = IxEq
+instance AppendIndices xs ys ks => AppendIndices (x ': xs) ys (x ': ks) where
+  appendIndices :: forall i. IxEq i (Curry (x ': xs) (Curry ys i)) (Curry (x ': ks) i)
+  appendIndices | IxEq <- appendIndices @xs @ys @ks @i = IxEq
 
 ----------------------------------------
 -- Either
