@@ -108,8 +108,8 @@ data IxEq i is js where
 class AppendIndices xs ys ks | xs ys -> ks where
   appendIndices :: IxEq i (Curry xs (Curry ys i)) (Curry ks i)
 
--- | If we know the second list is empty, we can pick the first list without
--- knowing anything about it, hence the instance is marked as INCOHERENT.
+-- | If the second list is empty, we can shortcircuit and pick the first list
+-- immediately.
 instance {-# INCOHERENT #-} AppendIndices xs '[] xs where
   appendIndices = IxEq
 
