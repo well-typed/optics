@@ -7,6 +7,7 @@ import Test.Tasty.HUnit
 import Test.Inspection
 import qualified GHC.Generics as G
 
+import Optics.Internal.Optic
 import qualified Data.Profunctor.Indexed as P
 
 hasNoProfunctors :: Name -> Obligation
@@ -34,6 +35,14 @@ hasNoProfunctors name = mkObligation name $ NoUseOf
   , 'P.iwander
   , 'P.roam
   , 'P.iroam
+  , 'appendIndices
+  , 'composeN
+  ]
+
+hasNoIndexClasses :: Name -> Obligation
+hasNoIndexClasses name = mkObligation name $ NoUseOf
+  [ 'appendIndices
+  , 'composeN
   ]
 
 -- | 'hasNoGenerics' from 'Test.Inspection' checks for lack of data types, but
@@ -85,4 +94,18 @@ ghcLE84failure :: Result -> IO ()
 ghcLE84failure = assertFailure'
 #else
 ghcLE84failure = assertSuccess
+#endif
+
+ghc82and90failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 802 || __GLASGOW_HASKELL__ == 900
+ghc82and90failure = assertFailure'
+#else
+ghc82and90failure = assertSuccess
+#endif
+
+ghc90failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 900
+ghc90failure = assertFailure'
+#else
+ghc90failure = assertSuccess
 #endif

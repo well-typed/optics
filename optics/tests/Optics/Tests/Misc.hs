@@ -39,6 +39,8 @@ miscTests = testGroup "Miscellaneous"
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkGplate)
   , testCase "optimized gplate (generics)" $
     assertSuccess $(inspectTest $ hasNoGenericRep 'checkGplate)
+  , testCase "optimized icomposeN/appendIndices" $
+    assertSuccess $ $(inspectTest $ hasNoIndexClasses 'checkNoIndexFunctions)
   ]
 
 simpleMapIx
@@ -92,3 +94,18 @@ checkGplate
   :: (Char, ([Either Char ()], Char, Maybe Char), [Char], Either Char Int)
   -> [Char]
 checkGplate = toListOf gplate
+
+checkNoIndexFunctions
+  :: ( TraversableWithIndex i1 f1, TraversableWithIndex i2 f2
+     , TraversableWithIndex i3 f3, TraversableWithIndex i4 f4
+     , TraversableWithIndex i5 f5, TraversableWithIndex i6 f6
+     , TraversableWithIndex i7 f7, TraversableWithIndex i8 f8
+     ) => Optic A_Traversal
+                (WithIx (i1, i2, i3, i4, i5, i6, i7, i8))
+                (f1 (f2 (f3 (f4 (f5 (f6 (f7 (f8 a))))))))
+                (f1 (f2 (f3 (f4 (f5 (f6 (f7 (f8 b))))))))
+                a
+                b
+checkNoIndexFunctions
+  = icomposeN (,,,,,,,) $ (((itraversed % itraversed) % itraversed) % itraversed)
+                        % (itraversed % (itraversed % (itraversed % itraversed)))

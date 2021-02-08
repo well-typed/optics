@@ -30,7 +30,6 @@ module Optics.Internal.Optic
   ) where
 
 import Data.Function ((&))
-import Data.Type.Equality
 
 import Data.Profunctor.Indexed
 
@@ -114,7 +113,7 @@ castOptic (Optic o) = Optic (cast o)
 -- indexed, the composition preserves all the indices.
 --
 infixl 9 %
-(%) :: (Is k m, Is l m, m ~ Join k l, ks ~ Append is js)
+(%) :: (Is k m, Is l m, m ~ Join k l, AppendIndices is js ks)
     => Optic k is s t u v
     -> Optic l js u v a b
     -> Optic m ks s t a b
@@ -127,14 +126,14 @@ o % o' = castOptic o %% castOptic o'
 -- type inference if the type of one of the optics is otherwise
 -- under-constrained.
 infixl 9 %%
-(%%) :: forall k is js ks s t u v a b. ks ~ Append is js
+(%%) :: forall k is js ks s t u v a b. AppendIndices is js ks
      => Optic k is s t u v
      -> Optic k js u v a b
      -> Optic k ks s t a b
 Optic o %% Optic o' = Optic oo
   where
     oo :: forall p i. (Profunctor p, Constraints k p) => Optic__ p i (Curry ks i) s t a b
-    oo | Refl <- appendIndices @is @js @i = o . o'
+    oo | IxEq <- appendIndices @is @js @ks @i = o . o'
 
 -- | Flipped function application, specialised to optics and binding tightly.
 --

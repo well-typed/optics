@@ -9,9 +9,7 @@
 module Optics.Internal.Optic.TypeLevel where
 
 import Data.Kind
-import Data.Type.Equality
 import GHC.TypeLits
-import Unsafe.Coerce
 
 -- | A list of index types, used for indexed optics.
 --
@@ -96,37 +94,31 @@ instance CurryCompose xs => CurryCompose (x ': xs) where
 ----------------------------------------
 -- Indices
 
+-- | Tagged version of 'Data.Type.Equality.(:~:)' for carrying evidence that two
+-- index lists in a curried form are equal.
+data IxEq i is js where
+  IxEq :: IxEq i is is
+
 -- | In pseudo (dependent-)Haskell, provide a witness
 --
 -- @
 -- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
 --    where f = (->)
 -- @
-class AppendIndices xs ys where
-  appendIndices__ :: proxy i -> Curry xs (Curry ys i) :~: Curry (Append xs ys) i
+class AppendIndices xs ys ks | xs ys -> ks where
+  appendIndices :: IxEq i (Curry xs (Curry ys i)) (Curry ks i)
 
--- | If we know the second list is empty, we can pick the first list without
--- knowing anything about it, hence the instance is marked as INCOHERENT.
-instance {-# INCOHERENT #-} AppendIndices xs '[] where
-  appendIndices__ _ = Refl
+-- | If the second list is empty, we can shortcircuit and pick the first list
+-- immediately.
+instance {-# INCOHERENT #-} AppendIndices xs '[] xs where
+  appendIndices = IxEq
 
-instance AppendIndices '[] ys where
-  appendIndices__ _ = Refl
+instance AppendIndices '[] ys ys where
+  appendIndices = IxEq
 
-instance
-  (Append (x ': xs) ys ~ (x ': Append xs ys), AppendIndices xs ys
-  ) => AppendIndices (x ': xs) ys where
-  appendIndices__ i | Refl <- appendIndices__ @xs @ys i = Refl
-
-appendIndices :: forall xs ys i. Curry xs (Curry ys i) :~: Curry (Append xs ys) i
-appendIndices = unsafeCoerce Refl
--- Note: below is the proper definition, but it requires @AppendIndices xs ys@
--- in the context. We don't want to propagate that constraint down into (%) and
--- force users to experience it since it's about internal details, so we trick
--- the compiler with unsafeCoerce that we always have the proof (which we do,
--- but GHC can't see it and would want to compute it itself).
---
--- appendIndices = appendIndices__ @xs @ys (Proxy @i)
+instance AppendIndices xs ys ks => AppendIndices (x ': xs) ys (x ': ks) where
+  appendIndices :: forall i. IxEq i (Curry (x ': xs) (Curry ys i)) (Curry (x ': ks) i)
+  appendIndices | IxEq <- appendIndices @xs @ys @ks @i = IxEq
 
 ----------------------------------------
 -- Either
