@@ -3,10 +3,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Optics.Tests.Labels.Generic where
 
@@ -20,7 +23,7 @@ import Optics
 import Optics.Tests.Utils
 
 data Mammal
-  = Dog { name :: String, age :: Int, lazy :: Bool }
+  = Dog { name :: String, age :: Int }
   | Cat { name :: String, age :: Int, lazy :: Bool }
   deriving (Show, Generic)
 
@@ -51,7 +54,8 @@ genericLabelsTests = testGroup "Labels via Generic"
   , testCase "set (#fish % #name) b s = s { fish = ... }" $
     assertSuccess $(inspectTest $ 'label4lhs ==- 'label4rhs)
   , testCase "set (#pets % traversed % #name) b s = s { pets = ... }" $
-    assertSuccess $(inspectTest $ 'label5lhs ==- 'label5rhs)
+    -- GHC 8.2 is the same modulo a case expression structure
+    ghc82failure $(inspectTest $ 'label5lhs ==- 'label5rhs)
   , testCase "multiple set with labels = multiple set with record syntax" $
     assertSuccess $(inspectTest $ 'label6lhs ==- 'label6rhs)
   , testCase "optimized petNames (generics)" $
@@ -89,8 +93,11 @@ label4lhs s b = set (#fish % #name) b s
 label4rhs s b = s { fish = (fish s) { name = b } }
 
 label5lhs, label5rhs :: Human Mammal -> Bool -> Human Mammal
-label5lhs s b = set (#pets % traversed % #lazy) b s
-label5rhs s b = s { pets = map (\p -> p { lazy = b }) (pets s) }
+label5lhs s b = set (#pets % traversed % gafield @"lazy") b s
+label5rhs s b = s { pets = (`map` pets s) $ \case
+                      Dog name age   -> Dog{..}
+                      Cat name age _ -> Cat { lazy = b, .. }
+                  }
 
 label6lhs, label6rhs :: Human a -> String -> Int -> String -> [b] -> Human b
 label6lhs = label6setter
@@ -131,7 +138,7 @@ human = Human
   { name = "Andrzej"
   , age = 30
   , fish = GoldFish "Goldie"
-  , pets = [Dog "Rocky" 3 False, Cat "Pickle" 4 True, Cat "Max" 1 False]
+  , pets = [Dog "Rocky" 3, Cat "Pickle" 4 True, Cat "Max" 1 False]
   }
 
 petNames :: [String]
@@ -149,7 +156,7 @@ howManyGoldFish :: Int
 howManyGoldFish = lengthOf (#pets % folded % #_GoldFish) humanWithFish
 
 hasLazyPets :: Bool
-hasLazyPets = orOf (#pets % folded % #lazy) human
+hasLazyPets = orOf (#pets % folded % gafield @"lazy") human
 
 yearLater :: Human Mammal
 yearLater = human & #age %~ (+1)

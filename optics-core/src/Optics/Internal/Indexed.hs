@@ -110,15 +110,12 @@ newtype Indexing f a = Indexing { runIndexing :: Int -> IntT f a }
 instance Functor f => Functor (Indexing f) where
   fmap f (Indexing m) = Indexing $ \i -> case m i of
     IntT j x -> IntT j (fmap f x)
-  {-# INLINE fmap #-}
 
 instance Applicative f => Applicative (Indexing f) where
   pure x = Indexing $ \i -> IntT i (pure x)
-  {-# INLINE pure #-}
   Indexing mf <*> Indexing ma = Indexing $ \i -> case mf i of
     IntT j ff -> case ma j of
        IntT k fa -> IntT k (ff <*> fa)
-  {-# INLINE (<*>) #-}
 
 -- | Index a traversal by position of visited elements.
 indexing
@@ -126,7 +123,6 @@ indexing
   -> ((Int -> a -> f b) -> s -> f t)
 indexing l iafb s =
   unIntT $ runIndexing (l (\a -> Indexing (\i -> IntT (i + 1) (iafb i a))) s) 0
-{-# INLINE indexing #-}
 
 ----------------------------------------
 
@@ -142,4 +138,3 @@ conjoined
   -> Optic k is   s t a b
   -> Optic k is   s t a b
 conjoined (Optic f) (Optic g) = Optic (conjoined__ f g)
-{-# INLINE conjoined #-}

@@ -31,24 +31,17 @@ data Identity' a = Identity' {-# UNPACK #-} !() a
 
 instance Applicative Identity' where
   pure a = Identity' () a
-  {-# INLINE pure #-}
   Identity' () f <*> Identity' () x = Identity' () (f x)
-  {-# INLINE (<*>) #-}
 
 instance Mapping (Star Identity') where
   roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
   iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
-  {-# INLINE roam #-}
-  {-# INLINE iroam #-}
 
 instance Mapping (IxStar Identity') where
   roam  f (IxStar k) =
     IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
   iroam f (IxStar k) =
     IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
-  {-# INLINE roam #-}
-  {-# INLINE iroam #-}
-
 
 -- | Mark a value for evaluation to whnf.
 --
@@ -59,11 +52,9 @@ instance Mapping (IxStar Identity') where
 --
 wrapIdentity' :: a -> Identity' a
 wrapIdentity' a = Identity' (a `seq` ()) a
-{-# INLINE wrapIdentity' #-}
 
 unwrapIdentity' :: Identity' a -> a
 unwrapIdentity' (Identity' () a) = a
-{-# INLINE unwrapIdentity' #-}
 
 ----------------------------------------
 
@@ -75,17 +66,13 @@ newtype Traversed f a = Traversed (f a)
 
 runTraversed :: Functor f => Traversed f a -> f ()
 runTraversed (Traversed fa) = () <$ fa
-{-# INLINE runTraversed #-}
 
 instance Applicative f => SG.Semigroup (Traversed f a) where
   Traversed ma <> Traversed mb = Traversed (ma *> mb)
-  {-# INLINE (<>) #-}
 
 instance Applicative f => Monoid (Traversed f a) where
   mempty = Traversed (pure (error "Traversed: value used"))
   mappend = (SG.<>)
-  {-# INLINE mempty #-}
-  {-# INLINE mappend #-}
 
 ----------------------------------------
 
@@ -96,18 +83,14 @@ data OrT f a = OrT !Bool (f a)
 instance Applicative f => Applicative (OrT f) where
   pure = OrT False . pure
   OrT a f <*> OrT b x = OrT (a || b) (f <*> x)
-  {-# INLINE pure #-}
-  {-# INLINE (<*>) #-}
 
 -- | Wrap the applicative action in 'OrT' so that we know later that it was
 -- executed.
 wrapOrT :: f a -> OrT f a
 wrapOrT = OrT True
-{-# INLINE wrapOrT #-}
 
 -- | 'uncurry' with no lazy pattern matching for more efficient code.
 --
 -- @since 0.3
 uncurry' :: (a -> b -> c) -> (a, b) -> c
 uncurry' f (a, b) = f a b
-{-# INLINE uncurry' #-}

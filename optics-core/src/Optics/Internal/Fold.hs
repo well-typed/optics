@@ -64,8 +64,6 @@ instance SG.Semigroup (Leftmost a) where
 instance Monoid (Leftmost a) where
   mempty  = LPure
   mappend = (SG.<>)
-  {-# INLINE mempty #-}
-  {-# INLINE mappend #-}
 
 -- | Extract the 'Leftmost' element. This will fairly eagerly determine that it
 -- can return 'Just' the moment it sees any element at all.
@@ -98,8 +96,6 @@ instance SG.Semigroup (Rightmost a) where
 instance Monoid (Rightmost a) where
   mempty  = RPure
   mappend = (SG.<>)
-  {-# INLINE mempty #-}
-  {-# INLINE mappend #-}
 
 -- | Extract the 'Rightmost' element. This will fairly eagerly determine that it
 -- can return 'Just' the moment it sees any element at all.
