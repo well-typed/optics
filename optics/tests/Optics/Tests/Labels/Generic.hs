@@ -113,14 +113,13 @@ label6rhs s name_ age_ fishName_ pets_ = s
 -- | Check that the setter compiles in full generality.
 label6setter
   :: ( Is k1 A_Setter
+     , Is k2 A_Setter
      , Is k3 A_Setter
      , Is k4 A_Setter
-     , Is l (Join k2 l)
-     , Is k2 (Join k2 l)
-     , Is (Join k2 l) A_Setter
+     , JoinKinds k5 l k4
      , LabelOptic "_GoldFish" l u v a1 b1
-     , LabelOptic "age" k4 s1 s2 a2 b2
-     , LabelOptic "fish" k2 s2 s3 u v
+     , LabelOptic "age" k2 s1 s2 a2 b2
+     , LabelOptic "fish" k5 s2 s3 u v
      , LabelOptic "name" k3 s4 s1 a3 b3
      , LabelOptic "pets" k1 s3 b4 a4 b5
      ) => s4 -> b3 -> b2 -> b1 -> b5 -> b4

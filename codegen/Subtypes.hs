@@ -97,7 +97,9 @@ genJoin = either (fail . show) id $ runG opticsKind $ \g -> do
     for_ gVertices $ \a -> do
         let k = gFromVertex a
         putStrLn   ""
-        putStrLn $ "  -- " ++ show k ++ "-----"
+        putStrLn $ "-- " ++ show k ++ " -----"
+
+        putStrLn $ joinInstance k k k
 
         for_ gVertices $ \b -> unless (a == b) $ do
             let l = gFromVertex b
@@ -114,16 +116,23 @@ genJoin = either (fail . show) id $ runG opticsKind $ \g -> do
 
             case mkl of
                 -- alignment is important, thus padding
-                []          -> putStrLn $ "  -- no Join with         " ++ show l
-                kls@(_:_:_) -> putStrLn $ "  -- error: multiple joins: " ++ show (map gFromVertex kls)
-                [kl]        -> do
-                  putStrLn $ unwords
-                    [ "  Join"
-                    , leftpad (show k)
-                    , leftpad (show l)
-                    , "="
-                    , show (gFromVertex kl)
-                    ]
+                []          -> putStrLn $ unwords
+                  [ "--    no JoinKinds"
+                  , leftpad (show k)
+                  , leftpad (show l)
+                  ]
+                kls@(_:_:_) -> putStrLn $ "-- error: multiple joins: "
+                                       ++ show (map gFromVertex kls)
+                [kl]        -> putStrLn . joinInstance k l $ gFromVertex kl
+  where
+    joinInstance k l m = unwords
+      [ "instance JoinKinds"
+      , leftpad $ show k
+      , leftpad $ show l
+      , leftpad $ show m
+      , "where\n  joinKinds r = r"
+      ]
+
 
 -------------------------------------------------------------------------------
 -- subtypes

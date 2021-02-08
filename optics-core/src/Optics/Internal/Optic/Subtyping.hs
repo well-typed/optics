@@ -147,174 +147,291 @@ instance Is A_Traversal        A_Setter           where implies r = r
 
 -- | Computes the least upper bound of two optics kinds.
 --
--- @Join k l@ represents the least upper bound of an @Optic k@ and an @Optic
--- l@. This means in particular that composition of an @Optic k@ and an @Optic
--- k@ will yield an @Optic (Join k l)@.
+-- In presence of a @JoinKinds k l m@ constraint @Optic m@ represents the least
+-- upper bound of an @Optic k@ and an @Optic l@. This means in particular that
+-- composition of an @Optic k@ and an @Optic k@ will yield an @Optic m@.
 --
-type family Join (k :: OpticKind) (l :: OpticKind) where
-  -- BEGIN GENERATED CONTENT
-  -- An_Iso-----
-  Join An_Iso             A_ReversedLens     = A_ReversedLens
-  Join An_Iso             A_ReversedPrism    = A_ReversedPrism
-  Join An_Iso             A_Prism            = A_Prism
-  Join An_Iso             A_Review           = A_Review
-  Join An_Iso             A_Lens             = A_Lens
-  Join An_Iso             A_Getter           = A_Getter
-  Join An_Iso             An_AffineTraversal = An_AffineTraversal
-  Join An_Iso             An_AffineFold      = An_AffineFold
-  Join An_Iso             A_Traversal        = A_Traversal
-  Join An_Iso             A_Fold             = A_Fold
-  Join An_Iso             A_Setter           = A_Setter
+class JoinKinds k l m | k l -> m where
+  joinKinds :: ((Constraints k p, Constraints l p) => r) -> (Constraints m p => r)
 
-  -- A_ReversedLens-----
-  Join A_ReversedLens     An_Iso             = A_ReversedLens
-  -- no Join with         A_ReversedPrism
-  Join A_ReversedLens     A_Prism            = A_Review
-  Join A_ReversedLens     A_Review           = A_Review
-  -- no Join with         A_Lens
-  -- no Join with         A_Getter
-  -- no Join with         An_AffineTraversal
-  -- no Join with         An_AffineFold
-  -- no Join with         A_Traversal
-  -- no Join with         A_Fold
-  -- no Join with         A_Setter
+-- BEGIN GENERATED CONTENT
 
-  -- A_ReversedPrism-----
-  Join A_ReversedPrism    An_Iso             = A_ReversedPrism
-  -- no Join with         A_ReversedLens
-  Join A_ReversedPrism    A_Prism            = An_AffineFold
-  -- no Join with         A_Review
-  Join A_ReversedPrism    A_Lens             = A_Getter
-  Join A_ReversedPrism    A_Getter           = A_Getter
-  Join A_ReversedPrism    An_AffineTraversal = An_AffineFold
-  Join A_ReversedPrism    An_AffineFold      = An_AffineFold
-  Join A_ReversedPrism    A_Traversal        = A_Fold
-  Join A_ReversedPrism    A_Fold             = A_Fold
-  -- no Join with         A_Setter
+-- An_Iso -----
+instance JoinKinds An_Iso             An_Iso             An_Iso             where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_ReversedLens     A_ReversedLens     where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_ReversedPrism    A_ReversedPrism    where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Prism            A_Prism            where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Review           A_Review           where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Lens             A_Lens             where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Getter           A_Getter           where
+  joinKinds r = r
+instance JoinKinds An_Iso             An_AffineTraversal An_AffineTraversal where
+  joinKinds r = r
+instance JoinKinds An_Iso             An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Traversal        A_Traversal        where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Fold             A_Fold             where
+  joinKinds r = r
+instance JoinKinds An_Iso             A_Setter           A_Setter           where
+  joinKinds r = r
 
-  -- A_Prism-----
-  Join A_Prism            An_Iso             = A_Prism
-  Join A_Prism            A_ReversedLens     = A_Review
-  Join A_Prism            A_ReversedPrism    = An_AffineFold
-  Join A_Prism            A_Review           = A_Review
-  Join A_Prism            A_Lens             = An_AffineTraversal
-  Join A_Prism            A_Getter           = An_AffineFold
-  Join A_Prism            An_AffineTraversal = An_AffineTraversal
-  Join A_Prism            An_AffineFold      = An_AffineFold
-  Join A_Prism            A_Traversal        = A_Traversal
-  Join A_Prism            A_Fold             = A_Fold
-  Join A_Prism            A_Setter           = A_Setter
+-- A_ReversedLens -----
+instance JoinKinds A_ReversedLens     A_ReversedLens     A_ReversedLens     where
+  joinKinds r = r
+instance JoinKinds A_ReversedLens     An_Iso             A_ReversedLens     where
+  joinKinds r = r
+--    no JoinKinds A_ReversedLens     A_ReversedPrism
+instance JoinKinds A_ReversedLens     A_Prism            A_Review           where
+  joinKinds r = r
+instance JoinKinds A_ReversedLens     A_Review           A_Review           where
+  joinKinds r = r
+--    no JoinKinds A_ReversedLens     A_Lens
+--    no JoinKinds A_ReversedLens     A_Getter
+--    no JoinKinds A_ReversedLens     An_AffineTraversal
+--    no JoinKinds A_ReversedLens     An_AffineFold
+--    no JoinKinds A_ReversedLens     A_Traversal
+--    no JoinKinds A_ReversedLens     A_Fold
+--    no JoinKinds A_ReversedLens     A_Setter
 
-  -- A_Review-----
-  Join A_Review           An_Iso             = A_Review
-  Join A_Review           A_ReversedLens     = A_Review
-  -- no Join with         A_ReversedPrism
-  Join A_Review           A_Prism            = A_Review
-  -- no Join with         A_Lens
-  -- no Join with         A_Getter
-  -- no Join with         An_AffineTraversal
-  -- no Join with         An_AffineFold
-  -- no Join with         A_Traversal
-  -- no Join with         A_Fold
-  -- no Join with         A_Setter
+-- A_ReversedPrism -----
+instance JoinKinds A_ReversedPrism    A_ReversedPrism    A_ReversedPrism    where
+  joinKinds r = r
+instance JoinKinds A_ReversedPrism    An_Iso             A_ReversedPrism    where
+  joinKinds r = r
+--    no JoinKinds A_ReversedPrism    A_ReversedLens
+instance JoinKinds A_ReversedPrism    A_Prism            An_AffineFold      where
+  joinKinds r = r
+--    no JoinKinds A_ReversedPrism    A_Review
+instance JoinKinds A_ReversedPrism    A_Lens             A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_ReversedPrism    A_Getter           A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_ReversedPrism    An_AffineTraversal An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_ReversedPrism    An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_ReversedPrism    A_Traversal        A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_ReversedPrism    A_Fold             A_Fold             where
+  joinKinds r = r
+--    no JoinKinds A_ReversedPrism    A_Setter
 
-  -- A_Lens-----
-  Join A_Lens             An_Iso             = A_Lens
-  -- no Join with         A_ReversedLens
-  Join A_Lens             A_ReversedPrism    = A_Getter
-  Join A_Lens             A_Prism            = An_AffineTraversal
-  -- no Join with         A_Review
-  Join A_Lens             A_Getter           = A_Getter
-  Join A_Lens             An_AffineTraversal = An_AffineTraversal
-  Join A_Lens             An_AffineFold      = An_AffineFold
-  Join A_Lens             A_Traversal        = A_Traversal
-  Join A_Lens             A_Fold             = A_Fold
-  Join A_Lens             A_Setter           = A_Setter
+-- A_Prism -----
+instance JoinKinds A_Prism            A_Prism            A_Prism            where
+  joinKinds r = r
+instance JoinKinds A_Prism            An_Iso             A_Prism            where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_ReversedLens     A_Review           where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_ReversedPrism    An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_Review           A_Review           where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_Lens             An_AffineTraversal where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_Getter           An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_Prism            An_AffineTraversal An_AffineTraversal where
+  joinKinds r = r
+instance JoinKinds A_Prism            An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_Traversal        A_Traversal        where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_Fold             A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Prism            A_Setter           A_Setter           where
+  joinKinds r = r
 
-  -- A_Getter-----
-  Join A_Getter           An_Iso             = A_Getter
-  -- no Join with         A_ReversedLens
-  Join A_Getter           A_ReversedPrism    = A_Getter
-  Join A_Getter           A_Prism            = An_AffineFold
-  -- no Join with         A_Review
-  Join A_Getter           A_Lens             = A_Getter
-  Join A_Getter           An_AffineTraversal = An_AffineFold
-  Join A_Getter           An_AffineFold      = An_AffineFold
-  Join A_Getter           A_Traversal        = A_Fold
-  Join A_Getter           A_Fold             = A_Fold
-  -- no Join with         A_Setter
+-- A_Review -----
+instance JoinKinds A_Review           A_Review           A_Review           where
+  joinKinds r = r
+instance JoinKinds A_Review           An_Iso             A_Review           where
+  joinKinds r = r
+instance JoinKinds A_Review           A_ReversedLens     A_Review           where
+  joinKinds r = r
+--    no JoinKinds A_Review           A_ReversedPrism
+instance JoinKinds A_Review           A_Prism            A_Review           where
+  joinKinds r = r
+--    no JoinKinds A_Review           A_Lens
+--    no JoinKinds A_Review           A_Getter
+--    no JoinKinds A_Review           An_AffineTraversal
+--    no JoinKinds A_Review           An_AffineFold
+--    no JoinKinds A_Review           A_Traversal
+--    no JoinKinds A_Review           A_Fold
+--    no JoinKinds A_Review           A_Setter
 
-  -- An_AffineTraversal-----
-  Join An_AffineTraversal An_Iso             = An_AffineTraversal
-  -- no Join with         A_ReversedLens
-  Join An_AffineTraversal A_ReversedPrism    = An_AffineFold
-  Join An_AffineTraversal A_Prism            = An_AffineTraversal
-  -- no Join with         A_Review
-  Join An_AffineTraversal A_Lens             = An_AffineTraversal
-  Join An_AffineTraversal A_Getter           = An_AffineFold
-  Join An_AffineTraversal An_AffineFold      = An_AffineFold
-  Join An_AffineTraversal A_Traversal        = A_Traversal
-  Join An_AffineTraversal A_Fold             = A_Fold
-  Join An_AffineTraversal A_Setter           = A_Setter
+-- A_Lens -----
+instance JoinKinds A_Lens             A_Lens             A_Lens             where
+  joinKinds r = r
+instance JoinKinds A_Lens             An_Iso             A_Lens             where
+  joinKinds r = r
+--    no JoinKinds A_Lens             A_ReversedLens
+instance JoinKinds A_Lens             A_ReversedPrism    A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_Lens             A_Prism            An_AffineTraversal where
+  joinKinds r = r
+--    no JoinKinds A_Lens             A_Review
+instance JoinKinds A_Lens             A_Getter           A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_Lens             An_AffineTraversal An_AffineTraversal where
+  joinKinds r = r
+instance JoinKinds A_Lens             An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_Lens             A_Traversal        A_Traversal        where
+  joinKinds r = r
+instance JoinKinds A_Lens             A_Fold             A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Lens             A_Setter           A_Setter           where
+  joinKinds r = r
 
-  -- An_AffineFold-----
-  Join An_AffineFold      An_Iso             = An_AffineFold
-  -- no Join with         A_ReversedLens
-  Join An_AffineFold      A_ReversedPrism    = An_AffineFold
-  Join An_AffineFold      A_Prism            = An_AffineFold
-  -- no Join with         A_Review
-  Join An_AffineFold      A_Lens             = An_AffineFold
-  Join An_AffineFold      A_Getter           = An_AffineFold
-  Join An_AffineFold      An_AffineTraversal = An_AffineFold
-  Join An_AffineFold      A_Traversal        = A_Fold
-  Join An_AffineFold      A_Fold             = A_Fold
-  -- no Join with         A_Setter
+-- A_Getter -----
+instance JoinKinds A_Getter           A_Getter           A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_Getter           An_Iso             A_Getter           where
+  joinKinds r = r
+--    no JoinKinds A_Getter           A_ReversedLens
+instance JoinKinds A_Getter           A_ReversedPrism    A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_Getter           A_Prism            An_AffineFold      where
+  joinKinds r = r
+--    no JoinKinds A_Getter           A_Review
+instance JoinKinds A_Getter           A_Lens             A_Getter           where
+  joinKinds r = r
+instance JoinKinds A_Getter           An_AffineTraversal An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_Getter           An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds A_Getter           A_Traversal        A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Getter           A_Fold             A_Fold             where
+  joinKinds r = r
+--    no JoinKinds A_Getter           A_Setter
 
-  -- A_Traversal-----
-  Join A_Traversal        An_Iso             = A_Traversal
-  -- no Join with         A_ReversedLens
-  Join A_Traversal        A_ReversedPrism    = A_Fold
-  Join A_Traversal        A_Prism            = A_Traversal
-  -- no Join with         A_Review
-  Join A_Traversal        A_Lens             = A_Traversal
-  Join A_Traversal        A_Getter           = A_Fold
-  Join A_Traversal        An_AffineTraversal = A_Traversal
-  Join A_Traversal        An_AffineFold      = A_Fold
-  Join A_Traversal        A_Fold             = A_Fold
-  Join A_Traversal        A_Setter           = A_Setter
+-- An_AffineTraversal -----
+instance JoinKinds An_AffineTraversal An_AffineTraversal An_AffineTraversal where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal An_Iso             An_AffineTraversal where
+  joinKinds r = r
+--    no JoinKinds An_AffineTraversal A_ReversedLens
+instance JoinKinds An_AffineTraversal A_ReversedPrism    An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal A_Prism            An_AffineTraversal where
+  joinKinds r = r
+--    no JoinKinds An_AffineTraversal A_Review
+instance JoinKinds An_AffineTraversal A_Lens             An_AffineTraversal where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal A_Getter           An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal A_Traversal        A_Traversal        where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal A_Fold             A_Fold             where
+  joinKinds r = r
+instance JoinKinds An_AffineTraversal A_Setter           A_Setter           where
+  joinKinds r = r
 
-  -- A_Fold-----
-  Join A_Fold             An_Iso             = A_Fold
-  -- no Join with         A_ReversedLens
-  Join A_Fold             A_ReversedPrism    = A_Fold
-  Join A_Fold             A_Prism            = A_Fold
-  -- no Join with         A_Review
-  Join A_Fold             A_Lens             = A_Fold
-  Join A_Fold             A_Getter           = A_Fold
-  Join A_Fold             An_AffineTraversal = A_Fold
-  Join A_Fold             An_AffineFold      = A_Fold
-  Join A_Fold             A_Traversal        = A_Fold
-  -- no Join with         A_Setter
+-- An_AffineFold -----
+instance JoinKinds An_AffineFold      An_AffineFold      An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineFold      An_Iso             An_AffineFold      where
+  joinKinds r = r
+--    no JoinKinds An_AffineFold      A_ReversedLens
+instance JoinKinds An_AffineFold      A_ReversedPrism    An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineFold      A_Prism            An_AffineFold      where
+  joinKinds r = r
+--    no JoinKinds An_AffineFold      A_Review
+instance JoinKinds An_AffineFold      A_Lens             An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineFold      A_Getter           An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineFold      An_AffineTraversal An_AffineFold      where
+  joinKinds r = r
+instance JoinKinds An_AffineFold      A_Traversal        A_Fold             where
+  joinKinds r = r
+instance JoinKinds An_AffineFold      A_Fold             A_Fold             where
+  joinKinds r = r
+--    no JoinKinds An_AffineFold      A_Setter
 
-  -- A_Setter-----
-  Join A_Setter           An_Iso             = A_Setter
-  -- no Join with         A_ReversedLens
-  -- no Join with         A_ReversedPrism
-  Join A_Setter           A_Prism            = A_Setter
-  -- no Join with         A_Review
-  Join A_Setter           A_Lens             = A_Setter
-  -- no Join with         A_Getter
-  Join A_Setter           An_AffineTraversal = A_Setter
-  -- no Join with         An_AffineFold
-  Join A_Setter           A_Traversal        = A_Setter
-  -- no Join with         A_Fold
+-- A_Traversal -----
+instance JoinKinds A_Traversal        A_Traversal        A_Traversal        where
+  joinKinds r = r
+instance JoinKinds A_Traversal        An_Iso             A_Traversal        where
+  joinKinds r = r
+--    no JoinKinds A_Traversal        A_ReversedLens
+instance JoinKinds A_Traversal        A_ReversedPrism    A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Traversal        A_Prism            A_Traversal        where
+  joinKinds r = r
+--    no JoinKinds A_Traversal        A_Review
+instance JoinKinds A_Traversal        A_Lens             A_Traversal        where
+  joinKinds r = r
+instance JoinKinds A_Traversal        A_Getter           A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Traversal        An_AffineTraversal A_Traversal        where
+  joinKinds r = r
+instance JoinKinds A_Traversal        An_AffineFold      A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Traversal        A_Fold             A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Traversal        A_Setter           A_Setter           where
+  joinKinds r = r
 
-  -- END GENERATED CONTENT
+-- A_Fold -----
+instance JoinKinds A_Fold             A_Fold             A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Fold             An_Iso             A_Fold             where
+  joinKinds r = r
+--    no JoinKinds A_Fold             A_ReversedLens
+instance JoinKinds A_Fold             A_ReversedPrism    A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Fold             A_Prism            A_Fold             where
+  joinKinds r = r
+--    no JoinKinds A_Fold             A_Review
+instance JoinKinds A_Fold             A_Lens             A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Fold             A_Getter           A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Fold             An_AffineTraversal A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Fold             An_AffineFold      A_Fold             where
+  joinKinds r = r
+instance JoinKinds A_Fold             A_Traversal        A_Fold             where
+  joinKinds r = r
+--    no JoinKinds A_Fold             A_Setter
 
-  -- Every optic kinds can be joined with itself.
-  Join k k = k
+-- A_Setter -----
+instance JoinKinds A_Setter           A_Setter           A_Setter           where
+  joinKinds r = r
+instance JoinKinds A_Setter           An_Iso             A_Setter           where
+  joinKinds r = r
+--    no JoinKinds A_Setter           A_ReversedLens
+--    no JoinKinds A_Setter           A_ReversedPrism
+instance JoinKinds A_Setter           A_Prism            A_Setter           where
+  joinKinds r = r
+--    no JoinKinds A_Setter           A_Review
+instance JoinKinds A_Setter           A_Lens             A_Setter           where
+  joinKinds r = r
+--    no JoinKinds A_Setter           A_Getter
+instance JoinKinds A_Setter           An_AffineTraversal A_Setter           where
+  joinKinds r = r
+--    no JoinKinds A_Setter           An_AffineFold
+instance JoinKinds A_Setter           A_Traversal        A_Setter           where
+  joinKinds r = r
+--    no JoinKinds A_Setter           A_Fold
 
-  -- Everything else is a type error.
-  Join k l = TypeError ('ShowType k
-                        ':<>: 'Text " cannot be composed with "
-                        ':<>: 'ShowType l)
+-- END GENERATED CONTENT
+
+instance {-# OVERLAPPABLE #-}
+  ( JoinKinds k l m
+  , TypeError ('ShowType k ':<>: 'Text " cannot be composed with " ':<>: 'ShowType l)
+  ) => JoinKinds k l m where
+  joinKinds _ = error "unreachable"
