@@ -31,7 +31,7 @@ module Optics.Optic
   -- * Subtyping
   , castOptic
   , Is
-  , Join
+  , JoinKinds
 
   -- * Composition
   -- | The usual operator for composing optics is ('%'), which allows different

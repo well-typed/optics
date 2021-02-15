@@ -532,17 +532,13 @@ import Data.Either.Optics                    as P
 -- computes the least upper bound given two optic kind tags.  For example the
 -- 'Join' of a 'Lens' and a 'Prism' is an 'AffineTraversal'.
 --
--- >>> :kind! Join A_Lens A_Prism
--- Join A_Lens A_Prism :: OpticKind
--- = An_AffineTraversal
+-- >>> let res :: JoinKinds A_Lens A_Prism k => Proxy k; res = Proxy
+-- >>> :t res
+-- res :: Proxy An_AffineTraversal
 --
 -- The join does not exist for some pairs of optic kinds, which means that they
 -- cannot be composed.  For example there is no optic kind above both 'Setter'
 -- and 'Fold':
---
--- >>> :kind! Join A_Setter A_Fold
--- Join A_Setter A_Fold :: OpticKind
--- = (TypeError ...)
 --
 -- >>> :t mapped % folded
 -- ...
@@ -999,9 +995,11 @@ import Data.Either.Optics                    as P
 -- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
 
 -- $setup
+-- >>> :set -XFlexibleContexts
 -- >>> import Control.Monad.Reader
 -- >>> import Control.Monad.State
 -- >>> import Data.Functor.Identity
+-- >>> import Data.Proxy
 -- >>> import qualified Data.IntSet as IntSet
 -- >>> import qualified Data.Map as Map
 -- >>> import Optics.State.Operators

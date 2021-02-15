@@ -75,8 +75,7 @@ import Optics.Traversal
 --
 infixl 9 <%>
 (<%>)
-  :: (m ~ Join k l, Is k m, Is l m, IxOptic m s t a b,
-      is `HasSingleIndex` i, js `HasSingleIndex` j)
+  :: (JoinKinds k l m, IxOptic m s t a b, is `HasSingleIndex` i, js `HasSingleIndex` j)
   => Optic k is              s t u v
   -> Optic l js              u v a b
   -> Optic m (WithIx (i, j)) s t a b
@@ -91,7 +90,7 @@ o <%> o' = icompose (,) (o % o')
 --
 infixl 9 %>
 (%>)
-  :: (m ~ Join k l, Is k m, Is l m, IxOptic k s t u v, NonEmptyIndices is)
+  :: (JoinKinds k l m, IxOptic k s t u v, NonEmptyIndices is)
   => Optic k is s t u v
   -> Optic l js u v a b
   -> Optic m js s t a b
@@ -106,7 +105,7 @@ o %> o' = noIx o % o'
 --
 infixl 9 <%
 (<%)
-  :: (m ~ Join k l, Is l m, Is k m, IxOptic l u v a b, NonEmptyIndices js)
+  :: (JoinKinds k l m, IxOptic l u v a b, NonEmptyIndices js)
   => Optic k is s t u v
   -> Optic l js u v a b
   -> Optic m is s t a b

@@ -113,12 +113,21 @@ castOptic (Optic o) = Optic (cast o)
 -- indexed, the composition preserves all the indices.
 --
 infixl 9 %
-(%) :: (Is k m, Is l m, m ~ Join k l, AppendIndices is js ks)
+(%) :: forall k l m is js ks s t u v a b. (JoinKinds k l m, AppendIndices is js ks)
     => Optic k is s t u v
     -> Optic l js u v a b
     -> Optic m ks s t a b
-o % o' = castOptic o %% castOptic o'
-{-# INLINE (%) #-}
+Optic k % Optic l = Optic m
+  where
+    km :: forall p i. Profunctor p => Optic_ m p i (Curry is i) s t u v
+    km = joinKinds @k @l @m @p k
+
+    lm :: forall p i. Profunctor p => Optic_ m p i (Curry js i) u v a b
+    lm = joinKinds @k @l @m @p l
+
+    m :: forall p i. (Profunctor p, Constraints m p)
+      => Optic__ p i (Curry ks i) s t a b
+    m | IxEq <- appendIndices @is @js @ks @i = km . lm
 
 -- | Compose two optics of the same flavour.
 --
@@ -132,7 +141,8 @@ infixl 9 %%
      -> Optic k ks s t a b
 Optic o %% Optic o' = Optic oo
   where
-    oo :: forall p i. (Profunctor p, Constraints k p) => Optic__ p i (Curry ks i) s t a b
+    oo :: forall p i. (Profunctor p, Constraints k p)
+       => Optic__ p i (Curry ks i) s t a b
     oo | IxEq <- appendIndices @is @js @ks @i = o . o'
 
 -- | Flipped function application, specialised to optics and binding tightly.
