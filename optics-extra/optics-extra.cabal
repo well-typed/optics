@@ -32,7 +32,7 @@ library
 
   build-depends: base                   >= 4.10      && <5
                , array                  >= 0.5.2.0   && <0.6
-               , bytestring             >= 0.10.8    && <0.11
+               , bytestring             >= 0.10.8    && <0.12
                , containers             >= 0.5.10.2  && <0.7
                , hashable               >= 1.1.1     && <1.4
                , indexed-profunctors    >= 0.1       && <0.2
