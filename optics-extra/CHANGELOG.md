@@ -1,4 +1,4 @@
-# optics-extra-0.4 (2020-mm-dd)
+# optics-extra-0.4 (2021-02-22)
 * Add support for GHC-9.0
 
 # optics-extra-0.3 (2020-04-15)

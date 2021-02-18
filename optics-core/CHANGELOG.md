@@ -1,17 +1,35 @@
-# optics-core-0.4 (2021-mm-dd)
+# optics-core-0.4 (2021-02-22)
 * See [migration-guide-0.4.md](https://github.com/well-typed/optics/blob/master/migration-guide-0.4.md) for more details
 * Add support for GHC-9.0
 * Drop support for GHC-8.0
 * The `FunctorWithIndex`, `FoldableWithIndex` and `TraversableWithIndex` type
   classes have been migrated to a new package,
   [`indexed-traversable`](https://hackage.haskell.org/package/indexed-traversable)
-* Add `adjoin`, `iadjoin` and `both` to `Optics.Traversal`
+  ([#370](https://github.com/well-typed/optics/pull/370))
+* Add `adjoin`, `iadjoin` and `both` to `Optics.[Ix]Traversal`
+  ([#332](https://github.com/well-typed/optics/pull/332),
+   [#372](https://github.com/well-typed/optics/pull/372))
+* Add `ifst` and `isnd` to `Optics.IxLens`
+  ([#389](https://github.com/well-typed/optics/pull/389))
 * Generalize types of `generic`
+  ([#376](https://github.com/well-typed/optics/pull/376))
 * Make `chosen` an indexed lens to see which value is traversed
+  ([#335](https://github.com/well-typed/optics/pull/335))
+* Remove `GeneralLabelOptic` extensibility mechanism
+  ([#361](https://github.com/well-typed/optics/pull/361))
 * Add `gfield`, `gafield`, `gconstructor`, `gposition` and `gplate` for
   generics-based data access
+  ([#358](https://github.com/well-typed/optics/pull/358),
+   [#361](https://github.com/well-typed/optics/pull/361))
 * Add support for generics-based field lenses and constructor prisms (`gfield`
   and `gconstructor`) to `LabelOptic` so they can be used via `OverloadedLabels`
+  ([#361](https://github.com/well-typed/optics/pull/361))
+* Remove unnecessary INLINE pragmas to reduce compile times
+  ([#394](https://github.com/well-typed/optics/pull/394))
+* Simplify the type of `(%)` using new `JoinKinds` and `AppendIndices` classes
+  in place of the `Join` and `Append` type families
+  ([#397](https://github.com/well-typed/optics/pull/397),
+   [#399](https://github.com/well-typed/optics/pull/399))
 
 # optics-core-0.3.0.1 (2020-08-05)
 * Add INLINE pragmas to `atraverseOf_`, `iaTraverseOf_` and `ignored`

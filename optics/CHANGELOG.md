@@ -1,3 +1,50 @@
+# optics-0.4 (2021-02-22)
+* See [migration-guide-0.4.md](https://github.com/well-typed/optics/blob/master/migration-guide-0.4.md) for more details
+* Add support for GHC-9.0
+* Drop support for GHC-8.0
+* The `FunctorWithIndex`, `FoldableWithIndex` and `TraversableWithIndex` type
+  classes have been migrated to a new package,
+  [`indexed-traversable`](https://hackage.haskell.org/package/indexed-traversable)
+  ([#370](https://github.com/well-typed/optics/pull/370))
+* Add `adjoin`, `iadjoin` and `both` to `Optics.[Ix]Traversal`
+  ([#332](https://github.com/well-typed/optics/pull/332),
+   [#372](https://github.com/well-typed/optics/pull/372))
+* Add `ifst` and `isnd` to `Optics.IxLens`
+  ([#389](https://github.com/well-typed/optics/pull/389))
+* Generalize types of `generic`
+  ([#376](https://github.com/well-typed/optics/pull/376))
+* Make `chosen` an indexed lens to see which value is traversed
+  ([#335](https://github.com/well-typed/optics/pull/335))
+* Remove `GeneralLabelOptic` extensibility mechanism
+  ([#361](https://github.com/well-typed/optics/pull/361))
+* Add `gfield`, `gafield`, `gconstructor`, `gposition` and `gplate` for
+  generics-based data access
+  ([#358](https://github.com/well-typed/optics/pull/358),
+   [#361](https://github.com/well-typed/optics/pull/361))
+* Add support for generics-based field lenses and constructor prisms (`gfield`
+  and `gconstructor`) to `LabelOptic` so they can be used via `OverloadedLabels`
+  ([#361](https://github.com/well-typed/optics/pull/361))
+* Remove unnecessary INLINE pragmas to reduce compile times
+  ([#394](https://github.com/well-typed/optics/pull/394))
+* Simplify the type of `(%)` using new `JoinKinds` and `AppendIndices` classes
+  in place of the `Join` and `Append` type families
+  ([#397](https://github.com/well-typed/optics/pull/397),
+   [#399](https://github.com/well-typed/optics/pull/399))
+* Print missing language extensions during TH generation of labels if there are
+  any ([#352](https://github.com/well-typed/optics/pull/352))
+* Add support for getters of rank1 polymorphic fields to optics generated with
+  the `makeFieldLabels` family of functions
+  ([#365](https://github.com/well-typed/optics/pull/365))
+* Extend support of type-changing optics generated with the `makeFieldLabels`
+  family to type parameters that are phantom and applied to non-injective type
+  families
+  ([#365](https://github.com/well-typed/optics/pull/365))
+* Fix TH generation of optics for poly-kinded data families
+  ([#378](https://github.com/well-typed/optics/pull/378))
+* Fix `declareFieldLabels` when a field type refers to a type defined in the
+  same quote
+  ([#380](https://github.com/well-typed/optics/pull/380))
+
 # optics-0.3 (2020-04-15)
 * GHC-8.10 support
 * Add `filteredBy` and `unsafeFilteredBy`

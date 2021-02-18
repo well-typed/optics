@@ -1,12 +1,19 @@
-# optics-th-0.4 (2021-mm-dd)
+# optics-th-0.4 (2021-02-22)
 * Add support for GHC-9.0
 * Print missing language extensions during TH generation of labels if there are
-  any
+  any ([#352](https://github.com/well-typed/optics/pull/352))
 * Add support for getters of rank1 polymorphic fields to optics generated with
   the `makeFieldLabels` family of functions
+  ([#365](https://github.com/well-typed/optics/pull/365))
 * Extend support of type-changing optics generated with the `makeFieldLabels`
   family to type parameters that are phantom and applied to non-injective type
   families
+  ([#365](https://github.com/well-typed/optics/pull/365))
+* Fix TH generation of optics for poly-kinded data families
+  ([#378](https://github.com/well-typed/optics/pull/378))
+* Fix `declareFieldLabels` when a field type refers to a type defined in the
+  same quote
+  ([#380](https://github.com/well-typed/optics/pull/380))
 
 # optics-th-0.3.0.2 (2020-08-20)
 * Fix tests on GHC 8.10.2
