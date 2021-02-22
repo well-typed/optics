@@ -4,6 +4,7 @@
 
 In `optics-0.4` the `FunctorWithIndex`, `FoldableWithIndex` and
 `TraversableWithIndex` type classes have been migrated to a new package,
+[`indexed-traversable`](https://hackage.haskell.org/package/indexed-traversable).
 
 Beware: the `lens` package (versions `<5`) defines similar classes,
 and will also migrate to use `indexed-traversable` classes. Therefore, you

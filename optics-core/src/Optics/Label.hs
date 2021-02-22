@@ -513,6 +513,8 @@ instance
 --
 -- For more information have a look at 'Optics.Generic.gfield' and
 -- 'Optics.Generic.gconstructor'.
+--
+-- @since 0.4
 instance {-# OVERLAPPABLE #-}
   ( GenericLabelOpticContext repDefined name k s t a b
   ) => LabelOptic name k s t a b where
@@ -569,6 +571,8 @@ type family NoLabelOpticError name k s t a b where
 -- /Note:/ the flag @explicit-generic-labels@ is disabled by default. Enabling
 -- it is generally unsupported as it might lead to compilation errors of
 -- dependencies relying on implicit fallback to generic optics.
+--
+-- @since 0.4
 class Generic a => GenericLabelOptics a where
   type HasGenericLabelOptics a :: Bool
   type HasGenericLabelOptics a = 'True
