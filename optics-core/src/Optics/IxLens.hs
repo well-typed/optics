@@ -123,6 +123,8 @@ devoid = ilens absurd const
 --
 -- See 'isnd' for examples.
 --
+-- @since 0.4
+--
 ifst :: IxLens i (a, i) (b, i) a b
 ifst = ilens (\(a, i) -> (i, a)) (\(_,i) b -> (b, i))
 
@@ -137,6 +139,8 @@ ifst = ilens (\(a, i) -> (i, a)) (\(_,i) b -> (b, i))
 -- >>> :t itraversed :: IxTraversal i (i, a) (i, b) a b
 -- itraversed :: IxTraversal i (i, a) (i, b) a b
 --   :: IxTraversal i (i, a) (i, b) a b
+--
+-- @since 0.4
 --
 isnd :: IxLens i (i, a) (i, b) a b
 isnd = ilens id (\(i,_) b -> (i, b))

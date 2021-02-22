@@ -105,6 +105,9 @@ data IxEq i is js where
 -- foldr f (foldr f init xs) ys = foldr f init (ys ++ xs)
 --    where f = (->)
 -- @
+--
+-- @since 0.4
+--
 class AppendIndices xs ys ks | xs ys -> ks where
   appendIndices :: IxEq i (Curry xs (Curry ys i)) (Curry ks i)
 

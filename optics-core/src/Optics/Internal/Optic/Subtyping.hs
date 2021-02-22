@@ -151,6 +151,8 @@ instance Is A_Traversal        A_Setter           where implies r = r
 -- upper bound of an @Optic k@ and an @Optic l@. This means in particular that
 -- composition of an @Optic k@ and an @Optic k@ will yield an @Optic m@.
 --
+-- @since 0.4
+--
 class JoinKinds k l m | k l -> m where
   joinKinds :: ((Constraints k p, Constraints l p) => r) -> (Constraints m p => r)
 
