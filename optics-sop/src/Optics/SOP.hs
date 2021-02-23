@@ -117,7 +117,7 @@ type TupleUnpack f xs = (TupleLike (Unpack f xs)) => ToTuple (Unpack f xs)
 tupleUnpack ::
   forall f xs .
   (forall x . f x -> ApplyWrapped f x) -> NP f xs -> TupleUnpack f xs
-tupleUnpack un = view tuple . go
+tupleUnpack un xs0= view tuple (go xs0)
   where
     go :: forall ys . NP f ys -> NP I (Unpack f ys)
     go Nil       = Nil

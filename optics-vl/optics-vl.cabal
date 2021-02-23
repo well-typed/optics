@@ -6,7 +6,7 @@ build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
 cabal-version: 1.24
-tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.3, GHCJS ==8.4
+tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.4 || ==9.0.1, GHCJS ==8.4
 synopsis:      Utilities for compatibility with van Laarhoven optics
 category:      Data, Optics, Lenses
 description:
