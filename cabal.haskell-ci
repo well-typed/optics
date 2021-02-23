@@ -1,4 +1,5 @@
 branches:       master
-doctest:        True
+doctest:        <9
 tests:          True
+benchmarks:     <9
 jobs-selection: any
