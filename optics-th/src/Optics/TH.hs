@@ -206,7 +206,7 @@ declareFieldLabelsWith rules = declareWith $ \dec -> do
   emit =<< liftDeclare (makeFieldLabelsForDec rules dec)
   return $ stripFields dec
 
--- | Rules for generation of 'LabelOptic' intances for use with
+-- | Rules for generation of 'LabelOptic' instances for use with
 -- OverloadedLabels. Same as 'lensRules', but uses 'camelCaseNamer'.
 --
 -- /Note:/ if you don't want to prefix field names with the full name of the
