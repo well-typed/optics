@@ -15,18 +15,20 @@ module Optics.Prism
   , prism
 
   -- * Elimination
-  -- | A 'Prism' is in particular an 'Optics.AffineFold.AffineFold', a
+  -- | A 'Prism' is in particular an 'Optics.AffineFold.AffineFold',
+  -- an 'Optics.AffineTraversal.AffineTraversal', a
   -- 'Optics.Review.Review' and a 'Optics.Setter.Setter', therefore you can
   -- specialise types to obtain:
   --
   -- @
-  -- 'Optics.AffineFold.preview' :: 'Prism'' s a -> s -> Maybe a
-  -- 'Optics.Review.review'  :: 'Prism'' s a -> a -> s
+  -- 'Optics.AffineFold.preview'  :: 'Prism'' s a -> s -> Maybe a
+  -- 'Optics.Review.review'   :: 'Prism'' s a -> a -> s
   -- @
   --
   -- @
-  -- 'Optics.Setter.over'    :: 'Prism' s t a b -> (a -> b) -> s -> t
-  -- 'Optics.Setter.set'     :: 'Prism' s t a b ->       b  -> s -> t
+  -- 'Optics.Setter.over'     :: 'Prism' s t a b -> (a -> b) -> s -> t
+  -- 'Optics.Setter.set'      :: 'Prism' s t a b ->       b  -> s -> t
+  -- 'Optics.AffineTraversal.matching' :: 'Prism' s t a b             -> s -> Either t a
   -- @
   --
   -- If you want to 'Optics.AffineFold.preview' a type-modifying 'Prism' that is
