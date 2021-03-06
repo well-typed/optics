@@ -147,6 +147,10 @@ infixl 3 `afailing` -- Same as (<|>)
 -- >>> isn't _Just Nothing
 -- True
 --
+-- /Note:/ We don't provide an operator called \"@is@\". We already
+-- have a type class called 'Is' and the clash of terminology would be
+-- confusing.  Nonetheless, if you want to use such a function you can
+-- simply define @is k = not . isn't k@ in your own codebase.
 isn't :: Is k An_AffineFold => Optic' k is s a -> s -> Bool
 isn't k s = not (isJust (preview k s))
 {-# INLINE isn't #-}
