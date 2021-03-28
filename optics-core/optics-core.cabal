@@ -88,6 +88,7 @@ library
                    Optics.Operators.Unsafe
                    Optics.Re
                    Optics.ReadOnly
+                   Optics.Core.Extras
 
                    -- optics for data types
                    Data.Either.Optics

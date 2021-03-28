@@ -147,8 +147,10 @@ infixl 3 `afailing` -- Same as (<|>)
 -- >>> isn't _Just Nothing
 -- True
 --
+-- The negation of this operator is 'Optics.Core.Extras.is' from
+-- "Optics.Core.Extras".
 isn't :: Is k An_AffineFold => Optic' k is s a -> s -> Bool
-isn't k s = not (isJust (preview k s))
+isn't k s = isNothing (preview k s)
 {-# INLINE isn't #-}
 
 -- $setup
