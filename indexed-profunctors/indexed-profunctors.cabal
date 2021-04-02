@@ -1,5 +1,5 @@
 name:          indexed-profunctors
-version:       0.1
+version:       0.1.1
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
