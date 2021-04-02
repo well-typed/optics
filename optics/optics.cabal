@@ -171,9 +171,9 @@ benchmark folds
   build-depends: base
                , bytestring
                , containers
-               , criterion
                , lens
                , optics
+               , tasty-bench
                , unordered-containers
                , vector
 
@@ -193,9 +193,9 @@ benchmark traversals
   build-depends: base
                , bytestring
                , containers
-               , criterion
                , lens
                , optics
+               , tasty-bench
                , transformers
                , unordered-containers
                , vector

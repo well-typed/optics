@@ -1,8 +1,7 @@
 module Main where
 
-import Criterion.Main
-import Criterion.Types
 import Data.Char
+import Test.Tasty.Bench
 import qualified Control.Lens as L
 import qualified Control.Lens.Unsound as L
 import qualified Control.Monad.Trans.State as S
@@ -22,7 +21,7 @@ import Data.ByteString.Optics
 import Optics
 
 main :: IO ()
-main = defaultMainWith config
+main = defaultMain
   [ bgroup "vector"
     [ bgroup "traverse"
       [ bench "native" $
@@ -456,8 +455,6 @@ main = defaultMainWith config
     ]
   ]
   where
-    config = defaultConfig { timeLimit = 1 }
-
     l  = [0..10000] :: [Int]
     {-# NOINLINE l #-}
     xl = [0..100000] :: [Int]
