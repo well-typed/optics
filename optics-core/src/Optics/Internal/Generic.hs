@@ -426,13 +426,13 @@ instance
 instance
   ( GConstructorTuple g h a b
   ) => GConstructorSum '[] (M1 C m g) (M1 C m h) a b where
-  gconstructorSum = _M1 % gconstructorTuple
+  gconstructorSum = castOptic (_M1 % gconstructorTuple)
 
 class GConstructorTuple g h a b | g -> a
                                 , h -> b
                                 , g b -> h
                                 , h a -> g where
-  gconstructorTuple :: Prism (g x) (h x) a b
+  gconstructorTuple :: Iso (g x) (h x) a b
 
 -- Fon uncluttering types in below instances a bit.
 type F m a = M1 S m (Rec0 a)
@@ -450,14 +450,14 @@ instance
   ( a ~ ()
   , b ~ ()
   ) => GConstructorTuple U1 U1 a b where
-  gconstructorTuple = castOptic _U1
+  gconstructorTuple = _U1
   {-# INLINE gconstructorTuple #-}
 
 instance
   ( r ~ a
   , s ~ b
   ) => GConstructorTuple (F m a) (F m b) r s where
-  gconstructorTuple = castOptic coerced
+  gconstructorTuple = coerced
   {-# INLINE gconstructorTuple #-}
 
 instance
@@ -466,7 +466,7 @@ instance
   ) => GConstructorTuple
          (F m1 a1 :*: F m2 a2)
          (F m1 b1 :*: F m2 b2) r s where
-  gconstructorTuple = castOptic $ iso
+  gconstructorTuple = iso
     (\(M1 (K1 a1) :*: M1 (K1 a2)) -> (a1, a2))
     (\(b1, b2) -> M1 (K1 b1) :*: M1 (K1 b2))
   {-# INLINE gconstructorTuple #-}
@@ -478,7 +478,7 @@ instance
   ) => GConstructorTuple
          (F m1 a1 :*: F m2 a2 :*: F m3 a3)
          (F m1 b1 :*: F m2 b2 :*: F m3 b3) r s where
-  gconstructorTuple = castOptic $ iso
+  gconstructorTuple = iso
     (\(M1 (K1 a1) :*: M1 (K1 a2) :*: M1 (K1 a3)) -> (a1, a2, a3))
     (\(b1, b2, b3) -> M1 (K1 b1) :*: M1 (K1 b2) :*: M1 (K1 b3))
   {-# INLINE gconstructorTuple #-}
@@ -490,7 +490,7 @@ instance
   ) => GConstructorTuple
          ((F m1 a1 :*: F m2 a2) :*: (F m3 a3 :*: F m4 a4))
          ((F m1 b1 :*: F m2 b2) :*: (F m3 b3 :*: F m4 b4)) r s where
-  gconstructorTuple = castOptic $ iso
+  gconstructorTuple = iso
     (\((M1 (K1 a1) :*: M1 (K1 a2)) :*: (M1 (K1 a3) :*: M1 (K1 a4))) -> (a1, a2, a3, a4))
     (\(b1, b2, b3, b4) -> (M1 (K1 b1) :*: M1 (K1 b2)) :*: (M1 (K1 b3) :*: M1 (K1 b4)))
   {-# INLINE gconstructorTuple #-}
@@ -502,7 +502,7 @@ instance
   ) => GConstructorTuple
          ((F m1 a1 :*: F m2 a2) :*: (F m3 a3 :*: F m4 a4 :*: F m5 a5))
          ((F m1 b1 :*: F m2 b2) :*: (F m3 b3 :*: F m4 b4 :*: F m5 b5)) r s where
-  gconstructorTuple = castOptic $ iso
+  gconstructorTuple = iso
     (\((M1 (K1 a1) :*: M1 (K1 a2)) :*: (M1 (K1 a3) :*: M1 (K1 a4) :*: M1 (K1 a5))) ->
        (a1, a2, a3, a4, a5))
     (\(b1, b2, b3, b4, b5) ->
