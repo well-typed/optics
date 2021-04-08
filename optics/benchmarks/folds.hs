@@ -1,7 +1,6 @@
 module Main where
 
-import Criterion.Main
-import Criterion.Types
+import Test.Tasty.Bench
 import qualified Control.Lens as L
 import qualified Data.ByteString.Lens as L
 import qualified Data.ByteString as BS
@@ -18,7 +17,7 @@ import Data.ByteString.Optics
 import Optics
 
 main :: IO ()
-main = defaultMainWith config
+main = defaultMain
   [ bgroup "vector"
     [ bgroup "toList"
       [ bench "native"          $ nf V.toList v
@@ -197,7 +196,6 @@ main = defaultMainWith config
     ]
   ]
   where
-    config = defaultConfig { timeLimit = 1 }
     l  = [0..10000] :: [Int]
     b  = BS.pack $ map fromIntegral l
     bl = BSL.pack $ map fromIntegral [0..1000000::Int]
