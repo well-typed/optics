@@ -14,6 +14,7 @@ module Optics.Review
   , unto
 
   -- * Elimination
+  , construct
   , review
 
   -- * Computation
@@ -37,7 +38,15 @@ import Optics.Internal.Optic
 -- | Type synonym for a review.
 type Review t b = Optic' A_Review NoIx t b
 
--- | Retrieve the value targeted by a 'Review'.
+-- | Construct a value from a payload.
+--
+-- >>> construct _Left "hi"
+-- Left "hi"
+construct :: Is k A_Review => Optic' k is t b -> b -> t
+construct = review
+
+-- | Retrieve the value targeted by a 'Review'.  Historical synonym of
+-- 'construct'.
 --
 -- >>> review _Left "hi"
 -- Left "hi"
