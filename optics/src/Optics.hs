@@ -530,7 +530,7 @@ import Data.Either.Optics                    as P
 -- The optic kind resulting from a composition is the least upper bound (join)
 -- of the optic kinds being composed, if it exists.  The 'JoinKinds' class
 -- computes the least upper bound given two optic kind tags.  For example the
--- constraint 'JoinKinds A_Lens A_Prism k' makes GHC unify @k@ with
+-- constraint 'JoinKinds A_Lens A_Prism k' makes GHC infer that @k@ must be
 -- 'An_AffineTraversal'.
 --
 -- >>> let res :: JoinKinds A_Lens A_Prism k => Proxy k; res = Proxy
