@@ -13,7 +13,7 @@
 -- * the subtyping relation 'Is' with an accompanying 'castOptic' function to
 --   convert an optic kind;
 --
--- * the 'Join' operation used to find the optic kind resulting from a
+-- * the 'JoinKinds' class used to find the optic kind resulting from a
 --   composition.
 --
 -- Each optic kind is identified by a "tag type" (such as 'A_Lens'), which is an
@@ -36,7 +36,7 @@ module Optics.Optic
   -- * Composition
   -- | The usual operator for composing optics is ('%'), which allows different
   -- optic kinds to be composed, automatically calculating the resulting optic
-  -- kind using 'Join'.
+  -- kind using 'JoinKinds'.
   --
   -- The ('.') function composition operator cannot be used to compose optics,
   -- because /optics are not functions/.  The ('Control.Category..') operator
