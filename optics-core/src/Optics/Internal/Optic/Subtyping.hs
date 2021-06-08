@@ -2,14 +2,20 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | Instances to implement the subtyping hierarchy between optics.
 --
 -- This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
-module Optics.Internal.Optic.Subtyping where
+module Optics.Internal.Optic.Subtyping
+  ( Is(..)
+  , JoinKinds(..)
+  ) where
 
+import Data.Kind (Constraint)
+import Data.Type.Bool
 import GHC.TypeLits (ErrorMessage(..), TypeError)
 
 import Optics.Internal.Optic.TypeLevel
@@ -32,12 +38,18 @@ instance Is k k where
   implies r = r
 
 -- | Overlappable instance for a custom type error.
-instance {-# OVERLAPPABLE #-} TypeError
-  ('ShowType k ':<>: 'Text " cannot be used as " ':<>: 'ShowType l
-   ':$$: 'Text "Perhaps you meant one of these:"
-   ':$$: ShowEliminations (EliminationForms k)
-  ) => Is k l where
+instance {-# OVERLAPPABLE #-} Isn't k l => Is k l where
   implies _ = error "unreachable"
+
+-- | Hide the error message in a type family, for prettier Haddocks.  (We can't
+-- just use a type synonym, or use a class with a single instance, because then
+-- GHC reports the 'TypeError' at the definition site.)
+type family Isn't k l where
+  Isn't k l =
+    TypeError ('ShowType k ':<>: 'Text " cannot be used as " ':<>: 'ShowType l
+     ':$$: 'Text "Perhaps you meant one of these:"
+     ':$$: ShowEliminations (EliminationForms k)
+    )
 
 type family EliminationForms (k :: OpticKind) where
   EliminationForms An_AffineFold      = AffineFoldEliminations
@@ -432,8 +444,83 @@ instance JoinKinds A_Setter           A_Traversal        A_Setter           wher
 
 -- END GENERATED CONTENT
 
+-- | Overlappable instance for a custom type error.
 instance {-# OVERLAPPABLE #-}
   ( JoinKinds k l m
-  , TypeError ('ShowType k ':<>: 'Text " cannot be composed with " ':<>: 'ShowType l)
+  , CannotJoinKinds k l m p v
   ) => JoinKinds k l m where
   joinKinds _ = error "unreachable"
+
+
+-- | This type family is called when solving @JoinKinds k l m@ fails, with @p@
+-- and @v@ being fresh variables.  It returns a constraint which, when solved,
+-- displays a nice type error.
+--
+-- We know that @k@ and @l@ must be concrete, because otherwise GHC would not
+-- have committed to the OVERLAPPABLE instance above that uses CannotJoinKinds.
+-- However @m@ may or may not be concrete, and we want to print a different
+-- error in each case (#423).
+--
+-- This could be a type synonym, except then GHC prints the type error at the
+-- definition site of the type synonym, which is rather stupid.
+--
+type family CannotJoinKinds k l m actual is_concrete :: Constraint where
+  CannotJoinKinds k l m actual is_concrete =
+    ( -- 1. Unify is_concrete with True or False
+      IsOpticKind m is_concrete
+      -- 2. If is_concrete, unify actual with the join of k and m (otherwise
+      -- do nothing; the conditional is necessary to avoid an infinite
+      -- constraint solver loop).
+    , If is_concrete (JoinKinds k l actual) (() :: Constraint)
+      -- 3. Display an error that depends on is_concrete and actual
+    , TypeError (CannotJoinKindsMessage k l m actual is_concrete)
+    )
+
+-- | If @is_concrete@ is True, then the context must be demanding an optic kind
+-- that differs from the actual result of the composition (with the latter given
+-- by the @actual@ parameter).  For example:
+--
+-- >>> :t castOptic @A_Setter @A_Setter (traversed % _1)
+-- ...
+-- ... • A_Traversal composed with A_Lens produces A_Traversal,
+-- ...   but the context expects A_Setter
+-- ...
+--
+-- Otherwise, the user has tried to compose two optic kinds that simply cannot
+-- be used together, for example:
+--
+-- >>> to not % mapped
+-- ...
+-- ... • A_Getter cannot be composed with A_Setter
+-- ...
+--
+type family CannotJoinKindsMessage k l m actual is_concrete where
+  CannotJoinKindsMessage k l m actual 'True
+    = 'ShowType k ':<>: 'Text " composed with " ':<>: 'ShowType l
+      ':<>: 'Text " produces " ':<>: 'ShowType actual ':<>: 'Text ","
+      ':$$: 'Text "but the context expects " ':<>: 'ShowType m
+  CannotJoinKindsMessage k l m actual 'False
+    = 'ShowType k ':<>: 'Text " cannot be composed with " ':<>: 'ShowType l
+
+-- | When solving an @IsOpticKind m v@ constraint, if @m@ is known to be an
+-- optic kind then @is_concrete@ will be unified with True; otherwise
+-- @is_concrete@ will be unified with @False@.
+--
+class IsOpticKind (m :: OpticKind) (is_concrete :: Bool) | m -> is_concrete
+instance is_concrete ~ 'True => IsOpticKind An_AffineFold      is_concrete
+instance is_concrete ~ 'True => IsOpticKind An_AffineTraversal is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Fold             is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Getter           is_concrete
+instance is_concrete ~ 'True => IsOpticKind An_Iso             is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Lens             is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Prism            is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_ReversedLens     is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_ReversedPrism    is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Review           is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Setter           is_concrete
+instance is_concrete ~ 'True => IsOpticKind A_Traversal        is_concrete
+
+instance {-# INCOHERENT #-} is_concrete ~ 'False => IsOpticKind m is_concrete
+
+-- $setup
+-- >>> import Optics.Core
