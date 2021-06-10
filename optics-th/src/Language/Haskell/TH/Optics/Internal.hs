@@ -16,7 +16,7 @@ module Language.Haskell.TH.Optics.Internal
   , _OpenTypeFamilyD
   , _ForallT
 
-  -- * TyVarBndr compatiblity
+  -- * TyVarBndr compatibility
   , TyVarBndrSpec
   ) where
 
