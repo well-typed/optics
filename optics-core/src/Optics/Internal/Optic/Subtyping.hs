@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -467,7 +468,7 @@ instance {-# OVERLAPPABLE #-}
 type family CannotJoinKinds k l m actual is_concrete :: Constraint where
   CannotJoinKinds k l m actual is_concrete =
     ( -- 1. Unify is_concrete with True or False
-      IsOpticKind m is_concrete
+      IsConcrete m is_concrete
       -- 2. If is_concrete, unify actual with the join of k and m (otherwise
       -- do nothing; the conditional is necessary to avoid an infinite
       -- constraint solver loop).
@@ -502,25 +503,37 @@ type family CannotJoinKindsMessage k l m actual is_concrete where
   CannotJoinKindsMessage k l m actual 'False
     = 'ShowType k ':<>: 'Text " cannot be composed with " ':<>: 'ShowType l
 
--- | When solving an @IsOpticKind m v@ constraint, if @m@ is known to be an
--- optic kind then @is_concrete@ will be unified with True; otherwise
--- @is_concrete@ will be unified with @False@.
+-- | When solving an @IsConcrete m v@ constraint, if @m@ is concrete (i.e. a
+-- type constructor) then @is_concrete@ will be unified with True; otherwise
+-- (i.e. @m@ is a type variable or family application), @is_concrete@ will be
+-- unified with @False@.
 --
-class IsOpticKind (m :: OpticKind) (is_concrete :: Bool) | m -> is_concrete
-instance is_concrete ~ 'True => IsOpticKind An_AffineFold      is_concrete
-instance is_concrete ~ 'True => IsOpticKind An_AffineTraversal is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Fold             is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Getter           is_concrete
-instance is_concrete ~ 'True => IsOpticKind An_Iso             is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Lens             is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Prism            is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_ReversedLens     is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_ReversedPrism    is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Review           is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Setter           is_concrete
-instance is_concrete ~ 'True => IsOpticKind A_Traversal        is_concrete
+-- Note that applications are considered as concrete, even if the head is a
+-- variable.  This means we get the following (but no user is likely to write
+-- such nonsense):
+--
+-- >>> castOptic @(_ _) (traversed % _1)
+-- ...
+-- ... • A_Traversal cannot be used as ...
+-- ...
+--
+type IsConcrete m is_concrete = IsConcreteHelper (PartialIsConcrete m) is_concrete
 
-instance {-# INCOHERENT #-} is_concrete ~ 'False => IsOpticKind m is_concrete
+-- | If @m@ is concrete, it is apart from 'Void0' and hence this will reduce to
+-- True.  Otherwise the family application gets stuck.
+type family PartialIsConcrete m where
+  PartialIsConcrete Void0 = 'False
+  PartialIsConcrete _     = 'True
+
+-- | If the first parameter is True, unify the second parameter with True.  If
+-- the first parameter is anything else (crucially, including a stuck type
+-- family application) unify the second parameter with False.
+class IsConcreteHelper x is_concrete
+instance                    is_concrete ~ 'True  => IsConcreteHelper 'True is_concrete
+instance {-# INCOHERENT #-} is_concrete ~ 'False => IsConcreteHelper f     is_concrete
+
+-- | Non-exported, used solely to be apart from every other concrete type.
+data Void0
 
 -- $setup
 -- >>> import Optics.Core
