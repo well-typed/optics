@@ -86,6 +86,7 @@ library
                    Optics.Label
                    Optics.Operators
                    Optics.Operators.Unsafe
+                   Optics.Plated
                    Optics.Re
                    Optics.ReadOnly
                    Optics.Core.Extras
