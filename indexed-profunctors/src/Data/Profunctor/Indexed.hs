@@ -444,7 +444,6 @@ class (Choice p, Strong p) => Visiting p where
     -> p (i -> j) s t
   ivisit f = coerce . visit (\point afb -> f point $ \_ -> afb)
 
-
 instance Functor f => Visiting (StarA f) where
   visit  f (StarA point k) = StarA point $ f point k
   ivisit f (StarA point k) = StarA point $ f point (\_ -> k)
@@ -504,6 +503,13 @@ class Visiting p => Traversing p where
     :: (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
     -> p       j  a b
     -> p (i -> j) s t
+  default iwander
+    :: Coercible (p j s t) (p (i -> j) s t)
+    => (forall f. Applicative f => (i -> a -> f b) -> s -> f t)
+    -> p       j  a b
+    -> p (i -> j) s t
+  iwander f = coerce . wander (\afb -> f $ \_ -> afb)
+  {-# INLINE iwander #-}
 
 instance Applicative f => Traversing (Star f) where
   wander  f (Star k) = Star $ f k

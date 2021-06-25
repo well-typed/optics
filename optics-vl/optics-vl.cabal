@@ -30,6 +30,7 @@ library
   hs-source-dirs:   src
 
   build-depends: base                   >= 4.10       && <5
+               , contravariant          >= 1.5        && <1.6
                , indexed-profunctors    >= 0.1        && <0.2
                , optics-core            >= 0.2        && <0.5
                , profunctors            >= 5.0        && <6.0
