@@ -6,9 +6,11 @@
 module Data.Maybe.Optics
   ( _Nothing
   , _Just
+  , (%?)
   )
   where
 
+import Optics.Internal.Optic
 import Optics.Prism
 
 -- | A 'Prism' that matches on the 'Nothing' constructor of 'Maybe'.
@@ -34,3 +36,15 @@ _Just =
         Just y  -> Right y
     )
 {-# INLINE _Just #-}
+
+-- | Shortcut for '% _Just %'.
+--
+-- Useful for composing lenses of 'Maybe' type.
+infixl 9 %?
+(%?)
+  :: (AppendIndices is js ks, JoinKinds k1 A_Prism k2, JoinKinds k2 l m)
+  => Optic k1 is s t (Maybe u) (Maybe v)
+  -> Optic l js u v a b
+  -> Optic m ks s t a b
+o1 %? o2 = o1 % _Just % o2
+{-# INLINE (%?) #-}
