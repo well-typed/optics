@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.11.20210222
+# version: 0.13.20211113
 #
-# REGENDATA ("0.11.20210222",["github","--config=cabal.haskell-ci","cabal.project"])
+# REGENDATA ("0.13.20211113",["github","--config=cabal.haskell-ci","cabal.project"])
 #
 name: Haskell-CI
 on:
@@ -22,57 +22,129 @@ on:
       - master
 jobs:
   linux:
-    name: Haskell-CI - Linux - GHC ${{ matrix.ghc }}
+    name: Haskell-CI - Linux - ${{ matrix.compiler }}
     runs-on: ubuntu-18.04
+    timeout-minutes:
+      60
     container:
       image: buildpack-deps:bionic
     continue-on-error: ${{ matrix.allow-failure }}
     strategy:
       matrix:
         include:
-          - ghc: 9.0.1
+          - compiler: ghcjs-8.4
+            compilerKind: ghcjs
+            compilerVersion: "8.4"
+            setup-method: hvr-ppa
             allow-failure: false
-          - ghc: 8.10.4
+          - compiler: ghc-9.2.1
+            compilerKind: ghc
+            compilerVersion: 9.2.1
+            setup-method: ghcup
             allow-failure: false
-          - ghc: 8.8.4
+          - compiler: ghc-9.0.1
+            compilerKind: ghc
+            compilerVersion: 9.0.1
+            setup-method: hvr-ppa
             allow-failure: false
-          - ghc: 8.6.5
+          - compiler: ghc-8.10.7
+            compilerKind: ghc
+            compilerVersion: 8.10.7
+            setup-method: ghcup
             allow-failure: false
-          - ghc: 8.4.4
+          - compiler: ghc-8.8.4
+            compilerKind: ghc
+            compilerVersion: 8.8.4
+            setup-method: hvr-ppa
             allow-failure: false
-          - ghc: 8.2.2
+          - compiler: ghc-8.6.5
+            compilerKind: ghc
+            compilerVersion: 8.6.5
+            setup-method: hvr-ppa
+            allow-failure: false
+          - compiler: ghc-8.4.4
+            compilerKind: ghc
+            compilerVersion: 8.4.4
+            setup-method: hvr-ppa
+            allow-failure: false
+          - compiler: ghc-8.2.2
+            compilerKind: ghc
+            compilerVersion: 8.2.2
+            setup-method: hvr-ppa
             allow-failure: false
       fail-fast: false
     steps:
+      - name: Set GHCJS environment variables
+        run: |
+          if [ $HCKIND = ghcjs ]; then
+          echo "GHCJS=true" >> "$GITHUB_ENV"
+          echo "GHCJSARITH=1" >> "$GITHUB_ENV"
+          else
+          echo "GHCJS=false" >> "$GITHUB_ENV"
+          echo "GHCJSARITH=0" >> "$GITHUB_ENV"
+          fi
+        env:
+          HCKIND: ${{ matrix.compilerKind }}
+          HCNAME: ${{ matrix.compiler }}
+          HCVER: ${{ matrix.compilerVersion }}
       - name: apt
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends gnupg ca-certificates dirmngr curl git software-properties-common
-          apt-add-repository -y 'ppa:hvr/ghc'
-          apt-get update
-          apt-get install -y ghc-$GHC_VERSION cabal-install-3.4
+          apt-get install -y --no-install-recommends gnupg ca-certificates dirmngr curl git software-properties-common libtinfo5
+          if [ "${{ matrix.setup-method }}" = ghcup ]; then
+            mkdir -p "$HOME/.ghcup/bin"
+            curl -sL https://downloads.haskell.org/ghcup/0.1.17.3/x86_64-linux-ghcup-0.1.17.3 > "$HOME/.ghcup/bin/ghcup"
+            chmod a+x "$HOME/.ghcup/bin/ghcup"
+            "$HOME/.ghcup/bin/ghcup" install ghc "$HCVER"
+            "$HOME/.ghcup/bin/ghcup" install cabal 3.6.2.0
+          else
+            apt-add-repository -y 'ppa:hvr/ghc'
+            if [ $((GHCJSARITH)) -ne 0 ] ; then apt-add-repository -y 'ppa:hvr/ghcjs' ; fi
+            if [ $((GHCJSARITH)) -ne 0 ] ; then curl -sSL "https://deb.nodesource.com/gpgkey/nodesource.gpg.key" | apt-key add - ; fi
+            if [ $((GHCJSARITH)) -ne 0 ] ; then apt-add-repository -y 'deb https://deb.nodesource.com/node_10.x bionic main' ; fi
+            apt-get update
+            if [ $((GHCJSARITH)) -ne 0 ] ; then apt-get install -y "$HCNAME" ghc-8.4.4 nodejs ; else apt-get install -y "$HCNAME" ; fi
+            mkdir -p "$HOME/.ghcup/bin"
+            curl -sL https://downloads.haskell.org/ghcup/0.1.17.3/x86_64-linux-ghcup-0.1.17.3 > "$HOME/.ghcup/bin/ghcup"
+            chmod a+x "$HOME/.ghcup/bin/ghcup"
+            "$HOME/.ghcup/bin/ghcup" install cabal 3.6.2.0
+          fi
         env:
-          GHC_VERSION: ${{ matrix.ghc }}
+          HCKIND: ${{ matrix.compilerKind }}
+          HCNAME: ${{ matrix.compiler }}
+          HCVER: ${{ matrix.compilerVersion }}
       - name: Set PATH and environment variables
         run: |
           echo "$HOME/.cabal/bin" >> $GITHUB_PATH
-          echo "LANG=C.UTF-8" >> $GITHUB_ENV
-          echo "CABAL_DIR=$HOME/.cabal" >> $GITHUB_ENV
-          echo "CABAL_CONFIG=$HOME/.cabal/config" >> $GITHUB_ENV
-          HC=/opt/ghc/$GHC_VERSION/bin/ghc
-          echo "HC=$HC" >> $GITHUB_ENV
-          echo "HCPKG=/opt/ghc/$GHC_VERSION/bin/ghc-pkg" >> $GITHUB_ENV
-          echo "HADDOCK=/opt/ghc/$GHC_VERSION/bin/haddock" >> $GITHUB_ENV
-          echo "CABAL=/opt/cabal/3.4/bin/cabal -vnormal+nowrap" >> $GITHUB_ENV
+          if [ $((GHCJSARITH)) -ne 0 ] ; then echo "/opt/ghc/8.4.4/bin" >> $GITHUB_PATH ; fi
+          echo "LANG=C.UTF-8" >> "$GITHUB_ENV"
+          echo "CABAL_DIR=$HOME/.cabal" >> "$GITHUB_ENV"
+          echo "CABAL_CONFIG=$HOME/.cabal/config" >> "$GITHUB_ENV"
+          HCDIR=/opt/$HCKIND/$HCVER
+          if [ "${{ matrix.setup-method }}" = ghcup ]; then
+            HC=$HOME/.ghcup/bin/$HCKIND-$HCVER
+            echo "HC=$HC" >> "$GITHUB_ENV"
+            echo "HCPKG=$HOME/.ghcup/bin/$HCKIND-pkg-$HCVER" >> "$GITHUB_ENV"
+            echo "HADDOCK=$HOME/.ghcup/bin/haddock-$HCVER" >> "$GITHUB_ENV"
+            echo "CABAL=$HOME/.ghcup/bin/cabal-3.6.2.0 -vnormal+nowrap" >> "$GITHUB_ENV"
+          else
+            HC=$HCDIR/bin/$HCKIND
+            echo "HC=$HC" >> "$GITHUB_ENV"
+            echo "HCPKG=$HCDIR/bin/$HCKIND-pkg" >> "$GITHUB_ENV"
+            echo "HADDOCK=$HCDIR/bin/haddock" >> "$GITHUB_ENV"
+            echo "CABAL=$HOME/.ghcup/bin/cabal-3.6.2.0 -vnormal+nowrap" >> "$GITHUB_ENV"
+          fi
+
           HCNUMVER=$(${HC} --numeric-version|perl -ne '/^(\d+)\.(\d+)\.(\d+)(\.(\d+))?$/; print(10000 * $1 + 100 * $2 + ($3 == 0 ? $5 != 1 : $3))')
-          echo "HCNUMVER=$HCNUMVER" >> $GITHUB_ENV
-          echo "ARG_TESTS=--enable-tests" >> $GITHUB_ENV
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "ARG_BENCH=--enable-benchmarks" >> $GITHUB_ENV ; else echo "ARG_BENCH=--disable-benchmarks" >> $GITHUB_ENV ; fi
-          echo "HEADHACKAGE=false" >> $GITHUB_ENV
-          echo "ARG_COMPILER=--ghc --with-compiler=$HC" >> $GITHUB_ENV
-          echo "GHCJSARITH=0" >> $GITHUB_ENV
+          echo "HCNUMVER=$HCNUMVER" >> "$GITHUB_ENV"
+          echo "ARG_TESTS=--enable-tests" >> "$GITHUB_ENV"
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "ARG_BENCH=--enable-benchmarks" >> "$GITHUB_ENV" ; else echo "ARG_BENCH=--disable-benchmarks" >> "$GITHUB_ENV" ; fi
+          echo "HEADHACKAGE=false" >> "$GITHUB_ENV"
+          echo "ARG_COMPILER=--$HCKIND --with-compiler=$HC" >> "$GITHUB_ENV"
         env:
-          GHC_VERSION: ${{ matrix.ghc }}
+          HCKIND: ${{ matrix.compilerKind }}
+          HCNAME: ${{ matrix.compiler }}
+          HCVER: ${{ matrix.compilerVersion }}
       - name: env
         run: |
           env
@@ -95,19 +167,25 @@ jobs:
           repository hackage.haskell.org
             url: http://hackage.haskell.org/
           EOF
+          cat >> $CABAL_CONFIG <<EOF
+          program-default-options
+            ghc-options: $GHCJOBS +RTS -M3G -RTS
+          EOF
           cat $CABAL_CONFIG
       - name: versions
         run: |
           $HC --version || true
           $HC --print-project-git-commit-id || true
           $CABAL --version || true
+          if [ $((GHCJSARITH)) -ne 0 ] ; then node --version ; fi
+          if [ $((GHCJSARITH)) -ne 0 ] ; then echo $GHCJS ; fi
       - name: update cabal index
         run: |
           $CABAL v2-update -v
       - name: cache (tools)
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ matrix.ghc }}-tools-68b98ccd
+          key: ${{ runner.os }}-${{ matrix.compiler }}-tools-60139de7
           path: ~/.haskell-ci-tools
       - name: install cabal-plan
         run: |
@@ -132,12 +210,12 @@ jobs:
           echo "packages: $GITHUB_WORKSPACE/source/optics" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/optics-core" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/optics-extra" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/optics-sop" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "packages: $GITHUB_WORKSPACE/source/optics-sop" >> cabal.project ; fi
           echo "packages: $GITHUB_WORKSPACE/source/optics-th" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/optics-vl" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/indexed-profunctors" >> cabal.project
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project ; fi
-          echo "packages: $GITHUB_WORKSPACE/source/metametapost" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "packages: $GITHUB_WORKSPACE/source/metametapost" >> cabal.project ; fi
           cat cabal.project
       - name: sdist
         run: |
@@ -150,42 +228,43 @@ jobs:
       - name: generate cabal.project
         run: |
           PKGDIR_optics="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/optics-[0-9.]*')"
-          echo "PKGDIR_optics=${PKGDIR_optics}" >> $GITHUB_ENV
+          echo "PKGDIR_optics=${PKGDIR_optics}" >> "$GITHUB_ENV"
           PKGDIR_optics_core="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/optics-core-[0-9.]*')"
-          echo "PKGDIR_optics_core=${PKGDIR_optics_core}" >> $GITHUB_ENV
+          echo "PKGDIR_optics_core=${PKGDIR_optics_core}" >> "$GITHUB_ENV"
           PKGDIR_optics_extra="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/optics-extra-[0-9.]*')"
-          echo "PKGDIR_optics_extra=${PKGDIR_optics_extra}" >> $GITHUB_ENV
+          echo "PKGDIR_optics_extra=${PKGDIR_optics_extra}" >> "$GITHUB_ENV"
           PKGDIR_optics_sop="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/optics-sop-[0-9.]*')"
-          echo "PKGDIR_optics_sop=${PKGDIR_optics_sop}" >> $GITHUB_ENV
+          echo "PKGDIR_optics_sop=${PKGDIR_optics_sop}" >> "$GITHUB_ENV"
           PKGDIR_optics_th="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/optics-th-[0-9.]*')"
-          echo "PKGDIR_optics_th=${PKGDIR_optics_th}" >> $GITHUB_ENV
+          echo "PKGDIR_optics_th=${PKGDIR_optics_th}" >> "$GITHUB_ENV"
           PKGDIR_optics_vl="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/optics-vl-[0-9.]*')"
-          echo "PKGDIR_optics_vl=${PKGDIR_optics_vl}" >> $GITHUB_ENV
+          echo "PKGDIR_optics_vl=${PKGDIR_optics_vl}" >> "$GITHUB_ENV"
           PKGDIR_indexed_profunctors="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/indexed-profunctors-[0-9.]*')"
-          echo "PKGDIR_indexed_profunctors=${PKGDIR_indexed_profunctors}" >> $GITHUB_ENV
+          echo "PKGDIR_indexed_profunctors=${PKGDIR_indexed_profunctors}" >> "$GITHUB_ENV"
           PKGDIR_template_haskell_optics="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/template-haskell-optics-[0-9.]*')"
-          echo "PKGDIR_template_haskell_optics=${PKGDIR_template_haskell_optics}" >> $GITHUB_ENV
+          echo "PKGDIR_template_haskell_optics=${PKGDIR_template_haskell_optics}" >> "$GITHUB_ENV"
           PKGDIR_metametapost="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/metametapost-[0-9.]*')"
-          echo "PKGDIR_metametapost=${PKGDIR_metametapost}" >> $GITHUB_ENV
+          echo "PKGDIR_metametapost=${PKGDIR_metametapost}" >> "$GITHUB_ENV"
+          rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
           echo "packages: ${PKGDIR_optics}" >> cabal.project
           echo "packages: ${PKGDIR_optics_core}" >> cabal.project
           echo "packages: ${PKGDIR_optics_extra}" >> cabal.project
-          echo "packages: ${PKGDIR_optics_sop}" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "packages: ${PKGDIR_optics_sop}" >> cabal.project ; fi
           echo "packages: ${PKGDIR_optics_th}" >> cabal.project
           echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
           echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project ; fi
-          echo "packages: ${PKGDIR_metametapost}" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "packages: ${PKGDIR_metametapost}" >> cabal.project ; fi
           echo "package optics" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package optics-core" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package optics-extra" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package optics-sop" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "package optics-sop" >> cabal.project ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods" >> cabal.project ; fi
           echo "package optics-th" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package optics-vl" >> cabal.project
@@ -194,8 +273,8 @@ jobs:
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods" >> cabal.project ; fi
-          echo "package metametapost" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "package metametapost" >> cabal.project ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods" >> cabal.project ; fi
           cat >> cabal.project <<EOF
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$/; }' >> cabal.project.local
@@ -208,9 +287,9 @@ jobs:
       - name: cache
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ matrix.ghc }}-${{ github.sha }}
+          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ github.sha }}
           path: ~/.cabal/store
-          restore-keys: ${{ runner.os }}-${{ matrix.ghc }}-
+          restore-keys: ${{ runner.os }}-${{ matrix.compiler }}-
       - name: install dependencies
         run: |
           $CABAL v2-build $ARG_COMPILER --disable-tests --disable-benchmarks --dependencies-only -j2 all
@@ -250,8 +329,8 @@ jobs:
           ${CABAL} -vnormal check
           cd ${PKGDIR_optics_extra} || false
           ${CABAL} -vnormal check
-          cd ${PKGDIR_optics_sop} || false
-          ${CABAL} -vnormal check
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then cd ${PKGDIR_optics_sop} || false ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then ${CABAL} -vnormal check ; fi
           cd ${PKGDIR_optics_th} || false
           ${CABAL} -vnormal check
           cd ${PKGDIR_optics_vl} || false
@@ -260,8 +339,8 @@ jobs:
           ${CABAL} -vnormal check
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then ${CABAL} -vnormal check ; fi
-          cd ${PKGDIR_metametapost} || false
-          ${CABAL} -vnormal check
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then cd ${PKGDIR_metametapost} || false ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90200)) -ne 0 ] ; then ${CABAL} -vnormal check ; fi
       - name: haddock
         run: |
           if [ $((! GHCJSARITH)) -ne 0 ] ; then $CABAL v2-haddock $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all ; fi
