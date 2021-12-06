@@ -533,10 +533,6 @@ import Data.Either.Optics                    as P
 -- constraint 'JoinKinds A_Lens A_Prism k' makes GHC infer that @k@ must be
 -- 'An_AffineTraversal'.
 --
--- >>> let res :: JoinKinds A_Lens A_Prism k => Proxy k; res = Proxy
--- >>> :t res
--- res :: Proxy An_AffineTraversal
---
 -- The join does not exist for some pairs of optic kinds, which means that they
 -- cannot be composed.  For example there is no optic kind above both 'Setter'
 -- and 'Fold':
@@ -996,11 +992,9 @@ import Data.Either.Optics                    as P
 -- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
 
 -- $setup
--- >>> :set -XFlexibleContexts
 -- >>> import Control.Monad.Reader
 -- >>> import Control.Monad.State
 -- >>> import Data.Functor.Identity
--- >>> import Data.Proxy
 -- >>> import qualified Data.IntSet as IntSet
 -- >>> import qualified Data.Map as Map
 -- >>> import Optics.State.Operators
