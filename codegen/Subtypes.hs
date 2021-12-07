@@ -117,7 +117,7 @@ genJoin = either (fail . show) id $ runG opticsKind $ \g -> do
             case mkl of
                 -- alignment is important, thus padding
                 []          -> putStrLn $ unwords
-                  [ "--    no JoinKinds"
+                  [ "--                              no JoinKinds"
                   , leftpad (show k)
                   , leftpad (show l)
                   ]
@@ -126,10 +126,12 @@ genJoin = either (fail . show) id $ runG opticsKind $ \g -> do
                 [kl]        -> putStrLn . joinInstance k l $ gFromVertex kl
   where
     joinInstance k l m = unwords
-      [ "instance JoinKinds"
+      [ "instance k ~"
+      , leftpad $ show m
+      , "=> JoinKinds"
       , leftpad $ show k
       , leftpad $ show l
-      , leftpad $ show m
+      , "k"
       , "where\n  joinKinds r = r"
       ]
 

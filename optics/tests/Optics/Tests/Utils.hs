@@ -75,11 +75,25 @@ ghc82to86failure = assertFailure'
 ghc82to86failure = assertSuccess
 #endif
 
+ghc86to810failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ >= 806 && __GLASGOW_HASKELL__ <= 810
+ghc86to810failure = assertFailure'
+#else
+ghc86to810failure = assertSuccess
+#endif
+
 ghc82failure :: Result -> IO ()
 #if __GLASGOW_HASKELL__ == 802
 ghc82failure = assertFailure'
 #else
 ghc82failure = assertSuccess
+#endif
+
+ghc810failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 810
+ghc810failure = assertFailure'
+#else
+ghc810failure = assertSuccess
 #endif
 
 ghcGE86failure :: Result -> IO ()
@@ -97,17 +111,20 @@ ghcLE84failure = assertSuccess
 #endif
 
 ghc82andGE90failure :: Result -> IO ()
-#if __GLASGOW_HASKELL__ == 802 || __GLASGOW_HASKELL__ >= 900
+#if __GLASGOW_HASKELL__ == 802 \
+ || __GLASGOW_HASKELL__ >= 900
 ghc82andGE90failure = assertFailure'
 #else
 ghc82andGE90failure = assertSuccess
 #endif
 
-ghc82and92failure :: Result -> IO ()
-#if __GLASGOW_HASKELL__ == 802 || __GLASGOW_HASKELL__ == 902
-ghc82and92failure = assertFailure'
+ghc82and86to810and92failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 802 \
+ || __GLASGOW_HASKELL__ >= 806 && __GLASGOW_HASKELL__ <= 810 \
+ || __GLASGOW_HASKELL__ == 902
+ghc82and86to810and92failure = assertFailure'
 #else
-ghc82and92failure = assertSuccess
+ghc82and86to810and92failure = assertSuccess
 #endif
 
 ghcGE90failure :: Result -> IO ()
@@ -117,9 +134,10 @@ ghcGE90failure = assertFailure'
 ghcGE90failure = assertSuccess
 #endif
 
-ghc92failure :: Result -> IO ()
-#if __GLASGOW_HASKELL__ == 902
-ghc92failure = assertFailure'
+ghc86to810and92failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ >= 806 && __GLASGOW_HASKELL__ <= 810 \
+ || __GLASGOW_HASKELL__ == 902
+ghc86to810and92failure = assertFailure'
 #else
-ghc92failure = assertSuccess
+ghc86to810and92failure = assertSuccess
 #endif
