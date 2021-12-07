@@ -70,6 +70,7 @@ module Optics.Fold
   , findOf
   , findMOf
   , lookupOf
+  , paraOf
 
   -- * Combinators
   , pre
@@ -674,6 +675,13 @@ findMOf o = \f -> foldrOf o
 lookupOf :: (Is k A_Fold, Eq a) => Optic' k is s (a, v) -> a -> s -> Maybe v
 lookupOf o a = foldrOf o (\(a', v) next -> if a == a' then Just v else next) Nothing
 {-# INLINE lookupOf #-}
+
+-- | Perform a fold-like computation on each value, technically a paramorphism.
+paraOf :: Is k A_Fold => Optic' k is a a -> (a -> [r] -> r) -> a -> r
+paraOf l f = go
+  where
+    go a = f a (go <$> toListOf l a)
+{-# INLINE paraOf #-}
 
 -- $setup
 -- >>> import Optics.Core
