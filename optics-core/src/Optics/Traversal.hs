@@ -60,6 +60,8 @@ module Optics.Traversal
   , mapAccumLOf
   , scanr1Of
   , scanl1Of
+  , rewriteMOf
+  , transformMOf
   , failover
   , failover'
 
@@ -246,6 +248,30 @@ scanr1Of o = \f ->
       step (Just s) a = let r = f a s in (r, Just r)
   in fst . mapAccumROf o step Nothing
 {-# INLINE scanr1Of #-}
+
+-- | Rewrite by applying a monadic rule everywhere you recursing with a
+-- user-specified 'Traversal'.
+--
+-- Ensures that the rule cannot be applied anywhere in the result.
+rewriteMOf
+  :: (Is k A_Traversal, Monad m)
+  => Optic k is a b a b
+  -> (b -> m (Maybe a)) -> a -> m b
+rewriteMOf l f = go
+  where
+    go = transformMOf l (\x -> f x >>= maybe (return x) go)
+{-# INLINE rewriteMOf #-}
+
+-- | Transform every element in a tree using a user supplied 'Traversal' in a
+-- bottom-up manner with a monadic effect.
+transformMOf
+  :: (Is k A_Traversal, Monad m)
+  => Optic k is a b a b
+  -> (b -> m b) -> a -> m b
+transformMOf l f = go
+  where
+    go t = traverseOf l go t >>= f
+{-# INLINE transformMOf #-}
 
 -- | Try to map a function over this 'Traversal', returning Nothing if the
 -- traversal has no targets.
