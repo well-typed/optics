@@ -167,16 +167,17 @@ mapped = Optic mapped__
 -- construct @\\a -> f a '<|>' g a@ which performs both rewrites until a fixed
 -- point.
 rewriteOf :: Is k A_Setter => Optic k is a b a b -> (b -> Maybe a) -> a -> b
-rewriteOf l f = go
+rewriteOf o f = go
   where
-    go = transformOf l (\x -> maybe x go (f x))
+    go = transformOf o $ \x -> maybe x go (f x)
 {-# INLINE rewriteOf #-}
 
 -- | Transform every element by recursively applying a given 'Setter' in a
 -- bottom-up manner.
 transformOf :: Is k A_Setter => Optic k is a b a b -> (b -> b) -> a -> b
-transformOf l f = go where
-  go = f . over l go
+transformOf o f = go
+  where
+    go = f . over o go
 {-# INLINE transformOf #-}
 
 -- $setup
