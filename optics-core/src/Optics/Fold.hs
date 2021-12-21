@@ -70,6 +70,9 @@ module Optics.Fold
   , findOf
   , findMOf
   , lookupOf
+  , universeOf
+  , cosmosOf
+  , paraOf
 
   -- * Combinators
   , pre
@@ -674,6 +677,30 @@ findMOf o = \f -> foldrOf o
 lookupOf :: (Is k A_Fold, Eq a) => Optic' k is s (a, v) -> a -> s -> Maybe v
 lookupOf o a = foldrOf o (\(a', v) next -> if a == a' then Just v else next) Nothing
 {-# INLINE lookupOf #-}
+
+-- | Given a 'Fold' that knows how to locate immediate children, retrieve all of
+-- the transitive descendants of a node, including itself.
+universeOf :: Is k A_Fold => Optic' k is a a -> a -> [a]
+universeOf o = (`appEndo` []) . go
+  where
+    go a = Endo (a :) <> foldMapOf o go a
+{-# INLINE universeOf #-}
+
+-- | Given a 'Fold' that knows how to locate immediate children, fold all of the
+-- transitive descendants of a node, including itself.
+cosmosOf :: forall k is a. Is k A_Fold => Optic' k is a a -> Fold a a
+cosmosOf o = foldVL go
+  where
+    go :: Applicative f => (a -> f ()) -> a -> f ()
+    go f a = f a *> traverseOf_ o (go f) a
+{-# INLINE cosmosOf #-}
+
+-- | Perform a fold-like computation on each value, technically a paramorphism.
+paraOf :: Is k A_Fold => Optic' k is a a -> (a -> [r] -> r) -> a -> r
+paraOf o f = go
+  where
+    go a = f a (go <$> toListOf o a)
+{-# INLINE paraOf #-}
 
 -- $setup
 -- >>> import Optics.Core

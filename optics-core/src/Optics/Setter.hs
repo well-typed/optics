@@ -54,6 +54,8 @@ module Optics.Setter
   , set
   , set'
   , over'
+  , rewriteOf
+  , transformOf
 
   -- * Subtyping
   , A_Setter
@@ -152,6 +154,31 @@ sets f = Optic (roam f)
 mapped :: Functor f => Setter (f a) (f b) a b
 mapped = Optic mapped__
 {-# INLINE mapped #-}
+
+-- | Rewrite by applying a rule everywhere you can. Ensures that the rule cannot
+-- be applied anywhere in the result:
+--
+-- @
+-- propRewriteOf l r x = 'all' ('Data.Just.isNothing' '.' r) ('universeOf' l ('rewriteOf' l r x))
+-- @
+--
+-- Usually 'transformOf' is more appropriate, but 'rewriteOf' can give better
+-- compositionality. Given two single transformations @f@ and @g@, you can
+-- construct @\\a -> f a '<|>' g a@ which performs both rewrites until a fixed
+-- point.
+rewriteOf :: Is k A_Setter => Optic k is a b a b -> (b -> Maybe a) -> a -> b
+rewriteOf o f = go
+  where
+    go = transformOf o $ \x -> maybe x go (f x)
+{-# INLINE rewriteOf #-}
+
+-- | Transform every element by recursively applying a given 'Setter' in a
+-- bottom-up manner.
+transformOf :: Is k A_Setter => Optic k is a b a b -> (b -> b) -> a -> b
+transformOf o f = go
+  where
+    go = f . over o go
+{-# INLINE transformOf #-}
 
 -- $setup
 -- >>> import Optics.Core
