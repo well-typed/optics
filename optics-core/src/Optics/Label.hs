@@ -65,16 +65,20 @@ import Optics.Internal.Optic
 -- >>> :set -XDuplicateRecordFields
 -- >>> :set -XOverloadedLabels
 -- >>> import GHC.Generics (Generic)
+--
+-- >>> :{
+-- data Pet
+--   = Cat  { name :: String, age :: Int, lazy :: Bool }
+--   | Fish { name :: String, age :: Int, lazy :: Bool }
+--   deriving (Show, Generic)
+-- :}
+--
 -- >>> :{
 -- data Human = Human
 --   { name :: String
 --   , age  :: Integer
 --   , pets :: [Pet]
 --   } deriving (Show, Generic)
--- data Pet
---   = Cat  { name :: String, age :: Int, lazy :: Bool }
---   | Fish { name :: String, age :: Int, lazy :: Bool }
---   deriving (Show, Generic)
 -- :}
 --
 -- /Note:/ Generic deriving of optics works well on a moderate scale, but for

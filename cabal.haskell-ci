@@ -1,5 +1,5 @@
 branches:       master
-doctest:        <9.2
+doctest:        <9.3
 tests:          True
 benchmarks:     <9.3
 jobs-selection: any
