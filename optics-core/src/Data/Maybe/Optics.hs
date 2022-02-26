@@ -37,13 +37,13 @@ _Just =
     )
 {-# INLINE _Just #-}
 
--- | Shortcut for '% _Just %'.
+-- | Shortcut for @'%' '_Just' '%'@.
 --
 -- Useful for composing lenses of 'Maybe' type.
 infixl 9 %?
 (%?)
-  :: (AppendIndices is js ks, JoinKinds k1 A_Prism k2, JoinKinds k2 l m)
-  => Optic k1 is s t (Maybe u) (Maybe v)
+  :: (AppendIndices is js ks, JoinKinds k A_Prism k', JoinKinds k' l m)
+  => Optic k is s t (Maybe u) (Maybe v)
   -> Optic l js u v a b
   -> Optic m ks s t a b
 o1 %? o2 = o1 % _Just % o2
