@@ -4,7 +4,7 @@ version:       0.1
 license:       BSD3
 license-file:  LICENSE
 build-type:    Simple
-tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2, GHCJS ==8.4
+tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.2, GHCJS ==8.4
 maintainer:    oleg@well-typed.com
 synopsis:      Generate optics documentation diagrams
 category:      Optics, Examples
@@ -18,7 +18,7 @@ executable metametapost-optics
   ghc-options:      -Wall
 
   build-depends: base                   >=4.10        && <5
-               , base-compat            >=0.11.1      && <0.12
+               , base-compat            >=0.11.1      && <0.13
                , containers
                , generics-sop
                , mtl
