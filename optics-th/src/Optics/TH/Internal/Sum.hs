@@ -7,11 +7,11 @@ module Optics.TH.Internal.Sum
   ) where
 
 import Data.Char
-import Data.List
 import Data.Maybe
 import Data.Traversable
 import Language.Haskell.TH
 import Language.Haskell.TH.Datatype.TyVarBndr
+import qualified Data.List as L
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
@@ -231,7 +231,7 @@ stabType (Stab _ _ o _ _ _ _) = o
 
 computeOpticType :: StabConfig -> Type -> [NCon] -> NCon -> Q Stab
 computeOpticType conf t cons con =
-  do let cons' = delete con cons
+  do let cons' = L.delete con cons
      if null (_nconVars con)
          then computePrismType conf t (view nconCxt con) cons' con
          else computeReviewType t (view nconCxt con) (view nconTypes con)
@@ -478,7 +478,7 @@ data NCon = NCon
 
 instance HasTypeVars NCon where
   typeVarsEx s = traversalVL $ \f (NCon x vars y z) ->
-    let s' = foldl' (flip S.insert) s vars
+    let s' = L.foldl' (flip S.insert) s vars
     in NCon x vars <$> traverseOf (typeVarsEx s') f y
                    <*> traverseOf (typeVarsEx s') f z
 

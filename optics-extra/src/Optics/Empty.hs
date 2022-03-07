@@ -11,7 +11,6 @@
 -- >>> case Nothing of { Empty -> True; _ -> False }
 -- True
 --
-{-# LANGUAGE PatternSynonyms #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Optics.Empty
   ( AsEmpty(..)

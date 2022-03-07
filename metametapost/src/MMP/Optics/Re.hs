@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts      #-}
 module MMP.Optics.Re where
 
 import           Control.Monad.State

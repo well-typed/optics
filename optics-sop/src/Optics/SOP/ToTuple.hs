@@ -1,7 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeFamilies #-}
 -- | Conversions between lists of types (of length up to 16) and the
 -- corresponding tuple types.
 --

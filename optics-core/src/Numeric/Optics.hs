@@ -1,5 +1,3 @@
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ViewPatterns #-}
 -- |
 -- Module: Numeric.Optics
 -- Description: Optics for working with numeric types.

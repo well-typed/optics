@@ -70,7 +70,7 @@ module Data.List.Optics
   ) where
 
 import Control.Monad (guard)
-import Data.List
+import qualified Data.List as L
 
 import Optics.Prism
 
@@ -86,7 +86,7 @@ import Optics.Prism
 -- >>> prefixed "pre" # "amble"
 -- "preamble"
 prefixed :: Eq a => [a] -> Prism' [a] [a]
-prefixed ps = prism' (ps ++) (stripPrefix ps)
+prefixed ps = prism' (ps ++) (L.stripPrefix ps)
 {-# INLINE prefixed #-}
 
 -- | A 'Prism' stripping a suffix from a list when used as a

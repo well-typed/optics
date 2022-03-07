@@ -5,7 +5,6 @@
 -- This module defines the 'Cons' and 'Snoc' classes, which provide 'Prism's for
 -- the leftmost and rightmost elements of a container, respectively.
 --
-{-# LANGUAGE PatternSynonyms #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Optics.Cons
   (

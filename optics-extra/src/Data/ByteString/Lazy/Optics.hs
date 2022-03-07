@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternSynonyms #-}
 -- | Lazy 'ByteString' lenses.
 module Data.ByteString.Lazy.Optics
   ( packedBytes, unpackedBytes, bytes

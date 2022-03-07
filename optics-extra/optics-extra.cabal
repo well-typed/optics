@@ -1,12 +1,13 @@
+cabal-version: 2.2
 name:          optics-extra
 version:       0.4
-license:       BSD3
+license:       BSD-3-Clause
 license-file:  LICENSE
 build-type:    Simple
-cabal-version: 1.24
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
-tested-with:   ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.2, GHCJS ==8.4
+tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
+                || ==9.0.2 || ==9.2.2, GHCJS ==8.4
 synopsis:      Extra utilities and instances for optics-core
 category:      Data, Optics, Lenses
 description:
@@ -25,10 +26,40 @@ source-repository head
   location: https://github.com/well-typed/optics.git
   subdir:   optics-extra
 
+common language
+    ghc-options:        -Wall -Wcompat
+
+    default-language:   Haskell2010
+
+    default-extensions: BangPatterns
+                        ConstraintKinds
+                        DefaultSignatures
+                        DeriveFoldable
+                        DeriveFunctor
+                        DeriveGeneric
+                        DeriveTraversable
+                        EmptyCase
+                        FlexibleContexts
+                        FlexibleInstances
+                        FunctionalDependencies
+                        GADTs
+                        GeneralizedNewtypeDeriving
+                        InstanceSigs
+                        KindSignatures
+                        LambdaCase
+                        OverloadedLabels
+                        PatternSynonyms
+                        RankNTypes
+                        ScopedTypeVariables
+                        TupleSections
+                        TypeApplications
+                        TypeFamilies
+                        TypeOperators
+                        ViewPatterns
+
 library
-  default-language: Haskell2010
+  import:           language
   hs-source-dirs:   src
-  ghc-options:      -Wall
 
   build-depends: base                   >= 4.10      && <5
                , array                  >= 0.5.2.0   && <0.6
@@ -74,20 +105,3 @@ library
                    Optics.Extra.Internal.ByteString
                    Optics.Extra.Internal.Vector
                    Optics.Extra.Internal.Zoom
-
-  default-extensions: BangPatterns
-                      DefaultSignatures
-                      DeriveFunctor
-                      FlexibleContexts
-                      FlexibleInstances
-                      FunctionalDependencies
-                      GADTs
-                      InstanceSigs
-                      LambdaCase
-                      MultiParamTypeClasses
-                      RankNTypes
-                      ScopedTypeVariables
-                      TupleSections
-                      TypeApplications
-                      TypeFamilies
-                      TypeOperators

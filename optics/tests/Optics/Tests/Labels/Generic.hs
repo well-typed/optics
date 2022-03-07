@@ -1,15 +1,6 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MonoLocalBinds #-}
-{-# LANGUAGE OverloadedLabels #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Optics.Tests.Labels.Generic where
 
@@ -95,8 +86,8 @@ label4rhs s b = s { fish = (fish s) { name = b } }
 label5lhs, label5rhs :: Human Mammal -> Bool -> Human Mammal
 label5lhs s b = set (#pets % traversed % gafield @"lazy") b s
 label5rhs s b = s { pets = (`map` pets s) $ \case
-                      Dog name age   -> Dog{..}
-                      Cat name age _ -> Cat { lazy = b, .. }
+                      Dog name0 age0   -> Dog { name = name0, age = age0 }
+                      Cat name0 age0 _ -> Cat { name = name0, age = age0, lazy = b }
                   }
 
 label6lhs, label6rhs :: Human a -> String -> Int -> String -> [b] -> Human b
