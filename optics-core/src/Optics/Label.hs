@@ -151,23 +151,20 @@ import Optics.Internal.Optic
 -- alleviate these issues. We're quite close to having a reasonable solution
 -- with the following trifecta:
 --
--- - @<https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#extension-DuplicateRecordFields DuplicateRecordFields>@ - introduced in GHC 8.0.1, addresses (1)
+-- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/duplicate_record_fields.html DuplicateRecordFields>@ - introduced in GHC 8.0.1, addresses (1)
 --
--- - @<https://github.com/ghc-proposals/ghc-proposals/pull/160 NoFieldSelectors>@ - accepted GHC proposal, addresses (2)
+-- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/field_selectors.html NoFieldSelectors>@ and @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_record_dot.html OverloadedRecordDot>@ - introduced in GHC 9.2.1, addresses (2)
 --
--- - @<https://github.com/ghc-proposals/ghc-proposals/pull/282 RecordDotSyntax>@ - accepted GHC proposal, addresses (3)
+-- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_record_update.html OverloadedRecordUpdate>@ - restricted version introduced in GHC 9.2.1, addresses (3)
 --
--- It needs to be noted however that both @NoFieldSelectors@ and
--- @RecordDotSyntax@ are not yet implemented, with the latter depending on
--- adding @setField@ to @HasField@
--- (<https://gitlab.haskell.org/ghc/ghc/issues/16232 ghc/16232>), not yet
--- merged.
+-- It needs to be noted however that @OverloadedRecordUpdate@ is not yet usable
+-- out of the box as it requires the user to enable @RebindableSyntax@ and
+-- provide their own @HasField@ class.
 --
 -- Is there no hope then for people who would like to work with records in a
--- reasonable way without waiting for these extensions? Not necessarily, as by
--- following a couple of simple patterns we can get pretty much the same (and
--- more) features with labels as optics, just with a slightly more verbose
--- syntax.
+-- reasonable way without waiting? Not necessarily, as by following a couple of
+-- simple patterns we can get pretty much the same (and more) features with
+-- labels as optics, just with a slightly more verbose syntax.
 
 -- $solution
 --
@@ -177,7 +174,7 @@ import Optics.Internal.Optic
 -- name and @#field@ to be an overloaded label that becomes an optic refering to
 -- this field in the appropriate context.  With this approach we get working
 -- autocompletion and jump-to-definition in editors supporting @ctags@/@etags@
--- in combination with @<https://hackage.haskell.org/package/hasktags hasktags>@,
+-- in combination with @<https://hackage.haskell.org/package/ghc-tags ghc-tags>@,
 -- both of which (especially the latter) are very important for developer's
 -- productivity in real-world code bases.
 --
@@ -214,9 +211,11 @@ import Optics.Internal.Optic
 -- makeFieldLabelsNoPrefix ''Movie
 -- @
 --
--- For production software the recommended approach is generation with Template
--- Haskell as it scales well in terms of compilation time and provides the best
--- performance in general.
+-- Generally speaking, both techniques trade blows in terms of compile time and
+-- run time resources. Generic optics are a bit slower to compile without
+-- optimizations than Template Haskell generated ones and their updating part
+-- might be slightly slower for larger data types with GHC < 9.2. On the other
+-- hand, generic optics are much more developer friendly.
 --
 -- /Note:/ there exists a similar approach that involves prefixing field names
 -- (either with the underscore or name of the data type) and generation of
@@ -230,8 +229,9 @@ import Optics.Internal.Optic
 --
 -- Prefixless fields (especially ones with common names such as @id@ or @name@)
 -- leak into global namespace as accessor functions and can generate a lot of
--- name clashes. Before @NoFieldSelectors@ is available, this can be alleviated by
--- splitting modules defining types into two, namely:
+-- name clashes. If you can't use GHC >= 9.2 and take advantage of the
+-- @NoFieldSelectors@ language extension, this can be alleviated by splitting
+-- modules defining types into two, namely:
 --
 -- (1) A private one that exports full type definitions, i.e. with their fields
 --     and constructors.
