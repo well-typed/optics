@@ -9,8 +9,6 @@
 -- module from @optics-extra@, so if you are not simply depending on @optics@
 -- you may wish to import that module instead.
 --
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ViewPatterns #-}
 module Optics.Cons.Core
   (
   -- * Cons

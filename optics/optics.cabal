@@ -1,12 +1,13 @@
+cabal-version:   2.2
 name:            optics
 version:         0.4
-license:         BSD3
+license:         BSD-3-Clause
 license-file:    LICENSE
 build-type:      Simple
 maintainer:      optics@well-typed.com
 author:          Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
-cabal-version:   1.24
-tested-with:     ghc ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.2, GHCJS ==8.4
+tested-with:     GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
+                  || ==9.0.2 || ==9.2.2, GHCJS ==8.4
 synopsis:        Optics as an abstract interface
 category:        Data, Optics, Lenses
 description:
@@ -33,10 +34,40 @@ source-repository head
   location: https://github.com/well-typed/optics.git
   subdir:   optics
 
+common language
+    ghc-options:        -Wall -Wcompat
+
+    default-language:   Haskell2010
+
+    default-extensions: BangPatterns
+                        ConstraintKinds
+                        DefaultSignatures
+                        DeriveFoldable
+                        DeriveFunctor
+                        DeriveGeneric
+                        DeriveTraversable
+                        EmptyCase
+                        FlexibleContexts
+                        FlexibleInstances
+                        FunctionalDependencies
+                        GADTs
+                        GeneralizedNewtypeDeriving
+                        InstanceSigs
+                        KindSignatures
+                        LambdaCase
+                        OverloadedLabels
+                        PatternSynonyms
+                        RankNTypes
+                        ScopedTypeVariables
+                        TupleSections
+                        TypeApplications
+                        TypeFamilies
+                        TypeOperators
+                        ViewPatterns
+
 library
-  default-language:   Haskell2010
+  import:             language
   hs-source-dirs:     src
-  ghc-options:        -Wall
 
   build-depends: base                   >= 4.10      && <5
                , array                  >= 0.5.2.0   && <0.6
@@ -124,9 +155,8 @@ library
                     , Numeric.Optics
 
 test-suite optics-tests
-  default-language: Haskell2010
+  import:           language
   hs-source-dirs:   tests
-  ghc-options:      -Wall
 
   -- inspection-testing doesn't compile with GHCJS
   if impl(ghcjs)
@@ -160,9 +190,8 @@ test-suite optics-tests
 
 -- Benchmarking folds
 benchmark folds
-  default-language: Haskell2010
+  import:           language
   hs-source-dirs:   benchmarks
-  ghc-options:      -Wall -threaded
 
   -- GHCJS takes forever to compile dependencies
   if impl(ghcjs)
@@ -182,9 +211,8 @@ benchmark folds
 
 -- Benchmarking traversals
 benchmark traversals
-  default-language: Haskell2010
+  import:           language
   hs-source-dirs:   benchmarks
-  ghc-options:      -Wall -threaded
 
   -- GHCJS takes forever to compile dependencies
   if impl(ghcjs)

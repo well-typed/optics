@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternSynonyms #-}
 module Data.ByteString.Strict.Optics
   ( packedBytes, unpackedBytes, bytes
   , packedChars, unpackedChars, chars

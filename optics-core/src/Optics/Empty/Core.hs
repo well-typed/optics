@@ -16,8 +16,6 @@
 -- True
 --
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ViewPatterns #-}
 module Optics.Empty.Core
   ( AsEmpty(..)
   , pattern Empty

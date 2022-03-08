@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternSynonyms #-}
 -- |
 -- Module: Data.Text.Optics
 -- Description: Optics for working with strict or lazy 'Text'.

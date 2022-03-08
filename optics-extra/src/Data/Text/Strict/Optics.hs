@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternSynonyms #-}
 -- |
 -- Module: Data.Text.Strict.Optics
 -- Description: Optics for working with strict 'Strict.Text'.

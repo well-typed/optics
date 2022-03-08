@@ -1,10 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 module Optics.TH.Internal.Product
   ( LensRules(..)
@@ -22,9 +16,9 @@ module Optics.TH.Internal.Product
 import Control.Monad
 import Control.Monad.State
 import Data.Either
-import Data.List
 import Data.Maybe
 import Language.Haskell.TH
+import qualified Data.List as L
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Traversable as T
@@ -119,10 +113,10 @@ expandName rules tyName cons allFields =
     -- field name.  See #323.
     stripSel :: String -> String
     stripSel n = fromMaybe n $ stripSuffix (':':first_con_name)
-                           =<< stripPrefix "$sel:" n
+                           =<< L.stripPrefix "$sel:" n
 
     stripSuffix :: Eq a => [a] -> [a] -> Maybe [a]
-    stripSuffix suffix = fmap reverse . stripPrefix (reverse suffix) . reverse
+    stripSuffix suffix = fmap reverse . L.stripPrefix (reverse suffix) . reverse
 
     -- We have to look up the actual name of the first constructor, rather than
     -- trying to split the string on colons, because either the field name or
@@ -301,7 +295,7 @@ buildScaffold forClassInstance rules s cons defName =
     scaffolds = [ (n, length ts, rightIndices ts) | (n,ts) <- consForDef ]
 
     rightIndices :: [Either Type Type] -> [Int]
-    rightIndices = findIndices (has _Right)
+    rightIndices = L.findIndices (has _Right)
 
     -- Right: types for this definition
     -- Left : other types

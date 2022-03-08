@@ -1,8 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 -- | Test 'makeFields' on a field whose type has a data family. Unlike for type
 -- families, for data families we do not generate type equality constraints, as
 -- they are not needed to avoid the issue in #754.

@@ -1,10 +1,4 @@
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TupleSections #-}
 {-# OPTIONS_HADDOCK not-home #-}
-
 -- | Definitions of concrete profunctors and profunctor classes.
 module Data.Profunctor.Indexed
   (

@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternSynonyms #-}
 module Data.ByteString.Optics
   ( IsByteString(..)
   , unpackedBytes

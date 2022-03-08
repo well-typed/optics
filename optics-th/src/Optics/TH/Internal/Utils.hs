@@ -2,9 +2,9 @@ module Optics.TH.Internal.Utils where
 
 import Control.Monad
 import Data.Maybe
-import Data.List
 import Language.Haskell.TH
 import Language.Haskell.TH.Datatype.TyVarBndr
+import qualified Data.List as L
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Language.Haskell.TH.Datatype as D
@@ -125,9 +125,9 @@ requireExtensions what extLists = do
       ]
     extensions -> fail $ mconcat
       [ "Generating " ++ what ++ " requires the following language extensions:\n\n"
-      , intercalate "\n" (map (("- " ++) . show) extensions)
+      , L.intercalate "\n" (map (("- " ++) . show) extensions)
       , "\n\nPlease enable the extensions by copy/pasting these lines into the top of your file:\n\n"
-      , intercalate "\n" (map extensionToPragma extensions)
+      , L.intercalate "\n" (map extensionToPragma extensions)
       , "\n\nTo enable them in a GHCi session, use the following command:\n\n"
       , ":seti " ++ unwords (map (("-X" ++) . show) extensions)
       ]
