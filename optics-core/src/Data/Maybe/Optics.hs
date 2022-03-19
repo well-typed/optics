@@ -40,6 +40,8 @@ _Just =
 -- | Shortcut for @'%' '_Just' '%'@.
 --
 -- Useful for composing lenses of 'Maybe' type.
+--
+-- @since 0.4.1
 infixl 9 %?
 (%?)
   :: (AppendIndices is js ks, JoinKinds k A_Prism k', JoinKinds k' l m)

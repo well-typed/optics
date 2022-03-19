@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name:          optics-th
-version:       0.4
+version:       0.4.1
 license:       BSD-3-Clause
 license-file:  LICENSE
 build-type:    Simple
@@ -63,7 +63,7 @@ library
   build-depends: base                   >= 4.10      && <5
                , containers             >= 0.5.10.2  && <0.7
                , mtl                    >= 2.2.2     && <2.3
-               , optics-core            >= 0.4       && <0.5
+               , optics-core            >= 0.4.1     && <0.5
                , template-haskell       >= 2.12      && <2.19
                , th-abstraction         >= 0.4       && <0.5
                , transformers           >= 0.5       && <0.6

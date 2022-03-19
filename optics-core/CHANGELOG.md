@@ -1,3 +1,14 @@
+# optics-core-0.4.1 (2022-03-22)
+* Add support for GHC-9.2
+* Add `is` ([#410](https://github.com/well-typed/optics/pull/410))
+* Improve error messages related to the `JoinKinds` class
+  ([#439](https://github.com/well-typed/optics/pull/439))
+* Port `universeOf`, `cosmosOf`, `paraOf`, `rewriteOf`, `transformOf`,
+  `rewriteMOf` and `transformMOf` from `Control.Lens.Plated`
+  ([#379](https://github.com/well-typed/optics/pull/379))
+* Add `(%?)` composition operator
+  ([#434](https://github.com/well-typed/optics/pull/434))
+
 # optics-core-0.4 (2021-02-22)
 * See [migration-guide-0.4.md](https://github.com/well-typed/optics/blob/master/migration-guide-0.4.md) for more details
 * Add support for GHC-9.0

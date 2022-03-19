@@ -252,6 +252,8 @@ scanr1Of o = \f ->
 -- user-specified 'Traversal'.
 --
 -- Ensures that the rule cannot be applied anywhere in the result.
+--
+-- @since 0.4.1
 rewriteMOf
   :: (Is k A_Traversal, Monad m)
   => Optic k is a b a b
@@ -263,6 +265,8 @@ rewriteMOf l f = go
 
 -- | Transform every element in a tree using a user supplied 'Traversal' in a
 -- bottom-up manner with a monadic effect.
+--
+-- @since 0.4.1
 transformMOf
   :: (Is k A_Traversal, Monad m)
   => Optic k is a b a b
