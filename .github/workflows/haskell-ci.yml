@@ -214,7 +214,7 @@ jobs:
           echo "packages: $GITHUB_WORKSPACE/source/optics-th" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/optics-vl" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/indexed-profunctors" >> cabal.project
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project ; fi
+          echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/metametapost" >> cabal.project
           cat cabal.project
       - name: sdist
@@ -255,7 +255,7 @@ jobs:
           echo "packages: ${PKGDIR_optics_th}" >> cabal.project
           echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
           echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project ; fi
+          echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
           echo "packages: ${PKGDIR_metametapost}" >> cabal.project
           echo "package optics" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
@@ -271,8 +271,8 @@ jobs:
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package indexed-profunctors" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods" >> cabal.project ; fi
+          echo "package template-haskell-optics" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package metametapost" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
@@ -319,8 +319,8 @@ jobs:
           if [ $((! GHCJSARITH)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
           if [ $((! GHCJSARITH)) -ne 0 ] ; then cd ${PKGDIR_indexed_profunctors} || false ; fi
           if [ $((! GHCJSARITH)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then doctest  -XHaskell2010 src ; fi
+          if [ $((! GHCJSARITH)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
+          if [ $((! GHCJSARITH)) -ne 0 ] ; then doctest  -XHaskell2010 src ; fi
       - name: cabal check
         run: |
           cd ${PKGDIR_optics} || false
@@ -337,8 +337,8 @@ jobs:
           ${CABAL} -vnormal check
           cd ${PKGDIR_indexed_profunctors} || false
           ${CABAL} -vnormal check
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90000)) -ne 0 ] ; then ${CABAL} -vnormal check ; fi
+          cd ${PKGDIR_template_haskell_optics} || false
+          ${CABAL} -vnormal check
           cd ${PKGDIR_metametapost} || false
           ${CABAL} -vnormal check
       - name: haddock
