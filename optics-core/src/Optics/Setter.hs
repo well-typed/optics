@@ -166,6 +166,8 @@ mapped = Optic mapped__
 -- compositionality. Given two single transformations @f@ and @g@, you can
 -- construct @\\a -> f a '<|>' g a@ which performs both rewrites until a fixed
 -- point.
+--
+-- @since 0.4.1
 rewriteOf :: Is k A_Setter => Optic k is a b a b -> (b -> Maybe a) -> a -> b
 rewriteOf o f = go
   where
@@ -174,6 +176,8 @@ rewriteOf o f = go
 
 -- | Transform every element by recursively applying a given 'Setter' in a
 -- bottom-up manner.
+--
+-- @since 0.4.1
 transformOf :: Is k A_Setter => Optic k is a b a b -> (b -> b) -> a -> b
 transformOf o f = go
   where

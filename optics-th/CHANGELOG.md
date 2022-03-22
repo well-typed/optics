@@ -1,3 +1,6 @@
+# optics-th-0.4.1 (2022-03-22)
+* Add support for GHC-9.2
+
 # optics-th-0.4 (2021-02-22)
 * Add support for GHC-9.0
 * Print missing language extensions during TH generation of labels if there are

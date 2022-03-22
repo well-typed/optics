@@ -680,6 +680,8 @@ lookupOf o a = foldrOf o (\(a', v) next -> if a == a' then Just v else next) Not
 
 -- | Given a 'Fold' that knows how to locate immediate children, retrieve all of
 -- the transitive descendants of a node, including itself.
+--
+-- @since 0.4.1
 universeOf :: Is k A_Fold => Optic' k is a a -> a -> [a]
 universeOf o = (`appEndo` []) . go
   where
@@ -688,6 +690,8 @@ universeOf o = (`appEndo` []) . go
 
 -- | Given a 'Fold' that knows how to locate immediate children, fold all of the
 -- transitive descendants of a node, including itself.
+--
+-- @since 0.4.1
 cosmosOf :: forall k is a. Is k A_Fold => Optic' k is a a -> Fold a a
 cosmosOf o = foldVL go
   where
@@ -696,6 +700,8 @@ cosmosOf o = foldVL go
 {-# INLINE cosmosOf #-}
 
 -- | Perform a fold-like computation on each value, technically a paramorphism.
+--
+-- @since 0.4.1
 paraOf :: Is k A_Fold => Optic' k is a a -> (a -> [r] -> r) -> a -> r
 paraOf o f = go
   where
