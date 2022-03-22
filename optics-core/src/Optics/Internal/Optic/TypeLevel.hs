@@ -113,7 +113,7 @@ class AppendIndices xs ys ks | xs ys -> ks where
 
 -- | If the second list is empty, we can pick the first list
 -- even if nothing is known about it.
-instance {-# INCOHERENT #-} AppendIndices xs '[] xs where
+instance {-# INCOHERENT #-} xs ~ zs => AppendIndices xs '[] zs where
   appendIndices = IxEq
 
 instance ys ~ zs => AppendIndices '[] ys zs where
