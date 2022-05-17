@@ -1,3 +1,13 @@
+# optics-extra-0.4.2 (????-??-??)
+* Allow transformers-0.6 and mtl-2.3
+
+  Note that optics-extra no longer defines Zoom instances for ErrorT or ListT when
+  building with mtl-2.3 or later. This is because MonadState is a superclass of
+  Zoom, and the MonadState instances for ErrorT and ListT were removed in
+  mtl-2.3. Be watchful of this if you build optics-extra with mtl-2.3 (or
+  later) combined with an older version of transformers (pre-0.6) that defines
+  ErrorT or ListT.  Similarly for Magnify and MagnifyMany.
+
 # optics-extra-0.4.1 (2022-03-22)
 * Add support for GHC-9.2
 

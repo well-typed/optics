@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-warnings-deprecations #-}
 module Optics.Zoom
@@ -11,10 +12,8 @@ module Optics.Zoom
 
 import Control.Monad.Reader (ReaderT (..), MonadReader)
 import Control.Monad.State (MonadState (..))
-import Control.Monad.Trans.Error (Error, ErrorT (..))
 import Control.Monad.Trans.Except (ExceptT (..), runExceptT)
 import Control.Monad.Trans.Identity (IdentityT (..))
-import Control.Monad.Trans.List (ListT (..))
 import Control.Monad.Trans.Maybe (MaybeT (..))
 import qualified Control.Monad.Trans.RWS.Lazy as L
 import qualified Control.Monad.Trans.RWS.Strict as S
@@ -22,6 +21,11 @@ import qualified Control.Monad.Trans.State.Lazy as L
 import qualified Control.Monad.Trans.State.Strict as S
 import qualified Control.Monad.Trans.Writer.Lazy as L
 import qualified Control.Monad.Trans.Writer.Strict as S
+
+#if !MIN_VERSION_transformers(0,6,0)
+import Control.Monad.Trans.Error (Error, ErrorT (..))
+import Control.Monad.Trans.List (ListT (..))
+#endif
 
 import Optics.Core
 import Optics.Internal.Utils
@@ -158,14 +162,6 @@ instance (Monoid w, Zoom m n s t) => Zoom (L.WriterT w m) (L.WriterT w n) s t wh
   {-# INLINE zoomMaybe #-}
   {-# INLINE zoomMany #-}
 
-instance Zoom m n s t => Zoom (ListT m) (ListT n) s t where
-  zoom      o = ListT #.                  zoom      o .# runListT
-  zoomMaybe o = ListT #. fmap sequenceA . zoomMaybe o .# runListT
-  zoomMany  o = ListT #.                  zoomMany  o .# runListT
-  {-# INLINE zoom #-}
-  {-# INLINE zoomMaybe #-}
-  {-# INLINE zoomMany #-}
-
 instance Zoom m n s t => Zoom (MaybeT m) (MaybeT n) s t where
   zoom o =
     MaybeT #. zoom o .# runMaybeT
@@ -173,17 +169,6 @@ instance Zoom m n s t => Zoom (MaybeT m) (MaybeT n) s t where
     MaybeT #. fmap (getMay . shuffleMay) . zoomMaybe o . fmap May .# runMaybeT
   zoomMany o =
     MaybeT #. fmap getMay . zoomMany o . fmap May .# runMaybeT
-  {-# INLINE zoom #-}
-  {-# INLINE zoomMaybe #-}
-  {-# INLINE zoomMany #-}
-
-instance (Error e, Zoom m n s t) => Zoom (ErrorT e m) (ErrorT e n) s t where
-  zoom o =
-    ErrorT #. zoom o .# runErrorT
-  zoomMaybe o =
-    ErrorT #. fmap (getErr . shuffleErr) . zoomMaybe o . fmap Err .# runErrorT
-  zoomMany o =
-    ErrorT #. fmap getErr . zoomMany o . fmap Err .# runErrorT
   {-# INLINE zoom #-}
   {-# INLINE zoomMaybe #-}
   {-# INLINE zoomMany #-}
@@ -198,6 +183,27 @@ instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
   {-# INLINE zoom #-}
   {-# INLINE zoomMaybe #-}
   {-# INLINE zoomMany #-}
+
+#if !MIN_VERSION_transformers(0,6,0) && !MIN_VERSION_mtl(2,3,0)
+instance (Error e, Zoom m n s t) => Zoom (ErrorT e m) (ErrorT e n) s t where
+  zoom o =
+    ErrorT #. zoom o .# runErrorT
+  zoomMaybe o =
+    ErrorT #. fmap (getErr . shuffleErr) . zoomMaybe o . fmap Err .# runErrorT
+  zoomMany o =
+    ErrorT #. fmap getErr . zoomMany o . fmap Err .# runErrorT
+  {-# INLINE zoom #-}
+  {-# INLINE zoomMaybe #-}
+  {-# INLINE zoomMany #-}
+
+instance Zoom m n s t => Zoom (ListT m) (ListT n) s t where
+  zoom      o = ListT #.                  zoom      o .# runListT
+  zoomMaybe o = ListT #. fmap sequenceA . zoomMaybe o .# runListT
+  zoomMany  o = ListT #.                  zoomMany  o .# runListT
+  {-# INLINE zoom #-}
+  {-# INLINE zoomMaybe #-}
+  {-# INLINE zoomMany #-}
+#endif
 
 ------------------------------------------------------------------------------
 -- Magnify
@@ -367,16 +373,6 @@ instance
   magnifyMany o = L.WriterT #. magnifyMany o .# L.runWriterT
   {-# INLINE magnifyMany #-}
 
-instance Magnify m n b a => Magnify (ListT m) (ListT n) b a where
-  magnify      o = ListT #.                  magnify      o .# runListT
-  magnifyMaybe o = ListT #. fmap sequenceA . magnifyMaybe o .# runListT
-  {-# INLINE magnify #-}
-  {-# INLINE magnifyMaybe #-}
-
-instance MagnifyMany m n b a => MagnifyMany (ListT m) (ListT n) b a where
-  magnifyMany o = ListT #. magnifyMany o .# runListT
-  {-# INLINE magnifyMany #-}
-
 instance Magnify m n b a => Magnify (MaybeT m) (MaybeT n) b a where
   magnify o = MaybeT #. magnify o .# runMaybeT
   magnifyMaybe o =
@@ -388,6 +384,18 @@ instance MagnifyMany m n b a => MagnifyMany (MaybeT m) (MaybeT n) b a where
   magnifyMany o = MaybeT #. fmap getMay . magnifyMany o . fmap May .# runMaybeT
   {-# INLINE magnifyMany #-}
 
+instance Magnify m n b a => Magnify (ExceptT e m) (ExceptT e n) b a where
+  magnify o = ExceptT #. magnify o .# runExceptT
+  magnifyMaybe o =
+    ExceptT #. fmap (getErr . shuffleErr) . magnifyMaybe o . fmap Err .# runExceptT
+  {-# INLINE magnify #-}
+  {-# INLINE magnifyMaybe #-}
+
+instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a where
+  magnifyMany o = ExceptT #. fmap getErr . magnifyMany o . fmap Err .# runExceptT
+  {-# INLINE magnifyMany #-}
+
+#if !MIN_VERSION_transformers(0,6,0)
 instance (Error e, Magnify m n b a) => Magnify (ErrorT e m) (ErrorT e n) b a where
   magnify o = ErrorT #. magnify o .# runErrorT
   magnifyMaybe o =
@@ -401,13 +409,13 @@ instance
   magnifyMany o = ErrorT #. fmap getErr . magnifyMany o . fmap Err .# runErrorT
   {-# INLINE magnifyMany #-}
 
-instance Magnify m n b a => Magnify (ExceptT e m) (ExceptT e n) b a where
-  magnify o = ExceptT #. magnify o .# runExceptT
-  magnifyMaybe o =
-    ExceptT #. fmap (getErr . shuffleErr) . magnifyMaybe o . fmap Err .# runExceptT
+instance Magnify m n b a => Magnify (ListT m) (ListT n) b a where
+  magnify      o = ListT #.                  magnify      o .# runListT
+  magnifyMaybe o = ListT #. fmap sequenceA . magnifyMaybe o .# runListT
   {-# INLINE magnify #-}
   {-# INLINE magnifyMaybe #-}
 
-instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a where
-  magnifyMany o = ExceptT #. fmap getErr . magnifyMany o . fmap Err .# runExceptT
+instance MagnifyMany m n b a => MagnifyMany (ListT m) (ListT n) b a where
+  magnifyMany o = ListT #. magnifyMany o .# runListT
   {-# INLINE magnifyMany #-}
+#endif

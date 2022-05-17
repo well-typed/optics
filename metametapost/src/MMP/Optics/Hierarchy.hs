@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 module MMP.Optics.Hierarchy where
 
-import           Control.Monad.State
+import           Control.Monad
 import qualified Data.Graph as G
 import           Optics
 

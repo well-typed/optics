@@ -1,6 +1,6 @@
 module MMP.Optics.Re where
 
-import           Control.Monad.State
+import           Control.Monad
 import           Optics
 
 import           MetaMetaPost
