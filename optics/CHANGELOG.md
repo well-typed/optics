@@ -1,4 +1,4 @@
-# optics-0.4.2 (????-??-??)
+# optics-0.4.2 (2022-05-19)
 * Allow `transformers-0.6` and `mtl-2.3`
 
   Note that `optics-extra` no longer defines `Zoom` instances for `ErrorT` or `ListT` when
