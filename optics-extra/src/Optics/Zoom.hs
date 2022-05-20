@@ -22,7 +22,7 @@ import qualified Control.Monad.Trans.State.Strict as S
 import qualified Control.Monad.Trans.Writer.Lazy as L
 import qualified Control.Monad.Trans.Writer.Strict as S
 
-#if !MIN_VERSION_transformers(0,6,0)
+#if !MIN_VERSION_transformers(0,6,0) && !MIN_VERSION_mtl(2,3,0)
 import Control.Monad.Trans.Error (Error, ErrorT (..))
 import Control.Monad.Trans.List (ListT (..))
 #endif
@@ -395,7 +395,7 @@ instance MagnifyMany m n b a => MagnifyMany (ExceptT e m) (ExceptT e n) b a wher
   magnifyMany o = ExceptT #. fmap getErr . magnifyMany o . fmap Err .# runExceptT
   {-# INLINE magnifyMany #-}
 
-#if !MIN_VERSION_transformers(0,6,0)
+#if !MIN_VERSION_transformers(0,6,0) && !MIN_VERSION_mtl(2,3,0)
 instance (Error e, Magnify m n b a) => Magnify (ErrorT e m) (ErrorT e n) b a where
   magnify o = ErrorT #. magnify o .# runErrorT
   magnifyMaybe o =
