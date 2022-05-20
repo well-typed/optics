@@ -1,3 +1,6 @@
+# optics-extra-0.4.2.1 (2022-05-20)
+* Fix for previous release when used with `mtl-2.3` and `transformers-0.5`.
+
 # optics-extra-0.4.2 (2022-05-19)
 * Allow `transformers-0.6` and `mtl-2.3`
 
