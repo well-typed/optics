@@ -336,8 +336,8 @@ jobs:
           $CABAL v2-test $ARG_COMPILER $ARG_TESTS $ARG_BENCH all --test-show-details=direct
       - name: docspec
         run: |
-          if [ $((HCNUMVER < 90400 || HCNUMVER >= 90800 && HCNUMVER < 91400)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
-          if [ $((HCNUMVER < 90400 || HCNUMVER >= 90800 && HCNUMVER < 91400)) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
+          if [ $((HCNUMVER >= 90800 && HCNUMVER < 91400)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
+          if [ $((HCNUMVER >= 90800 && HCNUMVER < 91400)) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
       - name: cabal check
         run: |
           cd ${PKGDIR_optics} || false
