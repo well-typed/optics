@@ -67,8 +67,9 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs09)
   , testCase "itraverseOf_ itraversed = itraverseOf_ ifolded" $
-    -- GHC 8.2, 8.6 to 8.10 and 9.2 give a different structure of let bindings.
-    ghc82and86to810and92failure $(inspectTest $ 'lhs10 === 'rhs10)
+    -- GHC 8.2, 8.6 to 8.10 and 9.2 to 9.4 give a different structure of let
+    -- bindings.
+    ghc82and86to810and92to94failure $(inspectTest $ 'lhs10 === 'rhs10)
   , testCase "optimized lhs10a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs10a)
   , testCase "optimized rhs10a" $
@@ -93,8 +94,9 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs13" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs13)
   , testCase "traverseOf_ itraversed = traverseOf_ folded" $
-    -- GHC 8.6 to 8.10 and GHC 9.2 give a different structure of let bindings.
-    ghc86to810and92failure $(inspectTest $ 'lhs14 ==- 'rhs14)
+    -- GHC 8.6 to 8.10 and GHC 9.2 to 9.4 give a different structure of let
+    -- bindings.
+    ghc86to810and92to94failure $(inspectTest $ 'lhs14 ==- 'rhs14)
   , testCase "optimized lhs14a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs14a)
   , testCase "optimized rhs14a" $
