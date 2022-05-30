@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Optics.Tests.Labels.Generic where
@@ -69,7 +70,7 @@ genericLabelsTests = testGroup "Labels via Generic"
 
 label1lhs, label1rhs :: forall a. Human a -> String
 label1lhs s = view #name s
-label1rhs s = name (s :: Human a)
+label1rhs Human{name} = name
 
 label2lhs, label2rhs :: Human a -> [b] -> Human b
 label2lhs s b = set #pets b s
@@ -77,7 +78,9 @@ label2rhs s b = s { pets = b }
 
 label3lhs, label3rhs :: Human a -> String
 label3lhs s = view (#fish % #name) s
-label3rhs s = name (fish s :: Fish)
+label3rhs Human{fish} = case fish of
+  GoldFish{name} -> name
+  Herring{name}  -> name
 
 label4lhs, label4rhs :: Human a -> String -> Human a
 label4lhs s b = set (#fish % #name) b s
