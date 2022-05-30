@@ -92,6 +92,9 @@ module Language.Haskell.TH.Optics
   , _SigD
   , _ForeignD
   , _InfixD
+#if MIN_VERSION_template_haskell(2,19,0)
+  , _DefaultD
+#endif
   , _PragmaD
   , _DataInstD
   , _NewtypeInstD
@@ -499,6 +502,14 @@ instance HasTypeVars Type where
 #if MIN_VERSION_template_haskell(2,17,0)
     t@MulArrowT{}      -> pure t
 #endif
+#if MIN_VERSION_template_haskell(2,19,0)
+    PromotedInfixT t1 n t2 -> InfixT <$> traverseOf (typeVarsEx s) f t1
+                                     <*> pure n
+                                     <*> traverseOf (typeVarsEx s) f t2
+    PromotedUInfixT t1 n t2 -> UInfixT <$> traverseOf (typeVarsEx s) f t1
+                                       <*> pure n
+                                       <*> traverseOf (typeVarsEx s) f t2
+#endif
 
 instance HasTypeVars Con where
   typeVarsEx s = traversalVL $ \f -> \case
@@ -569,6 +580,12 @@ instance SubstType Type where
 #endif
 #if MIN_VERSION_template_haskell(2,17,0)
   substType _ t@MulArrowT{}        = t
+#endif
+#if MIN_VERSION_template_haskell(2,19,0)
+  substType m (PromotedInfixT  t1 n t2) =
+    PromotedInfixT  (substType m t1) n (substType m t2)
+  substType m (PromotedUInfixT t1 n t2) =
+    PromotedUInfixT (substType m t1) n (substType m t2)
 #endif
 
 instance SubstType t => SubstType [t] where
@@ -892,6 +909,16 @@ _InfixD
       reviewer (x, y) = InfixD x y
       remitter (InfixD x y) = Just (x, y)
       remitter _ = Nothing
+
+#if MIN_VERSION_template_haskell(2,19,0)
+_DefaultD :: Prism' Dec [Type]
+_DefaultD
+  = prism' reviewer remitter
+  where
+      reviewer = DefaultD
+      remitter (DefaultD ts) = Just ts
+      remitter _ = Nothing
+#endif
 
 _PragmaD :: Prism' Dec Pragma
 _PragmaD

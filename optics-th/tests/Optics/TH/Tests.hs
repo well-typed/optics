@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK hide #-} -- GHC 8.2.2 hangs on this module otherwise
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TemplateHaskell #-}

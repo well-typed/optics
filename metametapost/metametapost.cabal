@@ -5,7 +5,7 @@ license:       BSD-3-Clause
 license-file:  LICENSE
 build-type:    Simple
 tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.2, GHCJS ==8.4
+                || ==9.0.2 || ==9.2.2 || ==9.4.1, GHCJS ==8.4
 maintainer:    oleg@well-typed.com
 synopsis:      Generate optics documentation diagrams
 category:      Optics, Examples
