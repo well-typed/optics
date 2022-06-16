@@ -134,6 +134,13 @@ ghcGE90failure = assertFailure'
 ghcGE90failure = assertSuccess
 #endif
 
+ghcGE92failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ >= 902
+ghcGE92failure = assertFailure'
+#else
+ghcGE92failure = assertSuccess
+#endif
+
 ghc86to810and92to94failure :: Result -> IO ()
 #if __GLASGOW_HASKELL__ >= 806 && __GLASGOW_HASKELL__ <= 810 \
  || __GLASGOW_HASKELL__ >= 902 && __GLASGOW_HASKELL__ <= 904
