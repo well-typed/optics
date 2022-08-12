@@ -84,7 +84,10 @@ label3rhs Human{fish} = case fish of
 
 label4lhs, label4rhs :: Human a -> String -> Human a
 label4lhs s b = set (#fish % #name) b s
-label4rhs s b = s { fish = (fish s) { name = b } }
+label4rhs s b = s { fish = case fish s of
+                      GoldFish{} -> GoldFish b
+                      Herring{}  -> Herring b
+                  }
 
 label5lhs, label5rhs :: Human Mammal -> Bool -> Human Mammal
 label5lhs s b = set (#pets % traversed % gafield @"lazy") b s
