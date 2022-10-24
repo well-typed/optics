@@ -106,6 +106,7 @@ castOptic (Optic o) = Optic (cast o)
       .  Optic_ srcKind  p i (Curry is i) s t a b
       -> Optic_ destKind p i (Curry is i) s t a b
     cast x = implies @srcKind @destKind @p x
+{-# INLINE castOptic #-}
 
 -- | Compose two optics of compatible flavours.
 --
