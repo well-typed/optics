@@ -85,8 +85,8 @@ iover'
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
 iover' o = \f ->
-  let star = getOptic (castOptic @A_Setter o) $ IxStar (\i -> wrapIdentity' . f i)
-  in unwrapIdentity' . runIxStar star id
+  let star = getOptic (castOptic @A_Setter o) $ IxStar (\i -> wrapSolo' . f i)
+  in getSolo . runIxStar star id
 
 {-# INLINE iover' #-}
 

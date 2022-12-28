@@ -227,9 +227,9 @@ ifailover'
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
 ifailover' o = \f s ->
-  let OrT visited t = itraverseOf o (\i -> wrapOrT . wrapIdentity' . f i) s
+  let OrT visited t = itraverseOf o (\i -> wrapOrT . wrapSolo' . f i) s
   in if visited
-     then Just (unwrapIdentity' t)
+     then case t of Solo v -> Just v
      else Nothing
 {-# INLINE ifailover' #-}
 

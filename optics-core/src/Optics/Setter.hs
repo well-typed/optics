@@ -106,8 +106,8 @@ over'
   => Optic k is s t a b
   -> (a -> b) -> s -> t
 over' o = \f ->
-  let star = getOptic (castOptic @A_Setter o) $ Star (wrapIdentity' . f)
-  in unwrapIdentity' . runStar star
+  let star = getOptic (castOptic @A_Setter o) $ Star (wrapSolo' . f)
+  in getSolo . runStar star
 {-# INLINE over' #-}
 
 -- | Apply a setter.

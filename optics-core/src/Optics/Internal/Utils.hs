@@ -3,9 +3,9 @@
 -- | This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
 module Optics.Internal.Utils
-  ( Identity'(..)
-  , wrapIdentity'
-  , unwrapIdentity'
+  ( Solo (..)
+  , wrapSolo'
+  , getSolo
 
   , Traversed(..)
   , runTraversed
@@ -21,27 +21,22 @@ module Optics.Internal.Utils
 import qualified Data.Semigroup as SG
 
 import Data.Profunctor.Indexed
+import Data.Tuple.Solo (Solo (..), getSolo)
 
 -- Needed for strict application of (indexed) setters.
 --
 -- Credit for this goes to Eric Mertens, see
 -- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
-data Identity' a = Identity' {-# UNPACK #-} !() a
-  deriving Functor
 
-instance Applicative Identity' where
-  pure a = Identity' () a
-  Identity' () f <*> Identity' () x = Identity' () (f x)
+instance Mapping (Star Solo) where
+  roam  f (Star k) = Star $ wrapSolo' . f (getSolo . k)
+  iroam f (Star k) = Star $ wrapSolo' . f (\_ -> getSolo . k)
 
-instance Mapping (Star Identity') where
-  roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
-  iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
-
-instance Mapping (IxStar Identity') where
+instance Mapping (IxStar Solo) where
   roam  f (IxStar k) =
-    IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
+    IxStar $ \i -> wrapSolo' . f (getSolo . k i)
   iroam f (IxStar k) =
-    IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
+    IxStar $ \ij -> wrapSolo' . f (\i -> getSolo . k (ij i))
 
 -- | Mark a value for evaluation to whnf.
 --
@@ -50,11 +45,8 @@ instance Mapping (IxStar Identity') where
 -- instance of Identity' makes sure that we force evaluation of all of them, but
 -- we leave anything else alone.
 --
-wrapIdentity' :: a -> Identity' a
-wrapIdentity' a = Identity' (a `seq` ()) a
-
-unwrapIdentity' :: Identity' a -> a
-unwrapIdentity' (Identity' () a) = a
+wrapSolo' :: a -> Solo a
+wrapSolo' a = Solo $! a
 
 ----------------------------------------
 
