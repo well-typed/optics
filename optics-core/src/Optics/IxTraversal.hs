@@ -97,6 +97,7 @@ import Control.Monad.Trans.State
 import Data.Functor.Identity
 
 import Data.Profunctor.Indexed
+import Data.Tuple.Solo (Solo (..))
 
 import Optics.Internal.Indexed
 import Optics.Internal.Indexed.Classes
@@ -227,7 +228,7 @@ ifailover'
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
 ifailover' o = \f s ->
-  let OrT visited t = itraverseOf o (\i -> wrapOrT . wrapSolo' . f i) s
+  let OrT visited t = itraverseOf o (\i -> wrapOrT . (Solo $!) . f i) s
   in if visited
      then case t of Solo v -> Just v
      else Nothing

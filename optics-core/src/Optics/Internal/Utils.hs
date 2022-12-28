@@ -3,11 +3,7 @@
 -- | This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
 module Optics.Internal.Utils
-  ( Solo (..)
-  , wrapSolo'
-  , getSolo
-
-  , Traversed(..)
+  ( Traversed(..)
   , runTraversed
 
   , OrT(..)
@@ -21,34 +17,6 @@ module Optics.Internal.Utils
 import qualified Data.Semigroup as SG
 
 import Data.Profunctor.Indexed
-import Data.Tuple.Solo (Solo (..), getSolo)
-
--- Needed for strict application of (indexed) setters.
---
--- Credit for this goes to Eric Mertens, see
--- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
-
-instance Mapping (Star Solo) where
-  roam  f (Star k) = Star $ wrapSolo' . f (getSolo . k)
-  iroam f (Star k) = Star $ wrapSolo' . f (\_ -> getSolo . k)
-
-instance Mapping (IxStar Solo) where
-  roam  f (IxStar k) =
-    IxStar $ \i -> wrapSolo' . f (getSolo . k i)
-  iroam f (IxStar k) =
-    IxStar $ \ij -> wrapSolo' . f (\i -> getSolo . k (ij i))
-
--- | Mark a value for evaluation to whnf.
---
--- This allows us to, when applying a setter to a structure, evaluate only the
--- parts that we modify. If an optic focuses on multiple targets, Applicative
--- instance of Identity' makes sure that we force evaluation of all of them, but
--- we leave anything else alone.
---
-wrapSolo' :: a -> Solo a
-wrapSolo' a = Solo $! a
-
-----------------------------------------
 
 -- | Helper for 'Optics.Fold.traverseOf_' and the like for better
 -- efficiency than the foldr-based version.

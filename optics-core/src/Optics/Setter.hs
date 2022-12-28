@@ -63,10 +63,10 @@ module Optics.Setter
   ) where
 
 import Data.Profunctor.Indexed
+import Data.Tuple.Solo (Solo (..), getSolo)
 
 import Optics.Internal.Optic
 import Optics.Internal.Setter
-import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying setter.
 type Setter s t a b = Optic A_Setter NoIx s t a b
@@ -102,13 +102,27 @@ over o = \f -> runFunArrow $ getOptic (castOptic @A_Setter o) (FunArrow f)
 -- 'over' is used, because the first coordinate of a pair is never forced.
 --
 over'
-  :: Is k A_Setter
+  :: Is k A_Traversal
   => Optic k is s t a b
   -> (a -> b) -> s -> t
+-- See [Note: Solo wrapping]
 over' o = \f ->
-  let star = getOptic (castOptic @A_Setter o) $ Star (wrapSolo' . f)
+  let star = getOptic (castOptic @A_Traversal o) $ Star ((Solo $!) . f)
   in getSolo . runStar star
 {-# INLINE over' #-}
+
+-- Note: Solo wrapping
+--
+-- We use Solo for strict application of (indexed) setters.
+--
+-- Credit for this idea goes to Eric Mertens; see
+-- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
+--
+-- Using Solo rather than Identity allows us, when applying a traversal to a
+-- structure, to evaluate only the parts that we modify. If an optic focuses on
+-- multiple targets, the Applicative instance of Solo (combined with applying
+-- the Solo data constructor strictly) makes sure that we force evaluation of
+-- all of them, but we leave anything else alone.
 
 -- | Apply a setter.
 --
@@ -128,10 +142,11 @@ set o = over o . const
 
 -- | Apply a setter, strictly.
 --
--- TODO DOC: what exactly is the strictness property?
---
+-- The new value will be forced if and only if the optic traverses at
+-- least one target. If forcing the new value is inexpensive, then it
+-- is cheaper to do so manually and use 'set'.
 set'
-  :: Is k A_Setter
+  :: Is k A_Traversal
   => Optic k is s t a b
   -> b -> s -> t
 set' o = over' o . const
