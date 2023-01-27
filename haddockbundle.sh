@@ -25,7 +25,7 @@ for PKG in $PACKAGES; do
 	# Apparently cabal haddock --ignore-project doesn't ignore project after all.
 	echo 'packages: .' > cabal.project
 
-	cabal haddock --haddock-for-hackage --with-compiler "$GHC"
+	cabal haddock --enable-documentation --haddock-for-hackage --with-compiler "$GHC"
 	cp dist-newstyle/*-docs.tar.gz "$TOPDIR/dist-newstyle/"
 
 	rm -f cabal.project
