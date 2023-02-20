@@ -6,8 +6,10 @@ module Optics.Tests.Labels.TH where
 
 import Data.Ord
 import Data.Word
-import Control.Monad.Reader
-import Control.Monad.State
+import Data.Function (fix)
+import Control.Monad (replicateM)
+import Control.Monad.Reader (MonadReader (..), runReaderT, asks)
+import Control.Monad.State (MonadState (..), gets, evalStateT, modify')
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Inspection
