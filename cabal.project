@@ -13,3 +13,14 @@ packages:
   metametapost/*.cabal
 
 tests: true
+
+-- TODO: for GHC-9.6.1 we need to add few allow newer
+allow-newer: bifunctors:template-haskell
+allow-newer: generics-sop-0.5.1.2:base
+allow-newer: generics-sop-0.5.1.2:ghc-prim
+allow-newer: generics-sop-0.5.1.2:template-haskell
+allow-newer: hashable-1.4.2.0:base
+allow-newer: indexed-traversable-0.1.2:base
+allow-newer: indexed-traversable-instances-0.1.1.1:base
+allow-newer: OneTuple-0.3.1:base
+allow-newer: sop-core-0.5.0.2:base
