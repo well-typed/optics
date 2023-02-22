@@ -50,8 +50,8 @@ module Optics.Iso
   -- | The functions translating back and forth must be mutually inverse:
   --
   -- @
-  -- 'Optics.Getter.view' i . 'Optics.Getter.review' i ≡ 'id'
-  -- 'Optics.Getter.review' i . 'Optics.Getter.view' i ≡ 'id'
+  -- 'Optics.Getter.view' i . 'Optics.Review.review' i ≡ 'id'
+  -- 'Optics.Review.review' i . 'Optics.Getter.view' i ≡ 'id'
   -- @
 
   -- * Additional introduction forms
