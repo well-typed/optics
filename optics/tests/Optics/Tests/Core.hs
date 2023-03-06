@@ -96,7 +96,7 @@ coreTests = testGroup "Core"
   , testCase "traverseOf_ itraversed = traverseOf_ folded" $
     -- GHC 8.6 to 8.10 give a different structure of let bindings
     -- GHC 9.2 to 9.4 have very different structure
-    ghcGE92failure $(inspectTest $ 'lhs14 ==~ 'rhs14)
+    ghc92and94failure $(inspectTest $ 'lhs14 ==~ 'rhs14)
   , testCase "optimized lhs14a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs14a)
   , testCase "optimized rhs14a" $

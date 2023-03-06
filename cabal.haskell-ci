@@ -3,3 +3,6 @@ doctest:        <9.3
 tests:          True
 benchmarks:     <9.5
 jobs-selection: any
+
+-- turn head hackage off
+head-hackage: <0
