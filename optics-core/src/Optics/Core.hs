@@ -41,6 +41,7 @@ import Optics.IxLens                           as O
 import Optics.IxSetter                         as O
 import Optics.IxTraversal                      as O
 import Optics.Lens                             as O
+import Optics.NeFold                           as O
 import Optics.ReversedLens                     as O
 import Optics.Prism                            as O
 import Optics.ReversedPrism                    as O

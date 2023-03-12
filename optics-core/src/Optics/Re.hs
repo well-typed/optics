@@ -32,7 +32,6 @@ import Data.Coerce
 
 import Data.Profunctor.Indexed
 
-import Optics.Internal.Bi
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 
@@ -125,17 +124,17 @@ instance Profunctor p => Profunctor (Re p s t) where
   ixcontramap = error "ixcontramap(Re) shouldn't be reachable"
 
 instance Bicontravariant p => Bifunctor (Re p s t) where
-  bimap  f g (Re p) = Re (p . contrabimap g f)
-  first  f   (Re p) = Re (p . contrasecond f)
-  second   g (Re p) = Re (p . contrafirst g)
-  {-# INLINE bimap #-}
-  {-# INLINE first #-}
-  {-# INLINE second #-}
+  bimap_  f g (Re p) = Re (p . contrabimap g f)
+  first_  f   (Re p) = Re (p . contrasecond f)
+  second_   g (Re p) = Re (p . contrafirst g)
+  {-# INLINE bimap_ #-}
+  {-# INLINE first_ #-}
+  {-# INLINE second_ #-}
 
 instance Bifunctor p => Bicontravariant (Re p s t) where
-  contrabimap  f g (Re p) = Re (p . bimap g f)
-  contrafirst  f   (Re p) = Re (p . second f)
-  contrasecond   g (Re p) = Re (p . first g)
+  contrabimap  f g (Re p) = Re (p . bimap_ g f)
+  contrafirst  f   (Re p) = Re (p . second_ f)
+  contrasecond   g (Re p) = Re (p . first_ g)
   {-# INLINE contrabimap #-}
   {-# INLINE contrafirst #-}
   {-# INLINE contrasecond #-}

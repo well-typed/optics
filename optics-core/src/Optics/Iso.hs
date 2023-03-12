@@ -345,7 +345,7 @@ involuted a = iso a a
 {-# INLINE involuted #-}
 
 -- | This class provides for symmetric bifunctors.
-class Bifunctor p => Swapped p where
+class Data.Bifunctor.Bifunctor p => Swapped p where
   -- |
   -- @
   -- 'swapped' '.' 'swapped' ≡ 'id'

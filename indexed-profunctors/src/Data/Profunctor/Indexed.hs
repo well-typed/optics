@@ -13,6 +13,10 @@ module Data.Profunctor.Indexed
   , Visiting(..)
   , Mapping(..)
   , Traversing(..)
+  , Bifunctor (..)
+  , Bicontravariant (..)
+  , Folding (..)
+  , Folding1 (..)
 
     -- * Concrete profunctors
   , Star(..)
@@ -55,6 +59,7 @@ module Data.Profunctor.Indexed
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
 import Data.Functor.Identity
+import Data.Foldable1
 
 ----------------------------------------
 -- Concrete profunctors
@@ -547,6 +552,67 @@ instance Mapping IxFunArrow where
   roam  f (IxFunArrow k) = IxFunArrow $ \i -> f (k i)
   iroam f (IxFunArrow k) = IxFunArrow $ \ij -> f $ \i -> k (ij i)
 
+----------------------------------------
+
+-- | Class for (covariant) bifunctors.
+class Bifunctor p where
+  bimap_  :: (a -> b) -> (c -> d) -> p i a c -> p i b d
+  first_  :: (a -> b)             -> p i a c -> p i b c
+  second_ ::             (c -> d) -> p i a c -> p i a d
+
+instance Bifunctor Tagged where
+  bimap_  _f g = Tagged #. g .# unTagged
+  first_  _f   = coerce
+  second_    g = Tagged #. g .# unTagged
+
+----------------------------------------
+
+-- | Class for contravariant bifunctors.
+class Bicontravariant p where
+  contrabimap  :: (b -> a) -> (d -> c) -> p i a c -> p i b d
+  contrafirst  :: (b -> a)             -> p i a c -> p i b c
+  contrasecond ::             (c -> b) -> p i a b -> p i a c
+
+instance Bicontravariant (Forget r) where
+  contrabimap  f _g (Forget k) = Forget (k . f)
+  contrafirst  f    (Forget k) = Forget (k . f)
+  contrasecond   _g (Forget k) = Forget k
+
+instance Bicontravariant (ForgetM r) where
+  contrabimap  f _g (ForgetM k) = ForgetM (k . f)
+  contrafirst  f    (ForgetM k) = ForgetM (k . f)
+  contrasecond   _g (ForgetM k) = ForgetM k
+
+instance Bicontravariant (IxForget r) where
+  contrabimap  f _g (IxForget k) = IxForget (\i -> k i . f)
+  contrafirst  f    (IxForget k) = IxForget (\i -> k i . f)
+  contrasecond   _g (IxForget k) = IxForget k
+
+instance Bicontravariant (IxForgetM r) where
+  contrabimap  f _g (IxForgetM k) = IxForgetM (\i -> k i . f)
+  contrafirst  f    (IxForgetM k) = IxForgetM (\i -> k i . f)
+  contrasecond   _g (IxForgetM k) = IxForgetM k
+
+----------------------------------------
+
+class (Bicontravariant p, Cochoice p, Strong p) => Folding1 p where
+  folded1__       :: Foldable1 f => p i a b -> p i (f a) (f b)
+  foldrMapping1__ :: (forall b. (a -> b) -> (a -> b -> b) -> s -> b) -> p i a a -> p i s s
+
+instance Semigroup r => Folding1 (Forget r) where
+  folded1__         (Forget k) = Forget (foldMap1 k)
+  foldrMapping1__ f (Forget k) = Forget (f k (\a r -> k a <> r))
+
+instance Semigroup r => Folding1 (IxForget r) where
+  folded1__         (IxForget k) = IxForget (\i -> foldMap1 (k i))
+  foldrMapping1__ f (IxForget k) = IxForget (\i -> f (k i) (\a r -> k i a <> r))
+
+class (Folding1 p, Traversing p) => Folding p where
+
+instance Monoid r => Folding (Forget r) where
+instance Monoid r => Folding (IxForget r) where
+
+----------------------------------------
 
   -- | Type to represent the components of an isomorphism.
 data Exchange a b i s t =

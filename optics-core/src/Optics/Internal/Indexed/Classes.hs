@@ -9,9 +9,11 @@
 module Optics.Internal.Indexed.Classes (
    module Data.Functor.WithIndex,
    module Data.Foldable.WithIndex,
+   module Data.Foldable1.WithIndex,
    module Data.Traversable.WithIndex,
 ) where
 
 import Data.Functor.WithIndex
 import Data.Foldable.WithIndex
+import Data.Foldable1.WithIndex
 import Data.Traversable.WithIndex
