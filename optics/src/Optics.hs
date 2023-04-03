@@ -368,7 +368,7 @@ import Data.Either.Optics                    as P
 --   to @A@ then @S@ is isomorphic to @A@, and similarly for other optic kinds.
 --
 -- * Composition and subtyping interact: a lens and a prism can be composed, by
---   first thinking of them as traverals using the subtyping relationship.  That
+--   first thinking of them as traversals using the subtyping relationship.  That
 --   is, if @S@ has a field @U@, and @U@ has a constructor @A@, then @S@
 --   contains zero or one @A@s that we can pick out with a traversal (but in
 --   general there is neither a lens from @S@ to @A@ nor a prism).
