@@ -77,6 +77,7 @@ library
                , indexed-profunctors    >= 0.1        && <0.2
                , transformers           >= 0.5        && <0.7
                , indexed-traversable    >= 0.1        && <0.2
+               , OneTuple               >= 0.3        && <0.4
 
   exposed-modules: Optics.Core
 

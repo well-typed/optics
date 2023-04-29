@@ -1,3 +1,9 @@
+# optics-core-0.5 (???)
+* Restrict `over'`, `iover'`, `set'`, and associated operators to require
+  traversals rather than just setters. Setters are not capable of actually
+  making strict modifications, so these operations were just silently lazier
+  than expected when passed setters.
+
 # optics-core-0.4.1 (2022-03-22)
 * Add support for GHC-9.2
 * Add `is` ([#410](https://github.com/well-typed/optics/pull/410))

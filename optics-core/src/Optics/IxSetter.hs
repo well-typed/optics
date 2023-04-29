@@ -58,6 +58,7 @@ module Optics.IxSetter
   ) where
 
 import Data.Profunctor.Indexed
+import Data.Tuple.Solo (Solo (..), getSolo)
 
 import Optics.Internal.Indexed
 import Optics.Internal.Indexed.Classes
@@ -81,12 +82,12 @@ iover o = \f -> runIxFunArrow (getOptic (castOptic @A_Setter o) (IxFunArrow f)) 
 
 -- | Apply an indexed setter as a modifier, strictly.
 iover'
-  :: (Is k A_Setter, is `HasSingleIndex` i)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> t
 iover' o = \f ->
-  let star = getOptic (castOptic @A_Setter o) $ IxStar (\i -> wrapIdentity' . f i)
-  in unwrapIdentity' . runIxStar star id
+  let star = getOptic (castOptic @A_Traversal o) $ IxStar (\i -> (Solo $!) . f i)
+  in getSolo . runIxStar star id
 
 {-# INLINE iover' #-}
 
@@ -105,7 +106,7 @@ iset o = \f -> iover o (\i _ -> f i)
 
 -- | Apply an indexed setter, strictly.
 iset'
-  :: (Is k A_Setter, is `HasSingleIndex` i)
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> b) -> s -> t
 iset' o = \f -> iover' o (\i _ -> f i)

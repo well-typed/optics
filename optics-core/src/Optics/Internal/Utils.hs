@@ -3,11 +3,7 @@
 -- | This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
 module Optics.Internal.Utils
-  ( Identity'(..)
-  , wrapIdentity'
-  , unwrapIdentity'
-
-  , Traversed(..)
+  ( Traversed(..)
   , runTraversed
 
   , OrT(..)
@@ -21,42 +17,6 @@ module Optics.Internal.Utils
 import qualified Data.Semigroup as SG
 
 import Data.Profunctor.Indexed
-
--- Needed for strict application of (indexed) setters.
---
--- Credit for this goes to Eric Mertens, see
--- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
-data Identity' a = Identity' {-# UNPACK #-} !() a
-  deriving Functor
-
-instance Applicative Identity' where
-  pure a = Identity' () a
-  Identity' () f <*> Identity' () x = Identity' () (f x)
-
-instance Mapping (Star Identity') where
-  roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
-  iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
-
-instance Mapping (IxStar Identity') where
-  roam  f (IxStar k) =
-    IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
-  iroam f (IxStar k) =
-    IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
-
--- | Mark a value for evaluation to whnf.
---
--- This allows us to, when applying a setter to a structure, evaluate only the
--- parts that we modify. If an optic focuses on multiple targets, Applicative
--- instance of Identity' makes sure that we force evaluation of all of them, but
--- we leave anything else alone.
---
-wrapIdentity' :: a -> Identity' a
-wrapIdentity' a = Identity' (a `seq` ()) a
-
-unwrapIdentity' :: Identity' a -> a
-unwrapIdentity' (Identity' () a) = a
-
-----------------------------------------
 
 -- | Helper for 'Optics.Fold.traverseOf_' and the like for better
 -- efficiency than the foldr-based version.

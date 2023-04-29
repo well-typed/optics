@@ -105,6 +105,8 @@ import Data.Bitraversable
 import Data.Functor.Identity
 
 import Data.Profunctor.Indexed
+import Data.Tuple.Solo (Solo (..))
+
 import Optics.AffineTraversal
 import Optics.Fold
 import Optics.Internal.Optic
@@ -305,9 +307,9 @@ failover'
   => Optic k is s t a b
   -> (a -> b) -> s -> Maybe t
 failover' o = \f s ->
-  let OrT visited t = traverseOf o (wrapOrT . wrapIdentity' . f) s
+  let OrT visited t = traverseOf o (wrapOrT . (Solo $!) . f) s
   in if visited
-     then Just (unwrapIdentity' t)
+     then case t of Solo v -> Just v
      else Nothing
 {-# INLINE failover' #-}
 
