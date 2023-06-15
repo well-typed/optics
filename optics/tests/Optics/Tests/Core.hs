@@ -102,7 +102,8 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs14a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs14a)
   , testCase "over (itraversed..) = over (mapped..)" $
-    assertSuccess $(inspectTest $ 'lhs15 === 'rhs15)
+    -- GHC 9.2 and 9.4 do w/w transformation and split lhs into two binds.
+    ghc92and94failure $(inspectTest $ 'lhs15 === 'rhs15)
   , testCase "optimized lhs15" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs15)
   , testCase "optimized rhs15" $
