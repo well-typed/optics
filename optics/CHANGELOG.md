@@ -1,3 +1,6 @@
+# optics-0.4.2.1 (2023-06-22)
+* Fix compilation of tests with GHC 9.4 and 9.6
+
 # optics-0.4.2 (2022-05-19)
 * Allow `transformers-0.6` and `mtl-2.3`
 
