@@ -7,7 +7,7 @@ maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
 cabal-version: 1.18
 tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.6 || ==9.4.4 || ==9.6.1, GHCJS ==8.4
+                || ==9.0.2 || ==9.2.8 || ==9.4.5 || ==9.6.2, GHCJS ==8.4
 synopsis:      Optics for template-haskell types
 category:      Data, Optics, Lenses
 description:

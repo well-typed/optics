@@ -1,3 +1,6 @@
+# optics-core-0.4.1.1 (2023-06-22)
+* Add INLINE pragmas to small functions that really should inline
+
 # optics-core-0.4.1 (2022-03-22)
 * Add support for GHC-9.2
 * Add `is` ([#410](https://github.com/well-typed/optics/pull/410))
