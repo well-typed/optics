@@ -33,8 +33,8 @@ setmapped = sets HashSet.map
 
 -- | Construct a 'HashSet' from a fold.
 --
--- >>> setOf folded ["hello","world"]
--- fromList ["hello","world"]
+-- >>> setOf folded [1,2,3,4]
+-- fromList [1,2,3,4]
 --
 -- >>> setOf (folded % _2) [("hello",1),("world",2),("!!!",3)]
 -- fromList [1,2,3]
