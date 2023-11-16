@@ -711,7 +711,11 @@ typeFamilyHeadName = lens g s where
   g (TypeFamilyHead n _    _  _ )   = n
   s (TypeFamilyHead _ tvbs rs ia) n = TypeFamilyHead n tvbs rs ia
 
+#if MIN_VERSION_template_haskell(2,21,0)
+typeFamilyHeadTyVarBndrs :: Lens' TypeFamilyHead [TyVarBndr BndrVis]
+#else
 typeFamilyHeadTyVarBndrs :: Lens' TypeFamilyHead [TyVarBndrUnit]
+#endif
 typeFamilyHeadTyVarBndrs = lens g s where
   g (TypeFamilyHead _ tvbs _  _ )      = tvbs
   s (TypeFamilyHead n _    rs ia) tvbs = TypeFamilyHead n tvbs rs ia
@@ -834,7 +838,11 @@ _ValD
       remitter (ValD x y z) = Just (x, y, z)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,21,0)
+_TySynD :: Prism' Dec (Name, [TyVarBndr BndrVis], Type)
+#else
 _TySynD :: Prism' Dec (Name, [TyVarBndrUnit], Type)
+#endif
 _TySynD
   = prism' reviewer remitter
   where
@@ -842,7 +850,11 @@ _TySynD
       remitter (TySynD x y z) = Just (x, y, z)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,21,0)
+_ClassD :: Prism' Dec (Cxt, Name, [TyVarBndr BndrVis], [FunDep], [Dec])
+#else
 _ClassD :: Prism' Dec (Cxt, Name, [TyVarBndrUnit], [FunDep], [Dec])
+#endif
 _ClassD
   = prism' reviewer remitter
   where
@@ -988,7 +1000,15 @@ _ClosedTypeFamilyD
 -- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Maybe' ['TyVarBndrUnit'], 'Type', 'Maybe' 'Kind', ['Con'], ['DerivClause']) -- template-haskell-2.15+
 -- _DataInstD :: 'Prism'' 'Dec' ('Cxt', 'Name', ['Type'],                'Maybe' 'Kind', ['Con'], ['DerivClause']) -- Earlier versions
  -- @
-#if MIN_VERSION_template_haskell(2,15,0)
+#if MIN_VERSION_template_haskell(2,21,0)
+_DataInstD :: Prism' Dec (Cxt, Maybe [TyVarBndr ()], Type, Maybe Kind, [Con], [DerivClause])
+_DataInstD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u, v) = DataInstD x y z w u v
+      remitter (DataInstD x y z w u v) = Just (x, y, z, w, u, v)
+      remitter _ = Nothing
+#elif MIN_VERSION_template_haskell(2,15,0)
 _DataInstD :: Prism' Dec (Cxt, Maybe [TyVarBndrUnit], Type, Maybe Kind, [Con], [DerivClause])
 _DataInstD
   = prism' reviewer remitter
@@ -1029,7 +1049,11 @@ _NewtypeInstD
       remitter _ = Nothing
 #endif
 
+#if MIN_VERSION_template_haskell(2,21,0)
+_DataD :: Prism' Dec (Cxt, Name, [TyVarBndr BndrVis], Maybe Kind, [Con], [DerivClause])
+#else
 _DataD :: Prism' Dec (Cxt, Name, [TyVarBndrUnit], Maybe Kind, [Con], [DerivClause])
+#endif
 _DataD
   = prism' reviewer remitter
   where
@@ -1037,7 +1061,11 @@ _DataD
       remitter (DataD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,21,0)
+_NewtypeD :: Prism' Dec (Cxt, Name, [TyVarBndr BndrVis], Maybe Kind, Con, [DerivClause])
+#else
 _NewtypeD :: Prism' Dec (Cxt, Name, [TyVarBndrUnit], Maybe Kind, Con, [DerivClause])
+#endif
 _NewtypeD
   = prism' reviewer remitter
   where
@@ -1045,7 +1073,11 @@ _NewtypeD
       remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,21,0)
+_DataFamilyD :: Prism' Dec (Name, [TyVarBndr BndrVis], Maybe Kind)
+#else
 _DataFamilyD :: Prism' Dec (Name, [TyVarBndrUnit], Maybe Kind)
+#endif
 _DataFamilyD
   = prism' reviewer remitter
   where
