@@ -7,7 +7,7 @@ maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
 cabal-version: 1.18
 tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.8 || ==9.4.5 || ==9.6.2, GHCJS ==8.4
+                || ==9.0.2 || ==9.2.8 || ==9.4.8 || ==9.6.3 || ==9.8.1, GHCJS ==8.4
 synopsis:      Optics for template-haskell types
 category:      Data, Optics, Lenses
 description:
@@ -32,7 +32,7 @@ library
   build-depends: base                   >= 4.10      && <5
                , optics-core            >= 0.4       && <0.5
                , containers             >= 0.5.10.2  && <0.7
-               , template-haskell       >= 2.12      && <2.21
-               , th-abstraction         >= 0.4       && <0.6
+               , template-haskell       >= 2.12      && <2.22
+               , th-abstraction         >= 0.4       && <0.7
 
   exposed-modules: Language.Haskell.TH.Optics
