@@ -535,7 +535,9 @@ type GenericLabelOpticContext repDefined name k s t a b =
   , Unless repDefined (NoLabelOpticError name k s t a b)
   , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
-           A_Lens
+           (If (CmpSymbol "?`" name == 'LT && CmpSymbol "?{" name == 'GT)
+               An_AffineTraversal
+               A_Lens)
   , GenericOptic repDefined name k s t a b
   , Dysfunctional name k s t a b
   )
@@ -594,9 +596,15 @@ instance
   genericOptic = gfieldImpl @name
 
 instance
+  ( GAffineFieldImpl repDefined name s t a b
+  , origName ~ AppendSymbol "?" name
+  ) => GenericOptic repDefined origName An_AffineTraversal s t a b where
+  genericOptic = gafieldImpl @repDefined @name
+
+instance
   ( GConstructorImpl repDefined name s t a b
-  , _name ~ AppendSymbol "_" name
-  ) => GenericOptic repDefined _name A_Prism s t a b where
+  , origName ~ AppendSymbol "_" name
+  ) => GenericOptic repDefined origName A_Prism s t a b where
   genericOptic = gconstructorImpl @repDefined @name
 
 ----------------------------------------

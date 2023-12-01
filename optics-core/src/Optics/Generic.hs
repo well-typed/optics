@@ -176,6 +176,14 @@ instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
 -- ...In the...
 -- ...
 --
+-- /Note:/ 'gafield' is supported by 'Optics.Label.labelOptic' and can be used
+-- with a concise syntax via @OverloadedLabels@ with GHC >= 9.6.
+--
+-- @
+-- λ> herring ^? #"?name"
+-- Just \"Henry\"
+-- @
+--
 -- @since 0.4
 --
 class GAffineField (name :: Symbol) s t a b | name s -> t a b
