@@ -1,7 +1,7 @@
 branches:       master
-doctest:        <9.3
+doctest:        <9.9
 tests:          True
-benchmarks:     <9.5
+benchmarks:     <9.9
 jobs-selection: any
 
 -- turn head hackage off
