@@ -533,6 +533,9 @@ type GenericLabelOpticContext repDefined name k s t a b =
   , repDefined ~ (Defined (Rep s) && Defined (Rep t))
 #endif
   , Unless repDefined (NoLabelOpticError name k s t a b)
+  -- If a label starts with "_[A-Z]", assume it's a name of a constructor.
+  -- Otherwise, if it starts with "?[a-z]", assume it's a name of a partial
+  -- field. Otherwise it's a total field.
   , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
            A_Prism
            (If (CmpSymbol "?`" name == 'LT && CmpSymbol "?{" name == 'GT)
@@ -595,6 +598,8 @@ instance
   ) => GenericOptic repDefined name A_Lens s t a b where
   genericOptic = gfieldImpl @name
 
+-- | This instance can only be used via label syntax with GHC >= 9.6 since it's
+-- the first release with unrestricted overloaded labels.
 instance
   ( GAffineFieldImpl repDefined name s t a b
   , origName ~ AppendSymbol "?" name
