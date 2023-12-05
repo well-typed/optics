@@ -73,8 +73,7 @@ type family Curry (xs :: IxList) (y :: Type) :: Type where
 
 -- | Append two type-level lists together.
 type family Append (xs :: [k]) (ys :: [k]) :: [k] where
-  Append '[]       ys  = ys -- needed for (<%>) and (%>)
-  Append xs        '[] = xs -- needed for (<%)
+  Append '[]       ys  = ys
   Append (x ': xs) ys  = x ': Append xs ys
 
 -- | Class that is inhabited by all type-level lists @xs@, providing the ability
