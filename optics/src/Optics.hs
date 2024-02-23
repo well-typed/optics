@@ -430,7 +430,7 @@ import Data.Either.Optics                    as P
 --
 --     @
 --     -- Build a lens from a getter and a setter.
---     'lens' :: (s -> a) -> (s -> b -> t) :: 'Lens' s t a b
+--     'lens' :: (s -> a) -> (s -> b -> t) -> 'Lens' s t a b
 --     @
 --
 -- * Correspondingly, the __elimination__ sections show how you can destruct the
