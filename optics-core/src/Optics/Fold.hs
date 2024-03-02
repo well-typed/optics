@@ -112,7 +112,6 @@ import Data.Monoid
 import Data.Profunctor.Indexed
 
 import Optics.AffineFold
-import Optics.Internal.Bi
 import Optics.Internal.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Utils

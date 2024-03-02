@@ -59,6 +59,6 @@ library
   import:           language
   hs-source-dirs:   src
 
-  build-depends: base                   >= 4.10       && <5
+  build-depends: base                   >= 4.10       && <5, foldable1-classes-compat
 
   exposed-modules:    Data.Profunctor.Indexed
