@@ -65,7 +65,7 @@ library
                , mtl                    >= 2.2.2     && <2.4
                , optics-core            >= 0.4.1     && <0.5
                , template-haskell       >= 2.12      && <2.22
-               , th-abstraction         >= 0.4       && <0.7
+               , th-abstraction         >= 0.4       && <0.8
                , transformers           >= 0.5       && <0.7
 
   exposed-modules: Optics.TH
