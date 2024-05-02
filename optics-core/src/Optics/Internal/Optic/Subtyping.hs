@@ -102,6 +102,7 @@ instance Is An_Iso             A_Prism            where implies r = r
 instance Is An_Iso             A_Review           where implies r = r
 instance Is An_Iso             A_Lens             where implies r = r
 instance Is An_Iso             A_Getter           where implies r = r
+instance Is An_Iso             A_NeFold           where implies r = r
 instance Is An_Iso             An_AffineTraversal where implies r = r
 instance Is An_Iso             An_AffineFold      where implies r = r
 instance Is An_Iso             A_Traversal        where implies r = r
@@ -111,6 +112,7 @@ instance Is An_Iso             A_Setter           where implies r = r
 instance Is A_ReversedLens     A_Review           where implies r = r
 -- A_ReversedPrism
 instance Is A_ReversedPrism    A_Getter           where implies r = r
+instance Is A_ReversedPrism    A_NeFold           where implies r = r
 instance Is A_ReversedPrism    An_AffineFold      where implies r = r
 instance Is A_ReversedPrism    A_Fold             where implies r = r
 -- A_Prism
@@ -122,14 +124,18 @@ instance Is A_Prism            A_Fold             where implies r = r
 instance Is A_Prism            A_Setter           where implies r = r
 -- A_Lens
 instance Is A_Lens             A_Getter           where implies r = r
+instance Is A_Lens             A_NeFold           where implies r = r
 instance Is A_Lens             An_AffineTraversal where implies r = r
 instance Is A_Lens             An_AffineFold      where implies r = r
 instance Is A_Lens             A_Traversal        where implies r = r
 instance Is A_Lens             A_Fold             where implies r = r
 instance Is A_Lens             A_Setter           where implies r = r
 -- A_Getter
+instance Is A_Getter           A_NeFold           where implies r = r
 instance Is A_Getter           An_AffineFold      where implies r = r
 instance Is A_Getter           A_Fold             where implies r = r
+-- A_NeFold
+instance Is A_NeFold           A_Fold             where implies r = r
 -- An_AffineTraversal
 instance Is An_AffineTraversal An_AffineFold      where implies r = r
 instance Is An_AffineTraversal A_Traversal        where implies r = r
@@ -173,6 +179,8 @@ instance k ~ A_Lens             => JoinKinds An_Iso             A_Lens          
   joinKinds r = r
 instance k ~ A_Getter           => JoinKinds An_Iso             A_Getter           k where
   joinKinds r = r
+instance k ~ A_NeFold           => JoinKinds An_Iso             A_NeFold           k where
+  joinKinds r = r
 instance k ~ An_AffineTraversal => JoinKinds An_Iso             An_AffineTraversal k where
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds An_Iso             An_AffineFold      k where
@@ -196,6 +204,7 @@ instance k ~ A_Review           => JoinKinds A_ReversedLens     A_Review        
   joinKinds r = r
 --                              no JoinKinds A_ReversedLens     A_Lens
 --                              no JoinKinds A_ReversedLens     A_Getter
+--                              no JoinKinds A_ReversedLens     A_NeFold
 --                              no JoinKinds A_ReversedLens     An_AffineTraversal
 --                              no JoinKinds A_ReversedLens     An_AffineFold
 --                              no JoinKinds A_ReversedLens     A_Traversal
@@ -214,6 +223,8 @@ instance k ~ An_AffineFold      => JoinKinds A_ReversedPrism    A_Prism         
 instance k ~ A_Getter           => JoinKinds A_ReversedPrism    A_Lens             k where
   joinKinds r = r
 instance k ~ A_Getter           => JoinKinds A_ReversedPrism    A_Getter           k where
+  joinKinds r = r
+instance k ~ A_NeFold           => JoinKinds A_ReversedPrism    A_NeFold           k where
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds A_ReversedPrism    An_AffineTraversal k where
   joinKinds r = r
@@ -240,6 +251,8 @@ instance k ~ An_AffineTraversal => JoinKinds A_Prism            A_Lens          
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds A_Prism            A_Getter           k where
   joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_Prism            A_NeFold           k where
+  joinKinds r = r
 instance k ~ An_AffineTraversal => JoinKinds A_Prism            An_AffineTraversal k where
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds A_Prism            An_AffineFold      k where
@@ -263,6 +276,7 @@ instance k ~ A_Review           => JoinKinds A_Review           A_Prism         
   joinKinds r = r
 --                              no JoinKinds A_Review           A_Lens
 --                              no JoinKinds A_Review           A_Getter
+--                              no JoinKinds A_Review           A_NeFold
 --                              no JoinKinds A_Review           An_AffineTraversal
 --                              no JoinKinds A_Review           An_AffineFold
 --                              no JoinKinds A_Review           A_Traversal
@@ -281,6 +295,8 @@ instance k ~ An_AffineTraversal => JoinKinds A_Lens             A_Prism         
   joinKinds r = r
 --                              no JoinKinds A_Lens             A_Review
 instance k ~ A_Getter           => JoinKinds A_Lens             A_Getter           k where
+  joinKinds r = r
+instance k ~ A_NeFold           => JoinKinds A_Lens             A_NeFold           k where
   joinKinds r = r
 instance k ~ An_AffineTraversal => JoinKinds A_Lens             An_AffineTraversal k where
   joinKinds r = r
@@ -306,6 +322,8 @@ instance k ~ An_AffineFold      => JoinKinds A_Getter           A_Prism         
 --                              no JoinKinds A_Getter           A_Review
 instance k ~ A_Getter           => JoinKinds A_Getter           A_Lens             k where
   joinKinds r = r
+instance k ~ A_NeFold           => JoinKinds A_Getter           A_NeFold           k where
+  joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds A_Getter           An_AffineTraversal k where
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds A_Getter           An_AffineFold      k where
@@ -315,6 +333,31 @@ instance k ~ A_Fold             => JoinKinds A_Getter           A_Traversal     
 instance k ~ A_Fold             => JoinKinds A_Getter           A_Fold             k where
   joinKinds r = r
 --                              no JoinKinds A_Getter           A_Setter
+
+-- A_NeFold -----
+instance k ~ A_NeFold           => JoinKinds A_NeFold           A_NeFold           k where
+  joinKinds r = r
+instance k ~ A_NeFold           => JoinKinds A_NeFold           An_Iso             k where
+  joinKinds r = r
+--                              no JoinKinds A_NeFold           A_ReversedLens
+instance k ~ A_NeFold           => JoinKinds A_NeFold           A_ReversedPrism    k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_NeFold           A_Prism            k where
+  joinKinds r = r
+--                              no JoinKinds A_NeFold           A_Review
+instance k ~ A_NeFold           => JoinKinds A_NeFold           A_Lens             k where
+  joinKinds r = r
+instance k ~ A_NeFold           => JoinKinds A_NeFold           A_Getter           k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_NeFold           An_AffineTraversal k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_NeFold           An_AffineFold      k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_NeFold           A_Traversal        k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_NeFold           A_Fold             k where
+  joinKinds r = r
+--                              no JoinKinds A_NeFold           A_Setter
 
 -- An_AffineTraversal -----
 instance k ~ An_AffineTraversal => JoinKinds An_AffineTraversal An_AffineTraversal k where
@@ -330,6 +373,8 @@ instance k ~ An_AffineTraversal => JoinKinds An_AffineTraversal A_Prism         
 instance k ~ An_AffineTraversal => JoinKinds An_AffineTraversal A_Lens             k where
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds An_AffineTraversal A_Getter           k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds An_AffineTraversal A_NeFold           k where
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds An_AffineTraversal An_AffineFold      k where
   joinKinds r = r
@@ -355,6 +400,8 @@ instance k ~ An_AffineFold      => JoinKinds An_AffineFold      A_Lens          
   joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds An_AffineFold      A_Getter           k where
   joinKinds r = r
+instance k ~ A_Fold             => JoinKinds An_AffineFold      A_NeFold           k where
+  joinKinds r = r
 instance k ~ An_AffineFold      => JoinKinds An_AffineFold      An_AffineTraversal k where
   joinKinds r = r
 instance k ~ A_Fold             => JoinKinds An_AffineFold      A_Traversal        k where
@@ -377,6 +424,8 @@ instance k ~ A_Traversal        => JoinKinds A_Traversal        A_Prism         
 instance k ~ A_Traversal        => JoinKinds A_Traversal        A_Lens             k where
   joinKinds r = r
 instance k ~ A_Fold             => JoinKinds A_Traversal        A_Getter           k where
+  joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_Traversal        A_NeFold           k where
   joinKinds r = r
 instance k ~ A_Traversal        => JoinKinds A_Traversal        An_AffineTraversal k where
   joinKinds r = r
@@ -402,6 +451,8 @@ instance k ~ A_Fold             => JoinKinds A_Fold             A_Lens          
   joinKinds r = r
 instance k ~ A_Fold             => JoinKinds A_Fold             A_Getter           k where
   joinKinds r = r
+instance k ~ A_Fold             => JoinKinds A_Fold             A_NeFold           k where
+  joinKinds r = r
 instance k ~ A_Fold             => JoinKinds A_Fold             An_AffineTraversal k where
   joinKinds r = r
 instance k ~ A_Fold             => JoinKinds A_Fold             An_AffineFold      k where
@@ -423,6 +474,7 @@ instance k ~ A_Setter           => JoinKinds A_Setter           A_Prism         
 instance k ~ A_Setter           => JoinKinds A_Setter           A_Lens             k where
   joinKinds r = r
 --                              no JoinKinds A_Setter           A_Getter
+--                              no JoinKinds A_Setter           A_NeFold
 instance k ~ A_Setter           => JoinKinds A_Setter           An_AffineTraversal k where
   joinKinds r = r
 --                              no JoinKinds A_Setter           An_AffineFold

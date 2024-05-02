@@ -40,6 +40,8 @@ data OpticKind
   |  A_Getter
   -- | Tag for an affine fold.
   |  An_AffineFold
+  -- | Tag for a non-empty fold.
+  |  A_NeFold
   -- | Tag for a fold.
   |  A_Fold
   -- | Tag for a reversed lens.
@@ -69,6 +71,8 @@ opticsKind = mkProper $ Map.fromListWith (<>)
     , A_Traversal        ~> A_Fold
 
     , A_Getter           ~> An_AffineFold
+    , A_Getter           ~> A_NeFold
+    , A_NeFold           ~> A_Fold
     , An_AffineFold      ~> A_Fold
     ]
   where
