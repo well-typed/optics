@@ -7,7 +7,9 @@ build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
 tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.8 || ==9.4.8 || ==9.6.5 || ==9.8.2, GHCJS ==8.4
+                || ==9.0.2 || ==9.2.8 || ==9.4.8 || ==9.6.5 || ==9.8.2
+                || ==9.10.1,
+               GHCJS ==8.4
 synopsis:      Extra utilities and instances for optics-core
 category:      Data, Optics, Lenses
 description:
@@ -64,7 +66,7 @@ library
   build-depends: base                   >= 4.10      && <5
                , array                  >= 0.5.2.0   && <0.6
                , bytestring             >= 0.10.8    && <0.13
-               , containers             >= 0.5.10.2  && <0.7
+               , containers             >= 0.5.10.2  && <0.8
                , hashable               >= 1.1.1     && <1.5
                , indexed-profunctors    >= 0.1       && <0.2
                , mtl                    >= 2.2.2     && <2.4
