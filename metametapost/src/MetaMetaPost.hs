@@ -1,9 +1,11 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 module MetaMetaPost where
 
-import           Prelude ()
-import           Prelude.Compat
+#if !(MIN_VERSION_base(4,11,0))
+import Data.Semigroup ((<>))
+#endif
 
 import           Control.Applicative    (liftA2)
 import           Control.Monad.State
