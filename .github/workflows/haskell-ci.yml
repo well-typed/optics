@@ -37,6 +37,11 @@ jobs:
             compilerVersion: "8.4"
             setup-method: hvr-ppa
             allow-failure: false
+          - compiler: ghc-9.10.1
+            compilerKind: ghc
+            compilerVersion: 9.10.1
+            setup-method: ghcup
+            allow-failure: false
           - compiler: ghc-9.8.2
             compilerKind: ghc
             compilerVersion: 9.8.2
@@ -237,7 +242,7 @@ jobs:
           echo "packages: $GITHUB_WORKSPACE/source/optics-th" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/optics-vl" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/indexed-profunctors" >> cabal.project
-          echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91000)) -ne 0 ] ; then echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project ; fi
           echo "packages: $GITHUB_WORKSPACE/source/metametapost" >> cabal.project
           cat cabal.project
       - name: sdist
@@ -278,7 +283,7 @@ jobs:
           echo "packages: ${PKGDIR_optics_th}" >> cabal.project
           echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
           echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
-          echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91000)) -ne 0 ] ; then echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project ; fi
           echo "packages: ${PKGDIR_metametapost}" >> cabal.project
           echo "package optics" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
@@ -294,11 +299,15 @@ jobs:
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           echo "package indexed-profunctors" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
-          echo "package template-haskell-optics" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91000)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91000)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods" >> cabal.project ; fi
           echo "package metametapost" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
           cat >> cabal.project <<EOF
+          allow-newer: indexed-traversable:base
+          allow-newer: indexed-traversable:containers
+          allow-newer: indexed-traversable-instances:base
+          allow-newer: unordered-containers:template-haskell
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$/; }' >> cabal.project.local
           cat cabal.project
@@ -360,8 +369,8 @@ jobs:
           ${CABAL} -vnormal check
           cd ${PKGDIR_indexed_profunctors} || false
           ${CABAL} -vnormal check
-          cd ${PKGDIR_template_haskell_optics} || false
-          ${CABAL} -vnormal check
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91000)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91000)) -ne 0 ] ; then ${CABAL} -vnormal check ; fi
           cd ${PKGDIR_metametapost} || false
           ${CABAL} -vnormal check
       - name: haddock

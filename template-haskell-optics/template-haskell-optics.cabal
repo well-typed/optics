@@ -31,8 +31,8 @@ library
 
   build-depends: base                   >= 4.10      && <5
                , optics-core            >= 0.4       && <0.5
-               , containers             >= 0.5.10.2  && <0.7
-               , template-haskell       >= 2.12      && <2.23
+               , containers             >= 0.5.10.2  && <0.8
+               , template-haskell       >= 2.12      && <2.22
                , th-abstraction         >= 0.4       && <0.8
 
   exposed-modules: Language.Haskell.TH.Optics
