@@ -13,10 +13,3 @@ packages:
   metametapost/*.cabal
 
 tests: true
-
--- TODO for GHC-9.10.1
-allow-newer: indexed-traversable:base
-allow-newer: indexed-traversable:containers
-allow-newer: indexed-traversable-instances:base
--- https://github.com/haskell-unordered-containers/unordered-containers/issues/489
-allow-newer: unordered-containers:template-haskell
