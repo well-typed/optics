@@ -94,7 +94,7 @@ module Optics.Fold
   -- used to combine optics of different kinds.  When porting code from @lens@
   -- that uses '<>' to combine folds, use 'summing' instead.
   , summing
-  , failing
+  , failing_
 
   -- * Subtyping
   , A_Fold
@@ -282,23 +282,23 @@ infixr 6 `summing` -- Same as (<>)
 
 -- | Try the first 'Fold'. If it returns no entries, try the second one.
 --
--- >>> toListOf (ix 1 `failing` ix 0) [4,7]
+-- >>> toListOf (ix 1 `failing_` ix 0) [4,7]
 -- [7]
--- >>> toListOf (ix 1 `failing` ix 0) [4]
+-- >>> toListOf (ix 1 `failing_` ix 0) [4]
 -- [4]
 --
-failing
+failing_
   :: (Is k A_Fold, Is l A_Fold)
   => Optic' k is s a
   -> Optic' l js s a
   -> Fold s a
-failing a b = foldVL $ \f s ->
+failing_ a b = foldVL $ \f s ->
   let OrT visited fu = traverseOf_ a (wrapOrT . f) s
   in if visited
      then fu
      else traverseOf_ b f s
-infixl 3 `failing` -- Same as (<|>)
-{-# INLINE failing #-}
+infixl 3 `failing_` -- Same as (<|>)
+{-# INLINE failing_ #-}
 
 ----------------------------------------
 -- Special folds
