@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -90,7 +91,11 @@ label4rhs s b = s { fish = case fish s of
                   }
 
 label5lhs, label5rhs :: Human Mammal -> Bool -> Human Mammal
+#if __GLASGOW_HASKELL__ >= 906
+label5lhs s b = set (#pets % traversed % #"?lazy") b s
+#else
 label5lhs s b = set (#pets % traversed % gafield @"lazy") b s
+#endif
 label5rhs s b = s { pets = (`map` pets s) $ \case
                       Dog name0 age0   -> Dog { name = name0, age = age0 }
                       Cat name0 age0 _ -> Cat { name = name0, age = age0, lazy = b }
@@ -152,7 +157,11 @@ howManyGoldFish :: Int
 howManyGoldFish = lengthOf (#pets % folded % #_GoldFish) humanWithFish
 
 hasLazyPets :: Bool
+#if __GLASGOW_HASKELL__ >= 906
+hasLazyPets = orOf (#pets % folded % #"?lazy") human
+#else
 hasLazyPets = orOf (#pets % folded % gafield @"lazy") human
+#endif
 
 yearLater :: Human Mammal
 yearLater = human & #age %~ (+1)
