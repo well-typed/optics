@@ -108,6 +108,7 @@ library
                     , Optics.At
                     , Optics.Coerce
                     , Optics.Cons
+                    , Optics.Core.Extras
                     , Optics.Each
                     , Optics.Empty
                     , Optics.Generic
