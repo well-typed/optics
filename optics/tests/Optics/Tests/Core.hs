@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
 module Optics.Tests.Core (coreTests) where
@@ -59,9 +60,15 @@ coreTests = testGroup "Core"
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs08a)
   , testCase "optimized rhs08a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs08a)
+
+#if __GLASGOW_HASKELL__ != 912
+  -- This test causes inspection-testing to crash at compile time with a
+  -- lookupIdSubst panic in GHC 9.12, see #512.
   , testCase "iover (imapped <% imapped) = iover (imapped % mapped)" $
     -- GHC 9.* applies a worker-wrapper transformation to the RHS.
     ghcGE90failure $(inspectTest $ 'lhs09 === 'rhs09)
+#endif
+
   , testCase "optimized lhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs09)
   , testCase "optimized rhs09" $
