@@ -914,6 +914,20 @@ _ForeignD
       remitter (ForeignD x) = Just x
       remitter _ = Nothing
 
+-- |
+-- @
+-- _InfixD :: 'Prism'' 'Dec' ('Fixity', 'NamespaceSpecifier', 'Name') -- template-haskell 2.22+
+-- _InfixD :: 'Prism'' 'Dec' ('Fixity',                       'Name') -- Earlier versions
+-- @
+#if MIN_VERSION_template_haskell(2,22,0)
+_InfixD :: Prism' Dec (Fixity, NamespaceSpecifier, Name)
+_InfixD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z) = InfixD x y z
+      remitter (InfixD x y z) = Just (x, y, z)
+      remitter _ = Nothing
+#else
 _InfixD :: Prism' Dec (Fixity, Name)
 _InfixD
   = prism' reviewer remitter
@@ -921,6 +935,7 @@ _InfixD
       reviewer (x, y) = InfixD x y
       remitter (InfixD x y) = Just (x, y)
       remitter _ = Nothing
+#endif
 
 #if MIN_VERSION_template_haskell(2,19,0)
 _DefaultD :: Prism' Dec [Type]
