@@ -41,7 +41,7 @@ coreTests = testGroup "Core"
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs05)
   , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = traverseOf_ ..." $
     -- GHC >= 8.6 gives different structure of let bindings.
-    ghcGE86failure $(inspectTest $ 'lhs06 === 'rhs06)
+    ghc86to910failure $(inspectTest $ 'lhs06 === 'rhs06)
   , testCase "optimized lhs06" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs06)
   , testCase "optimized rhs06" $
@@ -75,7 +75,8 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs10a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs10a)
   , testCase "iover (itraversed..itraversed) = iover (imapped..imapped)" $
-    assertSuccess $(inspectTest $ 'lhs11 === 'rhs11)
+    -- GHC 9.12 has an intermediate let in the LHS.
+    ghcGE912failure $(inspectTest $ 'lhs11 === 'rhs11)
   , testCase "optimized lhs11" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs11)
   , testCase "optimized rhs11" $
@@ -110,7 +111,8 @@ coreTests = testGroup "Core"
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs15)
   , testCase "iset (itraversed..) = iset (imapped..)" $
     -- GHC 8.10 has an intermediate let in the RHS.
-    ghc810failure $(inspectTest $ 'lhs16 === 'rhs16)
+    -- GHC 9.12 has an intermediate let in the LHS.
+    ghc810andGE912failure $(inspectTest $ 'lhs16 === 'rhs16)
   , testCase "optimized lhs16" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs16)
   , testCase "optimized rhs16" $
