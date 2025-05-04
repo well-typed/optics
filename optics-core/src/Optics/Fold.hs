@@ -120,14 +120,17 @@ import Optics.Internal.Utils
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a
 
--- | Obtain a 'Fold' by lifting 'traverse_' like function.
+-- | Construct a 'Fold' from a 'traverse_' like function.
+--
+-- /Note:/ for lifting a 'Data.Traversable.traverse' like function see
+-- 'Optics.Traversal.traversalVL'.
 --
 -- @
 -- 'foldVL' '.' 'traverseOf_' ≡ 'id'
 -- 'traverseOf_' '.' 'foldVL' ≡ 'id'
 -- @
 foldVL
-  :: (forall f. Applicative f => (a -> f u) -> s -> f v)
+  :: (forall f. Applicative f => (a -> f b) -> s -> f ())
   -> Fold s a
 foldVL f = Optic (foldVL__ f)
 {-# INLINE foldVL #-}

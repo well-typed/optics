@@ -125,13 +125,18 @@ type TraversalVL s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
 -- | Type synonym for a type-preserving van Laarhoven traversal.
 type TraversalVL' s a = TraversalVL s s a a
 
--- | Build a traversal from the van Laarhoven representation.
+-- | Construct a 'Traversal' from a 'traverse' like function.
+--
+-- /Note:/ for lifting a 'Data.Foldable.traverse_' like function see
+-- 'Optics.Fold.foldVL'.
 --
 -- @
 -- 'traversalVL' '.' 'traverseOf' ≡ 'id'
 -- 'traverseOf' '.' 'traversalVL' ≡ 'id'
 -- @
-traversalVL :: TraversalVL s t a b -> Traversal s t a b
+traversalVL
+  :: (forall f. Applicative f => (a -> f b) -> s -> f t)
+  -> Traversal s t a b
 traversalVL t = Optic (wander t)
 {-# INLINE traversalVL #-}
 
