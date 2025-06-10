@@ -156,7 +156,7 @@ library
 test-suite optics-tests
   import:           language
   hs-source-dirs:   tests
-  ghc-options:      -fdicts-strict -fdicts-cheap -fdmd-tx-dict-sel
+  ghc-options:      -fdicts-strict -fdicts-cheap -fdmd-tx-dict-sel -fdo-clever-arg-eta-expansion
 
   -- inspection-testing doesn't compile with GHCJS
   if impl(ghcjs)
