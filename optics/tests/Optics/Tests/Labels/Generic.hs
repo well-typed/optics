@@ -48,7 +48,7 @@ genericLabelsTests = testGroup "Labels via Generic"
     assertSuccess $(inspectTest $ 'label4lhs ==- 'label4rhs)
   , testCase "set (#pets % traversed % #name) b s = s { pets = ... }" $
     -- GHC 8.2 is the same modulo a case expression structure
-    ghc82failure $(inspectTest $ 'label5lhs ==- 'label5rhs)
+    ghc82and9122failure $(inspectTest $ 'label5lhs ==- 'label5rhs)
   , testCase "multiple set with labels = multiple set with record syntax" $
     assertSuccess $(inspectTest $ 'label6lhs ==- 'label6rhs)
   , testCase "optimized petNames (generics)" $

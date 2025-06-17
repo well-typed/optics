@@ -170,3 +170,47 @@ ghc810andGE912failure = assertFailure'
 #else
 ghc810andGE912failure = assertSuccess
 #endif
+
+-- GHC-9.12.2 has issues with nospec being in the way.
+-- TODO: Later we should probably forbid GHC-9.12.2 usage.
+-- Until GHC-9.12.3 (with fix) is released it would be too prohibitive though.
+#if MIN_VERSION_GLASGOW_HASKELL(9,12,0,0) && !MIN_VERSION_GLASGOW_HASKELL(9,12,3,0)
+#define GHC_9122 1
+#else
+#define GHC_9122 0
+#endif
+
+ghc9122failure :: Result -> IO ()
+#if GHC_9122
+ghc9122failure = assertFailure'
+#else
+ghc9122failure = assertSuccess
+#endif
+
+ghc86to910and9122failure :: Result -> IO ()
+#if (__GLASGOW_HASKELL__ >= 806 && __GLASGOW_HASKELL__ <= 910) || GHC_9122
+ghc86to910and9122failure = assertFailure'
+#else
+ghc86to910and9122failure = assertSuccess
+#endif
+
+ghc92and94and9122failure :: Result -> IO ()
+#if (__GLASGOW_HASKELL__ >= 902 && __GLASGOW_HASKELL__ <= 904) || GHC_9122
+ghc92and94and9122failure = assertFailure'
+#else
+ghc92and94and9122failure = assertSuccess
+#endif
+
+ghc82and9122failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ == 802 || GHC_9122
+ghc82and9122failure = assertFailure'
+#else
+ghc82and9122failure = assertSuccess
+#endif
+
+ghcLE84and9122failure :: Result -> IO ()
+#if __GLASGOW_HASKELL__ <= 804 || GHC_9122
+ghcLE84and9122failure = assertFailure'
+#else
+ghcLE84and9122failure = assertSuccess
+#endif
