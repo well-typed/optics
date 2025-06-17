@@ -6,7 +6,9 @@ packages:
   optics-th/*.cabal
   optics-vl/*.cabal
   indexed-profunctors/*.cabal
-  template-haskell-optics/*.cabal
+
+if !impl(ghc >=9.10)
+  packages: template-haskell-optics/*.cabal
 
 -- An example, using optics to generate optics diagrams
 packages:
