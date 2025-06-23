@@ -434,6 +434,8 @@ instance k ~ A_Setter           => JoinKinds A_Setter           A_Traversal     
 
 instance {-# OVERLAPPABLE #-}
   ( JoinKinds k l m
-  , TypeError ('ShowType k ':<>: 'Text " cannot be composed with " ':<>: 'ShowType l)
+  , TypeError ('ShowType k ':<>: 'Text " cannot be composed with " ':<>:
+               'ShowType l ':<>: 'Text " into " ':<>:
+               'ShowType m)
   ) => JoinKinds k l m where
   joinKinds _ = error "unreachable"
