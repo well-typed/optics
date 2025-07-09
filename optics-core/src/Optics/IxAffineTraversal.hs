@@ -36,6 +36,8 @@ module Optics.IxAffineTraversal
   -- * Additional introduction forms
   , ignored
 
+  , iadisjoin
+
   -- * Subtyping
   , An_AffineTraversal
 
@@ -49,6 +51,7 @@ module Optics.IxAffineTraversal
 import Data.Profunctor.Indexed
 
 import Optics.AffineFold
+import Optics.AffineTraversal
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Utils
@@ -129,6 +132,20 @@ unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
 ignored :: IxAffineTraversal i s s a b
 ignored = iatraversalVL $ \point _ -> point
 {-# INLINE ignored #-}
+
+iadisjoin
+  :: ( Is k An_AffineTraversal, Is l An_AffineTraversal
+     , is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
+  => Optic k is1 s t a b
+  -> Optic l is2 s t a b
+  -> IxAffineTraversal i s t a b
+iadisjoin a b = conjoined (adisjoin a b) $ iatraversalVL $ \point f s ->
+  let OrT visited fu = iatraverseOf a (OrT False . point) (\i -> wrapOrT . f i) s
+  in if visited
+     then fu
+     else iatraverseOf b point f s
+infixl 3 `iadisjoin` -- Same as (<|>)
+{-# INLINE iadisjoin #-}
 
 -- $setup
 -- >>> import Optics.Core
