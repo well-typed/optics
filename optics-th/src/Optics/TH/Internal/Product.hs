@@ -929,4 +929,4 @@ addFieldClassName n = modify $ S.insert n
 
 -- We want to catch type families, but not *data* families. See #799.
 typeFamilyHead :: AffineFold Dec TypeFamilyHead
-typeFamilyHead = _OpenTypeFamilyD `afailing` _ClosedTypeFamilyD % _1
+typeFamilyHead = _OpenTypeFamilyD `afailing_` _ClosedTypeFamilyD % _1
