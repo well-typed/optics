@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.19.20250630
+# version: 0.19.20250710
 #
-# REGENDATA ("0.19.20250630",["github","--config=cabal.haskell-ci","cabal.project"])
+# REGENDATA ("0.19.20250710",["github","--config=cabal.haskell-ci","cabal.project"])
 #
 name: Haskell-CI
 on:
@@ -254,23 +254,59 @@ jobs:
           echo "packages: ${PKGDIR_metametapost}" >> cabal.project
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project ; fi
           echo "package optics" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package optics-core" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package optics-extra" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package optics-sop" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package optics-th" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package optics-vl" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package indexed-profunctors" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package metametapost" >> cabal.project
-          echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods" >> cabal.project ; fi
+          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics-core" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics-extra" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics-sop" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics-th" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics-vl" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package indexed-profunctors" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package metametapost" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400 && HCNUMVER < 91200)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400 && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics-core" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics-extra" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics-sop" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics-th" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics-vl" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package indexed-profunctors" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package metametapost" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000 && HCNUMVER < 91200)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000 && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
           cat >> cabal.project <<EOF
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: any.$_ installed\n" unless /^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$/; }' >> cabal.project.local

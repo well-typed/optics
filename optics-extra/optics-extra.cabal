@@ -64,7 +64,6 @@ library
   hs-source-dirs:   src
 
   build-depends: base                   >= 4.10      && <5
-               , array                  >= 0.5.2.0   && <0.6
                , bytestring             >= 0.10.8    && <0.13
                , containers             >= 0.5.10.2  && <0.8
                , hashable               >= 1.1.1     && <1.6
