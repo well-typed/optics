@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilyDependencies #-}
 -- |
 -- Module: Optics.Re
 -- Description: The 're' operator allows some optics to be reversed.
@@ -22,8 +23,6 @@
 --
 -- <<diagrams/reoptics.png Reversed Optics>>
 --
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
 module Optics.Re
   ( ReversibleOptic(..)
   ) where

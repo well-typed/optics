@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeInType #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | This module is intended for internal use only, and may change without

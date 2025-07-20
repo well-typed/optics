@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeInType #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | Core optic types and subtyping machinery.

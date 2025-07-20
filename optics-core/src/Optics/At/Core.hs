@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE TypeInType #-}
 -- |
 -- Module: Optics.At.Core
 -- Description: Optics for 'Map' and 'Set'-like containers.
