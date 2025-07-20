@@ -18,9 +18,9 @@ class is ~ NoIx => AcceptsEmptyIndices (f :: Symbol) (is :: IxList)
 
 instance
   ( TypeError
-    ('Text "‘" ':<>: 'Text f ':<>: 'Text "’ accepts only optics with no indices")
-  , (x ': xs) ~ NoIx
-  ) => AcceptsEmptyIndices f (x ': xs)
+    (Text "‘" :<>: Text f :<>: Text "’ accepts only optics with no indices")
+  , (x : xs) ~ NoIx
+  ) => AcceptsEmptyIndices f (x : xs)
 
 instance AcceptsEmptyIndices f '[]
 
@@ -30,10 +30,10 @@ class NonEmptyIndices (is :: IxList)
 
 instance
   ( TypeError
-    ('Text "Indexed optic is expected")
+    (Text "Indexed optic is expected")
   ) => NonEmptyIndices '[]
 
-instance NonEmptyIndices (x ': xs)
+instance NonEmptyIndices (x : xs)
 
 -- | Generate sensible error messages in case a user tries to pass either an
 -- unindexed optic or indexed optic with unflattened indices where indexed optic
@@ -44,57 +44,57 @@ instance HasSingleIndex '[i] i
 
 instance
   ( TypeError
-    ('Text "Indexed optic is expected")
+    (Text "Indexed optic is expected")
   , '[] ~ '[i]
   ) => HasSingleIndex '[] i
 
 instance
   ( TypeError
-    ('Text "Use (<%>) or icompose to combine indices of type "
-     ':<>: ShowTypes is)
+    (Text "Use (<%>) or icompose to combine indices of type "
+     :<>: ShowTypes is)
   , is ~ '[i1, i2]
   , is ~ '[i]
   ) => HasSingleIndex '[i1, i2] i
 
 instance
   ( TypeError
-    ('Text "Use icompose3 to combine indices of type "
-     ':<>: ShowTypes is)
+    (Text "Use icompose3 to combine indices of type "
+     :<>: ShowTypes is)
   , is ~ '[i1, i2, i3]
   , is ~ '[i]
   ) => HasSingleIndex [i1, i2, i3] i
 
 instance
   ( TypeError
-    ('Text "Use icompose4 to combine indices of type "
-     ':<>: ShowTypes is)
+    (Text "Use icompose4 to combine indices of type "
+     :<>: ShowTypes is)
   , is ~ '[i1, i2, i3, i4]
   , is ~ '[i]
   ) => HasSingleIndex '[i1, i2, i3, i4] i
 
 instance
   ( TypeError
-    ('Text "Use icompose5 to flatten indices of type "
-     ':<>: ShowTypes is)
+    (Text "Use icompose5 to flatten indices of type "
+     :<>: ShowTypes is)
   , is ~ '[i1, i2, i3, i4, i5]
   , is ~ '[i]
   ) => HasSingleIndex '[i1, i2, i3, i4, i5] i
 
 instance
   ( TypeError
-    ('Text "Use icomposeN to flatten indices of type "
-     ':<>: ShowTypes is)
-  , is ~ (i1 ': i2 ': i3 ': i4 ': i5 ': i6 : is')
+    (Text "Use icomposeN to flatten indices of type "
+     :<>: ShowTypes is)
+  , is ~ (i1 : i2 : i3 : i4 : i5 : i6 : is')
   , is ~ '[i]
-  ) => HasSingleIndex (i1 ': i2 ': i3 ': i4 ': i5 ': i6 ': is') i
+  ) => HasSingleIndex (i1 : i2 : i3 : i4 : i5 : i6 : is') i
 
 ----------------------------------------
 -- Helpers for HasSingleIndex
 
 type family ShowTypes (types :: [Type]) :: ErrorMessage where
-  ShowTypes '[i]      = QuoteType i
-  ShowTypes '[i, j]   = QuoteType i ':<>: 'Text " and " ':<>: QuoteType j
-  ShowTypes (i ': is) = QuoteType i ':<>: 'Text ", " ':<>: ShowTypes is
+  ShowTypes '[i]     = QuoteType i
+  ShowTypes '[i, j]  = QuoteType i :<>: Text " and " :<>: QuoteType j
+  ShowTypes (i : is) = QuoteType i :<>: Text ", " :<>: ShowTypes is
 
 ----------------------------------------
 

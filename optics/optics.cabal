@@ -68,7 +68,7 @@ library
   hs-source-dirs:     src
 
   build-depends: base                   >= 4.10      && <5
-               , optics-core            >= 0.4.1     && <0.4.2
+               , optics-core            >= 0.4.1     && <0.4.3
                , optics-extra           >= 0.4.2     && <0.4.3
                , optics-th              >= 0.4.1     && <0.4.2
 
