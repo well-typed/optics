@@ -18,6 +18,11 @@ import Optics.Fold
 import Optics.Optic
 import Optics.Setter
 
+-- $setup
+-- >>> import qualified Data.HashSet as HashSet
+-- >>> import Optics.Core
+
+
 -- | This 'Setter' can be used to change the type of a 'HashSet' by mapping the
 -- elements to new values.
 --
@@ -41,6 +46,3 @@ setmapped = sets HashSet.map
 setOf :: (Is k A_Fold, Eq a, Hashable a) => Optic' k is s a -> s -> HashSet a
 setOf l = foldMapOf l HashSet.singleton
 {-# INLINE setOf #-}
-
--- $setup
--- >>> import Optics.Core

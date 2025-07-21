@@ -44,6 +44,9 @@ import Optics.Core
 import Generics.SOP.Optics
 import Optics.SOP.ToTuple
 
+-- $setup
+-- >>> import Optics.Core
+
 -- | Wrapped form of a simple lens, to enable partial application.
 newtype WrappedLens    s a  = WrappedLens    { unWrapLens :: Lens' s a }
 -- | Wrapped form of a prism to an 'NP', to enable partial application.

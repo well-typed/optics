@@ -1,9 +1,10 @@
 distribution:   focal
 branches:       master
-doctest:        <9.3
+-- GHC-9.4 and 9.6 have some issue with overlapping instances for optic labels
+docspec:        <9.4 || >=9.8
 tests:          True
 benchmarks:     <9.5
 jobs-selection: any
 
 -- turn head hackage off
-head-hackage: <0
+head-hackage: False

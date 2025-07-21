@@ -15,6 +15,12 @@ import Data.Word (Word8)
 import Optics.Core
 import Optics.Extra.Internal.ByteString
 
+-- $setup
+-- >>> import Numeric
+-- >>> import qualified Data.ByteString.Lazy.Char8 as Char8
+-- >>> import Optics.Each
+-- >>> import Optics.Core
+
 -- | 'Data.ByteString.Lazy.pack' (or 'Data.ByteString.Lazy.unpack') a list of
 -- bytes into a 'ByteString'.
 --
@@ -127,7 +133,3 @@ pattern Bytes b <- (view unpackedBytes -> b) where
 pattern Chars :: [Char] -> ByteString
 pattern Chars b <- (view unpackedChars -> b) where
   Chars b = review unpackedChars b
-
--- $setup
--- >>> import Numeric
--- >>> import Optics.Each

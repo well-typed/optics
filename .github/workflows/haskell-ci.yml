@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.19.20250710
+# version: 0.19.20250722
 #
-# REGENDATA ("0.19.20250710",["github","--config=cabal.haskell-ci","cabal.project"])
+# REGENDATA ("0.19.20250722",["github","--config=cabal.haskell-ci","cabal.project"])
 #
 name: Haskell-CI
 on:
@@ -172,11 +172,6 @@ jobs:
       - name: update cabal index
         run: |
           $CABAL v2-update -v
-      - name: cache (tools)
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ runner.os }}-${{ matrix.compiler }}-tools-55831830
-          path: ~/.haskell-ci-tools
       - name: install cabal-plan
         run: |
           mkdir -p $HOME/.cabal/bin
@@ -186,16 +181,15 @@ jobs:
           rm -f cabal-plan.xz
           chmod a+x $HOME/.cabal/bin/cabal-plan
           cabal-plan --version
-      - name: install doctest
+      - name: install cabal-docspec
         run: |
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then $CABAL --store-dir=$HOME/.haskell-ci-tools/store v2-install $ARG_COMPILER --ignore-project -j2 doctest --constraint='doctest ^>=0.22.0' ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest --version ; fi
-      - name: save cache (tools)
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          key: ${{ runner.os }}-${{ matrix.compiler }}-tools-55831830
-          path: ~/.haskell-ci-tools
+          mkdir -p $HOME/.cabal/bin
+          curl -sL https://github.com/phadej/cabal-extras/releases/download/cabal-docspec-0.0.0.20250606/cabal-docspec-0.0.0.20250606-x86_64-linux.xz > cabal-docspec.xz
+          echo 'cc20bb5c19501b42bde77556bc419c7c0a5c8d1eb65663024d8a4e4c868bef25  cabal-docspec.xz' | sha256sum -c -
+          xz -d < cabal-docspec.xz > $HOME/.cabal/bin/cabal-docspec
+          rm -f cabal-docspec.xz
+          chmod a+x $HOME/.cabal/bin/cabal-docspec
+          cabal-docspec --version
       - name: checkout
         uses: actions/checkout@v4
         with:
@@ -335,24 +329,10 @@ jobs:
       - name: tests
         run: |
           if [ $((! GHCJSARITH)) -ne 0 ] ; then $CABAL v2-test $ARG_COMPILER $ARG_TESTS $ARG_BENCH all --test-show-details=direct ; fi
-      - name: doctest
+      - name: docspec
         run: |
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_optics} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_optics_core} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_optics_extra} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_optics_sop} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_optics_th} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_optics_vl} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_indexed_profunctors} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 -XBangPatterns -XConstraintKinds -XDefaultSignatures -XDeriveFoldable -XDeriveFunctor -XDeriveGeneric -XDeriveTraversable -XEmptyCase -XFlexibleContexts -XFlexibleInstances -XFunctionalDependencies -XGADTs -XGeneralizedNewtypeDeriving -XInstanceSigs -XKindSignatures -XLambdaCase -XOverloadedLabels -XPatternSynonyms -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XViewPatterns src ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
-          if [ $((! GHCJSARITH && HCNUMVER < 90400)) -ne 0 ] ; then doctest  -XHaskell2010 src ; fi
+          if [ $((! GHCJSARITH && (HCNUMVER < 90400 || HCNUMVER >= 90800))) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
+          if [ $((! GHCJSARITH && (HCNUMVER < 90400 || HCNUMVER >= 90800))) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
       - name: cabal check
         run: |
           cd ${PKGDIR_optics} || false

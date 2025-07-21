@@ -57,6 +57,11 @@ import Optics.IxAffineTraversal
 import Optics.IxFold
 import Optics.Optic
 
+-- $setup
+-- >>> import qualified Data.Map as Map
+-- >>> import Data.Monoid (Sum (..))
+-- >>> import Optics.Core
+
 -- | Construct a map from an 'IxFold'.
 --
 -- The construction is left-biased (see 'Map.union'), i.e. the first
@@ -139,7 +144,3 @@ ge k = iatraversalVL $ \point f s ->
     Nothing      -> point s
     Just (k', v) -> f k' v <&> \v' -> Map.insert k' v' s
 {-# INLINE ge #-}
-
--- $setup
--- >>> import Data.Monoid
--- >>> import Optics.Core

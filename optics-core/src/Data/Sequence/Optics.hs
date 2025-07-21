@@ -20,6 +20,11 @@ import Optics.IxTraversal
 import Optics.Optic
 import Optics.Traversal
 
+-- $setup
+-- >>> import Data.Sequence (ViewL (..), ViewR (..))
+-- >>> import qualified Data.Sequence as Seq
+-- >>> import Optics.Core
+
 -- * Sequence isomorphisms
 
 -- | A 'Seq' is isomorphic to a 'ViewL'
@@ -136,6 +141,3 @@ sliced i j = conjoined noix ix
 seqOf :: Is k A_Fold => Optic' k is s a -> s -> Seq a
 seqOf l = foldMapOf l Seq.singleton
 {-# INLINE seqOf #-}
-
--- $setup
--- >>> import Optics.Core

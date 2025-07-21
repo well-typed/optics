@@ -69,6 +69,11 @@ import Optics.Lens
 import Optics.Optic
 import Optics.Setter
 
+-- $setup
+-- >>> import Optics.Core
+-- >>> import qualified Data.Map as Map
+-- >>> import qualified Data.IntSet as IntSet
+
 -- | Type family that takes a key-value container type and returns the type of
 -- keys (indices) into the container, for example @'Index' ('Map' k a) ~ k@.
 -- This is shared by 'Ixed', 'At' and 'Contains'.
@@ -483,6 +488,3 @@ ixListVL k point f xs0 =
            go (a:as) i = (a:) <$> (go as $! i - 1)
        in go xs0 k
 {-# INLINE ixListVL #-}
-
--- $setup
--- >>> import Optics.Core

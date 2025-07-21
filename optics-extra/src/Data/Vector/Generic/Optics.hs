@@ -32,6 +32,7 @@ import Optics.Internal.Optic
 
 -- $setup
 -- >>> import qualified Data.Vector as Vector
+-- >>> import Optics.Core
 
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting at
 -- index @i@ from a 'Lens'.

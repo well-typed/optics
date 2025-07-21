@@ -13,6 +13,10 @@ import Data.Tree (Tree (..))
 
 import Optics.Lens
 
+-- $setup
+-- >>> import Data.Tree (Tree (..))
+-- >>> import Optics.Core
+
 -- | A 'Lens' that focuses on the root of a 'Tree'.
 --
 -- >>> view root $ Node 42 []
@@ -27,6 +31,3 @@ root = lensVL $ \f (Node a as) -> (`Node` as) <$> f a
 branches :: Lens' (Tree a) [Tree a]
 branches = lensVL $ \f (Node a as) -> Node a <$> f as
 {-# INLINE branches #-}
-
--- $setup
--- >>> import Optics.Core

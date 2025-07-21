@@ -148,6 +148,8 @@ library
                     , Data.Vector.Optics
                     , GHC.Generics.Optics
                     , Numeric.Optics
+  
+  x-docspec-extra-packages: containers mtl
 
 test-suite optics-tests
   import:           language

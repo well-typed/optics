@@ -15,9 +15,14 @@ module Optics.State
   , preuse
   ) where
 
-import Control.Monad.State
+import Control.Monad.State (MonadState, gets, modify, modify') 
 
 import Optics.Core
+
+-- $setup
+-- >>> import Control.Monad.State (execState, evalState)
+-- >>> import Data.Semigroup
+-- >>> import Optics.Core
 
 -- | Map over the target(s) of an 'Optic' in our monadic state.
 --
@@ -109,6 +114,3 @@ preuse
   -> m (Maybe a)
 preuse o = gets (preview o)
 {-# INLINE preuse #-}
-
--- $setup
--- >>> import Data.Semigroup

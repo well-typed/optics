@@ -106,7 +106,7 @@ import Control.Applicative
 import Control.Applicative.Backwards
 import Control.Monad
 import Data.Foldable
-import Data.Function
+import Data.Function (fix)
 import Data.Monoid
 
 import Data.Profunctor.Indexed
@@ -116,6 +116,10 @@ import Optics.Internal.Bi
 import Optics.Internal.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Utils
+
+-- $setup
+-- >>> import Optics.Core
+-- >>> import Data.Function (on)
 
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a
@@ -218,7 +222,7 @@ folded = Optic folded__
 -- This can be useful to lift operations from @Data.List@ and elsewhere into a
 -- 'Fold'.
 --
--- >>> toListOf (folding tail) [1,2,3,4]
+-- >>> toListOf (folding (drop 1)) [1,2,3,4]
 -- [2,3,4]
 folding :: Foldable f => (s -> f a) -> Fold s a
 folding f = Optic (contrafirst f . foldVL__ traverse_)
@@ -707,6 +711,3 @@ paraOf o f = go
   where
     go a = f a (go <$> toListOf o a)
 {-# INLINE paraOf #-}
-
--- $setup
--- >>> import Optics.Core
