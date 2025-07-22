@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.Indexed.Core
 -- Description: Core definitions for indexed optics.
