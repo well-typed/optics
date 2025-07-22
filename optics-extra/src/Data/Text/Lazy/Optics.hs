@@ -35,6 +35,8 @@ import Optics.Internal.Optic
 
 -- $setup
 -- >>> import Data.ByteString.Lazy as LBS
+-- >>> import qualified Data.Text.Lazy as Text
+-- >>> import Optics.Core
 
 -- | This isomorphism can be used to 'pack' (or 'unpack') lazy 'Text.Text'.
 --

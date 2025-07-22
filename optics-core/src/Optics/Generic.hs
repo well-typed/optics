@@ -53,6 +53,11 @@ import Optics.Lens
 import Optics.Prism
 import Optics.Traversal
 
+-- $setup
+-- >>> import GHC.Generics (Generic)
+-- >>> import Optics.Core
+-- >>> newtype NoG = NoG { fromNoG :: Char }
+
 -- | Hidden type for preventing GHC from solving constraints too early.
 data Void0
 
@@ -385,7 +390,3 @@ instance GPlate a Void0 where
 instance GPlate Void0 a where
   gplate = error "unreachable"
 
--- $setup
--- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
--- >>> import Optics.Core
--- >>> newtype NoG = NoG { fromNoG :: Char }

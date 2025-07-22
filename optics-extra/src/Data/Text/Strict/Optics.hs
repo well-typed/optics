@@ -34,6 +34,10 @@ import Optics.Internal.IxFold
 import Optics.Internal.IxTraversal
 import Optics.Internal.Optic
 
+-- $setup
+-- >>> import qualified Data.Text as Strict
+-- >>> import Optics.Core
+
 -- | This isomorphism can be used to 'pack' (or 'unpack') strict 'Strict.Text'.
 --
 --

@@ -64,6 +64,9 @@ import Data.Profunctor.Indexed
 
 import Optics.Internal.Optic
 
+-- $setup
+-- >>> import Optics.Core
+
 -- | Type synonym for a type-modifying affine traversal.
 type AffineTraversal s t a b = Optic An_AffineTraversal NoIx s t a b
 
@@ -186,6 +189,3 @@ matching o = withAffineTraversal o $ \match _ -> match
 unsafeFiltered :: (a -> Bool) -> AffineTraversal' a a
 unsafeFiltered p = atraversalVL (\point f a -> if p a then f a else point a)
 {-# INLINE unsafeFiltered #-}
-
--- $setup
--- >>> import Optics.Core

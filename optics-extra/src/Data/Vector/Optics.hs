@@ -16,6 +16,7 @@ import qualified Data.Vector.Generic.Optics as G
 
 -- $setup
 -- >>> import Data.Vector as Vector
+-- >>> import Optics.Core
 
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting at
 -- index @i@ from a 'Lens'.

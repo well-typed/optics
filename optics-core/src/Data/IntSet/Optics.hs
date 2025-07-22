@@ -17,6 +17,10 @@ import Optics.Fold
 import Optics.Optic
 import Optics.Setter
 
+-- $setup
+-- >>> import qualified Data.IntSet as IntSet
+-- >>> import Optics.Core
+
 -- | IntSet isn't Foldable, but this 'Fold' can be used to access the members of
 -- an 'IntSet'.
 --
@@ -49,6 +53,3 @@ setmapped = sets IntSet.map
 setOf :: Is k A_Fold => Optic' k is s Int -> s -> IntSet
 setOf l = foldMapOf l IntSet.singleton
 {-# INLINE setOf #-}
-
--- $setup
--- >>> import Optics.Core

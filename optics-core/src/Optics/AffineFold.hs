@@ -60,6 +60,10 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 
+-- $setup
+-- >>> import Data.Maybe (listToMaybe)
+-- >>> import Optics.Core
+
 -- | Type synonym for an affine fold.
 type AffineFold s a = Optic' An_AffineFold NoIx s a
 
@@ -152,6 +156,3 @@ infixl 3 `afailing` -- Same as (<|>)
 isn't :: Is k An_AffineFold => Optic' k is s a -> s -> Bool
 isn't k s = isNothing (preview k s)
 {-# INLINE isn't #-}
-
--- $setup
--- >>> import Optics.Core
