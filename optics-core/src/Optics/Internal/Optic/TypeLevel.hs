@@ -24,11 +24,11 @@ type WithIx i = ('[i] :: IxList)
 -- Elimination forms in error messages
 
 type family ShowSymbolWithOrigin symbol origin :: ErrorMessage where
-  ShowSymbolWithOrigin symbol origin = 'Text "  "
-                                 ':<>: QuoteSymbol symbol
-                                 ':<>: 'Text " (from "
-                                 ':<>: 'Text origin
-                                 ':<>: 'Text ")"
+  ShowSymbolWithOrigin symbol origin = Text "  "
+                                 :<>: QuoteSymbol symbol
+                                 :<>: Text " (from "
+                                 :<>: Text origin
+                                 :<>: Text ")"
 
 type family ShowSymbolsWithOrigin (fs :: [(Symbol, Symbol)]) :: ErrorMessage where
   ShowSymbolsWithOrigin '[ '(symbol, origin) ] =
@@ -38,9 +38,9 @@ type family ShowSymbolsWithOrigin (fs :: [(Symbol, Symbol)]) :: ErrorMessage whe
 
 type family ShowOperators (ops :: [Symbol]) :: ErrorMessage where
   ShowOperators '[op] =
-    QuoteSymbol op ':<>: 'Text " (from Optics.Operators)"
+    QuoteSymbol op :<>: Text " (from Optics.Operators)"
   ShowOperators (op ': rest) =
-    QuoteSymbol op ':<>: 'Text " " ':<>: ShowOperators rest
+    QuoteSymbol op :<>: Text " " :<>: ShowOperators rest
 
 type family AppendEliminations a b where
   AppendEliminations '(fs1, ops1) '(fs2, ops2) =
@@ -48,7 +48,7 @@ type family AppendEliminations a b where
 
 type family ShowEliminations forms :: ErrorMessage where
   ShowEliminations '(fs, ops) =
-    ShowSymbolsWithOrigin fs ':$$: 'Text "  " ':<>: ShowOperators ops
+    ShowSymbolsWithOrigin fs ':$$: Text "  " :<>: ShowOperators ops
 
 ----------------------------------------
 -- Lists
@@ -156,17 +156,17 @@ type family Defined (f :: k) :: Bool where
 
 -- | Show a type surrounded by quote marks.
 type family QuoteType (x :: t) :: ErrorMessage where
-  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
+  QuoteType x = Text "‘" :<>: 'ShowType x :<>: Text "’"
 
 -- | Show a symbol surrounded by quote marks.
 type family QuoteSymbol (x :: Symbol) :: ErrorMessage where
-  QuoteSymbol x = 'Text "‘" ':<>: 'Text x ':<>: 'Text "’"
+  QuoteSymbol x = Text "‘" :<>: Text x :<>: Text "’"
 
 type family ToOrdinal (n :: Nat) :: ErrorMessage where
-  ToOrdinal 1 = 'Text "1st"
-  ToOrdinal 2 = 'Text "2nd"
-  ToOrdinal 3 = 'Text "3rd"
-  ToOrdinal n = 'ShowType n ':<>: 'Text "th"
+  ToOrdinal 1 = Text "1st"
+  ToOrdinal 2 = Text "2nd"
+  ToOrdinal 3 = Text "3rd"
+  ToOrdinal n = 'ShowType n :<>: Text "th"
 
 ----------------------------------------
 -- Misc
