@@ -129,7 +129,7 @@ instance
 instance
   ( GSetFieldSum path1 g1 h1 b
   , GSetFieldSum path2 g2 h2 b
-  ) => GSetFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) b where
+  ) => GSetFieldSum (PathNode path1 path2) (g1 :+: g2) (h1 :+: h2) b where
   gsetFieldSum (L1 x) = L1 . gsetFieldSum @path1 x
   gsetFieldSum (R1 y) = R1 . gsetFieldSum @path2 y
   {-# INLINE gsetFieldSum #-}
@@ -225,7 +225,7 @@ instance
 instance
   ( GAffineFieldSum path1 g1 h1 a b
   , GAffineFieldSum path2 g2 h2 a b
-  ) => GAffineFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
+  ) => GAffineFieldSum (PathNode path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
   gafieldSum point f (L1 x) = L1 <$> gafieldSum @path1 point f x
   gafieldSum point f (R1 y) = R1 <$> gafieldSum @path2 point f y
   {-# INLINE gafieldSum #-}
@@ -330,7 +330,7 @@ instance
 instance
   ( GPositionSum path1 g1 h1 a b
   , GPositionSum path2 g2 h2 a b
-  ) => GPositionSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
+  ) => GPositionSum (PathNode path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
   gpositionSum f (L1 x) = L1 <$> gpositionSum @path1 f x
   gpositionSum f (R1 y) = R1 <$> gpositionSum @path2 f y
   {-# INLINE gpositionSum #-}

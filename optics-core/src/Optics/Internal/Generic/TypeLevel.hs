@@ -31,7 +31,7 @@ import Optics.Internal.Optic.TypeLevel
 -- a data type. Computed up front by generic optics for early error reporting
 -- and efficient data traversal.
 data PathTree e
-  = PathTree (PathTree e) (PathTree e)
+  = PathNode (PathTree e) (PathTree e)
   | PathLeaf (Either e [Path])
 
 data Path = PathLeft | PathRight
@@ -42,7 +42,7 @@ data Path = PathLeft | PathRight
 -- | Compute paths to a field with a specific name.
 type family GetFieldPaths s (name :: Symbol) g :: PathTree Symbol where
   GetFieldPaths s name (M1 D _ g)  = GetFieldPaths s name g
-  GetFieldPaths s name (g1 :+: g2) = 'PathTree (GetFieldPaths s name g1)
+  GetFieldPaths s name (g1 :+: g2) = PathNode (GetFieldPaths s name g1)
                                               (GetFieldPaths s name g2)
   GetFieldPaths s name (M1 C _ g)  = PathLeaf (GetNamePath name g '[])
 
@@ -72,7 +72,7 @@ type family GetNamePath (name :: Symbol) g (acc :: [Path]) :: Either Symbol [Pat
 -- | Compute paths to a field at a specific position.
 type family GetPositionPaths s (pos :: Nat) g :: PathTree (Nat, Nat) where
   GetPositionPaths s pos (M1 D _ g)  = GetPositionPaths s pos g
-  GetPositionPaths s pos (g1 :+: g2) = 'PathTree (GetPositionPaths s pos g1)
+  GetPositionPaths s pos (g1 :+: g2) = PathNode (GetPositionPaths s pos g1)
                                                 (GetPositionPaths s pos g2)
   GetPositionPaths s pos (M1 C _ g)  = PathLeaf (GetPositionPath pos g 0 '[])
 
@@ -119,7 +119,7 @@ type family HideReps (g :: Type -> Type) (h :: Type -> Type) :: Constraint where
 
 -- | Check if any leaf in the tree has a '[Path]'.
 type family AnyHasPath (path :: PathTree e) :: Bool where
-  AnyHasPath ('PathTree path1 path2) = AnyHasPath path1 || AnyHasPath path2
+  AnyHasPath (PathNode path1 path2) = AnyHasPath path1 || AnyHasPath path2
   AnyHasPath (PathLeaf (Right _))  = True
   AnyHasPath (PathLeaf (Left _ ))  = False
 
