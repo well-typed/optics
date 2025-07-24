@@ -37,6 +37,8 @@ flag explicit-generic-labels
 
 common language
     ghc-options:        -Wall -Wcompat
+    if impl(ghc <9.4)
+      ghc-options:      -Wno-unticked-promoted-constructors
 
     default-language:   Haskell2010
 
