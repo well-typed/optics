@@ -31,9 +31,9 @@ instance Is k k where
 
 -- | Overlappable instance for a custom type error.
 instance {-# OVERLAPPABLE #-} TypeError
-  ('ShowType k ':<>: 'Text " cannot be used as " ':<>: 'ShowType l
-   ':$$: 'Text "Perhaps you meant one of these:"
-   ':$$: ShowEliminations (EliminationForms k)
+  (ShowType k :<>: Text " cannot be used as " :<>: ShowType l
+   :$$: Text "Perhaps you meant one of these:"
+   :$$: ShowEliminations (EliminationForms k)
   ) => Is k l where
   implies _ = error "unreachable"
 
@@ -432,6 +432,6 @@ instance k ~ A_Setter           => JoinKinds A_Setter           A_Traversal     
 
 instance {-# OVERLAPPABLE #-}
   ( JoinKinds k l m
-  , TypeError ('ShowType k ':<>: 'Text " cannot be composed with " ':<>: 'ShowType l)
+  , TypeError (ShowType k :<>: Text " cannot be composed with " :<>: ShowType l)
   ) => JoinKinds k l m where
   joinKinds _ = error "unreachable"

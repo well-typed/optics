@@ -24,23 +24,23 @@ type WithIx i = ('[i] :: IxList)
 -- Elimination forms in error messages
 
 type family ShowSymbolWithOrigin symbol origin :: ErrorMessage where
-  ShowSymbolWithOrigin symbol origin = 'Text "  "
-                                 ':<>: QuoteSymbol symbol
-                                 ':<>: 'Text " (from "
-                                 ':<>: 'Text origin
-                                 ':<>: 'Text ")"
+  ShowSymbolWithOrigin symbol origin = Text "  "
+                                 :<>: QuoteSymbol symbol
+                                 :<>: Text " (from "
+                                 :<>: Text origin
+                                 :<>: Text ")"
 
 type family ShowSymbolsWithOrigin (fs :: [(Symbol, Symbol)]) :: ErrorMessage where
   ShowSymbolsWithOrigin '[ '(symbol, origin) ] =
     ShowSymbolWithOrigin symbol origin
-  ShowSymbolsWithOrigin ('(symbol, origin) ': rest) =
-    ShowSymbolWithOrigin symbol origin ':$$: ShowSymbolsWithOrigin rest
+  ShowSymbolsWithOrigin ('(symbol, origin) : rest) =
+    ShowSymbolWithOrigin symbol origin :$$: ShowSymbolsWithOrigin rest
 
 type family ShowOperators (ops :: [Symbol]) :: ErrorMessage where
   ShowOperators '[op] =
-    QuoteSymbol op ':<>: 'Text " (from Optics.Operators)"
-  ShowOperators (op ': rest) =
-    QuoteSymbol op ':<>: 'Text " " ':<>: ShowOperators rest
+    QuoteSymbol op :<>: Text " (from Optics.Operators)"
+  ShowOperators (op : rest) =
+    QuoteSymbol op :<>: Text " " :<>: ShowOperators rest
 
 type family AppendEliminations a b where
   AppendEliminations '(fs1, ops1) '(fs2, ops2) =
@@ -48,7 +48,7 @@ type family AppendEliminations a b where
 
 type family ShowEliminations forms :: ErrorMessage where
   ShowEliminations '(fs, ops) =
-    ShowSymbolsWithOrigin fs ':$$: 'Text "  " ':<>: ShowOperators ops
+    ShowSymbolsWithOrigin fs :$$: Text "  " :<>: ShowOperators ops
 
 ----------------------------------------
 -- Lists
@@ -66,13 +66,13 @@ type family Reverse (xs :: [k]) (acc :: [k]) :: [k] where
 -- 'Curry' xs y = 'foldr' (->) y xs
 -- @
 type family Curry (xs :: IxList) (y :: Type) :: Type where
-  Curry '[]       y = y
-  Curry (x ': xs) y = x -> Curry xs y
+  Curry '[]      y = y
+  Curry (x : xs) y = x -> Curry xs y
 
 -- | Append two type-level lists together.
 type family Append (xs :: [k]) (ys :: [k]) :: [k] where
-  Append '[]       ys  = ys
-  Append (x ': xs) ys  = x ': Append xs ys
+  Append '[]      ys  = ys
+  Append (x : xs) ys  = x : Append xs ys
 
 -- | Class that is inhabited by all type-level lists @xs@, providing the ability
 -- to compose a function under @'Curry' xs@.
@@ -85,7 +85,7 @@ class CurryCompose xs where
 instance CurryCompose '[] where
   composeN = id
 
-instance CurryCompose xs => CurryCompose (x ': xs) where
+instance CurryCompose xs => CurryCompose (x : xs) where
   composeN ij f = composeN @xs ij . f
 
 ----------------------------------------
@@ -116,57 +116,57 @@ instance {-# INCOHERENT #-} xs ~ zs => AppendIndices xs '[] zs where
 instance ys ~ zs => AppendIndices '[] ys zs where
   appendIndices = IxEq
 
-instance AppendIndices xs ys ks => AppendIndices (x ': xs) ys (x ': ks) where
-  appendIndices :: forall i. IxEq i (Curry (x ': xs) (Curry ys i)) (Curry (x ': ks) i)
+instance AppendIndices xs ys ks => AppendIndices (x : xs) ys (x : ks) where
+  appendIndices :: forall i. IxEq i (Curry (x : xs) (Curry ys i)) (Curry (x : ks) i)
   appendIndices | IxEq <- appendIndices @xs @ys @ks @i = IxEq
 
 ----------------------------------------
 -- Either
 
--- | If lhs is 'Right', return it. Otherwise check rhs.
+-- | If lhs is Right', return it. Otherwise check rhs.
 type family FirstRight (m1 :: Either e a) (m2 :: Either e a) :: Either e a where
-  FirstRight ('Right a) _ = 'Right a
-  FirstRight          _ b = b
+  FirstRight (Right a) _ = Right a
+  FirstRight         _ b = b
 
 type family FromRight (def :: b) (e :: Either a b) :: b where
-  FromRight _   ('Right b) = b
-  FromRight def ('Left  _) = def
+  FromRight _   (Right b) = b
+  FromRight def (Left  _) = def
 
 type family IsLeft (e :: Either a b) :: Bool where
-  IsLeft ('Left _)  = 'True
-  IsLeft ('Right _) = 'False
+  IsLeft (Left _)  = True
+  IsLeft (Right _) = False
 
 ----------------------------------------
 -- Errors
 
 -- | Show a custom type error if @p@ is true.
 type family When (p :: Bool) (err :: Constraint) :: Constraint where
-  When 'True  err = err
-  When 'False _   = ()
+  When True  err = err
+  When False _   = ()
 
 -- | Show a custom type error if @p@ is false (or stuck).
 type family Unless (p :: Bool) (err :: Constraint) :: Constraint where
-  Unless 'True  _   = ()
-  Unless 'False err = err
+  Unless True  _   = ()
+  Unless False err = err
 
 -- | Use with 'Unless' to detect stuck (undefined) type families.
 type family Defined (f :: k) :: Bool where
   Defined (f _) = Defined f
-  Defined _     = 'True
+  Defined _     = True
 
 -- | Show a type surrounded by quote marks.
 type family QuoteType (x :: t) :: ErrorMessage where
-  QuoteType x = 'Text "‘" ':<>: 'ShowType x ':<>: 'Text "’"
+  QuoteType x = Text "‘" :<>: ShowType x :<>: Text "’"
 
 -- | Show a symbol surrounded by quote marks.
 type family QuoteSymbol (x :: Symbol) :: ErrorMessage where
-  QuoteSymbol x = 'Text "‘" ':<>: 'Text x ':<>: 'Text "’"
+  QuoteSymbol x = Text "‘" :<>: Text x :<>: Text "’"
 
 type family ToOrdinal (n :: Nat) :: ErrorMessage where
-  ToOrdinal 1 = 'Text "1st"
-  ToOrdinal 2 = 'Text "2nd"
-  ToOrdinal 3 = 'Text "3rd"
-  ToOrdinal n = 'ShowType n ':<>: 'Text "th"
+  ToOrdinal 1 = Text "1st"
+  ToOrdinal 2 = Text "2nd"
+  ToOrdinal 3 = Text "3rd"
+  ToOrdinal n = ShowType n :<>: Text "th"
 
 ----------------------------------------
 -- Misc
