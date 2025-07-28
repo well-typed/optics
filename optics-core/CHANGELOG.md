@@ -1,3 +1,6 @@
+# optics-core-0.4.2
+* Rename PathTree data constructor to PathNode, to avoid pun with type constructor.
+
 # optics-core-0.4.1.1 (2023-06-22)
 * Add INLINE pragmas to small functions that really should inline
 

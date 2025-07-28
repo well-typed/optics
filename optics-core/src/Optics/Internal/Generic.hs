@@ -129,7 +129,7 @@ instance
 instance
   ( GSetFieldSum path1 g1 h1 b
   , GSetFieldSum path2 g2 h2 b
-  ) => GSetFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) b where
+  ) => GSetFieldSum (PathNode path1 path2) (g1 :+: g2) (h1 :+: h2) b where
   gsetFieldSum (L1 x) = L1 . gsetFieldSum @path1 x
   gsetFieldSum (R1 y) = R1 . gsetFieldSum @path2 y
   {-# INLINE gsetFieldSum #-}
@@ -138,15 +138,15 @@ instance
   ( path ~ GSetFieldPath con epath
   , When (IsLeft epath) (HideReps g h)
   , GSetFieldProd path g h b
-  ) => GSetFieldSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
-                                      (M1 C ('MetaCons con fix hs) h) b where
+  ) => GSetFieldSum (PathLeaf epath) (M1 C (MetaCons con fix hs) g)
+                                      (M1 C (MetaCons con fix hs) h) b where
   gsetFieldSum (M1 x) = M1 . gsetFieldProd @path x
 
 type family GSetFieldPath (con :: Symbol) (e :: Either Symbol [Path]) :: [Path] where
-  GSetFieldPath _   ('Right path) = path
-  GSetFieldPath con ('Left name)  = TypeError
-    ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
-     'Text " doesn't have a field named " ':<>: QuoteSymbol name)
+  GSetFieldPath _   (Right path) = path
+  GSetFieldPath con (Left name)  = TypeError
+    (Text "Data constructor " :<>: QuoteSymbol con :<>:
+     Text " doesn't have a field named " :<>: QuoteSymbol name)
 
 class GSetFieldProd (path :: [Path]) g h b | path h -> b
                                            , path g b -> h where
@@ -155,27 +155,27 @@ class GSetFieldProd (path :: [Path]) g h b | path h -> b
 -- fast path left
 instance {-# OVERLAPPING #-}
   ( GSetFieldProd path g1 h1 b
-  ) => GSetFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) b where
+  ) => GSetFieldProd (PathLeft : path) (g1 :*: g2) (h1 :*: g2) b where
   gsetFieldProd (x :*: y) = (:*: y) . gsetFieldProd @path x
 
 -- slow path left
 instance
   ( GSetFieldProd path g1 h1 b
   , g2 ~ h2
-  ) => GSetFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) b where
+  ) => GSetFieldProd (PathLeft : path) (g1 :*: g2) (h1 :*: h2) b where
   gsetFieldProd (x :*: y) = (:*: y) . gsetFieldProd @path x
 
 -- fast path right
 instance {-# OVERLAPPING #-}
   ( GSetFieldProd path g2 h2 b
-  ) => GSetFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) b where
+  ) => GSetFieldProd (PathRight : path) (g1 :*: g2) (g1 :*: h2) b where
   gsetFieldProd (x :*: y) = (x :*:) . gsetFieldProd @path y
 
 -- slow path right
 instance
   ( GSetFieldProd path g2 h2 b
   , g1 ~ h1
-  ) => GSetFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) b where
+  ) => GSetFieldProd (PathRight : path) (g1 :*: g2) (h1 :*: h2) b where
   gsetFieldProd (x :*: y) = (x :*:) . gsetFieldProd @path y
 
 instance
@@ -202,10 +202,10 @@ instance
   , HasField name s a -- require the field to be in scope
   , Unless (AnyHasPath path)
     (TypeError
-      ('Text "Type " ':<>: QuoteType s ':<>:
-       'Text " doesn't have a field named " ':<>: QuoteSymbol name))
+      (Text "Type " :<>: QuoteType s :<>:
+       Text " doesn't have a field named " :<>: QuoteSymbol name))
   , GAffineFieldSum path (Rep s) (Rep t) a b
-  ) => GAffineFieldImpl 'True name s t a b where
+  ) => GAffineFieldImpl True name s t a b where
   gafieldImpl = withAffineTraversal
     (atraversalVL (\point f s -> to <$> gafieldSum @path point f (from s)))
     (\match update -> atraversalVL $ \point f s ->
@@ -225,14 +225,14 @@ instance
 instance
   ( GAffineFieldSum path1 g1 h1 a b
   , GAffineFieldSum path2 g2 h2 a b
-  ) => GAffineFieldSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
+  ) => GAffineFieldSum (PathNode path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
   gafieldSum point f (L1 x) = L1 <$> gafieldSum @path1 point f x
   gafieldSum point f (R1 y) = R1 <$> gafieldSum @path2 point f y
   {-# INLINE gafieldSum #-}
 
 instance
   ( GAffineFieldMaybe epath g h a b
-  ) => GAffineFieldSum ('PathLeaf epath) (M1 C m g) (M1 C m h) a b where
+  ) => GAffineFieldSum (PathLeaf epath) (M1 C m g) (M1 C m h) a b where
   gafieldSum point f (M1 x) = M1 <$> gafieldMaybe @epath point f x
 
 class GAffineFieldMaybe (epath :: Either Symbol [Path]) g h a b where
@@ -240,12 +240,12 @@ class GAffineFieldMaybe (epath :: Either Symbol [Path]) g h a b where
 
 instance
   ( g ~ h
-  ) => GAffineFieldMaybe ('Left name) g h a b where
+  ) => GAffineFieldMaybe (Left name) g h a b where
   gafieldMaybe point _ g = point g
 
 instance
   ( GFieldProd prodPath g h a b
-  ) => GAffineFieldMaybe ('Right prodPath) g h a b where
+  ) => GAffineFieldMaybe (Right prodPath) g h a b where
   gafieldMaybe _ f g = gfieldProd @prodPath f g
 
 ----------------------------------------
@@ -259,27 +259,27 @@ class GFieldProd (path :: [Path]) g h a b | path g -> a
 -- fast path left
 instance {-# OVERLAPPING #-}
   ( GFieldProd path g1 h1 a b
-  ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: g2) a b where
+  ) => GFieldProd (PathLeft : path) (g1 :*: g2) (h1 :*: g2) a b where
   gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
 
 -- slow path left
 instance
   ( GFieldProd path g1 h1 a b
   , g2 ~ h2
-  ) => GFieldProd ('PathLeft : path) (g1 :*: g2) (h1 :*: h2) a b where
+  ) => GFieldProd (PathLeft : path) (g1 :*: g2) (h1 :*: h2) a b where
   gfieldProd f (x :*: y) = (:*: y) <$> gfieldProd @path f x
 
 -- fast path right
 instance {-# OVERLAPPING #-}
   ( GFieldProd path g2 h2 a b
-  ) => GFieldProd ('PathRight : path) (g1 :*: g2) (g1 :*: h2) a b where
+  ) => GFieldProd (PathRight : path) (g1 :*: g2) (g1 :*: h2) a b where
   gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
 
 -- slow path right
 instance
   ( GFieldProd path g2 h2 a b
   , g1 ~ h1
-  ) => GFieldProd ('PathRight : path) (g1 :*: g2) (h1 :*: h2) a b where
+  ) => GFieldProd (PathRight : path) (g1 :*: g2) (h1 :*: h2) a b where
   gfieldProd f (x :*: y) = (x :*:) <$> gfieldProd @path f y
 
 instance
@@ -304,11 +304,11 @@ instance
   ( Generic s
   , Generic t
   , path ~ If (n <=? 0)
-              (TypeError ('Text "There is no 0th position"))
+              (TypeError (Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
   , When (n <=? 0) (HideReps (Rep s) (Rep t))
   , GPositionSum path (Rep s) (Rep t) a b
-  ) => GPositionImpl 'True n s t a b where
+  ) => GPositionImpl True n s t a b where
   gpositionImpl = withLens
     (lensVL (\f s -> to <$> gpositionSum @path f (from s)))
     (\get set -> lensVL $ \f s -> set s <$> f (get s))
@@ -330,7 +330,7 @@ instance
 instance
   ( GPositionSum path1 g1 h1 a b
   , GPositionSum path2 g2 h2 a b
-  ) => GPositionSum ('PathTree path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
+  ) => GPositionSum (PathNode path1 path2) (g1 :+: g2) (h1 :+: h2) a b where
   gpositionSum f (L1 x) = L1 <$> gpositionSum @path1 f x
   gpositionSum f (R1 y) = R1 <$> gpositionSum @path2 f y
   {-# INLINE gpositionSum #-}
@@ -339,21 +339,21 @@ instance
   ( path ~ GPositionPath con epath
   , When (IsLeft epath) (HideReps g h)
   , GFieldProd path g h a b
-  ) => GPositionSum ('PathLeaf epath) (M1 C ('MetaCons con fix hs) g)
-                                      (M1 C ('MetaCons con fix hs) h) a b where
+  ) => GPositionSum (PathLeaf epath) (M1 C (MetaCons con fix hs) g)
+                                      (M1 C (MetaCons con fix hs) h) a b where
   gpositionSum f (M1 x) = M1 <$> gfieldProd @path f x
 
 type family GPositionPath con (e :: Either (Nat, Nat) [Path]) :: [Path] where
-  GPositionPath _   ('Right path)   = path
-  GPositionPath con ('Left '(n, k)) = TypeError
-    ('Text "Data constructor " ':<>: QuoteSymbol con ':<>:
-     'Text " has " ':<>: ShowFieldNumber k ':<>: 'Text ", " ':<>:
-     ToOrdinal n ':<>: 'Text " requested")
+  GPositionPath _   (Right path)   = path
+  GPositionPath con (Left '(n, k)) = TypeError
+    (Text "Data constructor " :<>: QuoteSymbol con :<>:
+     Text " has " :<>: ShowFieldNumber k :<>: Text ", " :<>:
+     ToOrdinal n :<>: Text " requested")
 
 type family ShowFieldNumber (k :: Nat) :: ErrorMessage where
-  ShowFieldNumber 0 = 'Text "no fields"
-  ShowFieldNumber 1 = 'Text "1 field"
-  ShowFieldNumber k = 'ShowType k ':<>: 'Text " fields"
+  ShowFieldNumber 0 = Text "no fields"
+  ShowFieldNumber 1 = Text "1 field"
+  ShowFieldNumber k = ShowType k :<>: Text " fields"
 
 ----------------------------------------
 -- Constructor
@@ -373,12 +373,12 @@ instance
   , epath ~ GetNamePath name (Rep s) '[]
   , path ~ FromRight
     (TypeError
-      ('Text "Type " ':<>: QuoteType s ':<>:
-       'Text " doesn't have a constructor named " ':<>: QuoteSymbol name))
+      (Text "Type " :<>: QuoteType s :<>:
+       Text " doesn't have a constructor named " :<>: QuoteSymbol name))
     epath
   , When (IsLeft epath) (HideReps (Rep s) (Rep t))
   , GConstructorSum path (Rep s) (Rep t) a b
-  ) => GConstructorImpl 'True name s t a b where
+  ) => GConstructorImpl True name s t a b where
   gconstructorImpl = withPrism (generic % gconstructorSum @path) prism
   {-# INLINE gconstructorImpl #-}
 
@@ -398,27 +398,27 @@ instance
 -- fast path left
 instance {-# OVERLAPPING #-}
   ( GConstructorSum path g1 h1 a b
-  ) => GConstructorSum ('PathLeft : path) (g1 :+: g2) (h1 :+: g2) a b where
+  ) => GConstructorSum (PathLeft : path) (g1 :+: g2) (h1 :+: g2) a b where
   gconstructorSum = _L1 % gconstructorSum @path
 
 -- slow path left
 instance
   ( GConstructorSum path g1 h1 a b
   , g2 ~ h2
-  ) => GConstructorSum ('PathLeft : path) (g1 :+: g2) (h1 :+: h2) a b where
+  ) => GConstructorSum (PathLeft : path) (g1 :+: g2) (h1 :+: h2) a b where
   gconstructorSum = _L1 % gconstructorSum @path
 
 -- fast path right
 instance {-# OVERLAPPING #-}
   ( GConstructorSum path g2 h2 a b
-  ) => GConstructorSum ('PathRight : path) (g1 :+: g2) (g1 :+: h2) a b where
+  ) => GConstructorSum (PathRight : path) (g1 :+: g2) (g1 :+: h2) a b where
   gconstructorSum = _R1 % gconstructorSum @path
 
 -- slow path right
 instance
   ( GConstructorSum path g2 h2 a b
   , g1 ~ h1
-  ) => GConstructorSum ('PathRight : path) (g1 :+: g2) (h1 :+: h2) a b where
+  ) => GConstructorSum (PathRight : path) (g1 :+: g2) (h1 :+: h2) a b where
   gconstructorSum = _R1 % gconstructorSum @path
 
 instance
@@ -438,9 +438,9 @@ type F m a = M1 S m (Rec0 a)
 instance {-# OVERLAPPABLE #-}
   ( Dysfunctional () () g h a b
   , TypeError
-    ('Text "Generic based access supports constructors" ':$$:
-     'Text "containing up to 5 fields. Please generate" ':$$:
-     'Text "PrismS with Template Haskell if you need more.")
+    (Text "Generic based access supports constructors" :$$:
+     Text "containing up to 5 fields. Please generate" :$$:
+     Text "PrismS with Template Haskell if you need more.")
   ) => GConstructorTuple g h a b where
   gconstructorTuple = error "unreachable"
 
@@ -544,7 +544,7 @@ instance GPlateImpl (URec b) a where
 class GPlateInner (repDefined :: Bool) s a where
   gplateInner :: TraversalVL' s a
 
-instance (Generic s, GPlateImpl (Rep s) a) => GPlateInner 'True s a where
+instance (Generic s, GPlateImpl (Rep s) a) => GPlateInner True s a where
   gplateInner f = fmap to . gplateImpl f . from
 
 instance {-# INCOHERENT #-} GPlateInner repNotDefined s a where

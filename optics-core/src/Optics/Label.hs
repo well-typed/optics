@@ -534,9 +534,9 @@ type GenericLabelOpticContext repDefined name k s t a b =
   -- If a label starts with "_[A-Z]", assume it's a name of a constructor.
   -- Otherwise, if it starts with "?[a-z]", assume it's a name of a partial
   -- field. Otherwise it's a total field.
-  , k ~ If (CmpSymbol "_@" name == 'LT && CmpSymbol "_[" name == 'GT)
+  , k ~ If (CmpSymbol "_@" name == LT && CmpSymbol "_[" name == GT)
            A_Prism
-           (If (CmpSymbol "?`" name == 'LT && CmpSymbol "?{" name == 'GT)
+           (If (CmpSymbol "?`" name == LT && CmpSymbol "?{" name == GT)
                An_AffineTraversal
                A_Lens)
   , GenericOptic repDefined name k s t a b
@@ -546,19 +546,19 @@ type GenericLabelOpticContext repDefined name k s t a b =
 -- | If there is no specific 'LabelOptic' instance, display a custom type error.
 type family NoLabelOpticError name k s t a b where
   NoLabelOpticError name k s t a b = TypeError
-    ('Text "No instance for LabelOptic " ':<>: 'ShowType name
-     ':<>: 'Text " " ':<>: QuoteType k
-     ':<>: 'Text " " ':<>: QuoteType s
-     ':<>: 'Text " " ':<>: QuoteType t
-     ':<>: 'Text " " ':<>: QuoteType a
-     ':<>: 'Text " " ':<>: QuoteType b
-     ':$$: 'Text "Possible solutions:"
-     ':$$: 'Text "- Check and correct spelling of the label"
-     ':$$: 'Text "- Define the LabelOptic instance by hand or via Template Haskell"
+    (Text "No instance for LabelOptic " :<>: ShowType name
+     :<>: Text " " :<>: QuoteType k
+     :<>: Text " " :<>: QuoteType s
+     :<>: Text " " :<>: QuoteType t
+     :<>: Text " " :<>: QuoteType a
+     :<>: Text " " :<>: QuoteType b
+     :$$: Text "Possible solutions:"
+     :$$: Text "- Check and correct spelling of the label"
+     :$$: Text "- Define the LabelOptic instance by hand or via Template Haskell"
 #ifdef EXPLICIT_GENERIC_LABELS
-     ':$$: 'Text "- Derive a GenericLabelOptics instance for " ':<>: QuoteType s
+     :$$: Text "- Derive a GenericLabelOptics instance for " :<>: QuoteType s
 #else
-     ':$$: 'Text "- Derive a Generic instance for " ':<>: QuoteType s
+     :$$: Text "- Derive a Generic instance for " :<>: QuoteType s
 #endif
     )
 
@@ -581,7 +581,7 @@ type family NoLabelOpticError name k s t a b where
 -- @since 0.4
 class Generic a => GenericLabelOptics a where
   type HasGenericLabelOptics a :: Bool
-  type HasGenericLabelOptics a = 'True
+  type HasGenericLabelOptics a = True
 
 ----------------------------------------
 
