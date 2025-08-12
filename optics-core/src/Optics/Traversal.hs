@@ -66,6 +66,7 @@ module Optics.Traversal
     -- * Combinators
   , backwards
   , partsOf
+  , unsafePartsOf
   , singular
 
   -- * Monoid structure
@@ -379,7 +380,7 @@ backwards o = traversalVL $ \f -> forwards #. traverseOf o (Backwards #. f)
 -- So technically, this is only a 'Lens' if you do not change the number of
 -- results it returns.
 partsOf
-  :: forall k is s t a. Is k A_Traversal
+  :: Is k A_Traversal
   => Optic k is s t a a
   -> Lens s t [a] [a]
 partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
@@ -389,6 +390,22 @@ partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
       a' : as' -> put as' >> pure a'
       []       ->            pure a
 {-# INLINE partsOf #-}
+
+-- | A variant of 'partsOf' that allows changing the type of elements.
+--
+-- /Warning:/ if you don't supply at least as many @b@'s as you were given @a@'s,
+-- the reconstruction of @t@ will result in an error.
+unsafePartsOf
+  :: Is k A_Traversal
+  => Optic k is s t a b
+  -> Lens s t [a] [b]
+unsafePartsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
+  <$> f (toListOf (getting $ castOptic @A_Traversal o) s)
+  where
+    update _ = get >>= \case
+      b : bs -> put bs >> pure b
+      []     -> error "unsafePartsOf: not enough elements were supplied"
+{-# INLINE unsafePartsOf #-}
 
 -- | Convert a traversal to an 'AffineTraversal' that visits the first element
 -- of the original traversal.
@@ -400,7 +417,7 @@ partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
 --
 -- @since 0.3
 singular
-  :: forall k is s a. Is k A_Traversal
+  :: Is k A_Traversal
   => Optic' k is s a
   -> AffineTraversal' s a
 singular o = atraversalVL $ \point f s ->
