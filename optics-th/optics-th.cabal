@@ -8,7 +8,7 @@ maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
 tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
                 || ==9.0.2 || ==9.2.8 || ==9.4.8 || ==9.6.7 || ==9.8.4
-                || ==9.10.2 || ==9.12.2,
+                || ==9.10.2 || ==9.12.2 || ==9.14.1,
                GHCJS ==8.4
 synopsis:      Optics construction using TemplateHaskell
 category:      Data, Optics, Lenses
@@ -63,10 +63,10 @@ library
   hs-source-dirs:   src
 
   build-depends: base                   >= 4.10      && <5
-               , containers             >= 0.5.10.2  && <0.8
+               , containers             >= 0.5.10.2  && <0.9
                , mtl                    >= 2.2.2     && <2.4
                , optics-core            >= 0.4.1     && <0.5
-               , template-haskell       >= 2.12      && <2.24
+               , template-haskell       >= 2.12      && <2.25
                , th-abstraction         >= 0.4       && <0.8
                , transformers           >= 0.5       && <0.7
 
