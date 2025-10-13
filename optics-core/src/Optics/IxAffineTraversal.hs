@@ -36,6 +36,11 @@ module Optics.IxAffineTraversal
   -- * Additional introduction forms
   , ignored
 
+  -- * Monoid structure
+  -- | 'IxAffineTraversal' admits a monoid structure where 'iadisjoin' returns
+  -- the result from the second indexed affine traversal only if the first does
+  -- not return a result. The identity element is 'ignored' (which traverses no
+  -- elements).
   , iadisjoin
 
   -- * Subtyping
@@ -133,6 +138,17 @@ ignored :: IxAffineTraversal i s s a b
 ignored = iatraversalVL $ \point _ -> point
 {-# INLINE ignored #-}
 
+-- | Try the first 'IxAffineTraversal'. If it does not return a entry, try the
+-- second one.
+--
+-- >>> iover (ifst `iadisjoin` isnd) (++) ("foo", "bar")
+-- ("barfoo","bar")
+--
+-- >>> iover (ignored `iadisjoin` isnd) (++) ("foo", "bar")
+-- ("foo","foobar")
+--
+-- @since 0.4.3
+--
 iadisjoin
   :: ( Is k An_AffineTraversal, Is l An_AffineTraversal
      , is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)

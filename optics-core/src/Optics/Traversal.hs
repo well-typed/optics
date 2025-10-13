@@ -69,10 +69,16 @@ module Optics.Traversal
   , unsafePartsOf
   , singular
 
-  -- * Monoid structure
-  -- | 'Traversal' admits a (partial) monoid structure where 'adjoin' combines
-  -- non-overlapping traversals, and the identity element is
-  -- 'Optics.IxAffineTraversal.ignored' (which traverses no elements).
+  -- * Monoid structures
+  -- | 'Traversal' admits two monoid structures:
+  --
+  -- * 'adjoin' combines non-overlapping traversals.
+  --
+  -- * 'disjoin' returns results from the second traversal only if the first
+  --   returns no results.
+  --
+  -- In both cases, the identity element is 'Optics.IxAffineTraversal.ignored'
+  -- (which traverses no elements).
   --
   -- If you merely need a 'Fold', you can use traversals as folds and combine
   -- them with one of the monoid structures on folds (see
@@ -431,6 +437,15 @@ singular o = atraversalVL $ \point f s ->
       Nothing ->                pure a
 {-# INLINE singular #-}
 
+-- | Try the first 'Traversal'. If it returns no entries, try the second one.
+--
+-- >>> over (_1 `disjoin` _2) succ (0, 0)
+-- (1,0)
+-- >>> over (ignored `disjoin` _2) succ (0, 0)
+-- (0,1)
+--
+-- @since 0.4.3
+--
 disjoin
   :: (Is k A_Traversal, Is l A_Traversal)
   => Optic k is s t a b
@@ -443,7 +458,6 @@ disjoin a b = traversalVL $ \f s ->
      else traverseOf b f s
 infixl 3 `disjoin` -- Same as (<|>)
 {-# INLINE disjoin #-}
-
 
 -- | Combine two disjoint traversals into one.
 --

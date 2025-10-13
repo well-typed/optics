@@ -48,6 +48,10 @@ module Optics.AffineTraversal
   -- * Additional elimination forms
   , withAffineTraversal
 
+  -- * Monoid structure
+  -- | 'AffineTraversal' admits a monoid structure where 'adisjoin' returns the
+  -- result from the second affine traversal only if the first does not return a
+  -- result. The identity element is 'ignored' (which traverses no elements).
   , adisjoin
 
   -- * Subtyping
@@ -171,6 +175,16 @@ matching :: Is k An_AffineTraversal => Optic k is s t a b -> s -> Either t a
 matching o = withAffineTraversal o $ \match _ -> match
 {-# INLINE matching #-}
 
+-- | Try the first 'AffineTraversal'. If it does not return an entry, try the
+-- second one.
+--
+-- >>> over (ix 2 `adisjoin` ix 1) (*5) [1,2,3]
+-- [1,2,15]
+-- >>> over (ix 2 `adisjoin` ix 1) (*5) [1,2]
+-- [1,10]
+--
+-- @since 0.4.3
+--
 adisjoin
   :: (Is k An_AffineTraversal, Is l An_AffineTraversal)
   => Optic k is s t a b

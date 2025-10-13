@@ -59,10 +59,16 @@ module Optics.IxTraversal
   , ipartsOf
   , isingular
 
-  -- * Monoid structure
-  -- | 'IxTraversal' admits a (partial) monoid structure where 'iadjoin'
-  -- combines non-overlapping indexed traversals, and the identity element is
-  -- 'ignored' (which traverses no elements).
+  -- * Monoid structures
+  -- | 'IxTraversal' admits two monoid structures:
+  --
+  -- * 'iadjoin' combines non-overlapping indexed traversals.
+  --
+  -- * 'idisjoin' returns results from the second indexed traversal only if the
+  --   first returns no results.
+  --
+  -- In both cases, the identity element is 'ignored' (which traverses no
+  -- elements).
   --
   -- If you merely need an 'IxFold', you can use indexed traversals as indexed
   -- folds and combine them with one of the monoid structures on indexed folds
@@ -356,6 +362,16 @@ isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
       Nothing ->                pure a
 {-# INLINE isingular #-}
 
+-- | Try the first 'IxTraversal'. If it returns no entries, try the second one.
+--
+-- >>> iover (_1 % itraversed `idisjoin` _2 % itraversed) (+) ([0, 0, 0], (3, 5))
+-- ([0,1,2],(3,5))
+--
+-- >>> iover (ignored `idisjoin` _2 % itraversed) (+) ([0, 0, 0], (3, 5))
+-- ([0,0,0],(3,8))
+--
+-- @since 0.4.3
+--
 idisjoin
   :: ( Is k A_Traversal, Is l A_Traversal
      , is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
