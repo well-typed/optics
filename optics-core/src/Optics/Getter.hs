@@ -40,6 +40,7 @@ module Optics.Getter
   -- * van Laarhoven encoding
   , GetterVL
   , getterVL
+  , toGetterVL
   )
   where
 
@@ -79,3 +80,7 @@ type GetterVL s a =
 getterVL :: GetterVL s a -> Getter s a
 getterVL g = Optic (getter g)
 {-# INLINE getterVL #-}
+
+toGetterVL :: Is k A_Getter => Optic k is s s a a -> GetterVL s a
+toGetterVL o = runStar #. getOptic (castOptic @A_Getter o) .# Star
+{-# INLINE toGetterVL #-}
