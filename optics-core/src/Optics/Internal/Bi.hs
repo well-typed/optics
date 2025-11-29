@@ -7,6 +7,7 @@
 module Optics.Internal.Bi where
 
 import Data.Coerce
+import Data.Functor.Const (Const(Const, getConst))
 import Data.Void
 
 import Data.Profunctor.Indexed
@@ -59,3 +60,6 @@ lphantom = first absurd . lmap absurd
 -- must be phantom.
 rphantom :: (Profunctor p, Bicontravariant p) => p i c a -> p i c b
 rphantom = rmap absurd . contrasecond absurd
+
+getter :: (Profunctor p, Bicontravariant p) => ((s -> Const s s) -> a -> Const s a) -> p i s c1 -> p i a c2
+getter g = lmap (getConst . g Const) . rphantom
