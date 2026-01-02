@@ -36,6 +36,13 @@ module Optics.IxAffineTraversal
   -- * Additional introduction forms
   , ignored
 
+  -- * Monoid structure
+  -- | 'IxAffineTraversal' admits a monoid structure where 'iadisjoin' returns
+  -- the result from the second indexed affine traversal only if the first does
+  -- not return a result. The identity element is 'ignored' (which traverses no
+  -- elements).
+  , iadisjoin
+
   -- * Subtyping
   , An_AffineTraversal
 
@@ -49,6 +56,7 @@ module Optics.IxAffineTraversal
 import Data.Profunctor.Indexed
 
 import Optics.AffineFold
+import Optics.AffineTraversal
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
 import Optics.Internal.Utils
@@ -129,6 +137,31 @@ unsafeFilteredBy p = iatraversalVL $ \point f s -> case preview p s of
 ignored :: IxAffineTraversal i s s a b
 ignored = iatraversalVL $ \point _ -> point
 {-# INLINE ignored #-}
+
+-- | Try the first 'IxAffineTraversal'. If it does not return a entry, try the
+-- second one.
+--
+-- >>> iover (ifst `iadisjoin` isnd) (++) ("foo", "bar")
+-- ("barfoo","bar")
+--
+-- >>> iover (ignored `iadisjoin` isnd) (++) ("foo", "bar")
+-- ("foo","foobar")
+--
+-- @since 0.4.3
+--
+iadisjoin
+  :: ( Is k An_AffineTraversal, Is l An_AffineTraversal
+     , is1 `HasSingleIndex` i, is2 `HasSingleIndex` i)
+  => Optic k is1 s t a b
+  -> Optic l is2 s t a b
+  -> IxAffineTraversal i s t a b
+iadisjoin a b = conjoined (adisjoin a b) $ iatraversalVL $ \point f s ->
+  let OrT visited fu = iatraverseOf a (OrT False . point) (\i -> wrapOrT . f i) s
+  in if visited
+     then fu
+     else iatraverseOf b point f s
+infixl 3 `iadisjoin` -- Same as (<|>)
+{-# INLINE iadisjoin #-}
 
 -- $setup
 -- >>> import Optics.Core

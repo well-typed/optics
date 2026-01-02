@@ -48,6 +48,12 @@ module Optics.AffineTraversal
   -- * Additional elimination forms
   , withAffineTraversal
 
+  -- * Monoid structure
+  -- | 'AffineTraversal' admits a monoid structure where 'adisjoin' returns the
+  -- result from the second affine traversal only if the first does not return a
+  -- result. The identity element is 'ignored' (which traverses no elements).
+  , adisjoin
+
   -- * Subtyping
   , An_AffineTraversal
   -- | <<diagrams/AffineTraversal.png AffineTraversal in the optics hierarchy>>
@@ -63,6 +69,7 @@ module Optics.AffineTraversal
 import Data.Profunctor.Indexed
 
 import Optics.Internal.Optic
+import Optics.Internal.Utils
 
 -- $setup
 -- >>> import Optics.Core
@@ -167,6 +174,29 @@ atraverseOf o point =
 matching :: Is k An_AffineTraversal => Optic k is s t a b -> s -> Either t a
 matching o = withAffineTraversal o $ \match _ -> match
 {-# INLINE matching #-}
+
+-- | Try the first 'AffineTraversal'. If it does not return an entry, try the
+-- second one.
+--
+-- >>> over (ix 2 `adisjoin` ix 1) (*5) [1,2,3]
+-- [1,2,15]
+-- >>> over (ix 2 `adisjoin` ix 1) (*5) [1,2]
+-- [1,10]
+--
+-- @since 0.4.3
+--
+adisjoin
+  :: (Is k An_AffineTraversal, Is l An_AffineTraversal)
+  => Optic k is s t a b
+  -> Optic l js s t a b
+  -> AffineTraversal s t a b
+adisjoin a b = atraversalVL $ \point f s ->
+  let OrT visited fu = atraverseOf a (OrT False . point) (wrapOrT . f) s
+  in if visited
+     then fu
+     else atraverseOf b point f s
+infixl 3 `adisjoin` -- Same as (<|>)
+{-# INLINE adisjoin #-}
 
 -- | Filter result(s) of a traversal that don't satisfy a predicate.
 --
