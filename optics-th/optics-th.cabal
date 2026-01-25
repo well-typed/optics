@@ -66,7 +66,7 @@ library
                , containers             >= 0.5.10.2  && <0.8
                , mtl                    >= 2.2.2     && <2.4
                , optics-core            >= 0.4.1     && <0.5
-               , template-haskell       >= 2.12      && <2.24
+               , template-haskell       >= 2.12      && <2.25
                , th-abstraction         >= 0.4       && <0.8
                , transformers           >= 0.5       && <0.7
 
