@@ -162,6 +162,7 @@ library
                    Optics.Internal.Optic.Types
                    Optics.Internal.Setter
                    Optics.Internal.Traversal
+                   Optics.Internal.TypeError
                    Optics.Internal.Utils
 
   x-docspec-options: -XTypeApplications -XTypeOperators -XFlexibleContexts -XStandaloneDeriving -XDeriveGeneric -XDataKinds -XOverloadedLabels -XTupleSections

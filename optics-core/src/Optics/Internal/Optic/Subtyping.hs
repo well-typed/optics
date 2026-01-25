@@ -8,10 +8,9 @@
 -- in subsequent releases.
 module Optics.Internal.Optic.Subtyping where
 
-import GHC.TypeLits (ErrorMessage(..), TypeError)
-
 import Optics.Internal.Optic.TypeLevel
 import Optics.Internal.Optic.Types
+import Optics.Internal.TypeError
 
 -- | Subtyping relationship between kinds of optics.
 --
@@ -30,7 +29,7 @@ instance Is k k where
   implies r = r
 
 -- | Overlappable instance for a custom type error.
-instance {-# OVERLAPPABLE #-} TypeError
+instance {-# OVERLAPPABLE #-} Unsatisfiable
   (ShowType k :<>: Text " cannot be used as " :<>: ShowType l
    :$$: Text "Perhaps you meant one of these:"
    :$$: ShowEliminations (EliminationForms k)
@@ -432,6 +431,6 @@ instance k ~ A_Setter           => JoinKinds A_Setter           A_Traversal     
 
 instance {-# OVERLAPPABLE #-}
   ( JoinKinds k l m
-  , TypeError (ShowType k :<>: Text " cannot be composed with " :<>: ShowType l)
+  , Unsatisfiable (ShowType k :<>: Text " cannot be composed with " :<>: ShowType l)
   ) => JoinKinds k l m where
   joinKinds _ = error "unreachable"
