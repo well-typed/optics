@@ -8,9 +8,9 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.19.20250722
+# version: 0.19.20260104
 #
-# REGENDATA ("0.19.20250722",["github","--config=cabal.haskell-ci","cabal.project"])
+# REGENDATA ("0.19.20260104",["github","--config=cabal.haskell-ci","cabal.project"])
 #
 name: Haskell-CI
 on:
@@ -20,6 +20,9 @@ on:
   pull_request:
     branches:
       - master
+  merge_group:
+    branches:
+      - master
 jobs:
   linux:
     name: Haskell-CI - Linux - ${{ matrix.compiler }}
@@ -27,19 +30,24 @@ jobs:
     timeout-minutes:
       60
     container:
-      image: buildpack-deps:focal
+      image: buildpack-deps:jammy
     continue-on-error: ${{ matrix.allow-failure }}
     strategy:
       matrix:
         include:
+          - compiler: ghc-9.14.1
+            compilerKind: ghc
+            compilerVersion: 9.14.1
+            setup-method: ghcup
+            allow-failure: false
           - compiler: ghc-9.12.2
             compilerKind: ghc
             compilerVersion: 9.12.2
             setup-method: ghcup
             allow-failure: false
-          - compiler: ghc-9.10.2
+          - compiler: ghc-9.10.3
             compilerKind: ghc
-            compilerVersion: 9.10.2
+            compilerVersion: 9.10.3
             setup-method: ghcup
             allow-failure: false
           - compiler: ghc-9.8.4
@@ -105,8 +113,8 @@ jobs:
           chmod a+x "$HOME/.ghcup/bin/ghcup"
       - name: Install cabal-install
         run: |
-          "$HOME/.ghcup/bin/ghcup" install cabal 3.14.2.0 || (cat "$HOME"/.ghcup/logs/*.* && false)
-          echo "CABAL=$HOME/.ghcup/bin/cabal-3.14.2.0 -vnormal+nowrap" >> "$GITHUB_ENV"
+          "$HOME/.ghcup/bin/ghcup" install cabal 3.16.0.0 || (cat "$HOME"/.ghcup/logs/*.* && false)
+          echo "CABAL=$HOME/.ghcup/bin/cabal-3.16.0.0 -vnormal+nowrap" >> "$GITHUB_ENV"
       - name: Install GHC (GHCup)
         if: matrix.setup-method == 'ghcup'
         run: |
@@ -130,7 +138,7 @@ jobs:
           HCNUMVER=$(${HC} --numeric-version|perl -ne '/^(\d+)\.(\d+)\.(\d+)(\.(\d+))?$/; print(10000 * $1 + 100 * $2 + ($3 == 0 ? $5 != 1 : $3))')
           echo "HCNUMVER=$HCNUMVER" >> "$GITHUB_ENV"
           echo "ARG_TESTS=--enable-tests" >> "$GITHUB_ENV"
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 90600)) -ne 0 ] ; then echo "ARG_BENCH=--enable-benchmarks" >> "$GITHUB_ENV" ; else echo "ARG_BENCH=--disable-benchmarks" >> "$GITHUB_ENV" ; fi
+          echo "ARG_BENCH=--enable-benchmarks" >> "$GITHUB_ENV"
           echo "HEADHACKAGE=false" >> "$GITHUB_ENV"
           echo "ARG_COMPILER=--$HCKIND --with-compiler=$HC" >> "$GITHUB_ENV"
         env:
@@ -191,7 +199,7 @@ jobs:
           chmod a+x $HOME/.cabal/bin/cabal-docspec
           cabal-docspec --version
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: source
       - name: initial cabal.project for sdist
@@ -204,8 +212,8 @@ jobs:
           echo "packages: $GITHUB_WORKSPACE/source/optics-th" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/optics-vl" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/indexed-profunctors" >> cabal.project
+          echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project
           echo "packages: $GITHUB_WORKSPACE/source/metametapost" >> cabal.project
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "packages: $GITHUB_WORKSPACE/source/template-haskell-optics" >> cabal.project ; fi
           cat cabal.project
       - name: sdist
         run: |
@@ -231,10 +239,10 @@ jobs:
           echo "PKGDIR_optics_vl=${PKGDIR_optics_vl}" >> "$GITHUB_ENV"
           PKGDIR_indexed_profunctors="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/indexed-profunctors-[0-9.]*')"
           echo "PKGDIR_indexed_profunctors=${PKGDIR_indexed_profunctors}" >> "$GITHUB_ENV"
-          PKGDIR_metametapost="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/metametapost-[0-9.]*')"
-          echo "PKGDIR_metametapost=${PKGDIR_metametapost}" >> "$GITHUB_ENV"
           PKGDIR_template_haskell_optics="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/template-haskell-optics-[0-9.]*')"
           echo "PKGDIR_template_haskell_optics=${PKGDIR_template_haskell_optics}" >> "$GITHUB_ENV"
+          PKGDIR_metametapost="$(find "$GITHUB_WORKSPACE/unpacked" -maxdepth 1 -type d -regex '.*/metametapost-[0-9.]*')"
+          echo "PKGDIR_metametapost=${PKGDIR_metametapost}" >> "$GITHUB_ENV"
           rm -f cabal.project cabal.project.local
           touch cabal.project
           touch cabal.project.local
@@ -245,8 +253,8 @@ jobs:
           echo "packages: ${PKGDIR_optics_th}" >> cabal.project
           echo "packages: ${PKGDIR_optics_vl}" >> cabal.project
           echo "packages: ${PKGDIR_indexed_profunctors}" >> cabal.project
+          echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project
           echo "packages: ${PKGDIR_metametapost}" >> cabal.project
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "packages: ${PKGDIR_template_haskell_optics}" >> cabal.project ; fi
           echo "package optics" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package optics-core" >> cabal.project
@@ -261,10 +269,10 @@ jobs:
           echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package indexed-profunctors" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
+          echo "package template-haskell-optics" >> cabal.project
+          echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
           echo "package metametapost" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=missing-methods -Werror=missing-fields" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package optics-core" >> cabal.project ; fi
@@ -279,10 +287,10 @@ jobs:
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package indexed-profunctors" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "package metametapost" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90400)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
-          if [ $((! GHCJSARITH && HCNUMVER >= 90400 && HCNUMVER < 91200)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
-          if [ $((! GHCJSARITH && HCNUMVER >= 90400 && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=unused-packages" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package optics-core" >> cabal.project ; fi
@@ -297,11 +305,15 @@ jobs:
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package indexed-profunctors" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
+          if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "package metametapost" >> cabal.project ; fi
           if [ $((! GHCJSARITH && HCNUMVER >= 90000)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
-          if [ $((! GHCJSARITH && HCNUMVER >= 90000 && HCNUMVER < 91200)) -ne 0 ] ; then echo "package template-haskell-optics" >> cabal.project ; fi
-          if [ $((! GHCJSARITH && HCNUMVER >= 90000 && HCNUMVER < 91200)) -ne 0 ] ; then echo "    ghc-options: -Werror=incomplete-patterns -Werror=incomplete-uni-patterns" >> cabal.project ; fi
           cat >> cabal.project <<EOF
+          allow-newer: indexed-traversable:base
+          allow-newer: indexed-traversable-instances:base
+          allow-newer: indexed-traversable:containers
+          allow-newer: these:base
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: any.$_ installed\n" unless /^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$/; }' >> cabal.project.local
           cat cabal.project
@@ -331,8 +343,8 @@ jobs:
           if [ $((! GHCJSARITH)) -ne 0 ] ; then $CABAL v2-test $ARG_COMPILER $ARG_TESTS $ARG_BENCH all --test-show-details=direct ; fi
       - name: docspec
         run: |
-          if [ $((! GHCJSARITH && (HCNUMVER < 90400 || HCNUMVER >= 90800))) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
-          if [ $((! GHCJSARITH && (HCNUMVER < 90400 || HCNUMVER >= 90800))) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
+          if [ $((! GHCJSARITH && (HCNUMVER < 90400 || HCNUMVER >= 90800 && HCNUMVER < 91400))) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
+          if [ $((! GHCJSARITH && (HCNUMVER < 90400 || HCNUMVER >= 90800 && HCNUMVER < 91400))) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
       - name: cabal check
         run: |
           cd ${PKGDIR_optics} || false
@@ -349,10 +361,10 @@ jobs:
           ${CABAL} -vnormal check
           cd ${PKGDIR_indexed_profunctors} || false
           ${CABAL} -vnormal check
+          cd ${PKGDIR_template_haskell_optics} || false
+          ${CABAL} -vnormal check
           cd ${PKGDIR_metametapost} || false
           ${CABAL} -vnormal check
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then cd ${PKGDIR_template_haskell_optics} || false ; fi
-          if [ $((GHCJSARITH || ! GHCJSARITH && HCNUMVER < 91200)) -ne 0 ] ; then ${CABAL} -vnormal check ; fi
       - name: haddock
         run: |
           if [ $((! GHCJSARITH)) -ne 0 ] ; then $CABAL v2-haddock --disable-documentation --haddock-all $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all ; fi

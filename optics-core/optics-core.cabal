@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 3.0
 name:          optics-core
 version:       0.4.2
 license:       BSD-3-Clause
@@ -6,10 +6,10 @@ license-file:  LICENSE
 build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
-tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.8 || ==9.4.8 || ==9.6.7 || ==9.8.4
-                || ==9.10.2 || ==9.12.2,
-               GHCJS ==8.4
+tested-with:   GHC == { 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.8
+                      , 9.4.8, 9.6.7, 9.8.4, 9.10.3, 9.12.2, 9.14.1
+                      }
+               GHCJS == { 8.4 }
 synopsis:      Optics as an abstract interface: core definitions
 category:      Data, Optics, Lenses
 description:
@@ -82,7 +82,7 @@ library
 
   build-depends: base                   >= 4.10       && <5
                , array                  >= 0.5.2.0    && <0.6
-               , containers             >= 0.5.10.2   && <0.8
+               , containers             >= 0.5.10.2   && <0.9
                , indexed-profunctors    >= 0.1        && <0.2
                , transformers           >= 0.5        && <0.7
                , indexed-traversable    >= 0.1        && <0.2
