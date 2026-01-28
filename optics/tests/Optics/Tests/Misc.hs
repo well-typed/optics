@@ -1,5 +1,13 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
+#if __GLASGOW_HASKELL__ >= 914
+-- Fix for checkIxAdjoin not specializing properly in GHC-9.14.1. Once the fix
+-- for https://gitlab.haskell.org/ghc/ghc/-/issues/26831 is released (most
+-- likely 9.14.2), remove this since it invalidates results of all tests in this
+-- module in a realistic scenario.
+{-# OPTIONS_GHC -funfolding-use-threshold=300 #-}
+#endif
 module Optics.Tests.Misc (miscTests) where
 
 import Test.Tasty
@@ -109,3 +117,20 @@ checkNoIndexFunctions
 checkNoIndexFunctions
   = icomposeN (,,,,,,,) $ (((itraversed % itraversed) % itraversed) % itraversed)
                         % (itraversed % (itraversed % (itraversed % itraversed)))
+
+-- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
+_unused :: ()
+_unused = const ()
+  [ 'simpleMapIx
+  , 'mapIx
+  , 'seqIx
+  , 'checkitoListOf
+  , 'checkPartsOf
+  , 'checkSingular
+  , 'checkFilteredBy
+  , 'checkUnsafeFilteredBy
+  , 'checkAdjoin
+  , 'checkIxAdjoin
+  , 'checkGplate
+  , 'checkNoIndexFunctions
+  ]

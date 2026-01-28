@@ -6,12 +6,16 @@ packages:
   optics-th/*.cabal
   optics-vl/*.cabal
   indexed-profunctors/*.cabal
-
-if !impl(ghc >=9.10)
-  packages: template-haskell-optics/*.cabal
+  template-haskell-optics/*.cabal
 
 -- An example, using optics to generate optics diagrams
 packages:
   metametapost/*.cabal
 
 tests: true
+
+-- For GHC-9.14.1.
+allow-newer: indexed-traversable-instances:base
+           , indexed-traversable:base
+           , indexed-traversable:containers
+           , these:base

@@ -121,3 +121,20 @@ eta12lhs, eta12rhs
   => ((i, j) -> b) -> f (g a) -> f (g b)
 eta12lhs   = iset' (imapped <%> imapped)
 eta12rhs f = iset' (imapped <%> imapped) f
+
+-- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
+_unused :: ()
+_unused = const ()
+  [ 'eta1lhs, 'eta1rhs
+  , 'eta2lhs, 'eta2rhs
+  , 'eta3lhs, 'eta3rhs
+  , 'eta4lhs, 'eta4rhs
+  , 'eta5lhs, 'eta5rhs
+  , 'eta6lhs, 'eta6rhs
+  , 'eta7lhs, 'eta7rhs
+  , 'eta8lhs, 'eta8rhs
+  , 'eta9lhs, 'eta9rhs
+  , 'eta10lhs, 'eta10rhs
+  , 'eta11lhs, 'eta11rhs
+  , 'eta12lhs, 'eta12rhs
+  ]

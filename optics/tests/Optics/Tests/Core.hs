@@ -41,7 +41,7 @@ coreTests = testGroup "Core"
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs05)
   , testCase "traverseOf_ (_Left % itraversed % _1 % ifolded) = traverseOf_ ..." $
     -- GHC >= 8.6 gives different structure of let bindings.
-    ghc86to910and9122failure $(inspectTest $ 'lhs06 === 'rhs06)
+    ghc912failure $(inspectTest $ 'lhs06 ==~ 'rhs06)
   , testCase "optimized lhs06" $
     ghc9122failure $(inspectTest $ hasNoProfunctors 'lhs06)
   , testCase "optimized rhs06" $
@@ -325,3 +325,27 @@ ifailover'Check
   -> s (Either c (t a))
   -> Maybe (s (Either c (t b)))
 ifailover'Check = ifailover' (icompose (,) $ itraversed % _Right % itraversed)
+
+-- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
+_unused :: ()
+_unused = const ()
+  [ 'lhs01, 'rhs01, 'lhs01a
+  , 'lhs02, 'rhs02, 'lhs02a
+  , 'lhs03, 'rhs03
+  , 'lhs04, 'rhs04
+  , 'lhs05, 'rhs05, 'lhs05b
+  , 'lhs06, 'rhs06
+  , 'lhs07, 'rhs07, 'lhs07a, 'rhs07a
+  , 'lhs08, 'rhs08, 'lhs08a, 'rhs08a
+  , 'lhs09, 'rhs09
+  , 'lhs10, 'rhs10, 'lhs10a, 'rhs10a
+  , 'lhs11, 'rhs11
+  , 'lhs12, 'rhs12, 'lhs12a, 'rhs12a
+  , 'lhs13, 'rhs13
+  , 'lhs14, 'rhs14, 'lhs14a, 'rhs14a
+  , 'lhs15, 'rhs15
+  , 'lhs16, 'rhs16
+  , 'lhs17, 'rhs17
+  , 'lhs18, 'rhs18
+  , 'failoverCheck, 'failover'Check, 'ifailoverCheck, 'ifailover'Check
+  ]
