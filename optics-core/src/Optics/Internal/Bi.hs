@@ -7,8 +7,10 @@
 module Optics.Internal.Bi where
 
 import Data.Coerce
+import Data.Functor.Const (Const(Const, getConst))
 import Data.Void
 
+import Data.Functor.Contravariant (Contravariant(contramap))
 import Data.Profunctor.Indexed
 
 -- | Class for (covariant) bifunctors.
@@ -48,6 +50,11 @@ instance Bicontravariant (IxForgetM r) where
   contrafirst  f    (IxForgetM k) = IxForgetM (\i -> k i . f)
   contrasecond   _g (IxForgetM k) = IxForgetM k
 
+instance (Functor f, Contravariant f) => Bicontravariant (Star f) where
+  contrabimap f g (Star k) = Star (contramap g . k . f)
+  contrafirst f   (Star k) = Star (k . f)
+  contrasecond  g (Star k) = Star (contramap g . k)
+
 ----------------------------------------
 
 -- | If @p@ is a 'Profunctor' and a 'Bifunctor' then its left parameter must be
@@ -59,3 +66,6 @@ lphantom = first absurd . lmap absurd
 -- must be phantom.
 rphantom :: (Profunctor p, Bicontravariant p) => p i c a -> p i c b
 rphantom = rmap absurd . contrasecond absurd
+
+getter :: (Profunctor p, Bicontravariant p) => ((s -> Const s s) -> a -> Const s a) -> p i s c1 -> p i a c2
+getter g = lmap (getConst . g Const) . rphantom
