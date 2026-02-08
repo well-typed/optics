@@ -176,25 +176,39 @@ instance Each Int (IntMap a) (IntMap b) a b where
   {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' 'Int' [a] [b] a b@
-instance Each Int [a] [b] a b
+instance Each Int [a] [b] a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' 'Int' (NonEmpty a) (NonEmpty b) a b@
-instance Each Int (NonEmpty a) (NonEmpty b) a b
+instance Each Int (NonEmpty a) (NonEmpty b) a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' () ('Identity' a) ('Identity' b) a b@
-instance Each () (Identity a) (Identity b) a b
+instance Each () (Identity a) (Identity b) a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' () ('Maybe' a) ('Maybe' b) a b@
-instance Each () (Maybe a) (Maybe b) a b
+instance Each () (Maybe a) (Maybe b) a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' 'Int' ('Seq' a) ('Seq' b) a b@
-instance Each Int (Seq a) (Seq b) a b
+instance Each Int (Seq a) (Seq b) a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- | @'each' :: 'IxTraversal' [Int] ('Tree' a) ('Tree' b) a b@
-instance Each [Int] (Tree a) (Tree b) a b
+instance Each [Int] (Tree a) (Tree b) a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- | @'each' :: 'Ix' i => 'IxTraversal' i ('Array' i a) ('Array' i b) a b@
-instance (Ix i, i ~ j) => Each i (Array i a) (Array j b) a b
+instance (Ix i, i ~ j) => Each i (Array i a) (Array j b) a b where
+  each = itraversed
+  {-# INLINE[1] each #-}
 
 -- $setup
 -- >>> import Optics.Core
