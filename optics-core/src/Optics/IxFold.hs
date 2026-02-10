@@ -37,6 +37,8 @@ module Optics.IxFold
   , inoneOf
   , ifindOf
   , ifindMOf
+  , imaximumOf
+  , iminimumOf
 
   -- * Combinators
   , ipre
@@ -69,6 +71,7 @@ module Optics.IxFold
 
 import Control.Applicative.Backwards
 import Data.Monoid
+import qualified Data.Semigroup as SG
 
 import Data.Profunctor.Indexed
 
@@ -299,6 +302,46 @@ ilastOf
   => Optic' k is s a -> s -> Maybe (i, a)
 ilastOf o = getRightmost . ifoldMapOf o (\i -> RLeaf . (i, ))
 {-# INLINE ilastOf #-}
+
+newtype IxMin i a = IxMin { getIxMin :: (i, a) }
+
+instance (Ord a, Ord i) => SG.Semigroup (IxMin i a) where
+  x@(IxMin (i1, a1)) <> y@(IxMin (i2, a2)) =
+    case compare a1 a2 of
+      GT -> y
+      LT -> x
+      EQ -> IxMin (min i1 i2, a1)
+
+-- | Obtain the minimum element (if any) targeted by an 'IxFold' along with its index.
+--
+-- >>> iminimumOf ifolded "calamari"
+-- Just (1,'a')
+--
+-- @since 0.4.3
+iminimumOf
+  :: (Is k A_Fold, is `HasSingleIndex` i, Ord a, Ord i)
+  => Optic' k is s a -> s -> Maybe (i, a)
+iminimumOf o = fmap getIxMin #. ifoldMapOf o (curry (Just .# IxMin))
+
+newtype IxMax i a = IxMax { getIxMax :: (i, a) }
+
+instance (Ord a, Ord i) => SG.Semigroup (IxMax i a) where
+  x@(IxMax (i1, a1)) <> y@(IxMax (i2, a2)) =
+    case compare a1 a2 of
+      GT -> x
+      LT -> y
+      EQ -> IxMax (min i1 i2, a1)
+
+-- | Obtain the maximum element (if any) targeted by an 'IxFold' along with its index.
+--
+-- >>> imaximumOf ifolded "gazorpazorp"
+-- Just (2,'z')
+--
+-- @since 0.4.3
+imaximumOf
+  :: (Is k A_Fold, is `HasSingleIndex` i, Ord a, Ord i)
+  => Optic' k is s a -> s -> Maybe (i, a)
+imaximumOf o = fmap getIxMax #. ifoldMapOf o (curry (Just .# IxMax))
 
 -- | Return whether or not any element viewed through an 'IxFold' satisfies a
 -- predicate, with access to the @i@.
