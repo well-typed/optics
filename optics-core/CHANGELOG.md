@@ -1,5 +1,12 @@
-# optics-core-0.4.2
-* Rename PathTree data constructor to PathNode, to avoid pun with type constructor.
+# optics-core-0.4.2 (2025-02-10)
+* Rename `PathTree` data constructor to `PathNode`, to avoid pun with type
+  constructor.
+* Add support for using `gafield` as a label in GHC >= 9.6 using `#"?field"`
+  syntax.
+* Add `unsafePartsOf` to `Optics.Traversal`.
+* Add `failing`-like combinators for traversals: `adisjoin`
+  (`Optics.AffineTraversal`), `iadisjoin` (`Optics.IxAffineTraversal`),
+  `idisjoin` (`Optics.IxTraversal`) and `disjoin` (`Optics.Traversal`).
 
 # optics-core-0.4.1.1 (2023-06-22)
 * Add INLINE pragmas to small functions that really should inline
