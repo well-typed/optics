@@ -5,5 +5,7 @@ tests:          True
 benchmarks:     True
 jobs-selection: uniform
 
+distribution:jammy
+
 -- turn head hackage off
 head-hackage: False
