@@ -22,31 +22,31 @@ import Optics.Tests.Utils
 miscTests :: TestTree
 miscTests = testGroup "Miscellaneous"
   [ testCase "optimized sipleMapIx" $
-    ghc9122failure $(inspectTest $ 'simpleMapIx `hasNoTypeClassesExcept` [''Ord])
+    assertSuccess $(inspectTest $ 'simpleMapIx `hasNoTypeClassesExcept` [''Ord])
   , testCase "optimized mapIx" $
-    ghc9122failure $(inspectTest $ hasNoProfunctors 'mapIx)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'mapIx)
   , testCase "optimized seqIx" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'seqIx)
   , testCase "optimized itoList" $
-    ghc9122failure $(inspectTest $ hasNoProfunctors 'checkitoListOf)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkitoListOf)
   , testCase "optimized partsOf" $
-    ghc9122failure $(inspectTest $ hasNoProfunctors 'checkPartsOf)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkPartsOf)
   , testCase "optimized singular" $
-    ghc9122failure $(inspectTest $ hasNoProfunctors 'checkSingular)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkSingular)
   , testCase "optimized filteredBy" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkFilteredBy)
   , testCase "optimized unsafeFilteredBy" $
-    ghc9122failure $(inspectTest $ hasNoProfunctors 'checkUnsafeFilteredBy)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkUnsafeFilteredBy)
     -- GHC <= 8.4 doesn't optimize away profunctor classes
   , testCase "optimized adjoin" $
     ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkAdjoin)
     -- GHC <= 8.4 doesn't optimize away profunctor classes
   , testCase "optimized iadjoin" $
-    ghcLE84and9122failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
+    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
   , testCase "optimized gplate (profunctors)" $
-    ghc9122failure $(inspectTest $ hasNoProfunctors 'checkGplate)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkGplate)
   , testCase "optimized gplate (generics)" $
-    ghc9122failure $(inspectTest $ hasNoGenericRep 'checkGplate)
+    assertSuccess $(inspectTest $ hasNoGenericRep 'checkGplate)
   , testCase "optimized icomposeN/appendIndices" $
     assertSuccess $ $(inspectTest $ hasNoIndexClasses 'checkNoIndexFunctions)
   ]
