@@ -54,6 +54,7 @@ module Data.Profunctor.Indexed
 
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
+import Data.Functor.Contravariant
 import Data.Functor.Identity
 
 ----------------------------------------
@@ -407,6 +408,12 @@ instance Cochoice (IxForget r) where
 instance Cochoice (IxForgetM r) where
   unleft  (IxForgetM k) = IxForgetM (\i -> k i . Left)
   unright (IxForgetM k) = IxForgetM (\i -> k i . Right)
+
+instance (Contravariant f, Functor f) => Cochoice (Star f) where
+  unleft  (Star f) = Star (contramap Left . f . Left)
+  unright (Star f) = Star (contramap Right . f . Right)
+  {-# INLINE unleft #-}
+  {-# INLINE unright #-}
 
 ----------------------------------------
 

@@ -96,7 +96,7 @@ typeVars = typeVarsEx mempty
 
 -- | Traverse /free/ type variables paired with their kinds if applicable.
 typeVarsKinded :: Fold Type Type
-typeVarsKinded = foldVL $ go mempty
+typeVarsKinded = mkFold $ go mempty
   where
     go s f = \case
       var@(VarT n)          -> if n `Set.member` s then pure () else f var

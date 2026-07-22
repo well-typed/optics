@@ -32,7 +32,7 @@ library
   ghc-options:      -Wall
 
   build-depends: base                   >= 4.10      && <5
-               , optics-core            >= 0.4       && <0.5
+               , optics-core            >= 0.4       && <0.6
                , containers             >= 0.5.10.2  && <0.9
                , template-haskell       >= 2.12      && <2.25
                , th-abstraction         >= 0.4       && <0.8

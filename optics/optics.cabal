@@ -1,6 +1,6 @@
 cabal-version:   3.0
 name:            optics
-version:         0.4.2.1
+version:         0.5
 license:         BSD-3-Clause
 license-file:    LICENSE
 build-type:      Simple
@@ -69,9 +69,9 @@ library
   hs-source-dirs:     src
 
   build-depends: base                   >= 4.10      && <5
-               , optics-core            >= 0.4.1     && <0.4.3
+               , optics-core            >= 0.5       && <0.6
                , optics-extra           >= 0.4.2     && <0.4.3
-               , optics-th              >= 0.4.1     && <0.4.2
+               , optics-th              >= 0.4.2     && <0.5
 
   -- main module to land with repl
   exposed-modules:    Optics

@@ -1,3 +1,6 @@
+# indexed-profunctors-0.1.2.0 (2026-??-??)
+* Add a `Cochoice` instance for `Star`.
+
 # indexed-profunctors-0.1.1.1 (2023-06-22)
 * Add INLINE pragmas to small functions that really should inline
 

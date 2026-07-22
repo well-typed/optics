@@ -65,7 +65,7 @@ library
 
   build-depends: base                   >= 4.10       && <5
                , indexed-profunctors    >= 0.1        && <0.2
-               , optics-core            >= 0.2        && <0.5
+               , optics-core            >= 0.2        && <0.6
                , profunctors            >= 5.0        && <6.0
 
   exposed-modules: Optics.VL

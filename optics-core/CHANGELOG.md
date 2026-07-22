@@ -1,3 +1,11 @@
+# optics-core-0.5 (2026-??-??)
+* Add support for converting getters and folds to and from their van Laarhoven
+  representations: `GetterVL`, `getterVL` and `toGetterVL` in `Optics.Getter`,
+  and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.
+* **Breaking changes**:
+  - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
+    `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
+
 # optics-core-0.4.2 (2025-02-10)
 * Rename `PathTree` data constructor to `PathNode`, to avoid pun with type
   constructor.

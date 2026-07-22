@@ -1,3 +1,6 @@
+# optics-th-0.4.2 (2026-??-??)
+* Require `optics-core >= 0.5`.
+
 # optics-th-0.4.1 (2022-03-22)
 * Add support for GHC-9.2
 
