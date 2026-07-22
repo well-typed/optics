@@ -7,6 +7,7 @@
 module Optics.Internal.Bi where
 
 import Data.Coerce
+import Data.Functor.Contravariant
 import Data.Void
 
 import Data.Profunctor.Indexed
@@ -47,6 +48,11 @@ instance Bicontravariant (IxForgetM r) where
   contrabimap  f _g (IxForgetM k) = IxForgetM (\i -> k i . f)
   contrafirst  f    (IxForgetM k) = IxForgetM (\i -> k i . f)
   contrasecond   _g (IxForgetM k) = IxForgetM k
+
+instance (Functor f, Contravariant f) => Bicontravariant (Star f) where
+  contrabimap f g (Star k) = Star (contramap g . k . f)
+  contrafirst f   (Star k) = Star (k . f)
+  contrasecond  g (Star k) = Star (contramap g . k)
 
 ----------------------------------------
 
