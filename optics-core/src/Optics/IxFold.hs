@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 -- |
 -- Module: Optics.IxFold
 -- Description: An indexed version of a 'Optics.Fold.Fold'.
@@ -152,12 +151,7 @@ itraverseOf_
   :: (Is k A_Fold, Applicative f, is `HasSingleIndex` i)
   => Optic' k is s a
   -> (i -> a -> f r) -> s -> f ()
-#if __GLASGOW_HASKELL__ == 802
--- GHC 8.2.2 needs this to optimize away profunctors when f is not supplied.
-itraverseOf_ o = \f ->
-#else
 itraverseOf_ o f =
-#endif
   runTraversed . ifoldMapOf o (\i -> Traversed #. f i)
 {-# INLINE itraverseOf_ #-}
 

@@ -52,36 +52,32 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs07a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs07a)
   , testCase "itraverseOf_ (ifolded %> ifolded) ==- itraverseOf (folded % ifolded)" $
-    -- Same code modulo coercions.
     assertSuccess $(inspectTest $ 'lhs08 ==- 'rhs08)
   , testCase "optimized lhs08a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs08a)
   , testCase "optimized rhs08a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs08a)
   , testCase "iover (imapped <% imapped) = iover (imapped % mapped)" $
-    -- GHC 9.* applies a worker-wrapper transformation to the RHS.
-    ghcGE90failure $(inspectTest $ 'lhs09 === 'rhs09)
+    -- Various differences throughout GHC versions.
+    assertFailureIf (ghcVer >= (9,2)) $(inspectTest $ 'lhs09 === 'rhs09)
   , testCase "optimized lhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs09)
   , testCase "optimized rhs09" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs09)
   , testCase "itraverseOf_ itraversed = itraverseOf_ ifolded" $
-    -- GHC 8.2, 8.6 to 8.10 and 9.2 to 9.4 give a different structure of let
-    -- bindings.
     assertSuccess $(inspectTest $ 'lhs10 ==~ 'rhs10)
   , testCase "optimized lhs10a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs10a)
   , testCase "optimized rhs10a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs10a)
   , testCase "iover (itraversed..itraversed) = iover (imapped..imapped)" $
-    -- GHC 9.12 has an intermediate let in the LHS.
-    ghcGE912failure $(inspectTest $ 'lhs11 === 'rhs11)
+    -- GHC 9.12+ has an intermediate let in the LHS.
+    assertFailureIf (ghcVer >= (9,12)) $(inspectTest $ 'lhs11 === 'rhs11)
   , testCase "optimized lhs11" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs11)
   , testCase "optimized rhs11" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs11)
   , testCase "traverseOf_ traversed = traverseOf_ folded" $
-    -- GHC 8.6 to 8.10 give a different structure of let bindings.
     assertSuccess $(inspectTest $ 'lhs12 ==~ 'rhs12)
   , testCase "optimized lhs12a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs12a)
@@ -94,31 +90,28 @@ coreTests = testGroup "Core"
   , testCase "optimized rhs13" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs13)
   , testCase "traverseOf_ itraversed = traverseOf_ folded" $
-    -- GHC 8.6 to 8.10 give a different structure of let bindings
-    -- GHC 9.2 to 9.4 have very different structure
-    ghc92and94failure $(inspectTest $ 'lhs14 ==~ 'rhs14)
+    -- GHC 9.2 and 9.4 have very different structure.
+    assertFailureIf (ghcVer <= (9,4)) $(inspectTest $ 'lhs14 ==~ 'rhs14)
   , testCase "optimized lhs14a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs14a)
   , testCase "optimized rhs14a" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs14a)
   , testCase "over (itraversed..) = over (mapped..)" $
     -- GHC 9.2 and 9.4 do w/w transformation and split lhs into two binds.
-    ghc92and94failure $(inspectTest $ 'lhs15 === 'rhs15)
+    assertFailureIf (ghcVer <= (9,4)) $(inspectTest $ 'lhs15 === 'rhs15)
   , testCase "optimized lhs15" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs15)
   , testCase "optimized rhs15" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs15)
   , testCase "iset (itraversed..) = iset (imapped..)" $
-    -- GHC 8.10 has an intermediate let in the RHS.
-    -- GHC 9.12 has an intermediate let in the LHS.
-    ghc810andGE912failure $(inspectTest $ 'lhs16 === 'rhs16)
+    -- GHC 9.12+ has an intermediate let in the LHS.
+    assertFailureIf (ghcVer >= (9,12)) $(inspectTest $ 'lhs16 === 'rhs16)
   , testCase "optimized lhs16" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs16)
   , testCase "optimized rhs16" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'rhs16)
   , testCase "iset (_1 % itraversed) = iset (_1 % imapped)" $
-    -- GHC 8.10 has an intermediate let in the LHS.
-    ghc810failure $(inspectTest $ 'lhs17 === 'rhs17)
+    assertSuccess $(inspectTest $ 'lhs17 === 'rhs17)
   , testCase "optimized lhs17" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'lhs17)
   , testCase "optimized rhs17" $
