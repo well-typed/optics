@@ -6,11 +6,7 @@ license-file:    LICENSE
 build-type:      Simple
 maintainer:      optics@well-typed.com
 author:          Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus
-tested-with:   GHC == { 8.2.2, 8.4.4, 8.6.5, 8.8.4, 8.10.7, 9.0.2, 9.2.8
-                      , 9.4.8, 9.6.7, 9.8.4, 9.10.3, 9.12.4, 9.14.1
-                      }
-               GHCJS == { 8.4 }
-                 GHCJS ==8.4
+tested-with:   GHC == { 9.2.8, 9.4.8, 9.6.7, 9.8.4, 9.10.3, 9.12.4, 9.14.1 }
 synopsis:        Optics as an abstract interface
 category:        Data, Optics, Lenses
 description:
@@ -68,10 +64,10 @@ library
   import:             language
   hs-source-dirs:     src
 
-  build-depends: base                   >= 4.10      && <5
+  build-depends: base                   >= 4.16      && <5
                , optics-core            >= 0.5       && <0.6
-               , optics-extra           >= 0.4.2     && <0.4.3
-               , optics-th              >= 0.4.2     && <0.5
+               , optics-extra           >= 0.5       && <0.6
+               , optics-th              >= 0.5       && <0.6
 
   -- main module to land with repl
   exposed-modules:    Optics
@@ -156,10 +152,6 @@ test-suite optics-tests
   import:           language
   hs-source-dirs:   tests
 
-  -- inspection-testing doesn't compile with GHCJS
-  if impl(ghcjs)
-    buildable: False
-
   build-depends: base
                , containers
                , indexed-profunctors    >= 0.1        && <0.2
@@ -191,10 +183,6 @@ benchmark folds
   import:           language
   hs-source-dirs:   benchmarks
 
-  -- GHCJS takes forever to compile dependencies
-  if impl(ghcjs)
-    buildable: False
-
   build-depends: base
                , bytestring
                , containers
@@ -211,10 +199,6 @@ benchmark folds
 benchmark traversals
   import:           language
   hs-source-dirs:   benchmarks
-
-  -- GHCJS takes forever to compile dependencies
-  if impl(ghcjs)
-    buildable: False
 
   build-depends: base
                , bytestring

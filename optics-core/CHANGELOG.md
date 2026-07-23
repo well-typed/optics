@@ -1,4 +1,5 @@
 # optics-core-0.5 (2026-??-??)
+* Drop support for GHC older than 9.2.
 * Add support for converting getters and folds to and from their van Laarhoven
   representations: `GetterVL`, `getterVL` and `toGetterVL` in `Optics.Getter`,
   and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.

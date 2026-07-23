@@ -1,3 +1,6 @@
+# optics-extra-0.5 (2026-??-??)
+* Drop support for GHC older than 9.2.
+
 # optics-extra-0.4.2.1 (2022-05-20)
 * Fix for previous release when used with `mtl-2.3` and `transformers-0.5`.
 

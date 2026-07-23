@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 -- |
 -- Module: Optics.Optic
 -- Description: Common abstraction for all kinds of optics.
@@ -74,20 +73,7 @@ module Optics.Optic
   where
 
 import Data.Function
+import Data.Functor ((<&>))
 
 import Optics.Internal.Indexed
 import Optics.Internal.Optic
-
-#if MIN_VERSION_base(4,11,0)
-import Data.Functor ((<&>))
-#else
--- | Infix flipped 'fmap'.
---
--- @
--- ('<&>') = 'flip' 'fmap'
--- @
-(<&>) :: Functor f => f a -> (a -> b) -> f b
-as <&> f = f <$> as
-{-# INLINE (<&>) #-}
-infixl 1 <&>
-#endif

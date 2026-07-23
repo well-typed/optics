@@ -37,12 +37,10 @@ miscTests = testGroup "Miscellaneous"
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkFilteredBy)
   , testCase "optimized unsafeFilteredBy" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkUnsafeFilteredBy)
-    -- GHC <= 8.4 doesn't optimize away profunctor classes
   , testCase "optimized adjoin" $
-    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkAdjoin)
-    -- GHC <= 8.4 doesn't optimize away profunctor classes
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkAdjoin)
   , testCase "optimized iadjoin" $
-    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
   , testCase "optimized gplate (profunctors)" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkGplate)
   , testCase "optimized gplate (generics)" $
