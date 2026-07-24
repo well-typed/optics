@@ -6,6 +6,10 @@
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
+  - Restrict `over'`, `iover'`, `set'`, and associated operators to require
+    traversals rather than just setters. Setters are not capable of actually
+    making strict modifications, so these operations were just silently lazier
+    than expected when passed setters.
 
 # optics-core-0.4.2 (2025-02-10)
 * Rename `PathTree` data constructor to `PathNode`, to avoid pun with type

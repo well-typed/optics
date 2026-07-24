@@ -28,6 +28,7 @@ import Optics.Getter
 import Optics.Optic
 import Optics.Review
 import Optics.Setter
+import Optics.Traversal
 
 -- | Flipped infix version of 'view'.
 (^.) :: Is k A_Getter => s -> Optic' k is s a -> a
@@ -65,7 +66,7 @@ infixr 8 #
 infixr 4 %~
 
 -- | Infix version of 'over''.
-(%!~) :: Is k A_Setter => Optic k is s t a b -> (a -> b) -> s -> t
+(%!~) :: Is k A_Traversal => Optic k is s t a b -> (a -> b) -> s -> t
 (%!~) = over'
 {-# INLINE (%!~) #-}
 
@@ -79,7 +80,7 @@ infixr 4 %!~
 infixr 4 .~
 
 -- | Infix version of 'set''.
-(!~) :: Is k A_Setter => Optic k is s t a b -> b -> s -> t
+(!~) :: Is k A_Traversal => Optic k is s t a b -> b -> s -> t
 (!~) = set'
 {-# INLINE (!~) #-}
 
@@ -103,7 +104,7 @@ infixr 4 !~
 infixr 4 ?~
 
 -- | Strict version of ('?~').
-(?!~) :: Is k A_Setter => Optic k is s t a (Maybe b) -> b -> s -> t
+(?!~) :: Is k A_Traversal => Optic k is s t a (Maybe b) -> b -> s -> t
 (?!~) = \o !b -> set' o (Just b)
 {-# INLINE (?!~) #-}
 

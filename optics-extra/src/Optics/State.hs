@@ -48,7 +48,7 @@ modifying o = modify . over o
 -- >>> flip evalState ('a','b') $ modifying' _1 (errorWithoutStackTrace "oops")
 -- *** Exception: oops
 modifying'
-  :: (Is k A_Setter, MonadState s m)
+  :: (Is k A_Traversal, MonadState s m)
   => Optic k is s s a b
   -> (a -> b)
   -> m ()
@@ -80,7 +80,7 @@ assign o = modifying o . const
 -- >>> flip evalState ('a','b') $ assign' _1 (errorWithoutStackTrace "oops")
 -- *** Exception: oops
 assign'
-  :: (Is k A_Setter, MonadState s m)
+  :: (Is k A_Traversal, MonadState s m)
   => Optic k is s s a b
   -> b
   -> m ()
