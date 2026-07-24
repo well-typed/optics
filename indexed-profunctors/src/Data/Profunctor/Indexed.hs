@@ -54,6 +54,7 @@ module Data.Profunctor.Indexed
 
 import Data.Coerce (Coercible, coerce)
 import Data.Functor.Const
+import Data.Functor.Contravariant
 import Data.Functor.Identity
 
 ----------------------------------------
@@ -408,6 +409,12 @@ instance Cochoice (IxForgetM r) where
   unleft  (IxForgetM k) = IxForgetM (\i -> k i . Left)
   unright (IxForgetM k) = IxForgetM (\i -> k i . Right)
 
+instance (Contravariant f, Functor f) => Cochoice (Star f) where
+  unleft  (Star f) = Star (contramap Left . f . Left)
+  unright (Star f) = Star (contramap Right . f . Right)
+  {-# INLINE unleft #-}
+  {-# INLINE unright #-}
+
 ----------------------------------------
 
 class (Choice p, Strong p) => Visiting p where
@@ -661,6 +668,7 @@ data Context a b t = Context (b -> t) a
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
 (#.) _f = coerce
 infixl 8 .#
+{-# INLINE (.#) #-}
 
 -- | Composition operator where the second argument must be an
 -- identity function up to representational equivalence (e.g. a
@@ -668,3 +676,4 @@ infixl 8 .#
 (.#) :: Coercible a b => (b -> c) -> (a -> b) -> (a -> c)
 (.#) f _g = coerce f
 infixr 9 #.
+{-# INLINE (#.) #-}

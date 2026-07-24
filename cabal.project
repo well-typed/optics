@@ -13,3 +13,9 @@ packages:
   metametapost/*.cabal
 
 tests: true
+
+-- For GHC-9.14.1.
+allow-newer: indexed-traversable-instances:base
+           , indexed-traversable:base
+           , indexed-traversable:containers
+           , these:base

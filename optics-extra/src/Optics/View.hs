@@ -1,12 +1,16 @@
 -- | EXPERIMENTAL
 module Optics.View where
 
-import Control.Monad.Reader.Class
-import Control.Monad.State
-import Control.Monad.Writer
-import Data.Kind
+import Control.Monad.Reader.Class (MonadReader, asks)
+import Control.Monad.State (MonadState, gets)
+import Control.Monad.Writer (MonadWriter, listen)
+import Data.Kind (Type)
 
 import Optics.Core
+
+-- $setup
+-- >>> import Control.Monad.State (evalState)
+-- >>> import Optics.Core
 
 -- | Generalized view (even more powerful than @view@ from the lens library).
 --

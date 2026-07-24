@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 3.0
 name:          optics-sop
 version:       0.1
 license:       BSD-3-Clause
@@ -6,8 +6,7 @@ license-file:  LICENSE
 build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Adam Gundry, Andres Löh, Andrzej Rybczak
-tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.4 || ==9.4.1, GHCJS ==8.4
+tested-with:   GHC == { 9.2.8, 9.4.8, 9.6.7, 9.8.4, 9.10.3, 9.12.4, 9.14.1 }
 synopsis:      Optics for generics-sop, and using generics-sop
 category:      Data, Optics, Lenses, Generics
 description:
@@ -58,9 +57,9 @@ library
   import:           language
   hs-source-dirs:   src
 
-  build-depends: base          >=4.10    && <5
+  build-depends: base          >=4.16    && <5
                , generics-sop  >=0.3.1.0 && <0.6
-               , optics-core   >=0.4     && <0.5
+               , optics-core   >=0.4     && <0.6
 
   exposed-modules: Optics.SOP
                    Optics.SOP.ToTuple

@@ -1,5 +1,13 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin=Test.Inspection.Plugin -dsuppress-all #-}
+#if __GLASGOW_HASKELL__ >= 914
+-- Fix for checkIxAdjoin not specializing properly in GHC-9.14.1. Once the fix
+-- for https://gitlab.haskell.org/ghc/ghc/-/issues/26831 is released (most
+-- likely 9.14.2), remove this since it invalidates results of all tests in this
+-- module in a realistic scenario.
+{-# OPTIONS_GHC -funfolding-use-threshold=300 #-}
+#endif
 module Optics.Tests.Misc (miscTests) where
 
 import Test.Tasty
@@ -29,12 +37,10 @@ miscTests = testGroup "Miscellaneous"
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkFilteredBy)
   , testCase "optimized unsafeFilteredBy" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkUnsafeFilteredBy)
-    -- GHC <= 8.4 doesn't optimize away profunctor classes
   , testCase "optimized adjoin" $
-    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkAdjoin)
-    -- GHC <= 8.4 doesn't optimize away profunctor classes
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkAdjoin)
   , testCase "optimized iadjoin" $
-    ghcLE84failure $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
+    assertSuccess $(inspectTest $ hasNoProfunctors 'checkIxAdjoin)
   , testCase "optimized gplate (profunctors)" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'checkGplate)
   , testCase "optimized gplate (generics)" $
@@ -109,3 +115,20 @@ checkNoIndexFunctions
 checkNoIndexFunctions
   = icomposeN (,,,,,,,) $ (((itraversed % itraversed) % itraversed) % itraversed)
                         % (itraversed % (itraversed % (itraversed % itraversed)))
+
+-- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
+_unused :: ()
+_unused = const ()
+  [ 'simpleMapIx
+  , 'mapIx
+  , 'seqIx
+  , 'checkitoListOf
+  , 'checkPartsOf
+  , 'checkSingular
+  , 'checkFilteredBy
+  , 'checkUnsafeFilteredBy
+  , 'checkAdjoin
+  , 'checkIxAdjoin
+  , 'checkGplate
+  , 'checkNoIndexFunctions
+  ]

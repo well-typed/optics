@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 module Optics.TH.Internal.Product
   ( LensRules(..)
@@ -40,13 +39,8 @@ import Optics.TH.Internal.Utils
 typeSelf :: Traversal' Type Type
 typeSelf = traversalVL $ \f -> \case
   ForallT tyVarBndrs ctx ty ->
-#if MIN_VERSION_template_haskell(2,17,0)
     let go (KindedTV nam flag kind) = KindedTV <$> pure nam <*> pure flag <*> f kind
         go (PlainTV nam flag)       = pure (PlainTV nam flag)
-#else
-    let go (KindedTV nam kind) = KindedTV <$> pure nam <*> f kind
-        go (PlainTV nam)       = pure (PlainTV nam)
-#endif
     in ForallT <$> traverse go tyVarBndrs <*> traverse f ctx <*> f ty
   AppT ty1 ty2              -> AppT <$> f ty1 <*> f ty2
   SigT ty kind              -> SigT <$> f ty <*> f kind
@@ -688,7 +682,7 @@ makeFoldClause cons = do
   clause
     []
     (normalB $ appsE
-      [ varE 'foldVL
+      [ varE 'mkFold
       , lamE [varP f, varP s] $ caseE (varE s)
         [ makeFoldMatch f conName fieldCount fields
         | (conName, fieldCount, fields) <- cons

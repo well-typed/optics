@@ -34,9 +34,12 @@ import Optics.Extra.Internal.Zoom
 -- $setup
 -- >>> import Data.Monoid
 -- >>> import Control.Monad.Reader (runReader, ask)
+-- >>> import qualified Control.Monad.Trans.State.Lazy as L
+-- >>> import qualified Control.Monad.Trans.State.Strict as S
 -- >>> import Optics.State
 -- >>> import Optics.State.Operators
 -- >>> import Optics.View
+-- >>> import Optics.Core
 
 -- Chosen so that they have lower fixity than ('%=').
 infixr 2 `zoom`, `zoomMaybe`, `zoomMany`

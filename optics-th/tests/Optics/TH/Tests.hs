@@ -1,9 +1,6 @@
 {-# OPTIONS_HADDOCK hide #-} -- GHC 8.2.2 hangs on this module otherwise
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
-{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Main where

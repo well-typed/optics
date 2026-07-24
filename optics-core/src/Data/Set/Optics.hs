@@ -16,6 +16,10 @@ import Optics.Fold
 import Optics.Optic
 import Optics.Setter
 
+-- $setup
+-- >>> import qualified Data.Set as Set
+-- >>> import Optics.Core
+
 -- | This 'Setter' can be used to change the type of a 'Set' by mapping the
 -- elements to new values.
 --
@@ -39,6 +43,3 @@ setmapped = sets Set.map
 setOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Set a
 setOf l = foldMapOf l Set.singleton
 {-# INLINE setOf #-}
-
--- $setup
--- >>> import Optics.Core

@@ -1,5 +1,8 @@
-# template-haskell-optics-0.3 (2022-??-??)
-* Add support for GHC 9.4
+# template-haskell-optics-0.4 (2026-??-??)
+* Drop support for GHC older than 9.2.
+
+# template-haskell-optics-0.3 (2023-11-16)
+* Add support for GHC 9.4 to 9.8
 
 # template-haskell-optics-0.2 (2022-03-22)
 * Add support for GHC 9.0 and 9.2

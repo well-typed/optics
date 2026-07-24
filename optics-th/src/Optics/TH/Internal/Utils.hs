@@ -96,7 +96,7 @@ quantifyType' exclude vars cx t = ForallT vs cx t
 
 -- | Transform 'TyVarBndr' into a 'Type' so it's suitable e.g. for
 -- freeVariablesWellScoped or type substitution.
-tyVarBndrToType :: TyVarBndr_ flag -> Type
+tyVarBndrToType :: TyVarBndr flag -> Type
 tyVarBndrToType = elimTV VarT (\n k -> SigT (VarT n) k)
 
 -- | Pass in a list of lists of extensions, where any of the given extensions

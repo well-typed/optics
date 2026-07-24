@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeInType #-}
 {-# OPTIONS_HADDOCK not-home #-}
 
 -- | Core optic types and subtyping machinery.
@@ -106,6 +104,7 @@ castOptic (Optic o) = Optic (cast o)
       .  Optic_ srcKind  p i (Curry is i) s t a b
       -> Optic_ destKind p i (Curry is i) s t a b
     cast x = implies @srcKind @destKind @p x
+{-# INLINE castOptic #-}
 
 -- | Compose two optics of compatible flavours.
 --
@@ -128,6 +127,7 @@ Optic k % Optic l = Optic m
     m :: forall p i. (Profunctor p, Constraints m p)
       => Optic__ p i (Curry ks i) s t a b
     m | IxEq <- appendIndices @is @js @ks @i = km . lm
+{-# INLINE (%) #-}
 
 -- | Compose two optics of the same flavour.
 --
@@ -144,6 +144,7 @@ Optic o %% Optic o' = Optic oo
     oo :: forall p i. (Profunctor p, Constraints k p)
        => Optic__ p i (Curry ks i) s t a b
     oo | IxEq <- appendIndices @is @js @ks @i = o . o'
+{-# INLINE (%%) #-}
 
 -- | Flipped function application, specialised to optics and binding tightly.
 --
@@ -157,6 +158,7 @@ infixl 9 %&
      -> (Optic k is s t a b -> Optic l js s' t' a' b')
      -> Optic l js s' t' a' b'
 (%&) = (&)
+{-# INLINE (%&) #-}
 
 -- $setup
 -- >>> import Optics.Core

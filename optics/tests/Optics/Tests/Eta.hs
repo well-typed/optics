@@ -33,7 +33,7 @@ etaTests = testGroup "Eta expansion"
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta5lhs)
   , testCase "itraverseOf_ ifolded = \\f -> itraverseOf_ ifolded f" $
     -- The lhs has more lets which the rhs inlines.
-    ghc82andGE90failure $(inspectTest $ 'eta6lhs === 'eta6rhs)
+    assertFailureIf (ghcVer >= (9,2)) $(inspectTest $ 'eta6lhs === 'eta6rhs)
   , testCase "optimized eta6lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta6lhs)
   , testCase "over mapped = \\f -> over mapped f" $
@@ -119,5 +119,23 @@ eta11rhs f = iset (imapped <%> imapped) f
 eta12lhs, eta12rhs
   :: (TraversableWithIndex i f, TraversableWithIndex j g)
   => ((i, j) -> b) -> f (g a) -> f (g b)
+
 eta12lhs   = iset' (itraversed <%> itraversed)
 eta12rhs f = iset' (itraversed <%> itraversed) f
+
+-- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
+_unused :: ()
+_unused = const ()
+  [ 'eta1lhs, 'eta1rhs
+  , 'eta2lhs, 'eta2rhs
+  , 'eta3lhs, 'eta3rhs
+  , 'eta4lhs, 'eta4rhs
+  , 'eta5lhs, 'eta5rhs
+  , 'eta6lhs, 'eta6rhs
+  , 'eta7lhs, 'eta7rhs
+  , 'eta8lhs, 'eta8rhs
+  , 'eta9lhs, 'eta9rhs
+  , 'eta10lhs, 'eta10rhs
+  , 'eta11lhs, 'eta11rhs
+  , 'eta12lhs, 'eta12rhs
+  ]

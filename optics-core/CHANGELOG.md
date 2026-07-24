@@ -1,8 +1,28 @@
-# optics-core-0.5 (???)
-* Restrict `over'`, `iover'`, `set'`, and associated operators to require
-  traversals rather than just setters. Setters are not capable of actually
-  making strict modifications, so these operations were just silently lazier
-  than expected when passed setters.
+# optics-core-0.5 (2026-??-??)
+* Drop support for GHC older than 9.2.
+* Add support for converting getters and folds to and from their van Laarhoven
+  representations: `GetterVL`, `getterVL` and `toGetterVL` in `Optics.Getter`,
+  and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.
+* **Breaking changes**:
+  - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
+    `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
+  - Restrict `over'`, `iover'`, `set'`, and associated operators to require
+    traversals rather than just setters. Setters are not capable of actually
+    making strict modifications, so these operations were just silently lazier
+    than expected when passed setters.
+
+# optics-core-0.4.2 (2025-02-10)
+* Rename `PathTree` data constructor to `PathNode`, to avoid pun with type
+  constructor.
+* Add support for using `gafield` as a label in GHC >= 9.6 using `#"?field"`
+  syntax.
+* Add `unsafePartsOf` to `Optics.Traversal`.
+* Add `failing`-like combinators for traversals: `adisjoin`
+  (`Optics.AffineTraversal`), `iadisjoin` (`Optics.IxAffineTraversal`),
+  `idisjoin` (`Optics.IxTraversal`) and `disjoin` (`Optics.Traversal`).
+
+# optics-core-0.4.1.1 (2023-06-22)
+* Add INLINE pragmas to small functions that really should inline
 
 # optics-core-0.4.1 (2022-03-22)
 * Add support for GHC-9.2

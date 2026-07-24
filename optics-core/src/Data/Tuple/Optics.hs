@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Data.Tuple.Optics
 -- Description: 'Lens'es for tuple types.

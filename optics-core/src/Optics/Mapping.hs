@@ -6,7 +6,6 @@
 -- @'Optic'' ('MappedOptic' k) 'NoIx' (f s) (f a)@, in other words optic operating on values
 -- in a 'Functor'.
 --
-{-# LANGUAGE DataKinds #-}
 module Optics.Mapping
   ( MappingOptic (..)
   ) where

@@ -19,7 +19,7 @@ module Optics.Fold
     Fold
 
   -- * Introduction
-  , foldVL
+  , mkFold
 
   -- * Elimination
   , foldOf
@@ -99,6 +99,11 @@ module Optics.Fold
   -- * Subtyping
   , A_Fold
   -- | <<diagrams/Fold.png Fold in the optics hierarchy>>
+
+  -- * van Laarhoven encoding
+  , FoldVL
+  , foldVL
+  , toFoldVL
   )
   where
 
@@ -106,7 +111,8 @@ import Control.Applicative
 import Control.Applicative.Backwards
 import Control.Monad
 import Data.Foldable
-import Data.Function
+import Data.Function (fix)
+import Data.Functor.Contravariant
 import Data.Monoid
 
 import Data.Profunctor.Indexed
@@ -117,20 +123,38 @@ import Optics.Internal.Fold
 import Optics.Internal.Optic
 import Optics.Internal.Utils
 
+-- $setup
+-- >>> import Optics.Core
+-- >>> import Data.Function (on)
+
 -- | Type synonym for a fold.
 type Fold s a = Optic' A_Fold NoIx s a
+
+-- | Type synonym for a van Laarhoven fold.
+type FoldVL s a =
+  forall f. (Contravariant f, Applicative f) => (a -> f a) -> s -> f s
 
 -- | Obtain a 'Fold' by lifting 'traverse_' like function.
 --
 -- @
--- 'foldVL' '.' 'traverseOf_' ≡ 'id'
--- 'traverseOf_' '.' 'foldVL' ≡ 'id'
+-- 'mkFold' '.' 'traverseOf_' ≡ 'id'
+-- 'traverseOf_' '.' 'mkFold' ≡ 'id'
 -- @
-foldVL
+mkFold
   :: (forall f. Applicative f => (a -> f u) -> s -> f v)
   -> Fold s a
-foldVL f = Optic (foldVL__ f)
+mkFold f = Optic (foldVL__ f)
+{-# INLINE mkFold #-}
+
+-- | Build a 'Fold' from the van Laarhoven representation.
+foldVL :: FoldVL s a -> Fold s a
+foldVL o = mkFold $ \f -> runTraversed . getConst #. o (Const #. Traversed #. f)
 {-# INLINE foldVL #-}
+
+-- | Convert a 'Fold' to the van Laarhoven representation.
+toFoldVL :: Is k A_Fold => Optic' k is s a -> FoldVL s a
+toFoldVL o = runStar #. getOptic (castOptic @A_Fold o) .# Star
+{-# INLINE toFoldVL #-}
 
 -- | Combine the results of a fold using a monoid.
 foldOf :: (Is k A_Fold, Monoid a) => Optic' k is s a -> s -> a
@@ -218,7 +242,7 @@ folded = Optic folded__
 -- This can be useful to lift operations from @Data.List@ and elsewhere into a
 -- 'Fold'.
 --
--- >>> toListOf (folding tail) [1,2,3,4]
+-- >>> toListOf (folding (drop 1)) [1,2,3,4]
 -- [2,3,4]
 folding :: Foldable f => (s -> f a) -> Fold s a
 folding f = Optic (contrafirst f . foldVL__ traverse_)
@@ -243,7 +267,7 @@ foldring fr = Optic (foldring__ fr)
 -- >>> toListOf (unfolded $ \b -> if b == 0 then Nothing else Just (b, b - 1)) 10
 -- [10,9,8,7,6,5,4,3,2,1]
 unfolded :: (s -> Maybe (a, s)) -> Fold s a
-unfolded step = foldVL $ \f -> fix $ \loop b ->
+unfolded step = mkFold $ \f -> fix $ \loop b ->
   case step b of
     Just (a, b') -> f a *> loop b'
     Nothing      -> pure ()
@@ -262,7 +286,7 @@ backwards_
   :: Is k A_Fold
   => Optic' k is s a
   -> Fold s a
-backwards_ o = foldVL $ \f -> forwards #. traverseOf_ o (Backwards #. f)
+backwards_ o = mkFold $ \f -> forwards #. traverseOf_ o (Backwards #. f)
 {-# INLINE backwards_ #-}
 
 -- | Return entries of the first 'Fold', then the second one.
@@ -276,7 +300,7 @@ summing
   => Optic' k is s a
   -> Optic' l js s a
   -> Fold s a
-summing a b = foldVL $ \f s -> traverseOf_ a f s *> traverseOf_ b f s
+summing a b = mkFold $ \f s -> traverseOf_ a f s *> traverseOf_ b f s
 infixr 6 `summing` -- Same as (<>)
 {-# INLINE summing #-}
 
@@ -292,7 +316,7 @@ failing
   => Optic' k is s a
   -> Optic' l js s a
   -> Fold s a
-failing a b = foldVL $ \f s ->
+failing a b = mkFold $ \f s ->
   let OrT visited fu = traverseOf_ a (wrapOrT . f) s
   in if visited
      then fu
@@ -693,7 +717,7 @@ universeOf o = (`appEndo` []) . go
 --
 -- @since 0.4.1
 cosmosOf :: forall k is a. Is k A_Fold => Optic' k is a a -> Fold a a
-cosmosOf o = foldVL go
+cosmosOf o = mkFold go
   where
     go :: Applicative f => (a -> f ()) -> a -> f ()
     go f a = f a *> traverseOf_ o (go f) a
@@ -707,6 +731,3 @@ paraOf o f = go
   where
     go a = f a (go <$> toListOf o a)
 {-# INLINE paraOf #-}
-
--- $setup
--- >>> import Optics.Core

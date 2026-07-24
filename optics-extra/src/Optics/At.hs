@@ -61,6 +61,11 @@ import Data.Word (Word8)
 
 import Optics.Core
 
+-- $setup
+-- >>> import qualified Data.IntSet as IntSet
+-- >>> import qualified Data.Map as Map
+-- >>> import Optics.Core
+
 type instance Index (HashSet a) = a
 type instance Index (HashMap k a) = k
 type instance Index (Vector.Vector a) = Int
@@ -185,7 +190,3 @@ instance (Eq k, Hashable k) => At (HashSet k) where
       Nothing -> maybe m (const (HashSet.delete k m)) mv
       Just () -> HashSet.insert k m
   {-# INLINE at #-}
-
--- $setup
--- >>> import qualified Data.IntSet as IntSet
--- >>> import qualified Data.Map as Map

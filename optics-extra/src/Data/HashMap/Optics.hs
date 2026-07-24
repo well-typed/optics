@@ -53,6 +53,13 @@ import qualified Data.HashMap.Lazy as HashMap
 
 import Optics.Core
 
+-- $setup
+-- >>> import qualified Data.HashMap.Lazy as HashMap
+-- >>> import Data.Monoid
+-- >>> import Optics.At ()
+-- >>> import Optics.Indexed ()
+-- >>> import Optics.Core
+
 -- | Construct a hash map from an 'IxFold'.
 --
 -- The construction is left-biased (see 'HashMap.union'), i.e. the first
@@ -72,8 +79,3 @@ toMapOf
   => Optic' k is s a -> s -> HashMap i a
 toMapOf o = ifoldMapOf o HashMap.singleton
 {-# INLINE toMapOf #-}
-
--- $setup
--- >>> import Data.Monoid
--- >>> import Optics.At ()
--- >>> import Optics.Indexed ()

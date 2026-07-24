@@ -31,6 +31,9 @@ import qualified Data.Vector.Unboxed as Unboxed
 
 import Optics.Core
 
+-- $setup
+-- >>> import Optics.Core
+
 -- Extra instances
 
 instance AsEmpty (HashMap k a) where

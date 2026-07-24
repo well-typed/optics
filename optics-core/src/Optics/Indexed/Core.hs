@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 -- |
 -- Module: Optics.Indexed.Core
 -- Description: Core definitions for indexed optics.
@@ -210,7 +209,7 @@ instance IxOptic A_Traversal s t a b where
   {-# INLINE noIx #-}
 
 instance (s ~ t, a ~ b) => IxOptic A_Fold s t a b where
-  noIx o = foldVL (traverseOf_ o)
+  noIx o = mkFold (traverseOf_ o)
   {-# INLINE noIx #-}
 
 instance IxOptic A_Setter s t a b where

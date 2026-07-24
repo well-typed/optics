@@ -36,9 +36,16 @@ module Optics.Getter
   -- * Subtyping
   , A_Getter
   -- | <<diagrams/Getter.png Getter in the optics hierarchy>>
+
+  -- * van Laarhoven encoding
+  , GetterVL
+  , getterVL
+  , toGetterVL
   )
   where
 
+import Data.Functor.Const
+import Data.Functor.Contravariant
 import Data.Profunctor.Indexed
 
 import Optics.Internal.Bi
@@ -46,6 +53,10 @@ import Optics.Internal.Optic
 
 -- | Type synonym for a getter.
 type Getter s a = Optic' A_Getter NoIx s a
+
+-- | Type synonym for a van Laarhoven getter.
+type GetterVL s a =
+  forall f. (Contravariant f, Functor f) => (a -> f a) -> s -> f s
 
 -- | View the value pointed to by a getter.
 --
@@ -65,3 +76,13 @@ views o = \f -> runForget $ getOptic (castOptic @A_Getter o) (Forget f)
 to :: (s -> a) -> Getter s a
 to f = Optic (lmap f . rphantom)
 {-# INLINE to #-}
+
+-- | Build a 'Getter' from the van Laarhoven representation.
+getterVL :: GetterVL s a -> Getter s a
+getterVL o = to (getConst #. o Const)
+{-# INLINE getterVL #-}
+
+-- | Convert a 'Getter' to the van Laarhoven representation.
+toGetterVL :: Is k A_Getter => Optic' k is s a -> GetterVL s a
+toGetterVL o = runStar #. getOptic (castOptic @A_Getter o) .# Star
+{-# INLINE toGetterVL #-}

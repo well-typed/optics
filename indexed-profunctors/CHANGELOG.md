@@ -1,3 +1,10 @@
+# indexed-profunctors-0.1.2.0 (2026-??-??)
+* Drop support for GHC older than 9.2.
+* Add a `Cochoice` instance for `Star`.
+
+# indexed-profunctors-0.1.1.1 (2023-06-22)
+* Add INLINE pragmas to small functions that really should inline
+
 # indexed-profunctors-0.1.1 (2021-04-09)
 * Remove unnecessary INLINE pragmas
 

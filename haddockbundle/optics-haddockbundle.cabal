@@ -1,0 +1,23 @@
+cabal-version: 2.2
+name:          optics-haddockbundle
+version:       0
+
+executable optics-haddockbundle
+  default-language: Haskell2010
+  ghc-options:      -Wall
+  main-is:          optics-haddockbundle.hs
+  hs-source-dirs:   src
+  build-depends:
+    , aeson                  ^>=2.0.3.0
+    , base
+    , bytestring
+    , Cabal                  ^>=3.6.3.0
+    , cabal-install-parsers  ^>=0.4.5
+    , containers
+    , filepath
+    , lens
+    , tar
+    , text
+    , transformers
+    , vector
+    , zlib

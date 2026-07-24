@@ -2,9 +2,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 module MetaMetaPost where
 
-import           Prelude ()
-import           Prelude.Compat
-
 import           Control.Applicative    (liftA2)
 import           Control.Monad.State
 import           Data.Foldable          (traverse_)

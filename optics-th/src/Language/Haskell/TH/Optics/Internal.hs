@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 module Language.Haskell.TH.Optics.Internal
   (
   -- * Traversals
@@ -13,9 +12,6 @@ module Language.Haskell.TH.Optics.Internal
   , _ClosedTypeFamilyD
   , _OpenTypeFamilyD
   , _ForallT
-
-  -- * TyVarBndr compatibility
-  , TyVarBndrSpec
   ) where
 
 import Data.Map as Map hiding (map, toList)
@@ -23,7 +19,6 @@ import Data.Maybe (fromMaybe)
 import Data.Foldable (traverse_)
 import Data.Set as Set hiding (map, toList)
 import Language.Haskell.TH
-import Language.Haskell.TH.Datatype.TyVarBndr
 
 import Data.Set.Optics
 import Optics.Core
@@ -33,15 +28,10 @@ class HasName t where
   -- | Extract (or modify) the 'Name' of something
   name :: Lens' t Name
 
-instance HasName (TyVarBndr_ flag) where
+instance HasName (TyVarBndr flag) where
   name = lensVL $ \f -> \case
-#if MIN_VERSION_template_haskell(2,17,0)
     PlainTV n flag    -> (\n' -> PlainTV n' flag) <$> f n
     KindedTV n flag k -> (\n' -> KindedTV n' flag k ) <$> f n
-#else
-    PlainTV n    -> PlainTV <$> f n
-    KindedTV n k -> (`KindedTV` k) <$> f n
-#endif
 
 -- | Provides for the extraction of free type variables, and alpha renaming.
 class HasTypeVars t where
@@ -50,7 +40,7 @@ class HasTypeVars t where
   -- 'Traversal' laws, when in doubt generate your names with 'newName'.
   typeVarsEx :: Set Name -> Traversal' t Name
 
-instance HasTypeVars (TyVarBndr_ flag) where
+instance HasTypeVars (TyVarBndr flag) where
   typeVarsEx s = traversalVL $ \f b ->
     if view name b `Set.member` s
     then pure b
@@ -79,11 +69,9 @@ instance HasTypeVars Type where
                                  <*> pure n
                                  <*> traverseOf (typeVarsEx s) f t2
     ParensT t         -> ParensT <$> traverseOf (typeVarsEx s) f t
-#if MIN_VERSION_template_haskell(2,15,0)
     AppKindT t k       -> AppKindT <$> traverseOf (typeVarsEx s) f t
                                    <*> traverseOf (typeVarsEx s) f k
     ImplicitParamT n t -> ImplicitParamT n <$> traverseOf (typeVarsEx s) f t
-#endif
     t                 -> pure t
 
 instance HasTypeVars t => HasTypeVars [t] where
@@ -96,7 +84,7 @@ typeVars = typeVarsEx mempty
 
 -- | Traverse /free/ type variables paired with their kinds if applicable.
 typeVarsKinded :: Fold Type Type
-typeVarsKinded = foldVL $ go mempty
+typeVarsKinded = mkFold $ go mempty
   where
     go s f = \case
       var@(VarT n)          -> if n `Set.member` s then pure () else f var
@@ -109,10 +97,8 @@ typeVarsKinded = foldVL $ go mempty
       InfixT  t1 _ t2    -> go s f t1 *> go s f t2
       UInfixT t1 _ t2    -> go s f t1 *> go s f t2
       ParensT t          -> go s f t
-#if MIN_VERSION_template_haskell(2,15,0)
       AppKindT t k       -> go s f t *> go s f k
       ImplicitParamT _ t -> go s f t
-#endif
       _                 -> pure ()
 
 -- | Substitute using a map of names in for /free/ type variables
@@ -133,10 +119,8 @@ instance SubstType Type where
   substType m (InfixT  t1 n t2)   = InfixT  (substType m t1) n (substType m t2)
   substType m (UInfixT t1 n t2)   = UInfixT (substType m t1) n (substType m t2)
   substType m (ParensT t)         = ParensT (substType m t)
-#if MIN_VERSION_template_haskell(2,15,0)
   substType m (AppKindT t k)       = AppKindT (substType m t) (substType m k)
   substType m (ImplicitParamT n t) = ImplicitParamT n (substType m t)
-#endif
   substType _ t                   = t
 
 instance SubstType t => SubstType [t] where

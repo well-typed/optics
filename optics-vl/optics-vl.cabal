@@ -1,13 +1,12 @@
-cabal-version: 2.2
+cabal-version: 3.0
 name:          optics-vl
-version:       0.2.1
+version:       0.3
 license:       BSD-3-Clause
 license-file:  LICENSE
 build-type:    Simple
 maintainer:    optics@well-typed.com
 author:        Andrzej Rybczak
-tested-with:   GHC ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7
-                || ==9.0.2 || ==9.2.4 || ==9.4.1, GHCJS ==8.4
+tested-with:   GHC == { 9.2.8, 9.4.8, 9.6.7, 9.8.4, 9.10.3, 9.12.4, 9.14.1 }
 synopsis:      Utilities for compatibility with van Laarhoven optics
 category:      Data, Optics, Lenses
 description:
@@ -61,9 +60,9 @@ library
   import:           language
   hs-source-dirs:   src
 
-  build-depends: base                   >= 4.10       && <5
+  build-depends: base                   >= 4.16       && <5
                , indexed-profunctors    >= 0.1        && <0.2
-               , optics-core            >= 0.2        && <0.5
+               , optics-core            >= 0.2        && <0.6
                , profunctors            >= 5.0        && <6.0
 
   exposed-modules: Optics.VL

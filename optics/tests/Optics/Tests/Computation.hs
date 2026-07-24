@@ -62,3 +62,15 @@ afold1rhs sma s = sma s
 setter1lhs, setter1rhs :: ((a -> b) -> s -> t) -> ((a -> b) -> s -> t)
 setter1lhs f ab s = over (sets f) ab s
 setter1rhs f ab s = f ab s
+
+-- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
+_unused :: ()
+_unused = const ()
+  [ 'lens1lhs, 'lens1rhs
+  , 'lens2lhs, 'lens2rhs
+  , 'atraversal1lhs, 'atraversal2rhs
+  , 'atraversal1rhs_
+  , 'atraversal2lhs
+  , 'afold1lhs, 'afold1rhs
+  , 'setter1lhs, 'setter1rhs
+  ]

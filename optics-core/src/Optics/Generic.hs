@@ -1,5 +1,4 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- |
 -- Module: Optics.Generic
@@ -52,6 +51,11 @@ import Optics.Internal.Optic
 import Optics.Lens
 import Optics.Prism
 import Optics.Traversal
+
+-- $setup
+-- >>> import GHC.Generics (Generic)
+-- >>> import Optics.Core
+-- >>> newtype NoG = NoG { fromNoG :: Char }
 
 -- | Hidden type for preventing GHC from solving constraints too early.
 data Void0
@@ -175,6 +179,14 @@ instance (a ~ Void0, b ~ Void0) => GField name Void0 Void0 a b where
 -- ...Type ‘Fish’ doesn't have a field named ‘salary’
 -- ...In the...
 -- ...
+--
+-- /Note:/ 'gafield' is supported by 'Optics.Label.labelOptic' and can be used
+-- with a concise syntax via @OverloadedLabels@ with GHC >= 9.6.
+--
+-- @
+-- λ> herring ^? #"?name"
+-- Just \"Henry\"
+-- @
 --
 -- @since 0.4
 --
@@ -361,7 +373,7 @@ class GPlate a s where
   gplate :: Traversal' s a
 
 instance GPlateContext a s => GPlate a s where
-  gplate = traversalVL (gplateInner @'True)
+  gplate = traversalVL (gplateInner @True)
   {-# INLINE gplate #-}
 
 -- | Hide implementation from haddock.
@@ -377,7 +389,3 @@ instance GPlate a Void0 where
 instance GPlate Void0 a where
   gplate = error "unreachable"
 
--- $setup
--- >>> :set -XDataKinds -XDeriveGeneric -XStandaloneDeriving -XOverloadedLabels
--- >>> import Optics.Core
--- >>> newtype NoG = NoG { fromNoG :: Char }

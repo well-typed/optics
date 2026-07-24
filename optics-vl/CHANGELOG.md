@@ -1,3 +1,6 @@
+# optics-vl-0.3 (2026-??-??)
+* Drop support for GHC older than 9.2.
+
 # optics-vl-0.2.1 (2020-04-15)
 * Provide conversions from `Iso`/`Prism` to their VL representation
 

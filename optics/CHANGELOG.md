@@ -1,3 +1,15 @@
+# optics-0.5 (2026-??-??)
+* Drop support for GHC older than 9.2.
+* Add support for converting getters and folds to and from their van Laarhoven
+  representations: `GetterVL`, `getterVL` and `toGetterVL` in `Optics.Getter`,
+  and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.
+* **Breaking changes**:
+  - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
+    `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
+
+# optics-0.4.2.1 (2023-06-22)
+* Fix compilation of tests with GHC 9.4 and 9.6
+
 # optics-0.4.2 (2022-05-19)
 * Allow `transformers-0.6` and `mtl-2.3`
 
