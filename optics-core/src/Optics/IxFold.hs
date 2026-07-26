@@ -36,6 +36,10 @@ module Optics.IxFold
   , inoneOf
   , ifindOf
   , ifindMOf
+  , imaximumOf
+  , iminimumOf
+  , imaximumByOf
+  , iminimumByOf
 
   -- * Combinators
   , ipre
@@ -367,5 +371,156 @@ ifindMOf o = \f -> ifoldrOf o
   (pure Nothing)
 {-# INLINE ifindMOf #-}
 
+-- | Obtain the maximum element (if any) targeted by an 'IxFold' along with its
+-- index.
+--
+-- In case of multiple maximum elements the last one is returned:
+--
+-- >>> imaximumOf ifolded "gazorpazorp"
+-- Just (7,'z')
+--
+-- so that the following property holds:
+--
+-- @
+-- 'fmap' 'snd' '.' 'imaximumOf' o ≡ 'maximumOf' o
+-- @
+--
+-- >>> let xs = "gazorpazorp"
+-- >>> fmap snd (imaximumOf ifolded xs) == maximumOf ifolded xs
+-- True
+--
+-- It holds even if the 'Ord' instance of the element type doesn't describe a
+-- total order, e.g. because of @NaN@ in floating point types:
+--
+-- >>> let ys = [2, 0/0, 1] :: [Double]
+-- >>> fmap snd (imaximumOf ifolded ys) == maximumOf ifolded ys
+-- True
+--
+-- Note: 'imaximumOf' on a valid 'Optics.IxLens.IxLens' or
+-- 'Optics.IxGetter.IxGetter' will always return 'Just' a value.
+--
+-- In the interest of efficiency, this operation has semantics more strict than
+-- strictly necessary.
+--
+-- @since 0.5
+imaximumOf
+  :: (Is k A_Fold, is `HasSingleIndex` i, Ord a)
+  => Optic' k is s a -> s -> Maybe (i, a)
+imaximumOf o = ifoldlOf' o mf Nothing where
+  -- The guard mirrors max, i.e. max x y = if x <= y then y else x.
+  mf i acc a = case acc of
+    Just (_, a') | not (a' <= a) -> acc
+    _                            -> Just (i, a)
+{-# INLINE imaximumOf #-}
+
+-- | Obtain the minimum element (if any) targeted by an 'IxFold' along with its
+-- index.
+--
+-- In case of multiple minimum elements the first one is returned:
+--
+-- >>> iminimumOf ifolded "calamari"
+-- Just (1,'a')
+--
+-- so that the following property holds:
+--
+-- @
+-- 'fmap' 'snd' '.' 'iminimumOf' o ≡ 'minimumOf' o
+-- @
+--
+-- >>> let xs = "calamari"
+-- >>> fmap snd (iminimumOf ifolded xs) == minimumOf ifolded xs
+-- True
+--
+-- It holds even if the 'Ord' instance of the element type doesn't describe a
+-- total order, e.g. because of @NaN@ in floating point types:
+--
+-- >>> let ys = [2, 0/0, 1] :: [Double]
+-- >>> fmap snd (iminimumOf ifolded ys) == minimumOf ifolded ys
+-- True
+--
+-- Note: 'iminimumOf' on a valid 'Optics.IxLens.IxLens' or
+-- 'Optics.IxGetter.IxGetter' will always return 'Just' a value.
+--
+-- In the interest of efficiency, this operation has semantics more strict than
+-- strictly necessary.
+--
+-- @since 0.5
+iminimumOf
+  :: (Is k A_Fold, is `HasSingleIndex` i, Ord a)
+  => Optic' k is s a -> s -> Maybe (i, a)
+iminimumOf o = ifoldlOf' o mf Nothing where
+  -- The guard mirrors min, i.e. min x y = if x <= y then x else y.
+  mf i acc a = case acc of
+    Just (_, a') | a' <= a -> acc
+    _                      -> Just (i, a)
+{-# INLINE iminimumOf #-}
+
+-- | Obtain the maximum element (if any) targeted by an 'IxFold' according to a
+-- user supplied 'Ordering' along with its index.
+--
+-- In case of multiple maximum elements the last one is returned:
+--
+-- >>> imaximumByOf ifolded (compare `on` length) ["hey","you","ham"]
+-- Just (2,"ham")
+--
+-- so that the following property holds:
+--
+-- @
+-- 'fmap' 'snd' '.' 'imaximumByOf' o cmp ≡ 'maximumByOf' o cmp
+-- @
+--
+-- >>> let xs = ["hey","you","ham"]
+-- >>> let cmp = compare `on` length
+-- >>> fmap snd (imaximumByOf ifolded cmp xs) == maximumByOf ifolded cmp xs
+-- True
+--
+-- In the interest of efficiency, this operation has semantics more strict than
+-- strictly necessary.
+--
+-- @since 0.5
+imaximumByOf
+  :: (Is k A_Fold, is `HasSingleIndex` i)
+  => Optic' k is s a -> (a -> a -> Ordering) -> s -> Maybe (i, a)
+imaximumByOf o = \cmp ->
+  let mf i acc a = case acc of
+        Just (_, a') | cmp a' a == GT -> acc
+        _                             -> Just (i, a)
+  in ifoldlOf' o mf Nothing
+{-# INLINE imaximumByOf #-}
+
+-- | Obtain the minimum element (if any) targeted by an 'IxFold' according to a
+-- user supplied 'Ordering' along with its index.
+--
+-- In case of multiple minimum elements the first one is returned:
+--
+-- >>> iminimumByOf ifolded (compare `on` length) ["hey","you","ham"]
+-- Just (0,"hey")
+--
+-- so that the following property holds:
+--
+-- @
+-- 'fmap' 'snd' '.' 'iminimumByOf' o cmp ≡ 'minimumByOf' o cmp
+-- @
+--
+-- >>> let xs = ["hey","you","ham"]
+-- >>> let cmp = compare `on` length
+-- >>> fmap snd (iminimumByOf ifolded cmp xs) == minimumByOf ifolded cmp xs
+-- True
+--
+-- In the interest of efficiency, this operation has semantics more strict than
+-- strictly necessary.
+--
+-- @since 0.5
+iminimumByOf
+  :: (Is k A_Fold, is `HasSingleIndex` i)
+  => Optic' k is s a -> (a -> a -> Ordering) -> s -> Maybe (i, a)
+iminimumByOf o = \cmp ->
+  let mf i acc a = case acc of
+        Just (_, a') | cmp a' a /= GT -> acc
+        _                             -> Just (i, a)
+  in ifoldlOf' o mf Nothing
+{-# INLINE iminimumByOf #-}
+
 -- $setup
 -- >>> import Optics.Core
+-- >>> import Data.Function (on)
