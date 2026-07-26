@@ -571,9 +571,9 @@ lengthOf o = foldlOf' o (\ n _ -> 1 + n) 0
 -- 'maximum' ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'maximumOf' 'folded'
 -- @
 --
--- In the interest of efficiency, This operation has semantics more strict than
--- strictly necessary.  @\\o -> 'Data.Semigroup.getMax' . 'foldMapOf' o 'Data.Semigroup.Max'@ has lazier
--- semantics but could leak memory.
+-- In the interest of efficiency, this operation has semantics more strict than
+-- strictly necessary.  @\\o -> 'Data.Semigroup.getMax' . 'foldMapOf' o
+-- 'Data.Semigroup.Max'@ has lazier semantics but could leak memory.
 maximumOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Maybe a
 maximumOf o = foldlOf' o mf Nothing where
   mf Nothing y  = Just $! y
@@ -598,9 +598,9 @@ maximumOf o = foldlOf' o mf Nothing where
 -- 'minimum' ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'minimumOf' 'folded'
 -- @
 --
--- In the interest of efficiency, This operation has semantics more strict than
--- strictly necessary.  @\\o -> 'Data.Semigroup.getMin' . 'foldMapOf' o 'Data.Semigroup.Min'@ has lazier
--- semantics but could leak memory.
+-- In the interest of efficiency, this operation has semantics more strict than
+-- strictly necessary.  @\\o -> 'Data.Semigroup.getMin' . 'foldMapOf' o
+-- 'Data.Semigroup.Min'@ has lazier semantics but could leak memory.
 minimumOf :: (Is k A_Fold, Ord a) => Optic' k is s a -> s -> Maybe a
 minimumOf o = foldlOf' o mf Nothing where
   mf Nothing y = Just $! y
@@ -613,7 +613,7 @@ minimumOf o = foldlOf' o mf Nothing where
 -- >>> maximumByOf folded (compare `on` length) ["mustard","relish","ham"]
 -- Just "mustard"
 --
--- In the interest of efficiency, This operation has semantics more strict than
+-- In the interest of efficiency, this operation has semantics more strict than
 -- strictly necessary.
 --
 -- @
@@ -629,14 +629,14 @@ maximumByOf o = \cmp ->
 -- | Obtain the minimum element (if any) targeted by a 'Fold' according to a
 -- user supplied 'Ordering'.
 --
--- In the interest of efficiency, This operation has semantics more strict than
+-- In the interest of efficiency, this operation has semantics more strict than
 -- strictly necessary.
 --
 -- >>> minimumByOf folded (compare `on` length) ["mustard","relish","ham"]
 -- Just "ham"
 --
 -- @
--- 'minimumBy' cmp ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'minimumByOf' 'folded' cmp
+-- 'Data.Foldable.minimumBy' cmp ≡ 'Data.Maybe.fromMaybe' ('error' \"empty\") '.' 'minimumByOf' 'folded' cmp
 -- @
 minimumByOf :: Is k A_Fold => Optic' k is s a -> (a -> a -> Ordering) -> s -> Maybe a
 minimumByOf o = \cmp ->

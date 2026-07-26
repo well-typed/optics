@@ -3,6 +3,8 @@
 * Add support for converting getters and folds to and from their van Laarhoven
   representations: `GetterVL`, `getterVL` and `toGetterVL` in `Optics.Getter`,
   and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.
+* Add `iminimumOf`, `imaximumOf`, `iminimumByOf` and `imaximumByOf` to
+  `Optics.IxFold`.
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
