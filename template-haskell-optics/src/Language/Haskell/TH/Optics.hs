@@ -84,6 +84,9 @@ module Language.Haskell.TH.Optics
   , _ValD
   , _DataD
   , _NewtypeD
+#if MIN_VERSION_template_haskell(2,20,0)
+  , _TypeDataD
+#endif
   , _TySynD
   , _ClassD
   , _InstanceD
@@ -121,6 +124,12 @@ module Language.Haskell.TH.Optics
   , _ForallC
   , _GadtC
   , _RecGadtC
+#if MIN_VERSION_template_haskell(2,22,0)
+  -- ** NamespaceSpecifier Prisms
+  , _NoNamespaceSpecifier
+  , _TypeNamespaceSpecifier
+  , _DataNamespaceSpecifier
+#endif
   -- ** Overlap Prisms
   , _Overlappable
   , _Overlapping
@@ -159,6 +168,15 @@ module Language.Haskell.TH.Optics
   , _AnnP
   , _LineP
   , _CompleteP
+#if MIN_VERSION_template_haskell(2,19,0)
+  , _OpaqueP
+#endif
+#if MIN_VERSION_template_haskell(2,22,0)
+  , _SCCP
+#endif
+#if MIN_VERSION_template_haskell(2,24,0)
+  , _SpecialiseEP
+#endif
   -- ** Inline Prisms
   , _NoInline
   , _Inline
@@ -213,6 +231,23 @@ module Language.Haskell.TH.Optics
   , _LabelE
   , _MDoE
   , _ImplicitParamVarE
+  , _GetFieldE
+  , _ProjectionE
+#if MIN_VERSION_template_haskell(2,19,0)
+  , _LamCasesE
+#endif
+#if MIN_VERSION_template_haskell(2,21,0)
+  , _TypedBracketE
+  , _TypedSpliceE
+#endif
+#if MIN_VERSION_template_haskell(2,22,0)
+  , _TypeE
+#endif
+#if MIN_VERSION_template_haskell(2,23,0)
+  , _ForallE
+  , _ForallVisE
+  , _ConstrainedE
+#endif
   -- ** Body Prisms
   , _GuardedB
   , _NormalB
@@ -260,6 +295,13 @@ module Language.Haskell.TH.Optics
   , _ListP
   , _SigP
   , _ViewP
+#if MIN_VERSION_template_haskell(2,22,0)
+  , _TypeP
+  , _InvisP
+#endif
+#if MIN_VERSION_template_haskell(2,23,0)
+  , _OrP
+#endif
   -- ** Type Prisms
   , _ForallT
   , _AppT
@@ -287,9 +329,18 @@ module Language.Haskell.TH.Optics
   , _ImplicitParamT
   , _ForallVisT
   , _MulArrowT
+#if MIN_VERSION_template_haskell(2,19,0)
+  , _PromotedInfixT
+  , _PromotedUInfixT
+#endif
   -- ** Specificity Prisms
   , _SpecifiedSpec
   , _InferredSpec
+#if MIN_VERSION_template_haskell(2,21,0)
+  -- ** BndrVis Prisms
+  , _BndrReq
+  , _BndrInvis
+#endif
   -- ** TyVarBndr Prisms
   , _PlainTV
   , _KindedTV
@@ -312,6 +363,7 @@ module Language.Haskell.TH.Optics
   , _NewtypeStrategy
   ) where
 
+import Data.List.NonEmpty (NonEmpty)
 import Data.Map as Map hiding (map, toList)
 import Data.Maybe (fromMaybe)
 import Data.Set as Set hiding (map, toList)
@@ -811,6 +863,32 @@ _InstanceD
       remitter (InstanceD x y z w) = Just (x, y, z, w)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,22,0)
+_NoNamespaceSpecifier :: Prism' NamespaceSpecifier ()
+_NoNamespaceSpecifier
+  = prism' reviewer remitter
+  where
+      reviewer () = NoNamespaceSpecifier
+      remitter NoNamespaceSpecifier = Just ()
+      remitter _ = Nothing
+
+_TypeNamespaceSpecifier :: Prism' NamespaceSpecifier ()
+_TypeNamespaceSpecifier
+  = prism' reviewer remitter
+  where
+      reviewer () = TypeNamespaceSpecifier
+      remitter TypeNamespaceSpecifier = Just ()
+      remitter _ = Nothing
+
+_DataNamespaceSpecifier :: Prism' NamespaceSpecifier ()
+_DataNamespaceSpecifier
+  = prism' reviewer remitter
+  where
+      reviewer () = DataNamespaceSpecifier
+      remitter DataNamespaceSpecifier = Just ()
+      remitter _ = Nothing
+#endif
+
 _Overlappable  :: Prism' Overlap  ()
 _Overlappable  = prism' reviewer remitter
   where
@@ -967,6 +1045,16 @@ _NewtypeD
       reviewer (x, y, z, w, u, v) = NewtypeD x y z w u v
       remitter (NewtypeD x y z w u v) = Just (x, y, z, w, u, v)
       remitter _ = Nothing
+
+#if MIN_VERSION_template_haskell(2,20,0)
+_TypeDataD :: Prism' Dec (Name, [TyVarBndr BndrVis], Maybe Kind, [Con])
+_TypeDataD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, u) = TypeDataD x y z u
+      remitter (TypeDataD x y z u) = Just (x, y, z, u)
+      remitter _ = Nothing
+#endif
 
 _DataFamilyD :: Prism' Dec (Name, [TyVarBndr BndrVis], Maybe Kind)
 _DataFamilyD
@@ -1313,6 +1401,36 @@ _CompleteP
       reviewer (x, y) = CompleteP x y
       remitter (CompleteP x y) = Just (x, y)
       remitter _ = Nothing
+
+#if MIN_VERSION_template_haskell(2,19,0)
+_OpaqueP :: Prism' Pragma Name
+_OpaqueP
+  = prism' reviewer remitter
+  where
+      reviewer = OpaqueP
+      remitter (OpaqueP x) = Just x
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,22,0)
+_SCCP :: Prism' Pragma (Name, Maybe String)
+_SCCP
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = SCCP x y
+      remitter (SCCP x y) = Just (x, y)
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,24,0)
+_SpecialiseEP :: Prism' Pragma (Maybe [TyVarBndrUnit], [RuleBndr], Exp, Maybe Inline, Phases)
+_SpecialiseEP
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z, w, u) = SpecialiseEP x y z w u
+      remitter (SpecialiseEP x y z w u) = Just (x, y, z, w, u)
+      remitter _ = Nothing
+#endif
 
 _NoInline :: Prism' Inline ()
 _NoInline
@@ -1698,6 +1816,86 @@ _ImplicitParamVarE
       remitter (ImplicitParamVarE x) = Just x
       remitter _ = Nothing
 
+_GetFieldE :: Prism' Exp (Exp, String)
+_GetFieldE
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = GetFieldE x y
+      remitter (GetFieldE x y) = Just (x, y)
+      remitter _ = Nothing
+
+_ProjectionE :: Prism' Exp (NonEmpty String)
+_ProjectionE
+  = prism' reviewer remitter
+  where
+      reviewer = ProjectionE
+      remitter (ProjectionE x) = Just x
+      remitter _ = Nothing
+
+#if MIN_VERSION_template_haskell(2,19,0)
+_LamCasesE :: Prism' Exp [Clause]
+_LamCasesE
+  = prism' reviewer remitter
+  where
+      reviewer = LamCasesE
+      remitter (LamCasesE x) = Just x
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,21,0)
+_TypedBracketE :: Prism' Exp Exp
+_TypedBracketE
+  = prism' reviewer remitter
+  where
+      reviewer = TypedBracketE
+      remitter (TypedBracketE x) = Just x
+      remitter _ = Nothing
+
+_TypedSpliceE :: Prism' Exp Exp
+_TypedSpliceE
+  = prism' reviewer remitter
+  where
+      reviewer = TypedSpliceE
+      remitter (TypedSpliceE x) = Just x
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,22,0)
+_TypeE :: Prism' Exp Type
+_TypeE
+  = prism' reviewer remitter
+  where
+      reviewer = TypeE
+      remitter (TypeE x) = Just x
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,23,0)
+_ForallE :: Prism' Exp ([TyVarBndrSpec], Exp)
+_ForallE
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ForallE x y
+      remitter (ForallE x y) = Just (x, y)
+      remitter _ = Nothing
+
+_ForallVisE :: Prism' Exp ([TyVarBndrUnit], Exp)
+_ForallVisE
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ForallVisE x y
+      remitter (ForallVisE x y) = Just (x, y)
+      remitter _ = Nothing
+
+_ConstrainedE :: Prism' Exp ([Exp], Exp)
+_ConstrainedE
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = ConstrainedE x y
+      remitter (ConstrainedE x y) = Just (x, y)
+      remitter _ = Nothing
+#endif
+
 _GuardedB :: Prism' Body [(Guard, Exp)]
 _GuardedB
   = prism' reviewer remitter
@@ -2026,6 +2224,34 @@ _ViewP
       remitter (ViewP x y) = Just (x, y)
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,22,0)
+_TypeP :: Prism' Pat Type
+_TypeP
+  = prism' reviewer remitter
+  where
+      reviewer = TypeP
+      remitter (TypeP x) = Just x
+      remitter _ = Nothing
+
+_InvisP :: Prism' Pat Type
+_InvisP
+  = prism' reviewer remitter
+  where
+      reviewer = InvisP
+      remitter (InvisP x) = Just x
+      remitter _ = Nothing
+#endif
+
+#if MIN_VERSION_template_haskell(2,23,0)
+_OrP :: Prism' Pat (NonEmpty Pat)
+_OrP
+  = prism' reviewer remitter
+  where
+      reviewer = OrP
+      remitter (OrP x) = Just x
+      remitter _ = Nothing
+#endif
+
 _ForallT :: Prism' Type ([TyVarBndrSpec], Cxt, Type)
 _ForallT
   = prism' reviewer remitter
@@ -2234,6 +2460,24 @@ _MulArrowT
       remitter MulArrowT = Just ()
       remitter _ = Nothing
 
+#if MIN_VERSION_template_haskell(2,19,0)
+_PromotedInfixT :: Prism' Type (Type, Name, Type)
+_PromotedInfixT
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z) = PromotedInfixT x y z
+      remitter (PromotedInfixT x y z) = Just (x, y, z)
+      remitter _ = Nothing
+
+_PromotedUInfixT :: Prism' Type (Type, Name, Type)
+_PromotedUInfixT
+  = prism' reviewer remitter
+  where
+      reviewer (x, y, z) = PromotedUInfixT x y z
+      remitter (PromotedUInfixT x y z) = Just (x, y, z)
+      remitter _ = Nothing
+#endif
+
 _SpecifiedSpec :: Prism' Specificity ()
 _SpecifiedSpec
   = prism' reviewer remitter
@@ -2249,6 +2493,24 @@ _InferredSpec
       reviewer () = InferredSpec
       remitter InferredSpec = Just ()
       remitter _ = Nothing
+
+#if MIN_VERSION_template_haskell(2,21,0)
+_BndrReq :: Prism' BndrVis ()
+_BndrReq
+  = prism' reviewer remitter
+  where
+      reviewer () = BndrReq
+      remitter BndrReq = Just ()
+      remitter _ = Nothing
+
+_BndrInvis :: Prism' BndrVis ()
+_BndrInvis
+  = prism' reviewer remitter
+  where
+      reviewer () = BndrInvis
+      remitter BndrInvis = Just ()
+      remitter _ = Nothing
+#endif
 
 _PlainTV :: Prism' (TyVarBndr flag) (Name, flag)
 _PlainTV
