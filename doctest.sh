@@ -16,6 +16,7 @@ run_doctest() {
     -XHaskell2010 \
     -XBangPatterns \
     -XConstraintKinds \
+    -XDataKinds \
     -XDefaultSignatures \
     -XDeriveFoldable \
     -XDeriveFunctor \
@@ -32,8 +33,10 @@ run_doctest() {
     -XLambdaCase \
     -XOverloadedLabels \
     -XPatternSynonyms \
+    -XPolyKinds \
     -XRankNTypes \
     -XScopedTypeVariables \
+    -XStandaloneDeriving \
     -XTupleSections \
     -XTypeApplications \
     -XTypeFamilies \
