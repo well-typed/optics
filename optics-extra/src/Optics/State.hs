@@ -26,6 +26,8 @@ import Optics.Core
 
 -- | Map over the target(s) of an 'Optic' in our monadic state.
 --
+-- /Note:/ for a strict variant see 'modifying''.
+--
 -- >>> execState (do modifying _1 (*10); modifying _2 $ stimes 5) (6,"o")
 -- (60,"ooooo")
 --
@@ -47,8 +49,13 @@ modifying o = modify . over o
 --
 -- >>> flip evalState ('a','b') $ modifying' _1 (errorWithoutStackTrace "oops")
 -- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> fst $ execState (modifying' _1 (const 'x')) ('a', undefined)
+-- 'x'
 modifying'
-  :: (Is k A_Setter, MonadState s m)
+  :: (Is k A_Traversal, MonadState s m)
   => Optic k is s s a b
   -> (a -> b)
   -> m ()
@@ -57,6 +64,8 @@ modifying' o = modify' . over' o
 
 -- | Replace the target(s) of an 'Optic' in our monadic state with a new value,
 -- irrespective of the old.
+--
+-- /Note:/ for a strict variant see 'assign''.
 --
 -- >>> execState (do assign _1 'c'; assign _2 'd') ('a','b')
 -- ('c','d')
@@ -79,8 +88,13 @@ assign o = modifying o . const
 --
 -- >>> flip evalState ('a','b') $ assign' _1 (errorWithoutStackTrace "oops")
 -- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> fst $ execState (assign' _1 'x') ('a', undefined)
+-- 'x'
 assign'
-  :: (Is k A_Setter, MonadState s m)
+  :: (Is k A_Traversal, MonadState s m)
   => Optic k is s s a b
   -> b
   -> m ()

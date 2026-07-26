@@ -40,7 +40,7 @@ etaTests = testGroup "Eta expansion"
     assertSuccess $(inspectTest $ 'eta7lhs === 'eta7rhs)
   , testCase "optimized eta7lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta7lhs)
-  , testCase "over' mapped = \\f -> over' mapped f" $
+  , testCase "over' traversed = \\f -> over' traversed f" $
     assertSuccess $(inspectTest $ 'eta8lhs === 'eta8rhs)
   , testCase "optimized eta8lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta8lhs)
@@ -48,7 +48,7 @@ etaTests = testGroup "Eta expansion"
     assertSuccess $(inspectTest $ 'eta9lhs === 'eta9rhs)
   , testCase "optimized eta9lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta9lhs)
-  , testCase "iover' imapped = \\f -> iover' imapped f" $
+  , testCase "iover' itraversed = \\f -> iover' itraversed f" $
     assertSuccess $(inspectTest $ 'eta10lhs === 'eta10rhs)
   , testCase "optimized eta10lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta10lhs)
@@ -56,7 +56,7 @@ etaTests = testGroup "Eta expansion"
     assertSuccess $(inspectTest $ 'eta11lhs === 'eta11rhs)
   , testCase "optimized eta11lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta11lhs)
-  , testCase "iset' imapped = \\f -> iset' imapped f" $
+  , testCase "iset' itraversed = \\f -> iset' itraversed f" $
     assertSuccess $(inspectTest $ 'eta12lhs === 'eta12rhs)
   , testCase "optimized eta12lhs" $
     assertSuccess $(inspectTest $ hasNoProfunctors 'eta12lhs)
@@ -96,9 +96,9 @@ eta7lhs   = over mapped
 eta7rhs f = over mapped f
 
 eta8lhs, eta8rhs
-  :: Functor f => (a -> b) -> f a -> f b
-eta8lhs   = over' mapped
-eta8rhs f = over' mapped f
+  :: Traversable f => (a -> b) -> f a -> f b
+eta8lhs   = over' traversed
+eta8rhs f = over' traversed f
 
 eta9lhs, eta9rhs
   :: FunctorWithIndex i f => (i -> a -> b) -> f a -> f b
@@ -106,9 +106,9 @@ eta9lhs   = iover imapped
 eta9rhs f = iover imapped f
 
 eta10lhs, eta10rhs
-  :: FunctorWithIndex i f => (i -> a -> b) -> f a -> f b
-eta10lhs   = iover' imapped
-eta10rhs f = iover' imapped f
+  :: TraversableWithIndex i f => (i -> a -> b) -> f a -> f b
+eta10lhs   = iover' itraversed
+eta10rhs f = iover' itraversed f
 
 eta11lhs, eta11rhs
   :: (FunctorWithIndex i f, FunctorWithIndex j g)
@@ -117,10 +117,10 @@ eta11lhs   = iset (imapped <%> imapped)
 eta11rhs f = iset (imapped <%> imapped) f
 
 eta12lhs, eta12rhs
-  :: (FunctorWithIndex i f, FunctorWithIndex j g)
+  :: (TraversableWithIndex i f, TraversableWithIndex j g)
   => ((i, j) -> b) -> f (g a) -> f (g b)
-eta12lhs   = iset' (imapped <%> imapped)
-eta12rhs f = iset' (imapped <%> imapped) f
+eta12lhs   = iset' (itraversed <%> itraversed)
+eta12rhs f = iset' (itraversed <%> itraversed) f
 
 -- workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26436
 _unused :: ()

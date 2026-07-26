@@ -3,9 +3,9 @@
 -- | This module is intended for internal use only, and may change without warning
 -- in subsequent releases.
 module Optics.Internal.Utils
-  ( Identity'(..)
-  , wrapIdentity'
-  , unwrapIdentity'
+  ( Box
+  , wrapBox
+  , unwrapBox
 
   , Traversed(..)
   , runTraversed
@@ -22,39 +22,38 @@ import qualified Data.Semigroup as SG
 
 import Data.Profunctor.Indexed
 
--- Needed for strict application of (indexed) setters.
+-- Needed for strict application of (indexed) traversals.
 --
 -- Credit for this goes to Eric Mertens, see
 -- <https://github.com/glguy/irc-core/commit/2d5fc45b05f1>.
-data Identity' a = Identity' {-# UNPACK #-} !() a
+--
+-- Both the data type and the laziness of its field are necessary:
+--
+-- - It must not be a newtype, as then matching on the constructor in '<*>' and
+--   'unwrapBox' would no longer force the value put in by 'wrapBox'.
+--
+-- - The field must stay lazy, with only 'wrapBox' forcing what it puts in it.
+--   A strict field would make 'pure' and 'fmap' force the reconstructed
+--   structure as well, not only the new values.
+data Box a = Box a
   deriving Functor
 
-instance Applicative Identity' where
-  pure a = Identity' () a
-  Identity' () f <*> Identity' () x = Identity' () (f x)
+instance Applicative Box where
+  pure = Box
+  Box f <*> Box x = Box (f x)
 
-instance Mapping (Star Identity') where
-  roam  f (Star k) = Star $ wrapIdentity' . f (unwrapIdentity' . k)
-  iroam f (Star k) = Star $ wrapIdentity' . f (\_ -> unwrapIdentity' . k)
-
-instance Mapping (IxStar Identity') where
-  roam  f (IxStar k) =
-    IxStar $ \i -> wrapIdentity' . f (unwrapIdentity' . k i)
-  iroam f (IxStar k) =
-    IxStar $ \ij -> wrapIdentity' . f (\i -> unwrapIdentity' . k (ij i))
-
--- | Mark a value for evaluation to whnf.
+-- | Mark a value for evaluation to WHNF.
 --
--- This allows us to, when applying a setter to a structure, evaluate only the
--- parts that we modify. If an optic focuses on multiple targets, Applicative
--- instance of Identity' makes sure that we force evaluation of all of them, but
--- we leave anything else alone.
+-- This allows us to, when applying a traversal to a structure, evaluate only
+-- the parts that we modify. If an optic focuses on multiple targets,
+-- Applicative instance of Box makes sure that we force evaluation of all of
+-- them, but we leave anything else alone.
 --
-wrapIdentity' :: a -> Identity' a
-wrapIdentity' a = Identity' (a `seq` ()) a
+wrapBox :: a -> Box a
+wrapBox a = Box $! a
 
-unwrapIdentity' :: Identity' a -> a
-unwrapIdentity' (Identity' () a) = a
+unwrapBox :: Box a -> a
+unwrapBox (Box a) = a
 
 ----------------------------------------
 

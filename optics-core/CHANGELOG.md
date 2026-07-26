@@ -7,6 +7,14 @@
   `Optics.IxFold`.
 * Mention the resulting optic kind in the error message about optics that cannot
   be composed.
+* Fix `failover'` and `ifailover'` being lazier than expected: they wrapped the
+  result of the strict traversal in `Just` without forcing it, so the new values
+  were not forced until the contents of the `Just` were demanded, unlike with
+  `over'` and `iover'`.
+* Fix `(?!~)` being stricter than expected: it forced the new value eagerly,
+  even if the traversal had no targets, unlike `(!~)` and the other strict
+  modifications. Now the value is forced if and only if the traversal has at
+  least one target.
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
@@ -16,6 +24,12 @@
     (`Optics.IxAffineFold`). A `fooVL` function now consistently builds an optic
     from its van Laarhoven representation `FooVL`, while `mkFoo` lifts a
     `traverse_`-like function.
+  - Restrict `over'`, `set'`, `iover'`, `iset'` and the associated operators
+    `(%!~)`, `(!~)` and `(?!~)` to require traversals rather than just setters.
+    Setters are not capable of actually making strict modifications, so these
+    operations were just silently lazier than expected when passed setters.
+  - Move `over'` and `set'` from `Optics.Setter` to `Optics.Traversal`, and
+    `iover'` and `iset'` from `Optics.IxSetter` to `Optics.IxTraversal`.
 
 # optics-core-0.4.2 (2025-02-10)
 * Rename `PathTree` data constructor to `PathNode`, to avoid pun with type

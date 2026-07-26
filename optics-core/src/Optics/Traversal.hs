@@ -61,7 +61,10 @@ module Optics.Traversal
   , rewriteMOf
   , transformMOf
   , failover
+  -- ** Strict variants
   , failover'
+  , over'
+  , set'
 
     -- * Combinators
   , backwards
@@ -286,6 +289,8 @@ transformMOf l f = go
 -- | Try to map a function over this 'Traversal', returning Nothing if the
 -- traversal has no targets.
 --
+-- /Note:/ for a strict variant see 'failover''.
+--
 -- >>> failover (element 3) (*2) [1,2]
 -- Nothing
 --
@@ -307,16 +312,97 @@ failover o = \f s ->
 {-# INLINE failover #-}
 
 -- | Version of 'failover' strict in the application of @f@.
+--
+-- >>> failover _1 (errorWithoutStackTrace "oops") ('a','b') `seq` ()
+-- ()
+--
+-- >>> failover' _1 (errorWithoutStackTrace "oops") ('a','b') `seq` ()
+-- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> fmap fst $ failover' _1 (const 'x') ('a', undefined)
+-- Just 'x'
+--
 failover'
   :: Is k A_Traversal
   => Optic k is s t a b
   -> (a -> b) -> s -> Maybe t
 failover' o = \f s ->
-  let OrT visited t = traverseOf o (wrapOrT . wrapIdentity' . f) s
+  let OrT visited t = traverseOf o (wrapOrT . wrapBox . f) s
   in if visited
-     then Just (unwrapIdentity' t)
+     then Just $! unwrapBox t
      else Nothing
 {-# INLINE failover' #-}
+
+-- | Apply a traversal as a modifier, strictly.
+--
+-- This is a strict version of 'Optics.Setter.over': the new values are forced
+-- to WHNF if and only if the optic traverses at least one target. It requires a
+-- 'Traversal' rather than a 'Optics.Setter.Setter', because a
+-- 'Optics.Setter.Setter' provides no way to force the new values.
+--
+-- Example:
+--
+-- @
+--  f :: Int -> (Int, a) -> (Int, a)
+--  f k acc
+--    | k > 0     = f (k - 1) $ 'over'' 'Data.Tuple.Optics._1' (+1) acc
+--    | otherwise = acc
+-- @
+--
+-- runs in constant space, but would result in a space leak if used with
+-- 'Optics.Setter.over'.
+--
+-- Note that replacing '$' with '$!' or 'Data.Tuple.Optics._1' with
+-- 'Data.Tuple.Optics._1'' (which amount to the same thing) doesn't help when
+-- 'Optics.Setter.over' is used, because the first coordinate of a pair is
+-- never forced.
+--
+-- >>> snd $ over _1 (errorWithoutStackTrace "oops") ('a','b')
+-- 'b'
+--
+-- >>> snd $ over' _1 (errorWithoutStackTrace "oops") ('a','b')
+-- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> fst $ over' _1 (const 'x') ('a', undefined)
+-- 'x'
+--
+over'
+  :: Is k A_Traversal
+  => Optic k is s t a b
+  -> (a -> b) -> s -> t
+over' o = \f ->
+  let star = getOptic (castOptic @A_Traversal o) $ Star (wrapBox . f)
+  in unwrapBox . runStar star
+{-# INLINE over' #-}
+
+-- | Apply a traversal, strictly.
+--
+-- This is a strict version of 'Optics.Setter.set': the new value is forced to
+-- WHNF if and only if the optic traverses at least one target. If forcing the
+-- new value is inexpensive, then it is cheaper to do so manually and use
+-- 'Optics.Setter.set'.
+--
+-- >>> snd $ set _1 (errorWithoutStackTrace "oops") ('a','b')
+-- 'b'
+--
+-- >>> snd $ set' _1 (errorWithoutStackTrace "oops") ('a','b')
+-- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> fst $ set' _1 'x' ('a', undefined)
+-- 'x'
+--
+set'
+  :: Is k A_Traversal
+  => Optic k is s t a b
+  -> b -> s -> t
+set' o = over' o . const
+{-# INLINE set' #-}
 
 ----------------------------------------
 -- Traversals
