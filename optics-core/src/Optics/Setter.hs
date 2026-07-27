@@ -159,7 +159,7 @@ mapped = Optic mapped__
 -- be applied anywhere in the result:
 --
 -- @
--- propRewriteOf l r x = 'all' ('Data.Just.isNothing' '.' r) ('universeOf' l ('rewriteOf' l r x))
+-- propRewriteOf l r x = 'all' ('Data.Maybe.isNothing' '.' r) ('universeOf' l ('rewriteOf' l r x))
 -- @
 --
 -- Usually 'transformOf' is more appropriate, but 'rewriteOf' can give better

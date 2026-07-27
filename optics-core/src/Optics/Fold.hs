@@ -36,7 +36,7 @@ module Optics.Fold
   -- |
   --
   -- @
-  -- 'traverseOf_' ('foldVL' f) ≡ f
+  -- 'traverseOf_' ('mkFold' f) ≡ f
   -- @
 
   -- * Additional introduction forms

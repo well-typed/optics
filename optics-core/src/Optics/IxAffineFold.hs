@@ -68,8 +68,8 @@ type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
 -- | Obtain an 'IxAffineFold' by lifting 'itraverse_' like function.
 --
 -- @
--- 'aifoldVL' '.' 'iatraverseOf_' ≡ 'id'
--- 'aitraverseOf_' '.' 'iafoldVL' ≡ 'id'
+-- 'iafoldVL' '.' 'iatraverseOf_' ≡ 'id'
+-- 'iatraverseOf_' '.' 'iafoldVL' ≡ 'id'
 -- @
 --
 -- @since 0.3
