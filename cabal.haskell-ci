@@ -1,6 +1,8 @@
 branches:       master
--- GHC-9.4 and 9.6 have some issue with overlapping instances for optic labels
-docspec:        <9.4 || (>=9.8 && <9.14)
+-- - GHC 9.2 sometimes doesn't resolve TypeError for JoinKinds
+-- - GHC-9.4 and 9.6 have some issue with overlapping instances for optic labels
+-- - GHC 9.14 changed formatting of :t
+docspec:        >=9.8 && <9.14
 tests:          True
 benchmarks:     True
 jobs-selection: uniform

@@ -5,6 +5,8 @@
   and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.
 * Add `iminimumOf`, `imaximumOf`, `iminimumByOf` and `imaximumByOf` to
   `Optics.IxFold`.
+* Mention the resulting optic kind in the error message about optics that cannot
+  be composed.
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
