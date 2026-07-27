@@ -16,7 +16,7 @@ import Optics.Internal.Indexed.Classes
 import Optics.Internal.Optic
 import Optics.Internal.Fold
 
--- | Internal implementation of 'Optics.IxFold.ifoldVL'.
+-- | Internal implementation of 'Optics.IxFold.mkIxFold'.
 ifoldVL__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (i -> a -> f u) -> s -> f v)

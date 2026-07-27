@@ -16,7 +16,7 @@ import Data.Profunctor.Indexed
 import Optics.Internal.Bi
 import Optics.Internal.Optic
 
--- | Internal implementation of 'Optics.Fold.foldVL'.
+-- | Internal implementation of 'Optics.Fold.mkFold'.
 foldVL__
   :: (Bicontravariant p, Traversing p)
   => (forall f. Applicative f => (a -> f u) -> s -> f v)

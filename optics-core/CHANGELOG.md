@@ -10,6 +10,12 @@
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
+  - Rename the remaining `traverse_`-like constructors to match: `afoldVL` to
+    `mkAffineFold` (`Optics.AffineFold`), `ifoldVL` to `mkIxFold`
+    (`Optics.IxFold`) and `iafoldVL` to `mkIxAffineFold`
+    (`Optics.IxAffineFold`). A `fooVL` function now consistently builds an optic
+    from its van Laarhoven representation `FooVL`, while `mkFoo` lifts a
+    `traverse_`-like function.
 
 # optics-core-0.4.2 (2025-02-10)
 * Rename `PathTree` data constructor to `PathNode`, to avoid pun with type

@@ -27,7 +27,7 @@ module Optics.IxAffineFold
   -- @
 
   -- * Additional introduction forms
-  , iafoldVL
+  , mkIxAffineFold
 
   -- * Additional elimination forms
   , iatraverseOf_
@@ -68,16 +68,16 @@ type IxAffineFold i s a = Optic' An_AffineFold (WithIx i) s a
 -- | Obtain an 'IxAffineFold' by lifting 'itraverse_' like function.
 --
 -- @
--- 'iafoldVL' '.' 'iatraverseOf_' ≡ 'id'
--- 'iatraverseOf_' '.' 'iafoldVL' ≡ 'id'
+-- 'mkIxAffineFold' '.' 'iatraverseOf_' ≡ 'id'
+-- 'iatraverseOf_' '.' 'mkIxAffineFold' ≡ 'id'
 -- @
 --
--- @since 0.3
-iafoldVL
+-- @since 0.5
+mkIxAffineFold
   :: (forall f. Functor f => (forall r. r -> f r) -> (i -> a -> f u) -> s -> f v)
   -> IxAffineFold i s a
-iafoldVL f = Optic (rphantom . ivisit f . rphantom)
-{-# INLINE iafoldVL #-}
+mkIxAffineFold f = Optic (rphantom . ivisit f . rphantom)
+{-# INLINE mkIxAffineFold #-}
 
 -- | Retrieve the value along with its index targeted by an 'IxAffineFold'.
 ipreview
@@ -114,7 +114,7 @@ iatraverseOf_ o point f s = case ipreview o s of
 
 -- | Create an 'IxAffineFold' from a partial function.
 iafolding :: (s -> Maybe (i, a)) -> IxAffineFold i s a
-iafolding g = iafoldVL (\point f s -> maybe (point s) (uncurry' f) $ g s)
+iafolding g = mkIxAffineFold (\point f s -> maybe (point s) (uncurry' f) $ g s)
 {-# INLINE iafolding #-}
 
 -- | Obtain a potentially empty 'IxAffineFold' by taking the element from
@@ -122,7 +122,7 @@ iafolding g = iafoldVL (\point f s -> maybe (point s) (uncurry' f) $ g s)
 --
 -- @since 0.3
 filteredBy :: Is k An_AffineFold  => Optic' k is a i -> IxAffineFold i a a
-filteredBy p = iafoldVL $ \point f s -> case preview p s of
+filteredBy p = mkIxAffineFold $ \point f s -> case preview p s of
   Just i  -> f i s
   Nothing -> point s
 {-# INLINE filteredBy #-}
