@@ -866,6 +866,7 @@ _InstanceD
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,22,0)
+-- | @since 0.4
 _NoNamespaceSpecifier :: Prism' NamespaceSpecifier ()
 _NoNamespaceSpecifier
   = prism' reviewer remitter
@@ -874,6 +875,7 @@ _NoNamespaceSpecifier
       remitter NoNamespaceSpecifier = Just ()
       remitter _ = Nothing
 
+-- | @since 0.4
 _TypeNamespaceSpecifier :: Prism' NamespaceSpecifier ()
 _TypeNamespaceSpecifier
   = prism' reviewer remitter
@@ -882,6 +884,7 @@ _TypeNamespaceSpecifier
       remitter TypeNamespaceSpecifier = Just ()
       remitter _ = Nothing
 
+-- | @since 0.4
 _DataNamespaceSpecifier :: Prism' NamespaceSpecifier ()
 _DataNamespaceSpecifier
   = prism' reviewer remitter
@@ -927,6 +930,7 @@ _SigD
       remitter (SigD x y) = Just (x, y)
       remitter _ = Nothing
 
+-- | @since 0.4
 _KiSigD :: Prism' Dec (Name, Kind)
 _KiSigD
   = prism' reviewer remitter
@@ -967,6 +971,7 @@ _InfixD
 #endif
 
 #if MIN_VERSION_template_haskell(2,19,0)
+-- | @since 0.3
 _DefaultD :: Prism' Dec [Type]
 _DefaultD
   = prism' reviewer remitter
@@ -1057,6 +1062,7 @@ _NewtypeD
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,20,0)
+-- | @since 0.4
 _TypeDataD :: Prism' Dec (Name, [TyVarBndr BndrVis], Maybe Kind, [Con])
 _TypeDataD
   = prism' reviewer remitter
@@ -1413,6 +1419,7 @@ _CompleteP
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,19,0)
+-- | @since 0.4
 _OpaqueP :: Prism' Pragma Name
 _OpaqueP
   = prism' reviewer remitter
@@ -1423,6 +1430,7 @@ _OpaqueP
 #endif
 
 #if MIN_VERSION_template_haskell(2,22,0)
+-- | @since 0.4
 _SCCP :: Prism' Pragma (Name, Maybe String)
 _SCCP
   = prism' reviewer remitter
@@ -1433,6 +1441,7 @@ _SCCP
 #endif
 
 #if MIN_VERSION_template_haskell(2,24,0)
+-- | @since 0.4
 _SpecialiseEP :: Prism' Pragma (Maybe [TyVarBndrUnit], [RuleBndr], Exp, Maybe Inline, Phases)
 _SpecialiseEP
   = prism' reviewer remitter
@@ -1826,6 +1835,7 @@ _ImplicitParamVarE
       remitter (ImplicitParamVarE x) = Just x
       remitter _ = Nothing
 
+-- | @since 0.4
 _GetFieldE :: Prism' Exp (Exp, String)
 _GetFieldE
   = prism' reviewer remitter
@@ -1834,6 +1844,7 @@ _GetFieldE
       remitter (GetFieldE x y) = Just (x, y)
       remitter _ = Nothing
 
+-- | @since 0.4
 _ProjectionE :: Prism' Exp (NonEmpty String)
 _ProjectionE
   = prism' reviewer remitter
@@ -1843,6 +1854,7 @@ _ProjectionE
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,19,0)
+-- | @since 0.4
 _LamCasesE :: Prism' Exp [Clause]
 _LamCasesE
   = prism' reviewer remitter
@@ -1853,6 +1865,7 @@ _LamCasesE
 #endif
 
 #if MIN_VERSION_template_haskell(2,21,0)
+-- | @since 0.4
 _TypedBracketE :: Prism' Exp Exp
 _TypedBracketE
   = prism' reviewer remitter
@@ -1861,6 +1874,7 @@ _TypedBracketE
       remitter (TypedBracketE x) = Just x
       remitter _ = Nothing
 
+-- | @since 0.4
 _TypedSpliceE :: Prism' Exp Exp
 _TypedSpliceE
   = prism' reviewer remitter
@@ -1871,6 +1885,7 @@ _TypedSpliceE
 #endif
 
 #if MIN_VERSION_template_haskell(2,22,0)
+-- | @since 0.4
 _TypeE :: Prism' Exp Type
 _TypeE
   = prism' reviewer remitter
@@ -1881,6 +1896,7 @@ _TypeE
 #endif
 
 #if MIN_VERSION_template_haskell(2,23,0)
+-- | @since 0.4
 _ForallE :: Prism' Exp ([TyVarBndrSpec], Exp)
 _ForallE
   = prism' reviewer remitter
@@ -1889,6 +1905,7 @@ _ForallE
       remitter (ForallE x y) = Just (x, y)
       remitter _ = Nothing
 
+-- | @since 0.4
 _ForallVisE :: Prism' Exp ([TyVarBndrUnit], Exp)
 _ForallVisE
   = prism' reviewer remitter
@@ -1897,6 +1914,7 @@ _ForallVisE
       remitter (ForallVisE x y) = Just (x, y)
       remitter _ = Nothing
 
+-- | @since 0.4
 _ConstrainedE :: Prism' Exp ([Exp], Exp)
 _ConstrainedE
   = prism' reviewer remitter
@@ -2235,6 +2253,7 @@ _ViewP
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,22,0)
+-- | @since 0.4
 _TypeP :: Prism' Pat Type
 _TypeP
   = prism' reviewer remitter
@@ -2243,6 +2262,7 @@ _TypeP
       remitter (TypeP x) = Just x
       remitter _ = Nothing
 
+-- | @since 0.4
 _InvisP :: Prism' Pat Type
 _InvisP
   = prism' reviewer remitter
@@ -2253,6 +2273,7 @@ _InvisP
 #endif
 
 #if MIN_VERSION_template_haskell(2,23,0)
+-- | @since 0.4
 _OrP :: Prism' Pat (NonEmpty Pat)
 _OrP
   = prism' reviewer remitter
@@ -2462,6 +2483,7 @@ _ForallVisT
       remitter (ForallVisT x y) = Just (x, y)
       remitter _ = Nothing
 
+-- | @since 0.2
 _MulArrowT :: Prism' Type ()
 _MulArrowT
   = prism' reviewer remitter
@@ -2471,6 +2493,7 @@ _MulArrowT
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,19,0)
+-- | @since 0.4
 _PromotedInfixT :: Prism' Type (Type, Name, Type)
 _PromotedInfixT
   = prism' reviewer remitter
@@ -2479,6 +2502,7 @@ _PromotedInfixT
       remitter (PromotedInfixT x y z) = Just (x, y, z)
       remitter _ = Nothing
 
+-- | @since 0.4
 _PromotedUInfixT :: Prism' Type (Type, Name, Type)
 _PromotedUInfixT
   = prism' reviewer remitter
@@ -2488,6 +2512,7 @@ _PromotedUInfixT
       remitter _ = Nothing
 #endif
 
+-- | @since 0.2
 _SpecifiedSpec :: Prism' Specificity ()
 _SpecifiedSpec
   = prism' reviewer remitter
@@ -2496,6 +2521,7 @@ _SpecifiedSpec
       remitter SpecifiedSpec = Just ()
       remitter _ = Nothing
 
+-- | @since 0.2
 _InferredSpec :: Prism' Specificity ()
 _InferredSpec
   = prism' reviewer remitter
@@ -2505,6 +2531,7 @@ _InferredSpec
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,21,0)
+-- | @since 0.4
 _BndrReq :: Prism' BndrVis ()
 _BndrReq
   = prism' reviewer remitter
@@ -2513,6 +2540,7 @@ _BndrReq
       remitter BndrReq = Just ()
       remitter _ = Nothing
 
+-- | @since 0.4
 _BndrInvis :: Prism' BndrVis ()
 _BndrInvis
   = prism' reviewer remitter
@@ -2578,6 +2606,7 @@ _StrTyLit
       remitter (StrTyLit x) = Just x
       remitter _ = Nothing
 
+-- | @since 0.2
 _CharTyLit :: Prism' TyLit Char
 _CharTyLit
   = prism' reviewer remitter
@@ -2642,6 +2671,7 @@ _NewtypeStrategy
       remitter NewtypeStrategy = Just ()
       remitter _ = Nothing
 
+-- | @since 0.4
 _ViaStrategy :: Prism' DerivStrategy Type
 _ViaStrategy
   = prism' reviewer remitter
