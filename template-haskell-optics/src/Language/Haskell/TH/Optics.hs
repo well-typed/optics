@@ -91,6 +91,7 @@ module Language.Haskell.TH.Optics
   , _ClassD
   , _InstanceD
   , _SigD
+  , _KiSigD
   , _ForeignD
   , _InfixD
 #if MIN_VERSION_template_haskell(2,19,0)
@@ -361,6 +362,7 @@ module Language.Haskell.TH.Optics
   , _StockStrategy
   , _AnyclassStrategy
   , _NewtypeStrategy
+  , _ViaStrategy
   ) where
 
 import Data.List.NonEmpty (NonEmpty)
@@ -923,6 +925,14 @@ _SigD
   where
       reviewer (x, y) = SigD x y
       remitter (SigD x y) = Just (x, y)
+      remitter _ = Nothing
+
+_KiSigD :: Prism' Dec (Name, Kind)
+_KiSigD
+  = prism' reviewer remitter
+  where
+      reviewer (x, y) = KiSigD x y
+      remitter (KiSigD x y) = Just (x, y)
       remitter _ = Nothing
 
 _ForeignD :: Prism' Dec Foreign
@@ -2630,6 +2640,14 @@ _NewtypeStrategy
   where
       reviewer () = NewtypeStrategy
       remitter NewtypeStrategy = Just ()
+      remitter _ = Nothing
+
+_ViaStrategy :: Prism' DerivStrategy Type
+_ViaStrategy
+  = prism' reviewer remitter
+  where
+      reviewer = ViaStrategy
+      remitter (ViaStrategy x) = Just x
       remitter _ = Nothing
 
 -- Internal utils
