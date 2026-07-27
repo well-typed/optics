@@ -3,8 +3,8 @@
 --
 -- This module provides compatibility layer for converting from/to van Laarhoven
 -- encoding of 'Iso's, 'Prism's, 'Lens'es, 'IxLens'es, 'AffineTraversal's,
--- 'IxAffineTraversal's, 'Traversal's and 'IxTraversal's to their optics
--- equivalents.
+-- 'IxAffineTraversal's, 'Traversal's, 'IxTraversal's, 'Getter's and 'Fold's to
+-- their optics equivalents.
 module Optics.VL
   (
   -- * Iso
@@ -51,6 +51,14 @@ module Optics.VL
   , IxTraversalVL'
   , itraversalVL
   , itraverseOf
+  -- * Getter
+  , GetterVL
+  , getterVL
+  , toGetterVL
+  -- * Fold
+  , FoldVL
+  , foldVL
+  , toFoldVL
   ) where
 
 import Data.Coerce
