@@ -402,6 +402,8 @@ partsOf o = lensVL $ \f s -> evalState (traverseOf o update s)
 --
 -- /Warning:/ if you don't supply at least as many @b@'s as you were given @a@'s,
 -- the reconstruction of @t@ will result in an error.
+--
+-- @since 0.4.2
 unsafePartsOf
   :: Is k A_Traversal
   => Optic k is s t a b
