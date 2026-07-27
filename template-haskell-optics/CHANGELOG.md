@@ -1,5 +1,6 @@
 # template-haskell-optics-0.4 (2026-??-??)
 * Drop support for GHC older than 9.2.
+* Require `th-abstraction >= 0.6`.
 * Remove the `FamFlavour` prisms `_TypeFam` and `_DataFam`. `FamFlavour` was
   removed in `template-haskell-2.13`, so these were only available with
   `template-haskell-2.12` (GHC 8.2), which is no longer supported.

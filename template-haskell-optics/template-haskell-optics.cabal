@@ -32,6 +32,6 @@ library
                , optics-core            >= 0.4       && <0.6
                , containers             >= 0.5.10.2  && <0.9
                , template-haskell       >= 2.18      && <2.25
-               , th-abstraction         >= 0.4       && <0.8
+               , th-abstraction         >= 0.6       && <0.8
 
   exposed-modules: Language.Haskell.TH.Optics
