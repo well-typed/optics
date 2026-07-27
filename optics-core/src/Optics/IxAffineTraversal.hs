@@ -147,7 +147,7 @@ ignored = iatraversalVL $ \point _ -> point
 -- >>> iover (ignored `iadisjoin` isnd) (++) ("foo", "bar")
 -- ("foo","foobar")
 --
--- @since 0.4.3
+-- @since 0.4.2
 --
 iadisjoin
   :: ( Is k An_AffineTraversal, Is l An_AffineTraversal

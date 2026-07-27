@@ -370,7 +370,7 @@ isingular o = conjoined (singular o) $ iatraversalVL $ \point f s ->
 -- >>> iover (ignored `idisjoin` _2 % itraversed) (+) ([0, 0, 0], (3, 5))
 -- ([0,0,0],(3,8))
 --
--- @since 0.4.3
+-- @since 0.4.2
 --
 idisjoin
   :: ( Is k A_Traversal, Is l A_Traversal

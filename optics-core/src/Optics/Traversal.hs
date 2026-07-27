@@ -444,7 +444,7 @@ singular o = atraversalVL $ \point f s ->
 -- >>> over (ignored `disjoin` _2) succ (0, 0)
 -- (0,1)
 --
--- @since 0.4.3
+-- @since 0.4.2
 --
 disjoin
   :: (Is k A_Traversal, Is l A_Traversal)

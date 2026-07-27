@@ -131,6 +131,8 @@ import Optics.Internal.Utils
 type Fold s a = Optic' A_Fold NoIx s a
 
 -- | Type synonym for a van Laarhoven fold.
+--
+-- @since 0.5
 type FoldVL s a =
   forall f. (Contravariant f, Applicative f) => (a -> f a) -> s -> f s
 
@@ -140,6 +142,8 @@ type FoldVL s a =
 -- 'mkFold' '.' 'traverseOf_' ≡ 'id'
 -- 'traverseOf_' '.' 'mkFold' ≡ 'id'
 -- @
+--
+-- @since 0.5
 mkFold
   :: (forall f. Applicative f => (a -> f u) -> s -> f v)
   -> Fold s a
@@ -147,11 +151,15 @@ mkFold f = Optic (foldVL__ f)
 {-# INLINE mkFold #-}
 
 -- | Build a 'Fold' from the van Laarhoven representation.
+--
+-- @since 0.5
 foldVL :: FoldVL s a -> Fold s a
 foldVL o = mkFold $ \f -> runTraversed . getConst #. o (Const #. Traversed #. f)
 {-# INLINE foldVL #-}
 
 -- | Convert a 'Fold' to the van Laarhoven representation.
+--
+-- @since 0.5
 toFoldVL :: Is k A_Fold => Optic' k is s a -> FoldVL s a
 toFoldVL o = runStar #. getOptic (castOptic @A_Fold o) .# Star
 {-# INLINE toFoldVL #-}

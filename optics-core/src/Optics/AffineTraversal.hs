@@ -183,7 +183,7 @@ matching o = withAffineTraversal o $ \match _ -> match
 -- >>> over (ix 2 `adisjoin` ix 1) (*5) [1,2]
 -- [1,10]
 --
--- @since 0.4.3
+-- @since 0.4.2
 --
 adisjoin
   :: (Is k An_AffineTraversal, Is l An_AffineTraversal)

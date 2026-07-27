@@ -55,6 +55,8 @@ import Optics.Internal.Optic
 type Getter s a = Optic' A_Getter NoIx s a
 
 -- | Type synonym for a van Laarhoven getter.
+--
+-- @since 0.5
 type GetterVL s a =
   forall f. (Contravariant f, Functor f) => (a -> f a) -> s -> f s
 
@@ -78,11 +80,15 @@ to f = Optic (lmap f . rphantom)
 {-# INLINE to #-}
 
 -- | Build a 'Getter' from the van Laarhoven representation.
+--
+-- @since 0.5
 getterVL :: GetterVL s a -> Getter s a
 getterVL o = to (getConst #. o Const)
 {-# INLINE getterVL #-}
 
 -- | Convert a 'Getter' to the van Laarhoven representation.
+--
+-- @since 0.5
 toGetterVL :: Is k A_Getter => Optic' k is s a -> GetterVL s a
 toGetterVL o = runStar #. getOptic (castOptic @A_Getter o) .# Star
 {-# INLINE toGetterVL #-}
