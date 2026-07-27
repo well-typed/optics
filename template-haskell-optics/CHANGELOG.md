@@ -14,6 +14,10 @@
   `_TypeP` and `_InvisP` (`template-haskell-2.22+`); `_ForallE`, `_ForallVisE`,
   `_ConstrainedE` and `_OrP` (`template-haskell-2.23+`); `_SpecialiseEP`
   (`template-haskell-2.24+`).
+* **Bugfixes**:
+  - Fix the `HasTypeVars` instance for `Type` to rebuild `PromotedInfixT` and
+    `PromotedUInfixT` with their own constructors instead of demoting them to
+    `InfixT` and `UInfixT`.
 
 # template-haskell-optics-0.3 (2023-11-16)
 * Add support for GHC 9.4 to 9.8

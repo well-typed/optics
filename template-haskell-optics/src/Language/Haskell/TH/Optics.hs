@@ -516,12 +516,12 @@ instance HasTypeVars Type where
                           in ForallVisT bs <$> traverseOf (typeVarsEx s') f ty
     t@MulArrowT{}      -> pure t
 #if MIN_VERSION_template_haskell(2,19,0)
-    PromotedInfixT t1 n t2 -> InfixT <$> traverseOf (typeVarsEx s) f t1
-                                     <*> pure n
-                                     <*> traverseOf (typeVarsEx s) f t2
-    PromotedUInfixT t1 n t2 -> UInfixT <$> traverseOf (typeVarsEx s) f t1
-                                       <*> pure n
-                                       <*> traverseOf (typeVarsEx s) f t2
+    PromotedInfixT t1 n t2 -> PromotedInfixT <$> traverseOf (typeVarsEx s) f t1
+                                             <*> pure n
+                                             <*> traverseOf (typeVarsEx s) f t2
+    PromotedUInfixT t1 n t2 -> PromotedUInfixT <$> traverseOf (typeVarsEx s) f t1
+                                               <*> pure n
+                                               <*> traverseOf (typeVarsEx s) f t2
 #endif
 
 instance HasTypeVars Con where
