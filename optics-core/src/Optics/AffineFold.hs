@@ -26,7 +26,7 @@ module Optics.AffineFold
   -- @
 
   -- * Additional introduction forms
-  , afoldVL
+  , mkAffineFold
   , filtered
 
   -- * Additional elimination forms
@@ -70,16 +70,16 @@ type AffineFold s a = Optic' An_AffineFold NoIx s a
 -- | Obtain an 'AffineFold' by lifting 'traverse_' like function.
 --
 -- @
--- 'afoldVL' '.' 'atraverseOf_' ≡ 'id'
--- 'atraverseOf_' '.' 'afoldVL' ≡ 'id'
+-- 'mkAffineFold' '.' 'atraverseOf_' ≡ 'id'
+-- 'atraverseOf_' '.' 'mkAffineFold' ≡ 'id'
 -- @
 --
--- @since 0.3
-afoldVL
+-- @since 0.5
+mkAffineFold
   :: (forall f. Functor f => (forall r. r -> f r) -> (a -> f u) -> s -> f v)
   -> AffineFold s a
-afoldVL f = Optic (rphantom . visit f . rphantom)
-{-# INLINE afoldVL #-}
+mkAffineFold f = Optic (rphantom . visit f . rphantom)
+{-# INLINE mkAffineFold #-}
 
 -- | Retrieve the value targeted by an 'AffineFold'.
 --
@@ -126,7 +126,7 @@ afolding f = Optic (contrabimap (\s -> maybe (Left s) Right (f s)) Left . right'
 
 -- | Filter result(s) of a fold that don't satisfy a predicate.
 filtered :: (a -> Bool) -> AffineFold a a
-filtered p = afoldVL (\point f a -> if p a then f a else point a)
+filtered p = mkAffineFold (\point f a -> if p a then f a else point a)
 {-# INLINE filtered #-}
 
 -- | Try the first 'AffineFold'. If it returns no entry, try the second one.
