@@ -15,6 +15,10 @@
   even if the traversal had no targets, unlike `(!~)` and the other strict
   modifications. Now the value is forced if and only if the traversal has at
   least one target.
+* Fix spurious `-Wincomplete-record-selectors` warnings at every use site of
+  `gafield` and affine field labels with GHC >= 9.14.1 resulting from `HasField`
+  constraints being solved for partial fields. As a consequence, the field
+  selector no longer needs to be in scope for `gafield` to work.
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
