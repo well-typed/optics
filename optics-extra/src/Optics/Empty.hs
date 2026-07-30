@@ -27,6 +27,7 @@ import qualified Data.Text as StrictT
 import qualified Data.Text.Lazy as LazyT
 import qualified Data.Vector as Vector
 import qualified Data.Vector.Storable as Storable
+import qualified Data.Vector.Strict as Strict
 import qualified Data.Vector.Unboxed as Unboxed
 
 import Optics.Core
@@ -46,6 +47,11 @@ instance AsEmpty (HashSet a) where
 
 instance AsEmpty (Vector.Vector a) where
   _Empty = nearly Vector.empty Vector.null
+  {-# INLINE _Empty #-}
+
+-- | @since 0.5
+instance AsEmpty (Strict.Vector a) where
+  _Empty = nearly Strict.empty Strict.null
   {-# INLINE _Empty #-}
 
 instance Unboxed.Unbox a => AsEmpty (Unboxed.Vector a) where

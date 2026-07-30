@@ -1,5 +1,8 @@
 # optics-extra-0.5 (2026-??-??)
 * Drop support for GHC older than 9.2.
+* Add `Each`, `Cons`, `Snoc`, `Ixed` and `AsEmpty` instances for the strict boxed
+  vector from `Data.Vector.Strict`, along with the `Data.Vector.Strict.Optics`
+  module. Consequently, `vector >= 0.13.2` is now required.
 * **Breaking changes**:
   - Restrict `modifying'` and `assign'` to traversals. Setters are not capable
     of actually making strict modifications, so these operations were just

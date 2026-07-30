@@ -5,6 +5,9 @@
   and `FoldVL`, `foldVL` and `toFoldVL` in `Optics.Fold`.
 * Add `iminimumOf`, `imaximumOf`, `iminimumByOf` and `imaximumByOf` to
   `Optics.IxFold`.
+* Add `Each`, `Cons`, `Snoc`, `Ixed` and `AsEmpty` instances for the strict boxed
+  vector from `Data.Vector.Strict`, along with the `Data.Vector.Strict.Optics`
+  module. Consequently, `vector >= 0.13.2` is now required.
 * Mention the resulting optic kind in the error message about optics that cannot
   be composed.
 * Fix `failover'` and `ifailover'` being lazier than expected: they wrapped the

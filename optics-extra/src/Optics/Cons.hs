@@ -36,6 +36,7 @@ import qualified Data.Text.Lazy as LazyT
 import qualified Data.Vector as Vector
 import qualified Data.Vector.Primitive as Prim
 import qualified Data.Vector.Storable as Storable
+import qualified Data.Vector.Strict as Strict
 import qualified Data.Vector.Unboxed as Unbox
 
 import Optics.Core
@@ -66,6 +67,14 @@ instance Cons (Vector a) (Vector b) a b where
     else Right (Vector.unsafeHead v, Vector.unsafeTail v)
   {-# INLINE _Cons #-}
 
+-- | @since 0.5
+instance Cons (Strict.Vector a) (Strict.Vector b) a b where
+  _Cons = prism (uncurry' Strict.cons) $ \v ->
+    if Strict.null v
+    then Left Strict.empty
+    else Right (Strict.unsafeHead v, Strict.unsafeTail v)
+  {-# INLINE _Cons #-}
+
 instance (Prim a, Prim b) => Cons (Prim.Vector a) (Prim.Vector b) a b where
   _Cons = prism (uncurry' Prim.cons) $ \v ->
     if Prim.null v
@@ -93,6 +102,13 @@ instance Snoc (Vector a) (Vector b) a b where
   _Snoc = prism (uncurry' Vector.snoc) $ \v -> if Vector.null v
     then Left Vector.empty
     else Right (Vector.unsafeInit v, Vector.unsafeLast v)
+  {-# INLINE _Snoc #-}
+
+-- | @since 0.5
+instance Snoc (Strict.Vector a) (Strict.Vector b) a b where
+  _Snoc = prism (uncurry' Strict.snoc) $ \v -> if Strict.null v
+    then Left Strict.empty
+    else Right (Strict.unsafeInit v, Strict.unsafeLast v)
   {-# INLINE _Snoc #-}
 
 instance (Prim a, Prim b) => Snoc (Prim.Vector a) (Prim.Vector b) a b where

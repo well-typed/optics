@@ -29,6 +29,7 @@ import Data.Word (Word8)
 import qualified Data.Vector as V
 import qualified Data.Vector.Primitive as VP
 import qualified Data.Vector.Storable as VS
+import qualified Data.Vector.Strict as VStrict
 import qualified Data.Vector.Unboxed as VU
 
 import Optics.Core
@@ -45,6 +46,13 @@ instance k ~ k' => Each k (HashMap k a) (HashMap k' b) a b where
 
 -- | @'each' :: 'IxTraversal' Int ('V.Vector' a) ('V.Vector' b) a b@
 instance Each Int (V.Vector a) (V.Vector b) a b where
+  each = vectorTraverse
+  {-# INLINE[1] each #-}
+
+-- | @'each' :: 'IxTraversal' Int ('VStrict.Vector' a) ('VStrict.Vector' b) a b@
+--
+-- @since 0.5
+instance Each Int (VStrict.Vector a) (VStrict.Vector b) a b where
   each = vectorTraverse
   {-# INLINE[1] each #-}
 

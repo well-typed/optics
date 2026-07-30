@@ -143,6 +143,7 @@ library
                     , Data.Typeable.Optics
                     , Data.Vector.Generic.Optics
                     , Data.Vector.Optics
+                    , Data.Vector.Strict.Optics
                     , GHC.Generics.Optics
                     , Numeric.Optics
   
