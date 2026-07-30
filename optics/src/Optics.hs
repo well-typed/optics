@@ -990,6 +990,9 @@ import Data.Either.Optics                    as P
 -- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
 -- | '?~'         | '?!~'           | 'Optics.State.Operators.?='               | 'Optics.State.Operators.<?=' | 'Optics.State.Operators.<<?=' | Replace target(s) with 'Just' a value.    |
 -- +--------------+-----------------+-------------------------------------------+------------------------------+-------------------------------+-------------------------------------------+
+--
+-- The combinators in the @Strict@ column require a 'Traversal' rather than a
+-- 'Setter', because a 'Setter' provides no way to force the new values.
 
 -- $setup
 -- >>> import Control.Monad.Reader

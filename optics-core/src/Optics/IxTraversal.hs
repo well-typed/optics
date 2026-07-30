@@ -51,7 +51,10 @@ module Optics.IxTraversal
   , iscanl1Of
   , iscanr1Of
   , ifailover
+  -- ** Strict variants
   , ifailover'
+  , iover'
+  , iset'
 
   -- * Combinators
   , indices
@@ -216,6 +219,8 @@ iscanr1Of o f = fst . imapAccumROf o step Nothing
 
 -- | Try to map a function which uses the index over this 'IxTraversal',
 -- returning 'Nothing' if the 'IxTraversal' has no targets.
+--
+-- /Note:/ for a strict variant see 'ifailover''.
 ifailover
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -228,16 +233,78 @@ ifailover o = \f s ->
 {-# INLINE ifailover #-}
 
 -- | Version of 'ifailover' strict in the application of the function.
+--
+-- >>> ifailover itraversed (\_ _ -> errorWithoutStackTrace "oops") "abc" `seq` ()
+-- ()
+--
+-- >>> ifailover' itraversed (\_ _ -> errorWithoutStackTrace "oops") "abc" `seq` ()
+-- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> length <$> ifailover' (itraversed % _2) (\_ _ -> 'x') [(undefined,'b')]
+-- Just 1
+--
 ifailover'
   :: (Is k A_Traversal, is `HasSingleIndex` i)
   => Optic k is s t a b
   -> (i -> a -> b) -> s -> Maybe t
 ifailover' o = \f s ->
-  let OrT visited t = itraverseOf o (\i -> wrapOrT . wrapIdentity' . f i) s
+  let OrT visited t = itraverseOf o (\i -> wrapOrT . wrapBox . f i) s
   in if visited
-     then Just (unwrapIdentity' t)
+     then Just $! unwrapBox t
      else Nothing
 {-# INLINE ifailover' #-}
+
+-- | Apply an indexed traversal as a modifier, strictly.
+--
+-- This is a strict version of 'Optics.IxSetter.iover': the new values are
+-- forced to WHNF if and only if the optic traverses at least one target. It
+-- requires an 'IxTraversal' rather than an 'Optics.IxSetter.IxSetter', because
+-- an 'Optics.IxSetter.IxSetter' provides no way to force the new values.
+--
+-- >>> length $ iover itraversed (\i _ -> errorWithoutStackTrace "oops") "abc"
+-- 3
+--
+-- >>> length $ iover' itraversed (\i _ -> errorWithoutStackTrace "oops") "abc"
+-- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> length $ iover' (itraversed % _2) (\_ _ -> 'x') [(undefined,'b')]
+-- 1
+--
+iover'
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
+  => Optic k is s t a b
+  -> (i -> a -> b) -> s -> t
+iover' o = \f ->
+  let star = getOptic (castOptic @A_Traversal o) $ IxStar (\i -> wrapBox . f i)
+  in unwrapBox . runIxStar star id
+{-# INLINE iover' #-}
+
+-- | Apply an indexed traversal, strictly.
+--
+-- This is a strict version of 'Optics.IxSetter.iset': the new values are forced
+-- to WHNF if and only if the optic traverses at least one target.
+--
+-- >>> length $ iset itraversed (\i -> errorWithoutStackTrace "oops") "abc"
+-- 3
+--
+-- >>> length $ iset' itraversed (\i -> errorWithoutStackTrace "oops") "abc"
+-- *** Exception: oops
+--
+-- Values not targeted by the traversal are not forced:
+--
+-- >>> length $ iset' (itraversed % _2) (\_ -> 'x') [(undefined,'b')]
+-- 1
+--
+iset'
+  :: (Is k A_Traversal, is `HasSingleIndex` i)
+  => Optic k is s t a b
+  -> (i -> b) -> s -> t
+iset' o = \f -> iover' o (\i _ -> f i)
+{-# INLINE iset' #-}
 
 ----------------------------------------
 -- Traversals

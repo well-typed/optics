@@ -47,8 +47,6 @@ module Optics.IxSetter
 
   -- * Additional elimination forms
   , iset
-  , iset'
-  , iover'
 
   -- * Subtyping
   , A_Setter
@@ -63,7 +61,6 @@ import Optics.Internal.Indexed
 import Optics.Internal.Indexed.Classes
 import Optics.Internal.IxSetter
 import Optics.Internal.Optic
-import Optics.Internal.Utils
 
 -- | Type synonym for a type-modifying indexed setter.
 type IxSetter i s t a b = Optic A_Setter (WithIx i) s t a b
@@ -72,6 +69,8 @@ type IxSetter i s t a b = Optic A_Setter (WithIx i) s t a b
 type IxSetter' i s a = Optic' A_Setter (WithIx i) s a
 
 -- | Apply an indexed setter as a modifier.
+--
+-- /Note:/ for a strict variant see 'Optics.IxTraversal.iover''.
 iover
   :: (Is k A_Setter, is `HasSingleIndex` i)
   => Optic k is s t a b
@@ -79,22 +78,13 @@ iover
 iover o = \f -> runIxFunArrow (getOptic (castOptic @A_Setter o) (IxFunArrow f)) id
 {-# INLINE iover #-}
 
--- | Apply an indexed setter as a modifier, strictly.
-iover'
-  :: (Is k A_Setter, is `HasSingleIndex` i)
-  => Optic k is s t a b
-  -> (i -> a -> b) -> s -> t
-iover' o = \f ->
-  let star = getOptic (castOptic @A_Setter o) $ IxStar (\i -> wrapIdentity' . f i)
-  in unwrapIdentity' . runIxStar star id
-
-{-# INLINE iover' #-}
-
 -- | Apply an indexed setter.
 --
 -- @
 -- 'iset' o f ≡ 'iover' o (\i _ -> f i)
 -- @
+--
+-- /Note:/ for a strict variant see 'Optics.IxTraversal.iset''.
 --
 iset
   :: (Is k A_Setter, is `HasSingleIndex` i)
@@ -102,14 +92,6 @@ iset
   -> (i -> b) -> s -> t
 iset o = \f -> iover o (\i _ -> f i)
 {-# INLINE iset #-}
-
--- | Apply an indexed setter, strictly.
-iset'
-  :: (Is k A_Setter, is `HasSingleIndex` i)
-  => Optic k is s t a b
-  -> (i -> b) -> s -> t
-iset' o = \f -> iover' o (\i _ -> f i)
-{-# INLINE iset' #-}
 
 -- | Build an indexed setter from a function to modify the element(s).
 isets
