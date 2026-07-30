@@ -729,13 +729,13 @@ import Data.Either.Optics                    as P
 --
 -- === Talks
 --
--- * (2020-10) <https://skillsmatter.com/skillscasts/14906-user-friendly-optics User Friendly Optics> - a talk about the @optics@ library in comparison to the @lens@ library by Andrzej Rybczak
+-- * (2020-10) <https://www.youtube.com/watch?v=musLlGHN9QQ User Friendly Optics> - a talk about the @optics@ library in comparison to the @lens@ library by Andrzej Rybczak
 --
--- * (2020-06) <https://www.youtube.com/watch?v=geV8F59q48E Basic optics: lenses, prisms, and traversals> - an introductory talk about this library by Alejandro Serrano
+-- * (2020-06) <https://www.youtube.com/watch?v=f84tSjesV7o Basic optics: lenses, prisms, and traversals> - an introductory talk about this library by Alejandro Serrano
 --
--- * (2018-10) <https://skillsmatter.com/skillscasts/12360-profunctors-and-data-accessors Profunctors and Data Accessors> - a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
+-- * (2018-10) <https://www.youtube.com/watch?v=vTlOZTaraxE Profunctors and Data Accessors> - a talk on basics of profunctors and how they relate to data accessors such as lenses, prisms and traversals by Andrzej Rybczak
 --
--- * (2017-10) <https://skillsmatter.com/skillscasts/10692-through-a-glass-abstractly-lenses-and-the-power-of-abstraction Through a Glass, Abstractly: Lenses and the Power of Abstraction> - a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
+-- * (2017-10) <https://www.youtube.com/watch?v=AP1GN-f1pWU Through a Glass, Abstractly: Lenses and the Power of Abstraction> - a talk on the principles behind this library with <https://github.com/well-typed/optics/raw/master/Talk.pdf accompanying slides> by Adam Gundry (but note that the design details of @optics@ have changed substantially since this talk was given)
 --
 -- === Articles
 --
