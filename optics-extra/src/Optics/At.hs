@@ -56,6 +56,7 @@ import qualified Data.Text.Lazy as LazyT
 import qualified Data.Vector as Vector hiding (indexed)
 import qualified Data.Vector.Primitive as Prim
 import qualified Data.Vector.Storable as Storable
+import qualified Data.Vector.Strict as Strict hiding (indexed)
 import qualified Data.Vector.Unboxed as Unboxed hiding (indexed)
 import Data.Word (Word8)
 
@@ -69,6 +70,7 @@ import Optics.Core
 type instance Index (HashSet a) = a
 type instance Index (HashMap k a) = k
 type instance Index (Vector.Vector a) = Int
+type instance Index (Strict.Vector a) = Int
 type instance Index (Prim.Vector a) = Int
 type instance Index (Storable.Vector a) = Int
 type instance Index (Unboxed.Vector a) = Int
@@ -103,6 +105,15 @@ instance Ixed (Vector.Vector a) where
   ix i = atraversalVL $ \point f v ->
     if 0 <= i && i < Vector.length v
     then f (v Vector.! i) <&> \a -> v Vector.// [(i, a)]
+    else point v
+  {-# INLINE ix #-}
+
+type instance IxValue (Strict.Vector a) = a
+-- | @since 0.5
+instance Ixed (Strict.Vector a) where
+  ix i = atraversalVL $ \point f v ->
+    if 0 <= i && i < Strict.length v
+    then f (v Strict.! i) <&> \a -> v Strict.// [(i, a)]
     else point v
   {-# INLINE ix #-}
 
