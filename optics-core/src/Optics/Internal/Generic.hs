@@ -136,7 +136,6 @@ instance
 
 instance
   ( path ~ GSetFieldPath con epath
-  , When (IsLeft epath) (HideReps g h)
   , GSetFieldProd path g h b
   ) => GSetFieldSum (PathLeaf epath) (M1 C (MetaCons con fix hs) g)
                                       (M1 C (MetaCons con fix hs) h) b where
@@ -316,7 +315,6 @@ instance
   , path ~ If (n <=? 0)
               (TypeError (Text "There is no 0th position"))
               (GetPositionPaths s n (Rep s))
-  , When (n <=? 0) (HideReps (Rep s) (Rep t))
   , GPositionSum path (Rep s) (Rep t) a b
   ) => GPositionImpl True n s t a b where
   gpositionImpl = withLens
@@ -347,7 +345,6 @@ instance
 
 instance
   ( path ~ GPositionPath con epath
-  , When (IsLeft epath) (HideReps g h)
   , GFieldProd path g h a b
   ) => GPositionSum (PathLeaf epath) (M1 C (MetaCons con fix hs) g)
                                       (M1 C (MetaCons con fix hs) h) a b where
@@ -386,7 +383,6 @@ instance
       (Text "Type " :<>: QuoteType s :<>:
        Text " doesn't have a constructor named " :<>: QuoteSymbol name))
     epath
-  , When (IsLeft epath) (HideReps (Rep s) (Rep t))
   , GConstructorSum path (Rep s) (Rep t) a b
   ) => GConstructorImpl True name s t a b where
   gconstructorImpl = withPrism (generic % gconstructorSum @path) prism

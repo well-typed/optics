@@ -614,8 +614,7 @@ import Data.Either.Optics                    as P
 -- Since 'Optic' is a rank-1 type, it is easy to store optics in a
 -- datastructure:
 --
--- >>> :t [folded, backwards_ folded]
--- [folded, backwards_ folded] :: Foldable f => [Fold (f a) a]
+-- >>> let twoFolds = [folded, backwards_ folded]
 --
 -- It is possible to define aliases for optics without the monomorphism
 -- restriction spoiling the fun:

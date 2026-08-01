@@ -14,12 +14,10 @@ module Optics.Internal.Generic.TypeLevel
   , GetPositionPaths
   , GetPositionPath
   -- * Misc
-  , HideReps
   , AnyHasPath
   , NoGenericError
   ) where
 
-import Data.Kind
 import Data.Type.Bool
 import Data.Type.Equality
 import GHC.Generics
@@ -109,13 +107,6 @@ type family ContinueWhenLeft (r :: Either (Nat, Nat) [Path]) g acc
 
 ----------------------------------------
 -- Misc
-
-data Void1 a
--- | Generate bogus equality constraints that attempt to unify generic
--- representations with this type in case there is an error such as missing
--- field, constructor etc. so these huge types don't leak into error messages.
-type family HideReps (g :: Type -> Type) (h :: Type -> Type) :: Constraint where
-  HideReps g h = (g ~ Void1, h ~ Void1)
 
 -- | Check if any leaf in the tree has a '[Path]'.
 type family AnyHasPath (path :: PathTree e) :: Bool where

@@ -303,10 +303,6 @@ jobs:
           if [ $((HCNUMVER < 90800)) -ne 0 ] ; then echo "package metametapost" >> cabal.project ; fi
           if [ $((HCNUMVER < 90800)) -ne 0 ] ; then echo "    ghc-options: -j4" >> cabal.project ; fi
           cat >> cabal.project <<EOF
-          allow-newer: indexed-traversable-instances:base
-          allow-newer: indexed-traversable:base
-          allow-newer: indexed-traversable:containers
-          allow-newer: these:base
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: any.$_ installed\n" unless /^(indexed-profunctors|metametapost|optics|optics-core|optics-extra|optics-sop|optics-th|optics-vl|template-haskell-optics)$/; }' >> cabal.project.local
           cat cabal.project
@@ -336,8 +332,8 @@ jobs:
           $CABAL v2-test $ARG_COMPILER $ARG_TESTS $ARG_BENCH all --test-show-details=direct
       - name: docspec
         run: |
-          if [ $((HCNUMVER >= 90800 && HCNUMVER < 91400)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
-          if [ $((HCNUMVER >= 90800 && HCNUMVER < 91400)) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
+          if [ $((HCNUMVER >= 90400)) -ne 0 ] ; then $CABAL v2-build $ARG_COMPILER $ARG_TESTS $ARG_BENCH all ; fi
+          if [ $((HCNUMVER >= 90400)) -ne 0 ] ; then cabal-docspec $ARG_COMPILER ; fi
       - name: cabal check
         run: |
           cd ${PKGDIR_optics} || false
