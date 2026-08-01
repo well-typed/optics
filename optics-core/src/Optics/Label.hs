@@ -78,33 +78,31 @@ import Optics.Internal.Optic
 --   } deriving (Show, Generic)
 -- :}
 --
--- /Note:/ Generic deriving of optics works well on a moderate scale, but for
--- ubiquitous usage (and in production in general) we recommend generating them
--- with Template Haskell as it scales better in terms of compilation time. For
--- more details see @makeFieldLabelsNoPrefix@ from
--- <https://hackage.haskell.org/package/optics-th/docs/Optics-TH.html Optics.TH>
--- in the <https://hackage.haskell.org/package/optics-th optics-th> package.
---
 -- Here is some test data:
 --
 -- >>> :{
 -- peter :: Human
--- peter = Human { name = "Peter"
---               , age  = 13
---               , pets = [ Fish { name = "Goldie"
---                               , age  = 1
---                               , lazy = False
---                               }
---                        , Cat { name = "Loopy"
---                              , age  = 3
---                              , lazy = False
---                              }
---                        , Cat { name = "Sparky"
---                              , age  = 2
---                              , lazy = True
---                              }
---                        ]
---              }
+-- peter = Human
+--   { name = "Peter"
+--   , age = 13
+--   , pets =
+--       [ Fish
+--           { name = "Goldie"
+--           , age = 1
+--           , lazy = False
+--           }
+--       , Cat
+--           { name = "Loopy"
+--           , age = 3
+--           , lazy = False
+--           }
+--       , Cat
+--           { name = "Sparky"
+--           , age = 2
+--           , lazy = True
+--           }
+--       ]
+--   }
 -- :}
 --
 -- Now we can ask for Peter's name:
@@ -145,24 +143,21 @@ import Optics.Internal.Optic
 --
 -- (3) Clunky update syntax, especially when nested fields get involved.
 --
--- Over the years multiple language extensions were proposed and implemented to
--- alleviate these issues. We're quite close to having a reasonable solution
--- with the following trifecta:
+-- GHC 9.2 and later provides the following trifecta of language extensions to
+-- alleviate them:
 --
--- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/duplicate_record_fields.html DuplicateRecordFields>@ - introduced in GHC 8.0.1, addresses (1)
+-- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/duplicate_record_fields.html DuplicateRecordFields>@ - addresses (1)
 --
--- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/field_selectors.html NoFieldSelectors>@ and @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_record_dot.html OverloadedRecordDot>@ - introduced in GHC 9.2.1, addresses (2)
+-- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/field_selectors.html NoFieldSelectors>@ and @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_record_dot.html OverloadedRecordDot>@ - address (2)
 --
--- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_record_update.html OverloadedRecordUpdate>@ - restricted version introduced in GHC 9.2.1, addresses (3)
+-- - @<https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_record_update.html OverloadedRecordUpdate>@ - addresses (3)
 --
--- It needs to be noted however that @OverloadedRecordUpdate@ is not yet usable
--- out of the box as it requires the user to enable @RebindableSyntax@ and
--- provide their own @HasField@ class.
+-- It needs to be noted however that @OverloadedRecordUpdate@ is still not
+-- usable out of the box as it requires the user to enable @RebindableSyntax@
+-- and provide their own @HasField@ class.
 --
--- Is there no hope then for people who would like to work with records in a
--- reasonable way without waiting? Not necessarily, as by following a couple of
--- simple patterns we can get pretty much the same (and more) features with
--- labels as optics, just with a slightly more verbose syntax.
+-- Labels as optics are an alternative that addresses all three issues (and
+-- more) at the cost of a slightly more verbose syntax.
 
 -- $solution
 --
@@ -183,16 +178,18 @@ import Optics.Internal.Optic
 --
 -- import Data.Time
 --
--- data User = User { id     :: Int
---                  , name   :: String
---                  , joined :: UTCTime
---                  , movies :: [Movie]
---                  }
+-- data User = User
+--   { id     :: Int
+--   , name   :: String
+--   , joined :: UTCTime
+--   , movies :: [Movie]
+--   }
 --
--- data Movie = Movie { id          :: Int
---                    , name        :: String
---                    , releaseDate :: UTCTime
---                    }
+-- data Movie = Movie
+--   { id          :: Int
+--   , name        :: String
+--   , releaseDate :: UTCTime
+--   }
 -- @
 --
 -- Then appropriate 'LabelOptic' instances can be either written by hand,
@@ -209,11 +206,10 @@ import Optics.Internal.Optic
 -- makeFieldLabelsNoPrefix ''Movie
 -- @
 --
--- Generally speaking, both techniques trade blows in terms of compile time and
--- run time resources. Generic optics are a bit slower to compile without
--- optimizations than Template Haskell generated ones and their updating part
--- might be slightly slower for larger data types with GHC < 9.2. On the other
--- hand, generic optics are much more developer friendly.
+-- Generally speaking, both deriving techniques trade blows in terms of compile
+-- time and run time resources. Generic optics are a bit slower to compile
+-- without optimizations than Template Haskell generated ones. On the other
+-- hand, they are much more developer friendly.
 --
 -- /Note:/ there exists a similar approach that involves prefixing field names
 -- (either with the underscore or name of the data type) and generation of
@@ -223,75 +219,54 @@ import Optics.Internal.Optic
 -- navigation in unfamiliar code bases significantly harder, so it's not
 -- recommended.
 --
--- === Emulation of @NoFieldSelectors@
+-- === Clean namespace with @NoFieldSelectors@
 --
 -- Prefixless fields (especially ones with common names such as @id@ or @name@)
 -- leak into global namespace as accessor functions and can generate a lot of
--- name clashes. If you can't use GHC >= 9.2 and take advantage of the
--- @NoFieldSelectors@ language extension, this can be alleviated by splitting
--- modules defining types into two, namely:
---
--- (1) A private one that exports full type definitions, i.e. with their fields
---     and constructors.
---
--- (2) A public one that exports only constructors (or no constructors at all if
---     the data type in question is opaque).
---
--- There is no notion of private and public modules within a single cabal
--- target, but we can hint at it e.g. by naming the public module @T@ and
--- private @T.Internal@.
+-- name clashes. The @NoFieldSelectors@ language extension takes care of that:
+-- fields of data types defined in a module with this extension enabled can
+-- still be used in record construction, pattern matching and record update
+-- syntax, but no top-level accessor functions are generated for them.
 --
 -- An example:
 --
--- Private module:
---
 -- @
 -- {-\# LANGUAGE DataKinds \#-}
+-- {-\# LANGUAGE DuplicateRecordFields \#-}
 -- {-\# LANGUAGE FlexibleInstances \#-}
 -- {-\# LANGUAGE MultiParamTypeClasses \#-}
+-- {-\# LANGUAGE NoFieldSelectors \#-}
 -- {-\# LANGUAGE TemplateHaskell \#-}
 -- {-\# LANGUAGE TypeFamilies \#-}
 -- {-\# LANGUAGE UndecidableInstances \#-}
--- module User.Internal (User(..)) where
+-- module User (User(..)) where
 --
 -- import Optics.TH
 --
--- data User = User { id   :: Int
---                  , name :: String
---                  }
+-- data User = User
+--   { id   :: Int
+--   , name :: String
+--   }
 --
 -- makeFieldLabelsNoPrefix ''User
---
--- ...
 -- @
 --
--- Public module:
+-- Construction and pattern matching keep using the record syntax:
 --
 -- @
--- module User (User(User)) where
+-- import User
 --
--- import User.Internal
---
--- ...
+-- newUser :: User
+-- newUser = User
+--   { id   = 1
+--   , name = \"Ian\"
+--   }
 -- @
 --
--- Then, whenever we're dealing with a value of type @User@ and want to read or
--- modify its fields, we can use corresponding labels without having to import
--- @User.Internal@. Importing @User@ is enough because it provides appropriate
--- 'LabelOptic' instances through @User.Internal@ which enables labels to be
--- interpreted as optics in the appropriate context.
---
--- /Note:/ if you plan to completely hide (some of) the fields of a data type,
--- you need to skip defining the corresponding 'LabelOptic' instances for them
--- (in case you want fields to be read only, you can make the optic kind of the
--- coresponding 'LabelOptic' 'A_Getter' instead of 'A_Lens'). It's because
--- Haskell makes it impossible to selectively hide instances, so once a
--- 'LabelOptic' instance is defined, it'll always be possible to use a label
--- that desugars to its usage whenever a module with its definition is
--- (transitively) imported.
+-- whereas reading and modification of fields is done with labels:
 --
 -- @
--- {-\# LANGUAGE OverloadedLabels #-}
+-- {-\# LANGUAGE OverloadedLabels \#-}
 --
 -- import Optics
 -- import User
@@ -303,36 +278,22 @@ import Optics.Internal.Optic
 -- addSurname surname user = user & #name %~ (++ " " ++ surname)
 -- @
 --
--- But what if we want to create a new @User@ with the record syntax? Importing
--- @User@ module is not sufficient since it doesn't export @User@'s
--- fields. However, if we import @User.Internal@ /fully qualified/ and make use
--- of the fact that field names used within the record syntax don't have to be
--- prefixed when @DisambiguateRecordFields@ language extension is enabled, it
--- works out:
---
--- @
--- {-\# LANGUAGE DisambiguateRecordFields \#-}
---
--- import User
--- import qualified User.Internal
---
--- newUser :: User
--- newUser = User { id   = 1     -- not User.Internal.id
---                , name = \"Ian\" -- not User.Internal.name
---                }
--- @
---
--- This way top-level field accessor functions stay in their own qualified
--- namespace and don't generate name clashes, yet they can be used without
--- prefix within the record syntax.
+-- /Note:/ if you plan to completely hide (some of) the fields of a data type,
+-- you need to skip defining the corresponding 'LabelOptic' instances for them
+-- (in case you want fields to be read only, you can make the optic kind of the
+-- coresponding 'LabelOptic' 'A_Getter' instead of 'A_Lens'). It's because
+-- Haskell makes it impossible to selectively hide instances, so once a
+-- 'LabelOptic' instance is defined, it'll always be possible to use a label
+-- that desugars to its usage whenever a module with its definition is
+-- (transitively) imported.
 
 -- $result
 --
 -- When we follow the above conventions for data types in our application, we
 -- get:
 --
--- (1) Prefixless field names that don't pollute global namespace (with the
---     internal module qualification trick).
+-- (1) Prefixless field names that don't pollute global namespace (courtesy of
+--     @NoFieldSelectors@).
 --
 -- (2) Working tags based jump-to-definition for field names (as @field@ is the
 --     ordinary field, whereas @#field@ is the lens referencing it).
@@ -361,91 +322,47 @@ import Optics.Internal.Optic
 -- are solved after the instance matches), which not only makes type inference
 -- better, but also allows it to generate better error messages.
 --
+-- Therefore, if you write 'LabelOptic' instances by hand, follow the same
+-- pattern:
+--
 -- >>> :set -XDataKinds
 -- >>> :set -XFlexibleInstances
 -- >>> :set -XMultiParamTypeClasses
 -- >>> :set -XTypeFamilies
 -- >>> :set -XUndecidableInstances
 -- >>> :{
--- data Pet = Dog { name :: String }
---          | Cat { name :: String }
---   deriving Show
+-- data Pet
+--   = Dog {name :: String}
+--   | Cat {name :: String}
+--   deriving (Show)
 -- :}
 --
 -- >>> :{
--- data Human1 = Human1 { pets :: [Pet] }
---   deriving Show
--- instance LabelOptic "pets" A_Lens Human1 Human1 [Pet] [Pet] where
---   labelOptic = lensVL $ \f (Human1 pets) -> Human1 <$> f pets
+-- data Person = Person {pets :: [Pet]}
+--   deriving (Show)
+-- instance (k ~ A_Lens, a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" k Person Person a b where
+--   labelOptic = lensVL $ \f (Person pets) -> Person <$> f pets
 -- :}
 --
--- >>> :{
--- data Human2 = Human2 { pets :: [Pet] }
---  deriving Show
--- instance (k ~ A_Lens, a ~ [Pet], b ~ [Pet]) => LabelOptic "pets" k Human2 Human2 a b where
---   labelOptic = lensVL $ \f (Human2 pets) -> Human2 <$> f pets
--- :}
+-- >>> let person = Person [Dog "Lucky"]
 --
--- >>> let human1 = Human1 [Dog "Lucky"]
--- >>> let human2 = Human2 [Cat "Sleepy"]
+-- Since GHC matches on the instance as soon as it sees @Person@, values whose
+-- type it wouldn't be able to infer on its own (such as an empty list, which
+-- has the type @[r]@, not @[Pet]@) need no annotations:
 --
--- Let's have a look how these two instance definitions differ.
+-- >>> person & #pets .~ []
+-- Person {pets = []}
 --
--- >>> human1 & #pets .~ []
--- ...
--- ...No instance for LabelOptic "pets" ‘A_Lens’ ‘Human1’ ‘()’ ‘[Pet]’ ‘[a0]’
--- ...
+-- and using the label at a wrong type or optic kind reports the actual mismatch
+-- instead of a missing/overlapping 'LabelOptic' instance:
 --
--- >>> human2 & #pets .~ []
--- Human2 {pets = []}
---
--- That's because an empty list doesn't have a type @[Pet]@, it has a type @[r]@
--- and GHC doesn't have enough information to match on the instance we
--- provided. We'd need to either annotate the list:
---
--- >>> human1 & #pets .~ ([] :: [Pet])
--- Human1 {pets = []}
---
--- or the result type:
---
--- >>> human1 & #pets .~ [] :: Human1
--- Human1 {pets = []}
---
--- both of which are a nuisance.
---
--- Here are more examples of confusing error messages if the instance for
--- @LabelOptic "pets"@ is written without type equalities:
---
--- >>> human1 ^. #pets :: Char
--- ...
--- ...No instance for LabelOptic "pets" ‘A_Lens’ ‘Human1’ ‘Human1’ ‘Char’ ‘Char’
--- ...
---
--- >>> human1 & #pets .~ 'x'
--- ...
--- ...No instance for LabelOptic "pets" ‘A_Lens’ ‘Human1’ ‘Human1’ ‘[Pet]’ ‘Char’
--- ...
---
--- >>> let pets = #pets :: Iso' Human1 [Pet]
--- ...
--- ...No instance for LabelOptic "pets" ‘An_Iso’ ‘Human1’ ‘Human1’ ‘[Pet]’ ‘[Pet]’
--- ...
---
--- If we use the second form, error messages become much more accurate:
---
--- >>> human2 ^. #pets :: Char
+-- >>> person & #pets .~ 'x'
 -- ...
 -- ...Couldn't match type ‘Char’ with ‘[Pet]’
 -- ...  arising from the overloaded label ‘#pets’
 -- ...
 --
--- >>> human2 & #pets .~ 'x'
--- ...
--- ...Couldn't match type ‘Char’ with ‘[Pet]’
--- ...  arising from the overloaded label ‘#pets’
--- ...
---
--- >>> let pets = #pets :: Iso' Human2 [Pet]
+-- >>> let pets = #pets :: Iso' Person [Pet]
 -- ...
 -- ...Couldn't match type ‘An_Iso’ with ‘A_Lens’
 -- ...  arising from the overloaded label ‘#pets’
