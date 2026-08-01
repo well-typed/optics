@@ -187,11 +187,12 @@ instance
 -- Affine field
 
 class GAffineFieldImpl (repDefined :: Bool)
-                       (name :: Symbol) s t a b | name s -> a
-                                             {- These hold morally, but we can't prove it.
-                                                , name t -> b
-                                                , name s b -> t
-                                                , name t a -> s -} where
+                       (name :: Symbol) s t a b
+      {- These hold morally, but we can't prove it.
+         | name s -> a
+         , name t -> b
+         , name s b -> t
+         , name t a -> s -} where
 
   gafieldImpl :: AffineTraversal s t a b
 
@@ -199,7 +200,16 @@ instance
   ( Generic s
   , Generic t
   , path ~ GetFieldPaths s name (Rep s)
-  , HasField name s a -- require the field to be in scope
+  -- Below constraint can't be here anymore: since GHC 9.14.1
+  -- -Wincomplete-record-selectors generates warnings about partial fields
+  -- whenever an appropriate HasField constraint is solved, not whenever its
+  -- evidence (ie. the getField method) is used. For more info see
+  -- https://gitlab.haskell.org/ghc/ghc/-/issues/26686.
+  --
+  -- The consequence of this is that the field no longer needs to be in scope
+  -- for 'gafield' to work.
+  --
+  --, HasField name s a -- require the field to be in scope
   , Unless (AnyHasPath path)
     (TypeError
       (Text "Type " :<>: QuoteType s :<>:
