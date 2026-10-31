@@ -53,11 +53,6 @@ type family ShowEliminations forms :: ErrorMessage where
 ----------------------------------------
 -- Lists
 
--- | Reverse a type-level list.
-type family Reverse (xs :: [k]) (acc :: [k]) :: [k] where
-  Reverse '[]      acc = acc
-  Reverse (x : xs) acc = Reverse xs (x : acc)
-
 -- | Curry a type-level list.
 --
 -- In pseudo (dependent-)Haskell:
@@ -122,11 +117,6 @@ instance AppendIndices xs ys ks => AppendIndices (x : xs) ys (x : ks) where
 
 ----------------------------------------
 -- Either
-
--- | If lhs is Right', return it. Otherwise check rhs.
-type family FirstRight (m1 :: Either e a) (m2 :: Either e a) :: Either e a where
-  FirstRight (Right a) _ = Right a
-  FirstRight         _ b = b
 
 type family FromRight (def :: b) (e :: Either a b) :: b where
   FromRight _   (Right b) = b

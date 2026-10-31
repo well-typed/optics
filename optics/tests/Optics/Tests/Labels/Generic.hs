@@ -66,6 +66,24 @@ genericLabelsTests = testGroup "Labels via Generic"
     assertSuccess $(inspectTest $ hasNoGenericRep 'oldestPet)
   , testCase "optimized luckyDog (generics)" $
     assertSuccess $(inspectTest $ hasNoGenericRep 'luckyDog)
+  , testCase "view (gposition @1) s = name s" $
+    assertSuccess $(inspectTest $ 'position1lhs ==- 'position1rhs)
+  , testCase "set (gposition @4) b s = s { pets = b }" $
+    assertSuccess $(inspectTest $ 'position2lhs ==- 'position2rhs)
+  , testCase "view (gposition @2) s = age s (sum type)" $
+    assertSuccess $(inspectTest $ 'position3lhs ==- 'position3rhs)
+  , testCase "set (gposition @2) b s = s { age = b } (sum type)" $
+    assertSuccess $(inspectTest $ 'position4lhs ==- 'position4rhs)
+  , testCase "optimized petAges (generics)" $
+    assertSuccess $(inspectTest $ hasNoGenericRep 'petAges)
+  , testCase "preview #_Cat s = matching Cat" $
+    assertSuccess $(inspectTest $ 'constructor1lhs ==- 'constructor1rhs)
+  , testCase "review #_Cat b = Cat b" $
+    assertSuccess $(inspectTest $ 'constructor2lhs ==- 'constructor2rhs)
+  , testCase "set (#_Cat % _2) b s = s { age = b } for Cat" $
+    assertSuccess $(inspectTest $ 'constructor3lhs ==- 'constructor3rhs)
+  , testCase "preview #?lazy s = lazy s for Cat" $
+    assertSuccess $(inspectTest $ 'affineField1lhs ==- 'affineField1rhs)
   ]
 
 label1lhs, label1rhs :: forall a. Human a -> String
@@ -130,6 +148,52 @@ label6setter s name_ age_ fishName_ pets_ = s
   & #fish % #_GoldFish .~ fishName_
   & #pets              .~ pets_
 
+position1lhs, position1rhs :: Human a -> String
+position1lhs s = view (gposition @1) s
+position1rhs Human{name} = name
+
+position2lhs, position2rhs :: Human a -> [b] -> Human b
+position2lhs s b = set (gposition @4) b s
+position2rhs s b = s { pets = b }
+
+position3lhs, position3rhs :: Mammal -> Int
+position3lhs s = view (gposition @2) s
+position3rhs = \case
+  Dog _ age0   -> age0
+  Cat _ age0 _ -> age0
+
+position4lhs, position4rhs :: Mammal -> Int -> Mammal
+position4lhs s b = set (gposition @2) b s
+position4rhs s b = case s of
+  Dog name0 _       -> Dog name0 b
+  Cat name0 _ lazy0 -> Cat name0 b lazy0
+
+constructor1lhs, constructor1rhs :: Mammal -> Maybe (String, Int, Bool)
+constructor1lhs s = preview #_Cat s
+constructor1rhs = \case
+  Cat name0 age0 lazy0 -> Just (name0, age0, lazy0)
+  _                    -> Nothing
+
+constructor2lhs, constructor2rhs :: (String, Int, Bool) -> Mammal
+constructor2lhs b = review #_Cat b
+constructor2rhs (name0, age0, lazy0) = Cat name0 age0 lazy0
+
+constructor3lhs, constructor3rhs :: Mammal -> Int -> Mammal
+constructor3lhs s b = set (#_Cat % _2) b s
+constructor3rhs s b = case s of
+  Cat name0 _ lazy0 -> Cat name0 b lazy0
+  dog               -> dog
+
+affineField1lhs, affineField1rhs :: Mammal -> Maybe Bool
+#if __GLASGOW_HASKELL__ >= 906
+affineField1lhs s = preview #"?lazy" s
+#else
+affineField1lhs s = preview (gafield @"lazy") s
+#endif
+affineField1rhs = \case
+  Cat _ _ lazy0 -> Just lazy0
+  _             -> Nothing
+
 ----------------------------------------
 -- Basic data manipulation
 
@@ -171,3 +235,6 @@ oldestPet = maximumByOf (#pets % folded) (comparing $ view #age) human
 
 luckyDog :: Human Mammal
 luckyDog = human & set (#pets % mapped % #_Dog % _1) "Lucky"
+
+petAges :: [Int]
+petAges = toListOf (gposition @4 % folded % gposition @2) human

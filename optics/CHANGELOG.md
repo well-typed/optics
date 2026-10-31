@@ -22,6 +22,13 @@
   `gafield` and affine field labels with GHC >= 9.14.1 resulting from `HasField`
   constraints being solved for partial fields. As a consequence, the field
   selector no longer needs to be in scope for `gafield` to work.
+* Fix `gposition` not being optimised away. With optimisations enabled, it
+  accessed the field through the generic representation of the data type at
+  runtime instead of directly.
+* Make generic optics and labels backed by them cheaper to compile, especially
+  for data types with many fields.
+* `gafield` and affine field labels no longer force a value of a data type
+  with a single constructor of several fields before the field is needed.
 * **Breaking changes**:
   - Rename the `traverse_`-like `Fold` constructor `foldVL` to `mkFold`. The new
     `foldVL` now builds a `Fold` from its van Laarhoven representation `FoldVL`.
