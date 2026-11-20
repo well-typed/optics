@@ -31,7 +31,7 @@ Edward Kmett and contributors.
 
 ## Package structure
 
-### Officially supported packages
+### Supported packages
 
  * [`optics`](https://hackage.haskell.org/package/optics) is a
    "batteries-included" package with many dependencies. It incorporates:
@@ -55,17 +55,23 @@ Edward Kmett and contributors.
    dependency on `profunctors`.  Note that `optics-core` already supports
    conversion for van Laarhoven lenses and various other optics.
 
- * [`template-haskell-optics`](http://hackage.haskell.org/package/template-haskell-optics):
-   optics for working with types in the `template-haskell` package (see
-   `optics-th` for *using* `TemplateHaskell` to construct optics).
+### Unsupported packages
 
-### Work in progress packages
-
-These packages have not (yet) been officially released. If you find them
-useful, we would welcome offers to maintain these packages.
+> [!WARNING]
+> These libraries are not actively maintained. Use of these libraries as well as
+> feedback is welcome, but Well-Typed cannot guarantee any level of unpaid
+> maintenance or support. Please contact us via email to info@well-typed.com if
+> you are interested in commercial support or funding development of the
+> library.
 
  * `optics-sop`: generic construction of optics using the `generics-sop`
    package, and optics for `generics-sop` types.
+
+   This package has not yet been officially released.
+
+ * [`template-haskell-optics`](http://hackage.haskell.org/package/template-haskell-optics):
+   optics for working with types in the `template-haskell` package (see
+   `optics-th` for *using* `TemplateHaskell` to construct optics).
 
 ### Internal packages
 
